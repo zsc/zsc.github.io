@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textarea Sync Application</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 100%;
+            height: 50%;
+            box-sizing: border-box;
+            font-size: 16px;
+            padding: 10px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+
+    <textarea id="upperTextarea" placeholder="Type here..."></textarea>
+    <textarea id="lowerTextarea" placeholder="Result will appear here..."></textarea>
+
+    <script>
+        // Function to be called when the upper textarea changes
+
+function forward(inputStr) {
+  // 使用正则表达式提取数字
+  const numbers = inputStr.match(/\d+/g);
+
+  // 将数字转换为对应的Unicode字符
+  const characters = numbers.map(num => String.fromCharCode(0x4E00 + parseInt(num, 10)));
+
+  // 将字符列表转换为字符串
+  const charactersStr = characters.join('');
+
+  // 将字符串按每5个字符一组进行分组
+  const groupsOf5 = [];
+  for (let i = 0; i < charactersStr.length; i += 5) {
+    groupsOf5.push(charactersStr.slice(i, i + 5));
+  }
+
+  // 转置列表
+  const maxLength = Math.max(...groupsOf5.map(group => group.length));
+  let transposedList = [];
+
+  for (let i = 0; i < maxLength; i++) {
+    let row = '';
+    for (let group of groupsOf5) {
+      row += group[i] || '';
+    }
+    transposedList.push(row);
+  }
+
+  // 将结果组合成字符串
+  return transposedList.join('\n');
+}
+
+
+        // Function to be called when the lower textarea changes
+function backward(transposedStr) {
+  // 分割输入字符串为行
+  const lines = transposedStr.trim().split('\n');
+
+  // 获取每列字符，恢复为字符顺序
+  let charactersStr = '';
+  const numCols = lines[0].length;
+
+  for (let col = 0; col < numCols; col++) {
+    for (let line of lines) {
+      if (col < line.length) {
+        charactersStr += line[col];
+      }
+    }
+  }
+
+  // 将字符转换回数字
+  const numbers = [];
+  for (let char of charactersStr) {
+    const num = char.charCodeAt(0) - 0x4E00;
+    numbers.push(num);
+  }
+
+  // 将数字转换回原始格式的音频标签
+  const originalStr = numbers.map(num => `<audio_${num}>`).join('');
+
+  return originalStr;
+}
+
+        // Get references to the textareas
+        const upperTextarea = document.getElementById('upperTextarea');
+        const lowerTextarea = document.getElementById('lowerTextarea');
+
+        // Add event listeners to detect changes
+        upperTextarea.addEventListener('input', function() {
+            const updatedContent = forward(upperTextarea.value);
+            lowerTextarea.value = updatedContent;
+        });
+
+        lowerTextarea.addEventListener('input', function() {
+            const updatedContent = backward(lowerTextarea.value);
+            upperTextarea.value = updatedContent;
+        });
+    </script>
+
+</body>
+</html>
+
