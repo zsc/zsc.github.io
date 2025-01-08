@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WebAssembly Python 解释器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #output {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow: auto;
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebAssembly Python 解释器</h1>
+    <textarea id="python-code" placeholder="在这里输入您的 Python 代码">
+print("Hello, World!")
+    </textarea>
+    <br>
+    <button id="run-btn">运行代码</button>
+    <h2>输出结果：</h2>
+    <div id="output"></div>
+
+    <!-- 加载 Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script>
+        // 获取输出区域的引用
+        const outputElement = document.getElementById('output');
+
+        // 加载 Pyodide，并设置 stdout 和 stderr 回调
+        let pyodideReadyPromise = loadPyodide({
+            stdout: (msg) => {
+                outputElement.textContent += msg + '\n';
+            },
+            stderr: (msg) => {
+                outputElement.textContent += '错误: ' + msg + '\n';
+            }
+        });
+
+        // 运行 Python 代码的函数
+        async function runPython() {
+            // 清空输出区域
+            outputElement.textContent = '';
+            // 显示初始化消息
+            outputElement.textContent = '正在初始化 Pyodide... 请稍候...';
+
+            // 等待 Pyodide 加载完成
+            let pyodide = await pyodideReadyPromise;
+
+            // 获取用户输入的代码
+            let code = document.getElementById('python-code').value;
+
+            // 清空输出区域，移除初始化消息
+            outputElement.textContent = '';
+
+            try {
+                // 执行用户代码
+                await pyodide.runPythonAsync(code);
+            } catch (err) {
+                // 显示错误信息
+                outputElement.textContent += '错误: ' + err.toString();
+            }
+        }
+
+        // 添加按钮点击事件监听器
+        document.getElementById('run-btn').addEventListener('click', runPython);
+    </script>
+</body>
+</html>
