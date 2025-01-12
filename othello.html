@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Othello Game with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #2E7D32;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #gameStatus {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        #scores {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 2px;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #388E3C;
+            border: none;
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+        }
+        .cell:hover {
+            background-color: #66BB6A;
+        }
+        .cell.disabled {
+            background-color: #1B5E20;
+            cursor: not-allowed;
+        }
+        .disc {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            position: absolute;
+            top: 10%;
+            left: 10%;
+        }
+        .black {
+            background-color: black;
+        }
+        .white {
+            background-color: white;
+        }
+        #restartBtn {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #FFC107;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+        }
+        #restartBtn:hover {
+            background-color: #FFA000;
+        }
+        #modeSelection {
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        #modeSelection button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            background-color: #42A5F5;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            color: white;
+        }
+        #modeSelection button:hover {
+            background-color: #1E88E5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Othello Game</h1>
+    
+    <div id="modeSelection">
+        <p>Select Game Mode:</p>
+        <button id="twoPlayerBtn">Two Players</button>
+        <button id="singlePlayerBtn">Single Player ( vs AI )</button>
+    </div>
+    
+    <div id="gameContainer" class="hidden">
+        <div id="gameStatus">Current Turn: <span id="currentPlayer">Black</span></div>
+        <div id="scores">
+            Black: <span id="blackScore">2</span> | White: <span id="whiteScore">2</span>
+        </div>
+        <div id="board"></div>
+        <button id="restartBtn">Restart Game</button>
+    </div>
+
+    <script>
+        const boardElement = document.getElementById('board');
+        const currentPlayerElement = document.getElementById('currentPlayer');
+        const blackScoreElement = document.getElementById('blackScore');
+        const whiteScoreElement = document.getElementById('whiteScore');
+        const restartBtn = document.getElementById('restartBtn');
+        const modeSelection = document.getElementById('modeSelection');
+        const gameContainer = document.getElementById('gameContainer');
+        const twoPlayerBtn = document.getElementById('twoPlayerBtn');
+        const singlePlayerBtn = document.getElementById('singlePlayerBtn');
+
+        const DIRECTIONS = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1],         [0, 1],
+            [1, -1], [1, 0], [1, 1]
+        ];
+
+        let board = [];
+        let currentPlayer = 'black';
+        let gameMode = 'twoPlayer'; // 'singlePlayer' or 'twoPlayer'
+
+        // Initialize the board
+        function initBoard() {
+            board = Array(8).fill(null).map(() => Array(8).fill(null));
+            // Set up initial four discs
+            board[3][3] = 'white';
+            board[3][4] = 'black';
+            board[4][3] = 'black';
+            board[4][4] = 'white';
+        }
+
+        // Render the board
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('button');
+                    cell.classList.add('cell');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+
+                    if (board[row][col]) {
+                        const disc = document.createElement('div');
+                        disc.classList.add('disc', board[row][col]);
+                        cell.appendChild(disc);
+                        cell.classList.add('disabled');
+                    } else {
+                        if (isValidMove(row, col, currentPlayer)) {
+                            cell.classList.remove('disabled');
+                        } else {
+                            cell.classList.add('disabled');
+                        }
+                        cell.addEventListener('click', handleMove);
+                    }
+
+                    boardElement.appendChild(cell);
+                }
+            }
+            updateScores();
+            currentPlayerElement.textContent = capitalize(currentPlayer);
+            if (!hasValidMoves(currentPlayer)) {
+                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+                currentPlayerElement.textContent = capitalize(currentPlayer);
+                if (!hasValidMoves(currentPlayer)) {
+                    endGame();
+                } else {
+                    if (gameMode === 'singlePlayer' && currentPlayer === 'white') {
+                        // AI 的回合
+                        setTimeout(aiMove, 500); // 延迟以提升用户体验
+                    }
+                }
+            } else {
+                // 如果单人模式且当前为AI，让AI行动
+                if (gameMode === 'singlePlayer' && currentPlayer === 'white') {
+                    setTimeout(aiMove, 500); // 延迟以提升用户体验
+                }
+            }
+        }
+
+        // Handle a move
+        function handleMove(e) {
+            const row = parseInt(e.currentTarget.dataset.row);
+            const col = parseInt(e.currentTarget.dataset.col);
+            if (isValidMove(row, col, currentPlayer)) {
+                makeMove(row, col, currentPlayer);
+                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+                renderBoard();
+            }
+        }
+
+        // Check if a move is valid
+        function isValidMove(row, col, player) {
+            if (board[row][col] !== null) return false;
+            const opponent = player === 'black' ? 'white' : 'black';
+            for (let [dx, dy] of DIRECTIONS) {
+                let x = row + dx;
+                let y = col + dy;
+                let hasOpponentBetween = false;
+                while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                    if (board[x][y] === opponent) {
+                        hasOpponentBetween = true;
+                        x += dx;
+                        y += dy;
+                    } else {
+                        break;
+                    }
+                }
+                if (hasOpponentBetween && board[x] && board[x][y] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Make a move
+        function makeMove(row, col, player) {
+            board[row][col] = player;
+            const opponent = player === 'black' ? 'white' : 'black';
+            for (let [dx, dy] of DIRECTIONS) {
+                let x = row + dx;
+                let y = col + dy;
+                let discsToFlip = [];
+                while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                    if (board[x][y] === opponent) {
+                        discsToFlip.push([x, y]);
+                        x += dx;
+                        y += dy;
+                    } else {
+                        if (board[x][y] === player) {
+                            discsToFlip.forEach(pos => {
+                                board[pos[0]][pos[1]] = player;
+                            });
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check if the player has any valid moves
+        function hasValidMoves(player) {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (isValidMove(row, col, player)) return true;
+                }
+            }
+            return false;
+        }
+
+        // Update scores
+        function updateScores() {
+            let black = 0;
+            let white = 0;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (board[row][col] === 'black') black++;
+                    if (board[row][col] === 'white') white++;
+                }
+            }
+            blackScoreElement.textContent = black;
+            whiteScoreElement.textContent = white;
+        }
+
+        // End the game
+        function endGame() {
+            let black = 0;
+            let white = 0;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (board[row][col] === 'black') black++;
+                    if (board[row][col] === 'white') white++;
+                }
+            }
+            let message = 'Game Over! ';
+            if (black > white) {
+                message += 'Black Wins!';
+            } else if (white > black) {
+                message += 'White Wins!';
+            } else {
+                message += 'It\'s a Tie!';
+            }
+            alert(message);
+        }
+
+        // Capitalize first letter
+        function capitalize(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+
+        // Restart the game
+        restartBtn.addEventListener('click', () => {
+            initBoard();
+            currentPlayer = 'black';
+            renderBoard();
+        });
+
+        // AI Move
+        function aiMove() {
+            const validMoves = getValidMoves(currentPlayer);
+            if (validMoves.length === 0) {
+                // AI 没有合法的移动，跳过
+                currentPlayer = 'black';
+                renderBoard();
+                return;
+            }
+
+            // 简单 AI 策略：随机选择一个合法移动
+            // 您可以根据需要实现更复杂的策略，例如最大化翻转数，优先占据角落等
+            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            makeMove(move.row, move.col, currentPlayer);
+            currentPlayer = 'black';
+            renderBoard();
+        }
+
+        // 获取所有合法的移动
+        function getValidMoves(player) {
+            const moves = [];
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (isValidMove(row, col, player)) {
+                        moves.push({ row, col });
+                    }
+                }
+            }
+            return moves;
+        }
+
+        // Moderne模式选择
+        twoPlayerBtn.addEventListener('click', () => {
+            gameMode = 'twoPlayer';
+            modeSelection.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            initBoard();
+            currentPlayer = 'black';
+            renderBoard();
+        });
+
+        singlePlayerBtn.addEventListener('click', () => {
+            gameMode = 'singlePlayer';
+            modeSelection.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            initBoard();
+            currentPlayer = 'black'; // 玩家为黑色先手
+            renderBoard();
+        });
+
+        // 启动游戏（保持初始化为空，直到选择模式）
+    </script>
+</body>
+</html>
