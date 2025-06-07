@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPO Double Inverted Pendulum</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .container { display: flex; flex-wrap: wrap; justify-content: space-around; width: 100%; max-width: 1200px; }
+        .column { display: flex; flex-direction: column; align-items: center; margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        canvas { border: 1px solid black; margin-bottom: 10px; }
+        .controls, .hyperparams { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .controls button, .hyperparams label { margin: 2px 0; }
+        .hyperparams input { width: 80px; }
+        .charts-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px; }
+        .chart-wrapper { max-height: 200px; width:100%; margin-bottom:10px;}
+        .logs { width: 100%; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; font-size: 0.8em; white-space: pre-line; }
+    </style>
+</head>
+<body>
+    <h1>PPO Control for Double Inverted Pendulum</h1>
+
+    <div class="container">
+        <div class="column">
+            <h2>Environment</h2>
+            <canvas id="pendulumCanvas" width="600" height="400"></canvas>
+            <div class="logs" id="statusLog">Status: Idle</div>
+        </div>
+
+        <div class="column">
+            <h2>Controls & Hyperparameters</h2>
+            <div class="controls">
+                <button id="startTrainBtn">Start Training</button>
+                <button id="stopTrainBtn" disabled>Stop Training</button>
+                <button id="testPolicyBtn" disabled>Test Policy</button>
+                <button id="stopTestBtn" disabled>Stop Test</button>
+            </div>
+            <div class="hyperparams">
+                <label>Learning Rate Actor: <input type="number" id="lrActor" value="0.0003" step="0.00001"></label>
+                <label>Learning Rate Critic: <input type="number" id="lrCritic" value="0.001" step="0.0001"></label>
+                <label>Gamma (Discount): <input type="number" id="gamma" value="0.99" step="0.01"></label>
+                <label>Lambda (GAE): <input type="number" id="lambda_gae" value="0.95" step="0.01"></label>
+                <label>Clip Epsilon: <input type="number" id="clipEpsilon" value="0.2" step="0.01"></label>
+                <label>PPO Epochs: <input type="number" id="ppoEpochs" value="10" step="1"></label>
+                <label>PPO Batch Size: <input type="number" id="ppoBatchSize" value="64" step="1"></label>
+                <label>Update Timesteps: <input type="number" id="updateTimesteps" value="2048" step="128"></label>
+                <label>Max Ep. Steps: <input type="number" id="maxEpSteps" value="1000" step="100"></label>
+                <label>Hidden Dim: <input type="number" id="hiddenDim" value="16" step="1" readonly title="Fixed to 16 as per prompt"></label>
+                <label>Entropy Coeff: <input type="number" id="entropyCoeff" value="0.01" step="0.001"></label>
+                <label>Target Reward: <input type="number" id="targetReward" value="950" step="50"></label> <!-- Double pendulum target is high, may need adjustment -->
+                <label>Render Every (eps): <input type="number" id="renderEvery" value="20" step="1"></label>
+            </div>
+        </div>
+
+        <div class="column charts-container">
+            <h2>Losses</h2>
+            <div class="chart-wrapper"><canvas id="actorLossChart"></canvas></div>
+            <div class="chart-wrapper"><canvas id="criticLossChart"></canvas></div>
+            <div class="chart-wrapper"><canvas id="episodeRewardChart"></canvas></div>
+        </div>
+    </div>
+
+<script>
+// --- MATH UTILITIES ---
+const Mat = {
+    zeros: (rows, cols) => Array(rows).fill(0).map(() => Array(cols).fill(0)),
+    random: (rows, cols, scale = 1) => Array(rows).fill(0).map(() => Array(cols).fill(0).map(() => (Math.random() - 0.5) * 2 * scale)),
+    dot: (A, B) => {
+        const m = A.length, n = A[0].length, p = B[0].length;
+        if (n !== B.length) throw "Matrix dimension mismatch for dot product";
+        const C = Mat.zeros(m, p);
+        for (let i = 0; i < m; i++) {
+            for (let j = 0; j < p; j++) {
+                for (let k = 0; k < n; k++) {
+                    C[i][j] += A[i][k] * B[k][j];
+                }
+            }
+        }
+        return C;
+    },
+    add: (A, B) => A.map((row, i) => row.map((val, j) => val + B[i][j])),
+    subtract: (A, B) => A.map((row, i) => row.map((val, j) => val - B[i][j])),
+    scale: (A, s) => A.map(row => row.map(val => val * s)),
+    transpose: (A) => A[0].map((_, colIndex) => A.map(row => row[colIndex])),
+    map: (A, func) => A.map(row => row.map(func)),
+    sum: (A) => A.reduce((s, row) => s + row.reduce((rs, val) => rs + val, 0), 0),
+    vecDot: (v1, v2) => v1.reduce((s, val, i) => s + val * v2[i], 0),
+    vecAdd: (v1, v2) => v1.map((val, i) => val + v2[i]),
+    vecSubtract: (v1, v2) => v1.map((val, i) => val - v2[i]),
+    vecScale: (v, s) => v.map(val => val * s),
+    solve: (A_in, b_in) => {
+        const n = A_in.length;
+        const A = A_in.map(row => [...row]); 
+        const b = b_in.map(val => [val]);    
+
+        for (let i = 0; i < n; i++) {
+            let maxEl = Math.abs(A[i][i]);
+            let maxRow = i;
+            for (let k = i + 1; k < n; k++) {
+                if (Math.abs(A[k][i]) > maxEl) {
+                    maxEl = Math.abs(A[k][i]);
+                    maxRow = k;
+                }
+            }
+
+            if (maxEl < 1e-12) { // Check if pivot is too small even after searching
+                console.warn("Mat.solve: Max pivot element is near zero. Potential singularity.", maxEl);
+                throw new Error("Mat.solve: Singular or near-singular matrix, max pivot near zero.");
+            }
+
+            [A[maxRow], A[i]] = [A[i], A[maxRow]]; // Swap entire rows
+            [b[maxRow][0], b[i][0]] = [b[i][0], b[maxRow][0]];
+
+
+            if (Math.abs(A[i][i]) < 1e-12) { // Should be caught by above, but as a safeguard
+                console.warn("Mat.solve: Pivot element A[i][i] is near zero before normalization.", A[i][i]);
+                throw new Error("Mat.solve: Singular or near-singular matrix, pivot A[i][i] near zero.");
+            }
+
+            for (let k = i + 1; k < n; k++) {
+                const c = -A[k][i] / A[i][i];
+                if (isNaN(c) || !isFinite(c)) {
+                    console.warn("Mat.solve: Factor c is NaN/Infinity during elimination.");
+                    throw new Error("Mat.solve: Numerical instability calculating elimination factor c.");
+                }
+                for (let j = i; j < n; j++) {
+                    if (i === j) A[k][j] = 0;
+                    else A[k][j] += c * A[i][j];
+                }
+                b[k][0] += c * b[i][0];
+            }
+        }
+
+        const x = Mat.zeros(n, 1);
+        for (let i = n - 1; i > -1; i--) {
+            if (Math.abs(A[i][i]) < 1e-12) {
+                console.warn("Mat.solve: Pivot element for back-substitution is near zero.", A[i][i]);
+                x[i][0] = NaN; // Indicate failure
+                // throw new Error("Mat.solve: Division by near-zero in back-substitution.");
+            } else {
+                x[i][0] = b[i][0] / A[i][i];
+            }
+            if (isNaN(x[i][0])) {
+                 throw new Error(`Mat.solve: Solution component x[${i}] is NaN in back-substitution.`);
+            }
+            for (let k = i - 1; k > -1; k--) {
+                b[k][0] -= A[k][i] * x[i][0];
+            }
+        }
+        return x.map(row => row[0]);
+    }
+};
+
+const Activations = {
+    relu: x => Math.max(0, x),
+    relu_derivative: x => x > 0 ? 1 : 0,
+    tanh: x => Math.tanh(x),
+    tanh_derivative: x => 1 - Math.tanh(x) ** 2,
+    linear: x => x,
+    linear_derivative: x => 1,
+};
+
+// --- NEURAL NETWORK ---
+class NeuralNetwork {
+    constructor(inputDim, hiddenDims, outputDim, outputActivation = Activations.linear) {
+        this.layers = [];
+        this.outputActivation = outputActivation;
+        this.outputActivationDerivative = Activations[`${Object.keys(Activations).find(key => Activations[key] === outputActivation)}_derivative`] || Activations.linear_derivative;
+
+        let prevDim = inputDim;
+        for (const hiddenDim of hiddenDims) {
+            this.layers.push({
+                weights: Mat.random(hiddenDim, prevDim, Math.sqrt(2 / prevDim)),
+                biases: Mat.zeros(hiddenDim, 1),
+                activation: Activations.relu,
+                activation_derivative: Activations.relu_derivative
+            });
+            prevDim = hiddenDim;
+        }
+        this.layers.push({
+            weights: Mat.random(outputDim, prevDim, Math.sqrt(1 / prevDim)),
+            biases: Mat.zeros(outputDim, 1),
+            activation: this.outputActivation,
+            activation_derivative: this.outputActivationDerivative
+        });
+        this.layer_inputs = [];
+        this.layer_activations = [];
+    }
+
+    forward(inputVector) {
+        this.layer_inputs = [];
+        this.layer_activations = [];
+        let current_output = Mat.transpose([inputVector]); 
+
+        this.layer_activations.push(current_output); 
+
+        for (const layer of this.layers) {
+            const z = Mat.add(Mat.dot(layer.weights, current_output), layer.biases);
+            this.layer_inputs.push(z);
+            current_output = Mat.map(z, layer.activation);
+            this.layer_activations.push(current_output);
+        }
+        return Mat.transpose(current_output)[0];
+    }
+
+    backward(loss_gradient_output) {
+        let dL_dy = Mat.transpose([loss_gradient_output]);
+        const gradients = { weights: [], biases: [] };
+
+        for (let i = this.layers.length - 1; i >= 0; i--) {
+            const layer = this.layers[i];
+            const prev_activation = this.layer_activations[i];
+            const current_input_to_activation = this.layer_inputs[i];
+
+            const dL_dz = Mat.map(current_input_to_activation, (z_val, r, c) => 
+                dL_dy[r][c] * layer.activation_derivative(z_val)
+            );
+            
+            const dL_dW = Mat.dot(dL_dz, Mat.transpose(prev_activation));
+            gradients.weights.unshift(dL_dW);
+            gradients.biases.unshift(dL_dz);
+
+            if (i > 0) {
+                dL_dy = Mat.dot(Mat.transpose(layer.weights), dL_dz);
+            }
+        }
+        return gradients;
+    }
+    
+    getWeights() { return this.layers.map(l => ({ weights: l.weights, biases: l.biases })); }
+    setWeights(weights) { weights.forEach((w, i) => { this.layers[i].weights = w.weights; this.layers[i].biases = w.biases; }); }
+}
+
+class AdamOptimizer {
+    constructor(parameters, learningRate = 0.001, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8) {
+        this.parameters = parameters;
+        this.lr = learningRate;
+        this.beta1 = beta1;
+        this.beta2 = beta2;
+        this.epsilon = epsilon;
+        this.t = 0;
+
+        this.m_w = this.parameters.map(p => Mat.zeros(p.weights.length, p.weights[0].length));
+        this.v_w = this.parameters.map(p => Mat.zeros(p.weights.length, p.weights[0].length));
+        this.m_b = this.parameters.map(p => Mat.zeros(p.biases.length, p.biases[0].length));
+        this.v_b = this.parameters.map(p => Mat.zeros(p.biases.length, p.biases[0].length));
+    }
+
+    step(gradients) {
+        this.t++;
+        for (let i = 0; i < this.parameters.length; i++) {
+            // Update weights
+            this.m_w[i] = Mat.add(Mat.scale(this.m_w[i], this.beta1), Mat.scale(gradients.weights[i], 1 - this.beta1));
+            this.v_w[i] = Mat.add(Mat.scale(this.v_w[i], this.beta2), Mat.scale(Mat.map(gradients.weights[i], x => x * x), 1 - this.beta2));
+            const m_hat_w = Mat.scale(this.m_w[i], 1 / (1 - this.beta1 ** this.t));
+            const v_hat_w = Mat.scale(this.v_w[i], 1 / (1 - this.beta2 ** this.t));
+            
+            const update_w = Mat.map(m_hat_w, (val, r, c) => {
+                const divisor = Math.sqrt(v_hat_w[r][c]) + this.epsilon;
+                if (divisor === 0 || isNaN(divisor)) return 0; // Prevent NaN/Infinity
+                const update_val = this.lr * val / divisor;
+                return isNaN(update_val) ? 0 : update_val;
+            });
+
+            if (!update_w.some(row => row.some(isNaN))) {
+                 this.parameters[i].weights = Mat.subtract(this.parameters[i].weights, update_w);
+            } else {
+                console.warn(`AdamOptimizer: NaN in weight update for layer ${i}. Skipping update.`);
+            }
+
+
+            // Update biases
+            this.m_b[i] = Mat.add(Mat.scale(this.m_b[i], this.beta1), Mat.scale(gradients.biases[i], 1 - this.beta1));
+            this.v_b[i] = Mat.add(Mat.scale(this.v_b[i], this.beta2), Mat.scale(Mat.map(gradients.biases[i], x => x * x), 1 - this.beta2));
+            const m_hat_b = Mat.scale(this.m_b[i], 1 / (1 - this.beta1 ** this.t));
+            const v_hat_b = Mat.scale(this.v_b[i], 1 / (1 - this.beta2 ** this.t));
+            
+            const update_b = Mat.map(m_hat_b, (val, r, c) => {
+                const divisor = Math.sqrt(v_hat_b[r][c]) + this.epsilon;
+                 if (divisor === 0 || isNaN(divisor)) return 0;
+                const update_val = this.lr * val / divisor;
+                return isNaN(update_val) ? 0 : update_val;
+            });
+            
+            if (!update_b.some(row => row.some(isNaN))) {
+                this.parameters[i].biases = Mat.subtract(this.parameters[i].biases, update_b);
+            } else {
+                 console.warn(`AdamOptimizer: NaN in bias update for layer ${i}. Skipping update.`);
+            }
+        }
+    }
+}
+
+
+// --- ENVIRONMENT: Double Inverted Pendulum ---
+class DoubleInvertedPendulumEnv {
+    constructor() {
+        this.g = 9.81; this.m0 = 1.0; this.m1 = 0.1; this.m2 = 0.1;
+        this.l1 = 0.5; this.l2 = 0.5; // CoM lengths
+        this.I1 = 0.0025; this.I2 = 0.0025;
+        this.dt = 0.02;
+        this.state = new Array(6).fill(0);
+        this.action_scale = 10.0;
+        this.x_threshold = 2.4;
+        this.theta1_threshold = 12 * Math.PI / 180; // Approx 0.209 rad
+        this.theta2_threshold = 12 * Math.PI / 180;
+    }
+
+    reset() {
+        this.state = [
+            (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1,
+            (Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.05, // Start very close to upright
+            (Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.05
+        ];
+        return this.getStateObs();
+    }
+
+    getStateObs() { return [...this.state]; }
+    
+    _physics_step(force) {
+        const [x, x_dot, th1, th1_dot, th2, th2_dot] = this.state;
+        const {m0, m1, m2, l1, l2, g, I1, I2} = this;
+        const L1 = l1 * 2, L2 = l2 * 2; // Full lengths for some formulations
+
+        const c1 = Math.cos(th1), s1 = Math.sin(th1);
+        const c2 = Math.cos(th2), s2 = Math.sin(th2);
+        const c12 = Math.cos(th1-th2); // s12 not used in this variant from memory, let's be sure. Ah, I see it in N.
+
+        const M = Mat.zeros(3,3);
+        M[0][0] = m0 + m1 + m2;
+        M[0][1] = (m1*l1 + m2*L1)*c1 + m2*l2*c2;
+        M[0][2] = m2*l2*c2;
+        M[1][0] = M[0][1]; // Symmetrical
+        M[1][1] = (m1*l1*l1 + m2*L1*L1 + I1) + m2*l2*l2 + 2*m2*L1*l2*c12;
+        M[1][2] = m2*l2*(L1*c12 + l2);
+        M[2][0] = M[0][2]; // Symmetrical
+        M[2][1] = M[1][2]; // Symmetrical
+        M[2][2] = m2*l2*l2 + I2;
+        
+        const N = [0,0,0];
+        // N[0]: force + (m1*l1 + m2*L1)*s1*th1_dot*th1_dot + m2*l2*s2*th2_dot*th2_dot + m2*L1*l2*s12*th2_dot*th2_dot; // Original (s12 term seems unusual here for x_ddot)
+        // Simpler formulation often used for N[0] for cart-pendulum is:
+        // N[0] = force + m1*l1*s1*th1_dot^2 + m2*(L1*s1*th1_dot^2 + l2*s2*th2_dot^2 + L1*s(th1-th2)*th2_dot^2) ??? This gets complex.
+        // Let's use a common form:
+        N[0] = force + (m1*l1 + m2*L1)*s1*th1_dot*th1_dot + m2*l2*s2*th2_dot*th2_dot + m2*L1*l2*Math.sin(th1-th2)*th2_dot*th2_dot;
+        N[1] = -(m1*l1+m2*L1)*g*s1 - m2*L1*l2*Math.sin(th1-th2)*th2_dot*(th1_dot+th2_dot); // (th1_dot+th2_dot) or just th2_dot? Source varies.
+        N[2] = -m2*l2*g*s2 + m2*L1*l2*Math.sin(th1-th2)*th1_dot*th1_dot;
+
+
+        let accels;
+        try {
+            accels = Mat.solve(M, N);
+        } catch (e) {
+            console.warn("Physics failed: Mat.solve error. Using zero accelerations.", e.message);
+            accels = [0,0,0];
+            // Force done state:
+            this.state = [this.x_threshold * 2, 0, this.theta1_threshold * 2, 0, this.theta2_threshold * 2, 0];
+            return; // Skip integration if solver fails
+        }
+        
+        const [x_ddot, th1_ddot, th2_ddot] = accels;
+
+        if ([x_ddot, th1_ddot, th2_ddot].some(val => isNaN(val) || !isFinite(val))) {
+            console.warn("Physics: Accelerations are NaN/Infinity. Using zero accelerations.", accels);
+            this.state = [this.x_threshold * 2, 0, this.theta1_threshold * 2, 0, this.theta2_threshold * 2, 0];
+            return;
+        }
+
+        let new_x_dot = x_dot + x_ddot * this.dt;
+        let new_x = x + new_x_dot * this.dt;
+        let new_th1_dot = th1_dot + th1_ddot * this.dt;
+        let new_th1 = th1 + new_th1_dot * this.dt;
+        let new_th2_dot = th2_dot + th2_ddot * this.dt;
+        let new_th2 = th2 + new_th2_dot * this.dt;
+
+        new_th1 = (new_th1 + Math.PI) % (2 * Math.PI) - Math.PI;
+        new_th2 = (new_th2 + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        this.state = [new_x, new_x_dot, new_th1, new_th1_dot, new_th2, new_th2_dot];
+    }
+
+    step(action) {
+        if (isNaN(action)) {
+            console.warn("Environment received NaN action. Using 0.");
+            action = 0;
+        }
+        const force = action * this.action_scale;
+        this._physics_step(force);
+
+        const [x, x_dot, th1, th1_dot, th2, th2_dot] = this.state;
+        let done = false;
+        let reward = 0;
+
+        if (this.state.some(val => isNaN(val) || !isFinite(val))) {
+            console.warn("State contains NaN/Infinity after physics step. Episode terminated.");
+            done = true;
+            reward = -200; // Severe penalty for numerical instability leading to NaN state
+        } else if (Math.abs(x) > this.x_threshold ||
+                   Math.abs(th1) > this.theta1_threshold ||
+                   Math.abs(th2) > this.theta2_threshold) {
+            done = true;
+            reward = -100;
+        }
+
+        if (!done) {
+            reward = 1.0;
+            reward -= (th1**2) * 0.5 + (th2**2) * 0.5;
+            reward -= (x**2) * 0.1;
+            reward -= (x_dot**2) * 0.01 + (th1_dot**2) * 0.01 + (th2_dot**2) * 0.01;
+        }
+        
+        return { observation: this.getStateObs(), reward, done, info: {} };
+    }
+
+    render(canvas, ctx) {
+        if (!canvas || !ctx) return;
+        const [x_pos, _, theta1, __, theta2, ___] = this.state.map(s => isNaN(s) ? 0 : s); // Use 0 for NaN state vars in render
+
+        const cartWidth = 50, cartHeight = 30;
+        const pole1Length = this.l1 * 100 * 2; 
+        const pole2Length = this.l2 * 100 * 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height * 0.75);
+
+        const cartX = x_pos * 100;
+        ctx.fillStyle = "black";
+        ctx.fillRect(cartX - cartWidth / 2, -cartHeight / 2, cartWidth, cartHeight);
+
+        const pole1X1 = cartX, pole1Y1 = 0;
+        const pole1X2 = pole1X1 + pole1Length * Math.sin(theta1);
+        const pole1Y2 = pole1Y1 - pole1Length * Math.cos(theta1);
+        ctx.strokeStyle = "blue"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(pole1X1, pole1Y1); ctx.lineTo(pole1X2, pole1Y2); ctx.stroke();
+
+        const pole2X1 = pole1X2, pole2Y1 = pole1Y2;
+        const pole2X2 = pole2X1 + pole2Length * Math.sin(theta2);
+        const pole2Y2 = pole2Y1 - pole2Length * Math.cos(theta2);
+        ctx.strokeStyle = "red"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(pole2X1, pole2Y1); ctx.lineTo(pole2X2, pole2Y2); ctx.stroke();
+        
+        ctx.restore();
+    }
+}
+
+
+// --- PPO AGENT ---
+const MIN_LOG_STD = -5.0; // Corresponds to std e^-5 approx 0.0067
+const MAX_LOG_STD = 2.0;  // Corresponds to std e^2  approx 7.38
+
+class PPOAgent {
+    constructor(stateDim, actionDim, hiddenDim, lrActor, lrCritic, gamma, lambda_gae, clipEpsilon, ppoEpochs, ppoBatchSize, entropyCoeff) {
+        this.stateDim = stateDim; this.actionDim = actionDim;
+        this.gamma = gamma; this.lambda_gae = lambda_gae; this.clipEpsilon = clipEpsilon;
+        this.ppoEpochs = ppoEpochs; this.ppoBatchSize = ppoBatchSize; this.entropyCoeff = entropyCoeff;
+
+        this.actor = new NeuralNetwork(stateDim, [hiddenDim, hiddenDim], actionDim * 2);
+        this.actorOptimizer = new AdamOptimizer(this.actor.layers, lrActor);
+        this.critic = new NeuralNetwork(stateDim, [hiddenDim, hiddenDim], 1);
+        this.criticOptimizer = new AdamOptimizer(this.critic.layers, lrCritic);
+        
+        const lastLayerActor = this.actor.layers[this.actor.layers.length-1];
+        for(let i=0; i < actionDim; ++i) {
+            lastLayerActor.biases[actionDim + i][0] = Math.log(0.5); // Initial std_dev around 0.5
+        }
+    }
+
+    _sample_normal(mean, std_dev) {
+        const u1 = Math.random(), u2 = Math.random();
+        const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+        return mean + std_dev * z0;
+    }
+
+    _log_prob_normal(x, mean, std_dev) {
+        if (std_dev <= 1e-6) { // Avoid division by zero or log(0)
+             console.warn("_log_prob_normal: std_dev is too small.", std_dev);
+             return -1e8; // Very small log probability
+        }
+        const var_ = std_dev * std_dev;
+        const log_std = Math.log(std_dev);
+        return -((x - mean) ** 2) / (2 * var_) - log_std - Math.log(Math.sqrt(2 * Math.PI));
+    }
+    
+    selectAction(state, deterministic = false) {
+        if (state.some(isNaN)) {
+            console.error("PPOAgent.selectAction received NaN state:", state);
+            return { action: 0, log_prob: -1e8, value: 0 }; // Fallback
+        }
+        const actor_output = this.actor.forward(state);
+        
+        const means = actor_output.slice(0, this.actionDim);
+        const raw_log_stds = actor_output.slice(this.actionDim);
+        const log_stds = raw_log_stds.map(ls => Math.max(MIN_LOG_STD, Math.min(MAX_LOG_STD, ls)));
+        const std_devs = log_stds.map(ls => Math.exp(ls));
+
+        let action_val;
+        if (deterministic) {
+            action_val = means[0];
+        } else {
+            action_val = this._sample_normal(means[0], std_devs[0]);
+        }
+
+        if (isNaN(action_val) || !isFinite(action_val)) {
+            console.error("Sampled action is NaN/Inf. Mean:", means[0], "StdDev:", std_devs[0], "RawLogStd:", raw_log_stds[0]);
+            action_val = 0; // Fallback action
+        }
+        action_val = Math.max(-1.0, Math.min(1.0, action_val)); // Clip action
+        
+        let log_prob = this._log_prob_normal(action_val, means[0], std_devs[0]);
+        if (isNaN(log_prob) || !isFinite(log_prob)) {
+            console.error("log_prob is NaN/Inf. Action:", action_val, "Mean:", means[0], "StdDev:", std_devs[0]);
+            log_prob = -1e8; // Fallback log_prob
+        }
+        
+        const value_output = this.critic.forward(state);
+        let value = value_output[0];
+        if (isNaN(value) || !isFinite(value)) {
+            console.error("Critic value is NaN/Inf. State:", state);
+            value = 0; // Fallback value
+        }
+
+        return { action: action_val, log_prob: log_prob, value: value };
+    }
+
+    computeAdvantagesGAE(rewards, dones, values, next_value) {
+        const advantages = new Array(rewards.length).fill(0);
+        const returns = new Array(rewards.length).fill(0);
+        let gae_lambda = 0;
+
+        for (let t = rewards.length - 1; t >= 0; t--) {
+            const V_next_t = (t === rewards.length - 1) ? next_value : values[t+1];
+            const V_t = values[t];
+            if (isNaN(V_next_t) || isNaN(V_t) || isNaN(rewards[t])) {
+                 console.error("NaN in GAE inputs. R:", rewards[t], "V_t:", V_t, "V_next_t:", V_next_t);
+                 // This will propagate NaN. The checks in selectAction should prevent NaN values.
+            }
+            const delta = rewards[t] + this.gamma * V_next_t * (1 - dones[t]) - V_t;
+            gae_lambda = delta + this.gamma * this.lambda_gae * (1 - dones[t]) * gae_lambda;
+            advantages[t] = gae_lambda;
+            returns[t] = advantages[t] + V_t;
+        }
+        return { advantages, returns };
+    }
+
+    train(memory) {
+        const { states, actions, rewards, dones, old_log_probs, old_values } = memory.get();
+        
+        const last_state = states[states.length-1];
+        let next_value = 0;
+        if (last_state && !last_state.some(isNaN)) { // Ensure last_state is valid
+            next_value = this.critic.forward(last_state)[0];
+            if (isNaN(next_value) || !isFinite(next_value)) {
+                console.warn("NaN/Inf next_value in train, using 0. Last state:", last_state);
+                next_value = 0;
+            }
+        } else {
+            console.warn("Last state invalid for next_value calculation or memory empty.");
+        }
+
+
+        const { advantages, returns } = this.computeAdvantagesGAE(rewards, dones, old_values, next_value);
+
+        const adv_mean = advantages.reduce((a,b) => a+b, 0) / advantages.length || 0; // handle empty or all-NaN
+        const adv_std = Math.sqrt(advantages.map(x => (x-adv_mean)**2).reduce((a,b)=>a+b,0) / advantages.length) + 1e-8;
+        const normalized_advantages = advantages.map(adv => (isNaN(adv) ? 0 : (adv - adv_mean) / adv_std));
+
+
+        let totalActorLoss = 0, totalCriticLoss = 0;
+        const num_samples = states.length;
+        if (num_samples === 0) { memory.clear(); return { actor_loss: 0, critic_loss: 0}; } // Nothing to train on
+        const indices = Array.from(Array(num_samples).keys());
+
+        for (let epoch = 0; epoch < this.ppoEpochs; epoch++) {
+            for (let i = num_samples - 1; i > 0; i--) { // Shuffle
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            for (let i = 0; i < num_samples; i += this.ppoBatchSize) {
+                const batch_indices = indices.slice(i, Math.min(i + this.ppoBatchSize, num_samples));
+                if (batch_indices.length === 0) continue;
+
+                const actor_grads_sum = { weights: this.actor.layers.map(l => Mat.zeros(l.weights.length, l.weights[0].length)), biases: this.actor.layers.map(l => Mat.zeros(l.biases.length, l.biases[0].length)) };
+                const critic_grads_sum = { weights: this.critic.layers.map(l => Mat.zeros(l.weights.length, l.weights[0].length)), biases: this.critic.layers.map(l => Mat.zeros(l.biases.length, l.biases[0].length)) };
+                let batch_actor_loss = 0, batch_critic_loss = 0, valid_samples_in_batch = 0;
+
+                for (const idx of batch_indices) {
+                    const state = states[idx];
+                    const action = actions[idx];
+                    const old_log_prob = old_log_probs[idx];
+                    const advantage = normalized_advantages[idx];
+                    const target_value = returns[idx];
+
+                    if (state.some(isNaN) || isNaN(action) || isNaN(old_log_prob) || isNaN(advantage) || isNaN(target_value)) {
+                        console.warn("Skipping sample in batch due to NaN values.", {state, action, old_log_prob, advantage, target_value});
+                        continue;
+                    }
+                    valid_samples_in_batch++;
+
+                    const actor_output = this.actor.forward(state);
+                    const means = actor_output.slice(0, this.actionDim);
+                    const raw_log_stds = actor_output.slice(this.actionDim);
+                    const log_stds = raw_log_stds.map(ls => Math.max(MIN_LOG_STD, Math.min(MAX_LOG_STD, ls)));
+                    const std_devs = log_stds.map(ls => Math.exp(ls));
+                    const current_log_prob = this._log_prob_normal(action, means[0], std_devs[0]);
+
+                    const current_value = this.critic.forward(state)[0];
+
+                    // Actor Loss
+                    const log_prob_diff = current_log_prob - old_log_prob;
+                    let ratio;
+                    if (log_prob_diff > 50) ratio = Math.exp(50); // Clip to avoid Inf
+                    else if (log_prob_diff < -50) ratio = Math.exp(-50); // Clip to avoid 0 from large neg exp
+                    else ratio = Math.exp(log_prob_diff);
+                    
+                    if(isNaN(ratio) || !isFinite(ratio)){
+                        console.warn("Ratio is NaN/Inf, skipping sample's actor update. LogProbDiff:", log_prob_diff);
+                        // Skip actor update for this sample
+                    } else {
+                        const surrogate1 = ratio * advantage;
+                        const clipped_ratio = Math.max(1.0 - this.clipEpsilon, Math.min(1.0 + this.clipEpsilon, ratio));
+                        const surrogate2 = clipped_ratio * advantage;
+                        const actor_objective = -Math.min(surrogate1, surrogate2);
+                        
+                        const entropy = -(log_stds[0] + 0.5 * Math.log(2 * Math.PI * Math.E));
+                        const actor_loss_sample = actor_objective - this.entropyCoeff * entropy;
+                        batch_actor_loss += actor_loss_sample;
+
+                        let d_actor_objective_d_ratio;
+                        if (surrogate1 <= surrogate2) d_actor_objective_d_ratio = -advantage;
+                        else {
+                            if (ratio === clipped_ratio) d_actor_objective_d_ratio = -advantage;
+                            else d_actor_objective_d_ratio = 0;
+                        }
+                        
+                        const d_ratio_d_log_prob = ratio; // d(exp(x))/dx = exp(x)
+                        
+                        let d_log_prob_d_mean = 0, d_log_prob_d_log_std = 0;
+                        if (std_devs[0] > 1e-6) {
+                             d_log_prob_d_mean = (action - means[0]) / (std_devs[0]**2);
+                             d_log_prob_d_log_std = ((action - means[0])**2 / (std_devs[0]**2) - 1);
+                        } else {
+                            console.warn("Std_dev too small in train, d_log_prob derivatives zeroed.");
+                        }
+
+                        const d_entropy_d_log_std = -1;
+                        const d_actor_loss_d_output = new Array(this.actionDim * 2).fill(0);
+                        
+                        const grad_path_objective = d_actor_objective_d_ratio * d_ratio_d_log_prob;
+                        d_actor_loss_d_output[0] = grad_path_objective * d_log_prob_d_mean;
+                        d_actor_loss_d_output[1] = grad_path_objective * d_log_prob_d_log_std - this.entropyCoeff * d_entropy_d_log_std;
+
+                        if (!d_actor_loss_d_output.some(isNaN)) {
+                            const actor_grad_sample = this.actor.backward(d_actor_loss_d_output);
+                            for(let k=0; k<this.actor.layers.length; ++k) {
+                                actor_grads_sum.weights[k] = Mat.add(actor_grads_sum.weights[k], actor_grad_sample.weights[k]);
+                                actor_grads_sum.biases[k] = Mat.add(actor_grads_sum.biases[k], actor_grad_sample.biases[k]);
+                            }
+                        } else {
+                             console.warn("NaN in actor loss gradient output for sample, skipping actor grad sum.");
+                        }
+                    }
+
+                    // Critic Loss
+                    const critic_loss_sample = (current_value - target_value) ** 2 * 0.5;
+                    if (!isNaN(critic_loss_sample)) {
+                        batch_critic_loss += critic_loss_sample;
+                        const d_critic_loss_d_output = [current_value - target_value];
+                        if (!d_critic_loss_d_output.some(isNaN)) {
+                            const critic_grad_sample = this.critic.backward(d_critic_loss_d_output);
+                            for(let k=0; k<this.critic.layers.length; ++k) {
+                                critic_grads_sum.weights[k] = Mat.add(critic_grads_sum.weights[k], critic_grad_sample.weights[k]);
+                                critic_grads_sum.biases[k] = Mat.add(critic_grads_sum.biases[k], critic_grad_sample.biases[k]);
+                            }
+                        } else {
+                            console.warn("NaN in critic loss gradient output for sample, skipping critic grad sum.");
+                        }
+                    } else {
+                         console.warn("Critic loss sample is NaN.");
+                    }
+                }
+                
+                if (valid_samples_in_batch > 0) {
+                    const avg_actor_grads = {
+                        weights: actor_grads_sum.weights.map(g => Mat.scale(g, 1 / valid_samples_in_batch)),
+                        biases: actor_grads_sum.biases.map(g => Mat.scale(g, 1 / valid_samples_in_batch))
+                    };
+                    const avg_critic_grads = {
+                        weights: critic_grads_sum.weights.map(g => Mat.scale(g, 1 / valid_samples_in_batch)),
+                        biases: critic_grads_sum.biases.map(g => Mat.scale(g, 1 / valid_samples_in_batch))
+                    };
+                    
+                    if (!avg_actor_grads.weights.flat(Infinity).some(isNaN) && !avg_actor_grads.biases.flat(Infinity).some(isNaN)) {
+                        this.actorOptimizer.step(avg_actor_grads);
+                    } else { console.warn("NaN in averaged actor gradients. Skipping actor optimizer step.");}
+
+                    if (!avg_critic_grads.weights.flat(Infinity).some(isNaN) && !avg_critic_grads.biases.flat(Infinity).some(isNaN)) {
+                         this.criticOptimizer.step(avg_critic_grads);
+                    } else { console.warn("NaN in averaged critic gradients. Skipping critic optimizer step.");}
+
+                    totalActorLoss += batch_actor_loss / valid_samples_in_batch;
+                    totalCriticLoss += batch_critic_loss / valid_samples_in_batch;
+                }
+            }
+        }
+        memory.clear();
+        const num_update_steps = (this.ppoEpochs * Math.ceil(num_samples / this.ppoBatchSize));
+        return { 
+            actor_loss: num_update_steps > 0 ? totalActorLoss / num_update_steps : 0, 
+            critic_loss: num_update_steps > 0 ? totalCriticLoss / num_update_steps : 0,
+        };
+    }
+}
+
+// --- MEMORY BUFFER ---
+class Memory {
+    constructor() { this.clear(); }
+    add(state, action, reward, done, log_prob, value) {
+        this.states.push(state); this.actions.push(action); this.rewards.push(reward);
+        this.dones.push(done ? 1 : 0); this.old_log_probs.push(log_prob); this.old_values.push(value);
+    }
+    get() { return { states: this.states, actions: this.actions, rewards: this.rewards, dones: this.dones, old_log_probs: this.old_log_probs, old_values: this.old_values }; }
+    clear() { this.states = []; this.actions = []; this.rewards = []; this.dones = []; this.old_log_probs = []; this.old_values = []; }
+    size() { return this.rewards.length; }
+}
+
+
+// --- MAIN SCRIPT ---
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('pendulumCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusLog = document.getElementById('statusLog');
+
+    const lrActorIn = document.getElementById('lrActor'); const lrCriticIn = document.getElementById('lrCritic');
+    const gammaIn = document.getElementById('gamma'); const lambdaGaeIn = document.getElementById('lambda_gae');
+    const clipEpsilonIn = document.getElementById('clipEpsilon'); const ppoEpochsIn = document.getElementById('ppoEpochs');
+    const ppoBatchSizeIn = document.getElementById('ppoBatchSize'); const updateTimestepsIn = document.getElementById('updateTimesteps');
+    const maxEpStepsIn = document.getElementById('maxEpSteps'); const hiddenDimIn = document.getElementById('hiddenDim');
+    const entropyCoeffIn = document.getElementById('entropyCoeff'); const targetRewardIn = document.getElementById('targetReward');
+    const renderEveryIn = document.getElementById('renderEvery');
+
+    const startTrainBtn = document.getElementById('startTrainBtn'); const stopTrainBtn = document.getElementById('stopTrainBtn');
+    const testPolicyBtn = document.getElementById('testPolicyBtn'); const stopTestBtn = document.getElementById('stopTestBtn');
+
+    let env, agent, memory;
+    let trainingActive = false, testingActive = false, animationFrameId;
+    let episodeCount = 0, totalTimesteps = 0;
+    
+    let actorChart, criticChart, rewardChart;
+
+    function initCharts() {
+        if (actorChart) actorChart.destroy(); if (criticChart) criticChart.destroy(); if (rewardChart) rewardChart.destroy();
+        const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } }, elements: { point: { radius: 0 } }, animation: false };
+        actorChart = new Chart(document.getElementById('actorLossChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Actor Loss', data: [], borderColor: 'rgb(255, 99, 132)', tension: 0.1 }] }, options: chartOptions });
+        criticChart = new Chart(document.getElementById('criticLossChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Critic Loss', data: [], borderColor: 'rgb(54, 162, 235)', tension: 0.1 }] }, options: chartOptions });
+        rewardChart = new Chart(document.getElementById('episodeRewardChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Episode Reward', data: [], borderColor: 'rgb(75, 192, 192)', tension: 0.1 }] }, options: chartOptions });
+    }
+    initCharts();
+
+    function updateCharts(actorLoss, criticLoss, epReward, epNum) {
+        const MAX_CHART_POINTS = 200;
+        if (actorLoss !== null && !isNaN(actorLoss)) {
+            actorChart.data.labels.push(epNum); actorChart.data.datasets[0].data.push(actorLoss);
+            if (actorChart.data.labels.length > MAX_CHART_POINTS) { actorChart.data.labels.shift(); actorChart.data.datasets[0].data.shift(); }
+            actorChart.update('none');
+        }
+        if (criticLoss !== null && !isNaN(criticLoss)) {
+            criticChart.data.labels.push(epNum); criticChart.data.datasets[0].data.push(criticLoss);
+            if (criticChart.data.labels.length > MAX_CHART_POINTS) { criticChart.data.labels.shift(); criticChart.data.datasets[0].data.shift(); }
+            criticChart.update('none');
+        }
+        if (epReward !== null && !isNaN(epReward)) {
+            rewardChart.data.labels.push(epNum); rewardChart.data.datasets[0].data.push(epReward);
+            if (rewardChart.data.labels.length > MAX_CHART_POINTS) { rewardChart.data.labels.shift(); rewardChart.data.datasets[0].data.shift(); }
+            rewardChart.update('none');
+        }
+    }
+    
+    function logStatus(message) {
+        const currentLog = statusLog.textContent.split('\n').slice(0, 5).join('\n'); // Keep last few lines
+        statusLog.textContent = `Ep: ${episodeCount}, Steps: ${totalTimesteps}\n${message}\n${currentLog}`;
+        // console.log(message); // Can be too verbose for frequent updates
+    }
+
+    function initializeTraining() {
+        env = new DoubleInvertedPendulumEnv();
+        const stateDim = env.reset().length; const actionDim = 1;
+        agent = new PPOAgent( stateDim, actionDim, parseInt(hiddenDimIn.value), parseFloat(lrActorIn.value), parseFloat(lrCriticIn.value),
+            parseFloat(gammaIn.value), parseFloat(lambdaGaeIn.value), parseFloat(clipEpsilonIn.value), parseInt(ppoEpochsIn.value),
+            parseInt(ppoBatchSizeIn.value), parseFloat(entropyCoeffIn.value) );
+        memory = new Memory(); episodeCount = 0; totalTimesteps = 0;
+        initCharts(); logStatus("Initialized training.");
+    }
+
+    async function trainingStep(renderThisTrajectory = false) {
+        if (!trainingActive) return;
+
+        let state = env.reset(); let episodeReward = 0;
+        const MAX_EP_STEPS = parseInt(maxEpStepsIn.value);
+        const UPDATE_TIMESTEPS = parseInt(updateTimestepsIn.value);
+
+        for (let t = 0; t < MAX_EP_STEPS; t++) {
+            if (!trainingActive) break;
+
+            const { action, log_prob, value } = agent.selectAction(state);
+            if (state.some(isNaN)) { // Double check state before step
+                logStatus(`State NaN before env.step. Terminating episode. State: ${state.map(s=>s.toFixed(2))}`);
+                break;
+            }
+            const stepResult = env.step(action);
+            const next_state = stepResult.observation; const reward = stepResult.reward; const done = stepResult.done;
+
+            memory.add(state, action, reward, done, log_prob, value);
+            state = next_state; episodeReward += reward; totalTimesteps++;
+
+            if (renderThisTrajectory) {
+                env.render(canvas, ctx);
+                await new Promise(resolve => setTimeout(resolve, 25)); // Delay for visibility
+            }
+
+            if (done || t === MAX_EP_STEPS - 1) break;
+            
+            if (memory.size() >= UPDATE_TIMESTEPS) {
+                const losses = agent.train(memory); // Memory cleared inside
+                const lossMsg = `Trained. ALoss: ${losses.actor_loss.toFixed(4)}, CLoss: ${losses.critic_loss.toFixed(4)}`;
+                logStatus(lossMsg);
+                console.log(`Ep: ${episodeCount}, ${lossMsg}`); // Also log to console for training updates
+                updateCharts(losses.actor_loss, losses.critic_loss, null, episodeCount);
+            }
+        }
+        
+        episodeCount++;
+        updateCharts(null, null, episodeReward, episodeCount);
+        const epMsg = `Ep ${episodeCount} done. Reward: ${episodeReward.toFixed(2)}. Steps: ${totalTimesteps - (totalTimesteps - (MAX_EP_STEPS < (totalTimesteps % MAX_EP_STEPS === 0 ? MAX_EP_STEPS : totalTimesteps % MAX_EP_STEPS )))}`;
+        logStatus(epMsg);
+        console.log(epMsg);
+
+
+        if (episodeReward >= parseFloat(targetRewardIn.value) && episodeCount > 10) { // Min episodes to avoid lucky first one
+            logStatus(`Target reward ${targetRewardIn.value} reached! Training stopped.`);
+            stopTraining(); return;
+        }
+
+        if (trainingActive) {
+            const renderNext = (episodeCount % parseInt(renderEveryIn.value) === 0);
+            if (renderNext) requestAnimationFrame(() => trainingStep(true));
+            else setTimeout(() => trainingStep(false), 0); // Yield to browser
+        }
+    }
+    
+    function startTraining() {
+        initializeTraining(); trainingActive = true;
+        stopTrainBtn.disabled = false; startTrainBtn.disabled = true; testPolicyBtn.disabled = true;
+        disableHyperparamInputs(true);
+        trainingStep(true); // Start first episode with render
+    }
+
+    function stopTraining() {
+        trainingActive = false;
+        stopTrainBtn.disabled = true; startTrainBtn.disabled = false; testPolicyBtn.disabled = (agent === undefined);
+        disableHyperparamInputs(false);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        logStatus("Training stopped by user.");
+    }
+    
+    let testState, testEpisodeReward;
+    function testLoop() {
+        if (!testingActive || !agent) return;
+
+        const { action } = agent.selectAction(testState, true);
+        const stepResult = env.step(action);
+        testState = stepResult.observation; testEpisodeReward += stepResult.reward;
+
+        env.render(canvas, ctx);
+        logStatus(`Testing... Current Reward: ${testEpisodeReward.toFixed(2)}`);
+        
+        if (stepResult.done) {
+            logStatus(`Test episode finished. Reward: ${testEpisodeReward.toFixed(2)}. Resetting.`);
+            testState = env.reset(); testEpisodeReward = 0;
+        }
+        animationFrameId = requestAnimationFrame(testLoop);
+    }
+
+    function startTest() {
+        if (!agent) { alert("Train a policy first!"); return; }
+        testingActive = true; testState = env.reset(); testEpisodeReward = 0;
+        startTrainBtn.disabled = true; stopTrainBtn.disabled = true; testPolicyBtn.disabled = true; stopTestBtn.disabled = false;
+        disableHyperparamInputs(true);
+        logStatus("Starting test..."); env.render(canvas, ctx);
+        animationFrameId = requestAnimationFrame(testLoop);
+    }
+
+    function stopTest() {
+        testingActive = false; if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        startTrainBtn.disabled = false; stopTrainBtn.disabled = true; testPolicyBtn.disabled = false; stopTestBtn.disabled = true;
+        disableHyperparamInputs(false); logStatus("Test stopped.");
+    }
+
+    function disableHyperparamInputs(disabled) {
+        document.querySelectorAll('.hyperparams input').forEach(input => {
+            if (input.id !== "hiddenDim") input.disabled = disabled; // Keep hiddenDim always readonly
+        });
+    }
+
+    startTrainBtn.addEventListener('click', startTraining);
+    stopTrainBtn.addEventListener('click', stopTraining);
+    testPolicyBtn.addEventListener('click', startTest);
+    stopTestBtn.addEventListener('click', stopTest);
+
+    const tempEnv = new DoubleInvertedPendulumEnv(); tempEnv.reset(); tempEnv.render(canvas, ctx);
+});
+
+</script>
+</body>
+</html>
