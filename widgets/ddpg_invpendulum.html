@@ -66,6 +66,7 @@
     </div>
 
     <script>
+    // single-file html 实现一个倒立摆(开局时摆应该在上面，然后下面的滑块通过移动保持摆在上面)，用 ddpg 进行控制（用的 NN 两个隐藏层 hidden_dim 16 应该就够了），可视化训练过程（定期生成一条trajectory 演示）。并提供独立的测试按钮，对训完的策略进行测试。
     // --- Global Config Object (populated from UI and defaults) ---
     let DDPG_CONFIG = {};
 
