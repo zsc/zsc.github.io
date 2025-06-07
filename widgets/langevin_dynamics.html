@@ -1,52 +1,57 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en"> <!-- Default language set to English -->
 <head>
     <meta charset="UTF-8">
-    <title>2D Langevin Dynamics 动画（带拖尾）</title>
+    <title id="pageTitle">2D Langevin Dynamics Animation (with Trails)</title>
     <style>
         body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; background-color: #f0f0f0; }
         #controls { margin: 20px; padding: 15px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .control-group { margin-bottom: 10px; }
-        .control-group label { display: inline-block; width: 180px; }
-        .control-group input[type="range"] { width: 150px; vertical-align: middle; }
+        .control-group { margin-bottom: 10px; display: flex; align-items: center; }
+        .control-group label { display: inline-block; width: 220px; flex-shrink: 0; }
+        .control-group input[type="range"] { width: 150px; vertical-align: middle; margin-right: 5px; }
         .control-group span { display: inline-block; width: 40px; text-align: right; vertical-align: middle;}
         canvas { border: 1px solid black; background-color: #e0e0e0; cursor: crosshair; }
         h1 { color: #333; }
-        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; margin-right: 10px; }
         button:hover { background-color: #0056b3; }
+        #langToggle { background-color: #28a745; }
+        #langToggle:hover { background-color: #1e7e34; }
     </style>
 </head>
 <body>
-    <h1>2D Langevin Dynamics 动画（带拖尾）</h1>
+    <h1 id="mainHeading">2D Langevin Dynamics Animation (with Trails)</h1>
 
     <div id="controls">
         <div class="control-group">
-            <label for="mass">粒子质量 (mass):</label>
+            <label for="mass" data-translate-key="massLabel">Particle Mass (mass):</label>
             <input type="range" id="mass" min="0" max="10" value="1" step="0.1">
             <span id="massValue">1.0</span>
         </div>
         <div class="control-group">
-            <label for="friction">摩擦系数 (friction γ):</label>
+            <label for="friction" data-translate-key="frictionLabel">Friction Coefficient (γ):</label>
             <input type="range" id="friction" min="0.01" max="1" value="0.1" step="0.01">
             <span id="frictionValue">0.10</span>
         </div>
         <div class="control-group">
-            <label for="noiseSigma">布朗噪声强度 (σ):</label>
+            <label for="noiseSigma" data-translate-key="noiseSigmaLabel">Brownian Noise Strength (σ):</label>
             <input type="range" id="noiseSigma" min="0" max="10" value="0.1" step="0.01">
             <span id="noiseSigmaValue">0.10</span>
         </div>
         <div class="control-group">
-            <label for="numGaussians">高斯源数量:</label>
+            <label for="numGaussians" data-translate-key="numGaussiansLabel">Number of Gaussian Sources:</label>
             <input type="range" id="numGaussians" min="1" max="20" value="5" step="1">
             <span id="numGaussiansValue">5</span>
         </div>
         <div class="control-group">
-            <label for="trailLength">拖尾长度:</label>
+            <label for="trailLength" data-translate-key="trailLengthLabel">Trail Length:</label>
             <input type="range" id="trailLength" min="0" max="100" value="30" step="1">
             <span id="trailLengthValue">30</span>
         </div>
-        <button id="regeneratePotential">重新生成势场</button>
-        <p>点击画布添加粒子。</p>
+        <div>
+            <button id="regeneratePotential" data-translate-key="regeneratePotentialBtn">Regenerate Potential Field</button>
+            <button id="langToggle" data-translate-key="langToggleBtn">切换到中文</button>
+        </div>
+        <p data-translate-key="instructionText">Click on the canvas to add particles.</p>
     </div>
 
     <canvas id="simulationCanvas" width="600" height="400"></canvas>
@@ -63,13 +68,70 @@
         let numGaussians = parseInt(document.getElementById('numGaussians').value);
         let trailLength = parseInt(document.getElementById('trailLength').value);
 
-        const dt = 0.1; // 时间步长
+        const dt = 0.1;
         let particles = [];
         let gaussians = [];
 
         const gridResolution = 20;
         let potentialGrid = [];
         let minPotential = 0, maxPotential = 0;
+
+        // --- Language and Translation ---
+        let currentLang = localStorage.getItem('langevinSimLang') || 'en';
+        document.documentElement.lang = currentLang;
+
+        const translations = {
+            en: {
+                pageTitle: "2D Langevin Dynamics Animation (with Trails)",
+                mainHeading: "2D Langevin Dynamics Animation (with Trails)",
+                massLabel: "Particle Mass (mass):",
+                frictionLabel: "Friction Coefficient (γ):",
+                noiseSigmaLabel: "Brownian Noise Strength (σ):",
+                numGaussiansLabel: "Number of Gaussian Sources:",
+                trailLengthLabel: "Trail Length:",
+                regeneratePotentialBtn: "Regenerate Potential Field",
+                langToggleBtn: "切换到中文",
+                instructionText: "Click on the canvas to add particles."
+            },
+            zh: {
+                pageTitle: "2D Langevin Dynamics 动画（带拖尾）",
+                mainHeading: "2D Langevin Dynamics 动画（带拖尾）",
+                massLabel: "粒子质量 (mass):",
+                frictionLabel: "摩擦系数 (γ):",
+                noiseSigmaLabel: "布朗噪声强度 (σ):",
+                numGaussiansLabel: "高斯源数量:",
+                trailLengthLabel: "拖尾长度:",
+                regeneratePotentialBtn: "重新生成势场",
+                langToggleBtn: "Switch to English",
+                instructionText: "点击画布添加粒子。"
+            }
+        };
+
+        function applyTranslations(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('langevinSimLang', lang);
+            const langStrings = translations[lang];
+            for (const key in langStrings) {
+                const element = document.querySelector(`[data-translate-key="${key}"]`) || document.getElementById(key);
+                if (element) {
+                    if (element.tagName === 'INPUT' && element.type === 'button' || element.tagName === 'BUTTON') {
+                        element.value = langStrings[key]; // For input buttons
+                        element.textContent = langStrings[key]; // For button elements
+                    } else if (key === 'pageTitle') {
+                         document.title = langStrings[key];
+                    }
+                    else {
+                        element.textContent = langStrings[key];
+                    }
+                }
+            }
+        }
+        
+        document.getElementById('langToggle').addEventListener('click', () => {
+            currentLang = (currentLang === 'en') ? 'zh' : 'en';
+            applyTranslations(currentLang);
+        });
+
 
         // --- UI更新 ---
         document.getElementById('mass').addEventListener('input', e => {
@@ -106,7 +168,7 @@
             particles.push({
                 x: x, y: y,
                 vx: 0, vy: 0,
-                history: [] // 初始化历史记录
+                history: []
             });
         });
 
@@ -225,22 +287,17 @@
             const TRAIL_BASE_RADIUS = 3;
 
             for (const p of particles) {
-                // 绘制拖尾
                 if (trailLength > 0 && p.history.length > 0) {
                     for (let j = 0; j < p.history.length; j++) {
                         const histPoint = p.history[j];
-                        // 透明度随历史记录变老而衰减
-                        const opacity = ((j + 1) / p.history.length) * 0.6; // 最老点最暗，最新点（历史中）最亮 (0.6倍)
-                        
+                        const opacity = ((j + 1) / p.history.length) * 0.6;
                         ctx.beginPath();
-                        ctx.arc(histPoint.x, histPoint.y, TRAIL_BASE_RADIUS, 0, 2 * Math.PI);
-                        // 拖尾颜色可以自定义，这里用浅红色
+                        ctx.arc(histPoint.x, histPoint.y, TRAIL_BASE_RADIUS * (j / p.history.length), 0, 2 * Math.PI); // Trail radius shrinks
                         ctx.fillStyle = `rgba(255, 120, 120, ${opacity})`; 
                         ctx.fill();
                     }
                 }
 
-                // 绘制主粒子
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, BASE_PARTICLE_RADIUS, 0, 2 * Math.PI);
                 ctx.fillStyle = 'red';
@@ -264,59 +321,50 @@
                 const p = particles[i];
                 const force = getForce(p.x, p.y);
 
-                if (mass < 1e-5) { // 过阻尼情况 (质量接近0)
-                    // 速度 v = (F_potential / γ) + F_brownian_kick
-                    // F_brownian_kick 是一个速度项
-                    // 注意：friction (γ) 不能为0，我们的滑块最小值为0.01
+                if (mass < 1e-5) { 
                     p.vx = (force.fx / friction) + randomNormal() * brownianNoiseSigma;
                     p.vy = (force.fy / friction) + randomNormal() * brownianNoiseSigma;
-                } else { // 正常朗之万动力学
+                } else {
                     const ax = (force.fx - friction * p.vx) / mass;
                     const ay = (force.fy - friction * p.vy) / mass;
-
                     p.vx += ax * dt;
                     p.vy += ay * dt;
-
-                    // 添加布朗运动带来的随机速度变化
                     p.vx += randomNormal() * brownianNoiseSigma;
                     p.vy += randomNormal() * brownianNoiseSigma;
+                }
+
+                // Record history *before* updating position for the current frame's trail point
+                if (trailLength > 0) {
+                    p.history.push({ x: p.x, y: p.y }); // Store current position before moving
+                    while (p.history.length > trailLength) {
+                        p.history.shift();
+                    }
+                } else {
+                    p.history = [];
                 }
 
                 p.x += p.vx * dt;
                 p.y += p.vy * dt;
 
-                // 边界条件 (反射)
                 if (p.x < 0) { p.x = 0; p.vx *= -0.5; }
                 if (p.x > width) { p.x = width; p.vx *= -0.5; }
                 if (p.y < 0) { p.y = 0; p.vy *= -0.5; }
                 if (p.y > height) { p.y = height; p.vy *= -0.5; }
-
-                // 更新历史记录用于拖尾
-                if (trailLength > 0) {
-                    p.history.push({ x: p.x, y: p.y });
-                    while (p.history.length > trailLength) {
-                        p.history.shift(); // 移除最老的记录
-                    }
-                } else {
-                    p.history = []; // 如果拖尾长度为0，清空历史
-                }
             }
         }
 
         // --- 主循环 ---
         function mainLoop() {
             ctx.clearRect(0, 0, width, height);
-
             drawPotentialField();
             drawForceArrows();
-            
             updateParticles();
             drawParticles();
-
             requestAnimationFrame(mainLoop);
         }
 
         // 初始化
+        applyTranslations(currentLang); // Apply initial language
         generateGaussians();
         calculatePotentialGrid();
         mainLoop();
