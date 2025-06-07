@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>2D Langevin Dynamics 动画（带拖尾）</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; background-color: #f0f0f0; }
+        #controls { margin: 20px; padding: 15px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .control-group { margin-bottom: 10px; }
+        .control-group label { display: inline-block; width: 180px; }
+        .control-group input[type="range"] { width: 150px; vertical-align: middle; }
+        .control-group span { display: inline-block; width: 40px; text-align: right; vertical-align: middle;}
+        canvas { border: 1px solid black; background-color: #e0e0e0; cursor: crosshair; }
+        h1 { color: #333; }
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>2D Langevin Dynamics 动画（带拖尾）</h1>
+
+    <div id="controls">
+        <div class="control-group">
+            <label for="mass">粒子质量 (mass):</label>
+            <input type="range" id="mass" min="0" max="10" value="1" step="0.1">
+            <span id="massValue">1.0</span>
+        </div>
+        <div class="control-group">
+            <label for="friction">摩擦系数 (friction γ):</label>
+            <input type="range" id="friction" min="0.01" max="1" value="0.1" step="0.01">
+            <span id="frictionValue">0.10</span>
+        </div>
+        <div class="control-group">
+            <label for="noiseSigma">布朗噪声强度 (σ):</label>
+            <input type="range" id="noiseSigma" min="0" max="10" value="0.1" step="0.01">
+            <span id="noiseSigmaValue">0.10</span>
+        </div>
+        <div class="control-group">
+            <label for="numGaussians">高斯源数量:</label>
+            <input type="range" id="numGaussians" min="1" max="20" value="5" step="1">
+            <span id="numGaussiansValue">5</span>
+        </div>
+        <div class="control-group">
+            <label for="trailLength">拖尾长度:</label>
+            <input type="range" id="trailLength" min="0" max="100" value="30" step="1">
+            <span id="trailLengthValue">30</span>
+        </div>
+        <button id="regeneratePotential">重新生成势场</button>
+        <p>点击画布添加粒子。</p>
+    </div>
+
+    <canvas id="simulationCanvas" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        let mass = parseFloat(document.getElementById('mass').value);
+        let friction = parseFloat(document.getElementById('friction').value);
+        let brownianNoiseSigma = parseFloat(document.getElementById('noiseSigma').value);
+        let numGaussians = parseInt(document.getElementById('numGaussians').value);
+        let trailLength = parseInt(document.getElementById('trailLength').value);
+
+        const dt = 0.1; // 时间步长
+        let particles = [];
+        let gaussians = [];
+
+        const gridResolution = 20;
+        let potentialGrid = [];
+        let minPotential = 0, maxPotential = 0;
+
+        // --- UI更新 ---
+        document.getElementById('mass').addEventListener('input', e => {
+            mass = parseFloat(e.target.value);
+            document.getElementById('massValue').textContent = mass.toFixed(1);
+        });
+        document.getElementById('friction').addEventListener('input', e => {
+            friction = parseFloat(e.target.value);
+            document.getElementById('frictionValue').textContent = friction.toFixed(2);
+        });
+        document.getElementById('noiseSigma').addEventListener('input', e => {
+            brownianNoiseSigma = parseFloat(e.target.value);
+            document.getElementById('noiseSigmaValue').textContent = brownianNoiseSigma.toFixed(2);
+        });
+        document.getElementById('numGaussians').addEventListener('input', e => {
+            numGaussians = parseInt(e.target.value);
+            document.getElementById('numGaussiansValue').textContent = numGaussians;
+            generateGaussians();
+            calculatePotentialGrid();
+        });
+         document.getElementById('trailLength').addEventListener('input', e => {
+            trailLength = parseInt(e.target.value);
+            document.getElementById('trailLengthValue').textContent = trailLength;
+        });
+        document.getElementById('regeneratePotential').addEventListener('click', () => {
+            generateGaussians();
+            calculatePotentialGrid();
+        });
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            particles.push({
+                x: x, y: y,
+                vx: 0, vy: 0,
+                history: [] // 初始化历史记录
+            });
+        });
+
+        // --- 高斯势场函数 ---
+        function generateGaussians() {
+            gaussians = [];
+            for (let i = 0; i < numGaussians; i++) {
+                gaussians.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    amplitude: (Math.random() * 1000 + 500) * (Math.random() > 0.3 ? -1 : 0.5),
+                    sigmaX: Math.random() * 50 + 50,
+                    sigmaY: Math.random() * 50 + 50
+                });
+            }
+        }
+
+        function getPotential(x, y) {
+            let potential = 0;
+            for (const g of gaussians) {
+                const dx = x - g.x;
+                const dy = y - g.y;
+                potential += g.amplitude * Math.exp(-(dx * dx / (2 * g.sigmaX * g.sigmaX) + dy * dy / (2 * g.sigmaY * g.sigmaY)));
+            }
+            return potential;
+        }
+
+        function getForce(x, y) {
+            let fx = 0;
+            let fy = 0;
+            for (const g of gaussians) {
+                const dx = x - g.x;
+                const dy = y - g.y;
+                const commonFactor = g.amplitude * Math.exp(-(dx * dx / (2 * g.sigmaX * g.sigmaX) + dy * dy / (2 * g.sigmaY * g.sigmaY)));
+                fx -= commonFactor * (-dx / (g.sigmaX * g.sigmaX));
+                fy -= commonFactor * (-dy / (g.sigmaY * g.sigmaY));
+            }
+            return { fx, fy };
+        }
+        
+        function calculatePotentialGrid() {
+            potentialGrid = [];
+            minPotential = Infinity;
+            maxPotential = -Infinity;
+            const stepX = width / gridResolution;
+            const stepY = height / gridResolution;
+
+            for (let i = 0; i <= gridResolution; i++) {
+                let row = [];
+                for (let j = 0; j <= gridResolution; j++) {
+                    const x = i * stepX;
+                    const y = j * stepY;
+                    const pVal = getPotential(x, y);
+                    row.push(pVal);
+                    if (pVal < minPotential) minPotential = pVal;
+                    if (pVal > maxPotential) maxPotential = pVal;
+                }
+                potentialGrid.push(row);
+            }
+            if (minPotential === maxPotential) {
+                maxPotential = minPotential + 1;
+            }
+        }
+
+        // --- 绘图函数 ---
+        function drawPotentialField() {
+            const stepX = width / gridResolution;
+            const stepY = height / gridResolution;
+            for (let i = 0; i < gridResolution; i++) {
+                for (let j = 0; j < gridResolution; j++) {
+                    const pVal = potentialGrid[i][j];
+                    const normalizedPotential = (pVal - minPotential) / (maxPotential - minPotential);
+                    const colorVal = Math.floor(normalizedPotential * 255);
+                    ctx.fillStyle = `rgb(${255-colorVal}, ${255-colorVal}, ${255-colorVal})`; 
+                    ctx.fillRect(i * stepX, j * stepY, stepX, stepY);
+                }
+            }
+        }
+
+        function drawForceArrows() {
+            const stepX = width / (gridResolution / 2);
+            const stepY = height / (gridResolution / 2);
+            const arrowLength = 10;
+            ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < gridResolution / 2; i++) {
+                for (let j = 0; j < gridResolution / 2; j++) {
+                    const x = (i + 0.5) * stepX;
+                    const y = (j + 0.5) * stepY;
+                    const force = getForce(x, y);
+                    const magnitude = Math.sqrt(force.fx * force.fx + force.fy * force.fy);
+
+                    if (magnitude > 1e-3) {
+                        const nx = force.fx / magnitude;
+                        const ny = force.fy / magnitude;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x + nx * arrowLength, y + ny * arrowLength);
+                        ctx.stroke();
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(x + nx * arrowLength, y + ny * arrowLength);
+                        ctx.lineTo(x + nx * arrowLength - ny * 3 - nx * 3, y + ny * arrowLength + nx * 3 - ny * 3);
+                        ctx.moveTo(x + nx * arrowLength, y + ny * arrowLength);
+                        ctx.lineTo(x + nx * arrowLength + ny * 3 - nx * 3, y + ny * arrowLength - nx * 3 - ny * 3);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        function drawParticles() {
+            const BASE_PARTICLE_RADIUS = 5;
+            const TRAIL_BASE_RADIUS = 3;
+
+            for (const p of particles) {
+                // 绘制拖尾
+                if (trailLength > 0 && p.history.length > 0) {
+                    for (let j = 0; j < p.history.length; j++) {
+                        const histPoint = p.history[j];
+                        // 透明度随历史记录变老而衰减
+                        const opacity = ((j + 1) / p.history.length) * 0.6; // 最老点最暗，最新点（历史中）最亮 (0.6倍)
+                        
+                        ctx.beginPath();
+                        ctx.arc(histPoint.x, histPoint.y, TRAIL_BASE_RADIUS, 0, 2 * Math.PI);
+                        // 拖尾颜色可以自定义，这里用浅红色
+                        ctx.fillStyle = `rgba(255, 120, 120, ${opacity})`; 
+                        ctx.fill();
+                    }
+                }
+
+                // 绘制主粒子
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, BASE_PARTICLE_RADIUS, 0, 2 * Math.PI);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.strokeStyle = 'darkred';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        // --- 物理更新 ---
+        function randomNormal() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                const force = getForce(p.x, p.y);
+
+                if (mass < 1e-5) { // 过阻尼情况 (质量接近0)
+                    // 速度 v = (F_potential / γ) + F_brownian_kick
+                    // F_brownian_kick 是一个速度项
+                    // 注意：friction (γ) 不能为0，我们的滑块最小值为0.01
+                    p.vx = (force.fx / friction) + randomNormal() * brownianNoiseSigma;
+                    p.vy = (force.fy / friction) + randomNormal() * brownianNoiseSigma;
+                } else { // 正常朗之万动力学
+                    const ax = (force.fx - friction * p.vx) / mass;
+                    const ay = (force.fy - friction * p.vy) / mass;
+
+                    p.vx += ax * dt;
+                    p.vy += ay * dt;
+
+                    // 添加布朗运动带来的随机速度变化
+                    p.vx += randomNormal() * brownianNoiseSigma;
+                    p.vy += randomNormal() * brownianNoiseSigma;
+                }
+
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+
+                // 边界条件 (反射)
+                if (p.x < 0) { p.x = 0; p.vx *= -0.5; }
+                if (p.x > width) { p.x = width; p.vx *= -0.5; }
+                if (p.y < 0) { p.y = 0; p.vy *= -0.5; }
+                if (p.y > height) { p.y = height; p.vy *= -0.5; }
+
+                // 更新历史记录用于拖尾
+                if (trailLength > 0) {
+                    p.history.push({ x: p.x, y: p.y });
+                    while (p.history.length > trailLength) {
+                        p.history.shift(); // 移除最老的记录
+                    }
+                } else {
+                    p.history = []; // 如果拖尾长度为0，清空历史
+                }
+            }
+        }
+
+        // --- 主循环 ---
+        function mainLoop() {
+            ctx.clearRect(0, 0, width, height);
+
+            drawPotentialField();
+            drawForceArrows();
+            
+            updateParticles();
+            drawParticles();
+
+            requestAnimationFrame(mainLoop);
+        }
+
+        // 初始化
+        generateGaussians();
+        calculatePotentialGrid();
+        mainLoop();
+    </script>
+</body>
+</html>
