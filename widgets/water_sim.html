@@ -1,0 +1,245 @@
+// 2D 模拟几个点震源作用下的水面波纹，高度以色阶表示。
+// 点震源的坐标 x,y 可配
+
+import { useState, useEffect } from 'react';
+export default function WaveSimulation() {
+  const [sources, setSources] = useState([
+    { x: 100, y: 100, amplitude: 10, frequency: 0.05 },
+    { x: 300, y: 200, amplitude: 8, frequency: 0.04 }
+  ]);
+  const [time, setTime] = useState(0);
+  const [gridSize, setGridSize] = useState({ width: 400, height: 300 });
+  const [resolution, setResolution] = useState(8);
+  const [isRunning, setIsRunning] = useState(true);
+  const [newSource, setNewSource] = useState({ x: 200, y: 150, amplitude: 10, frequency: 0.05 });
+  
+  // 计算网格点
+  const points = [];
+  for (let y = 0; y < gridSize.height; y += resolution) {
+    for (let x = 0; x < gridSize.width; x += resolution) {
+      points.push({ x, y });
+    }
+  }
+
+  // 计算每个点的高度值
+  const calculateHeight = (x, y, time) => {
+    let height = 0;
+    sources.forEach(source => {
+      const dx = x - source.x;
+      const dy = y - source.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      // 波形方程: 振幅 * sin(频率 * (距离 - 时间))
+      const wave = source.amplitude * Math.sin(source.frequency * (distance - time));
+      // 加上距离衰减
+      height += wave / (1 + distance * 0.01);
+    });
+    return height;
+  };
+
+  // 将高度值映射到颜色
+  const heightToColor = (height) => {
+    // 正值为蓝色，负值为浅色
+    const r = 100 - height * 5;
+    const g = 150 - height * 5;
+    const b = 255 - Math.abs(height) * 3;
+    return `rgb(${Math.max(0, Math.min(255, r))}, ${Math.max(0, Math.min(255, g))}, ${Math.max(0, Math.min(255, b))})`;
+  };
+
+  useEffect(() => {
+    let animationId;
+    
+    const animate = () => {
+      if (isRunning) {
+        setTime(prevTime => prevTime + 1);
+      }
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [isRunning]);
+
+  const addSource = () => {
+    setSources([...sources, { ...newSource }]);
+  };
+
+  const removeSource = (index) => {
+    setSources(sources.filter((_, i) => i !== index));
+  };
+
+  const updateSourceValue = (index, field, value) => {
+    const newSources = [...sources];
+    newSources[index][field] = parseFloat(value);
+    setSources(newSources);
+  };
+
+  const updateNewSourceValue = (field, value) => {
+    setNewSource({ ...newSource, [field]: parseFloat(value) });
+  };
+
+  return (
+    <div className="flex flex-col items-center p-4 bg-gray-100 rounded-lg">
+      <h2 className="text-xl font-semibold mb-4">2D水面波纹模拟</h2>
+      
+      <div className="mb-4 bg-white rounded-lg shadow p-4">
+        <svg width={gridSize.width} height={gridSize.height} className="border border-gray-300">
+          {points.map((point, index) => {
+            const height = calculateHeight(point.x, point.y, time);
+            return (
+              <rect
+                key={index}
+                x={point.x}
+                y={point.y}
+                width={resolution}
+                height={resolution}
+                fill={heightToColor(height)}
+              />
+            );
+          })}
+          
+          {sources.map((source, index) => (
+            <circle
+              key={index}
+              cx={source.x}
+              cy={source.y}
+              r={5}
+              fill="red"
+            />
+          ))}
+        </svg>
+      </div>
+      
+      <div className="flex gap-4 mb-4">
+        <button
+          onClick={() => setIsRunning(!isRunning)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          {isRunning ? '暂停' : '继续'}
+        </button>
+        <button
+          onClick={() => setTime(0)}
+          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+        >
+          重置时间
+        </button>
+      </div>
+      
+      <div className="w-full max-w-lg">
+        <h3 className="font-medium mb-2">已有震源</h3>
+        {sources.map((source, index) => (
+          <div key={index} className="flex flex-wrap gap-2 mb-2 p-2 border border-gray-300 rounded">
+            <div className="flex items-center">
+              <label className="mr-1">X:</label>
+              <input
+                type="number"
+                value={source.x}
+                onChange={(e) => updateSourceValue(index, 'x', e.target.value)}
+                className="w-16 p-1 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex items-center">
+              <label className="mr-1">Y:</label>
+              <input
+                type="number"
+                value={source.y}
+                onChange={(e) => updateSourceValue(index, 'y', e.target.value)}
+                className="w-16 p-1 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex items-center">
+              <label className="mr-1">振幅:</label>
+              <input
+                type="number"
+                value={source.amplitude}
+                onChange={(e) => updateSourceValue(index, 'amplitude', e.target.value)}
+                className="w-16 p-1 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex items-center">
+              <label className="mr-1">频率:</label>
+              <input
+                type="number"
+                step="0.01"
+                value={source.frequency}
+                onChange={(e) => updateSourceValue(index, 'frequency', e.target.value)}
+                className="w-16 p-1 border border-gray-300 rounded"
+              />
+            </div>
+            <button
+              onClick={() => removeSource(index)}
+              className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              删除
+            </button>
+          </div>
+        ))}
+        
+        <h3 className="font-medium mb-2 mt-4">添加新震源</h3>
+        <div className="flex flex-wrap gap-2 mb-2 p-2 border border-gray-300 rounded">
+          <div className="flex items-center">
+            <label className="mr-1">X:</label>
+            <input
+              type="number"
+              value={newSource.x}
+              onChange={(e) => updateNewSourceValue('x', e.target.value)}
+              className="w-16 p-1 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex items-center">
+            <label className="mr-1">Y:</label>
+            <input
+              type="number"
+              value={newSource.y}
+              onChange={(e) => updateNewSourceValue('y', e.target.value)}
+              className="w-16 p-1 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex items-center">
+            <label className="mr-1">振幅:</label>
+            <input
+              type="number"
+              value={newSource.amplitude}
+              onChange={(e) => updateNewSourceValue('amplitude', e.target.value)}
+              className="w-16 p-1 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex items-center">
+            <label className="mr-1">频率:</label>
+            <input
+              type="number"
+              step="0.01"
+              value={newSource.frequency}
+              onChange={(e) => updateNewSourceValue('frequency', e.target.value)}
+              className="w-16 p-1 border border-gray-300 rounded"
+            />
+          </div>
+          <button
+            onClick={addSource}
+            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            添加
+          </button>
+        </div>
+        
+        <h3 className="font-medium mb-2 mt-4">设置</h3>
+        <div className="flex flex-wrap gap-2 mb-2 p-2 border border-gray-300 rounded">
+          <div className="flex items-center">
+            <label className="mr-1">分辨率:</label>
+            <input
+              type="range"
+              min="4"
+              max="20"
+              value={resolution}
+              onChange={(e) => setResolution(parseInt(e.target.value))}
+              className="w-32"
+            />
+            <span className="ml-1">{resolution}px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

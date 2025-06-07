@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sand Dune Evolution Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .parameter-value {
+            display: inline-block;
+            width: 50px;
+            text-align: right;
+        }
+        .colorbar {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .colorbar-gradient {
+            height: 20px;
+            flex-grow: 1;
+            background: linear-gradient(to right, blue, cyan, green, yellow, red);
+            border-radius: 2px;
+            margin: 0 10px;
+        }
+        .colorbar-label {
+            width: 40px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .equation {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sand Dune Evolution Simulation</h1>
+        <p>This simulation shows the evolution of sand dunes under wind action, based on the PDE:</p>
+        <div class="equation">
+            ∂h/∂t = -∇·[h q<sub>s0</sub> (τ/τ<sub>c</sub> - 1)<sup>n</sup> û]
+        </div>
+        <p>where h is the sand height, q<sub>s0</sub> is the reference sediment transport rate, τ is the wind shear stress, 
+           τ<sub>c</sub> is the critical shear stress, n is an empirical exponent, and û is the unit vector in the wind direction.</p>
+        
+        <canvas id="sandCanvas" width="600" height="600"></canvas>
+        
+        <div class="colorbar">
+            <div class="colorbar-label" id="min-height">0</div>
+            <div class="colorbar-gradient"></div>
+            <div class="colorbar-label" id="max-height">1</div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button id="startButton">Start</button>
+                <button id="pauseButton" disabled>Pause</button>
+                <button id="resetButton">Reset</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="windSpeed">
+                    Wind Speed: <span id="windSpeedValue" class="parameter-value">1.0</span>
+                </label>
+                <input type="range" id="windSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
+                
+                <label for="windDirection">
+                    Wind Direction: <span id="windDirectionValue" class="parameter-value">0°</span>
+                </label>
+                <input type="range" id="windDirection" min="0" max="360" step="15" value="0">
+                
+                <label for="transportRate">
+                    Transport Rate (q<sub>s0</sub>): <span id="transportRateValue" class="parameter-value">0.1</span>
+                </label>
+                <input type="range" id="transportRate" min="0.01" max="0.2" step="0.01" value="0.1">
+                
+                <label for="criticalStress">
+                    Critical Stress Ratio (τ/τ<sub>c</sub>): <span id="criticalStressValue" class="parameter-value">1.5</span>
+                </label>
+                <input type="range" id="criticalStress" min="1.1" max="2.0" step="0.1" value="1.5">
+                
+                <label for="exponent">
+                    Exponent (n): <span id="exponentValue" class="parameter-value">1.5</span>
+                </label>
+                <input type="range" id="exponent" min="1.0" max="2.0" step="0.5" value="1.5">
+            </div>
+        </div>
+    </div>
+
+    <script>
+      /* 我们详细探讨了风如何形成沙丘的物理过程和方程。描述沙表面高度 $$h(\mathbf{x}, t)$$ 时间演化的偏微分方程（PDE）是从 Exner 方程结合风成输运下的沉积物通量得出的：
+$$
+\frac{\partial h}{\partial t} = - \nabla \cdot \left[ h q_{s0} \left( \frac{\tau}{\tauc} - 1 \right) ^n \hat{\mathbf{u}} \right]
+$$
+其中：
+- $$h(\mathbf{x}, t)$$ 是位置 $$\mathbf{x}$$ 和时间 $$t$$ 处的沙表面高度，
+- $$q{s0}$$ 是参考沉积物输运率，
+- $$\tau$$ 是风施加的剪切应力，
+- $$\tauc$$ 是沙粒运动的临界剪切应力，
+- $$n$$ 是经验指数（通常 $$n = 1$$ 或 $$n = \frac{3}{2}$$），以及
+- $$\hat{\mathbf{u}}$$ 是风速 $$\mathbf{u}$$ 方向的单位向量。
+这个 PDE 表示了沙高度变化率与沉积物通量的散度之间的平衡，而沉积物通量本身取决于风的剪切应力相对于沙粒运动的临界阈值。
+因此，描述风影响下沙丘演化的 PDE，如讨论所示，为：
+$$
+\boxed{\frac{\partial h}{\partial t} = - \nabla \cdot \left( h q{s0} \left( \frac{\tau}{\tau_c} - 1 \right)^n \hat{\mathbf{u}} \right)}
+$$
+
+根据以上，将阵风作用下沙丘高度变换做成 2D 动画（高度以颜色表示，值域自动缩放）。输出 single-file html。Answer in English. */
+        const canvas = document.getElementById('sandCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const gridSize = 100;
+        const dx = width / gridSize;
+        const dy = height / gridSize;
+        const dt = 0.1;
+
+        let sandHeight = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+        let newSandHeight = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+        let animationId = null;
+        let minHeight = 0;
+        let maxHeight = 1;
+
+        // Controls
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const resetButton = document.getElementById('resetButton');
+        const windSpeedInput = document.getElementById('windSpeed');
+        const windDirectionInput = document.getElementById('windDirection');
+        const transportRateInput = document.getElementById('transportRate');
+        const criticalStressInput = document.getElementById('criticalStress');
+        const exponentInput = document.getElementById('exponent');
+        
+        // Value displays
+        const windSpeedValue = document.getElementById('windSpeedValue');
+        const windDirectionValue = document.getElementById('windDirectionValue');
+        const transportRateValue = document.getElementById('transportRateValue');
+        const criticalStressValue = document.getElementById('criticalStressValue');
+        const exponentValue = document.getElementById('exponentValue');
+        const minHeightLabel = document.getElementById('min-height');
+        const maxHeightLabel = document.getElementById('max-height');
+
+        // Initialize sand height with random dunes
+        function initializeSand() {
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    // Create some initial dunes
+                    const centerX = gridSize / 2;
+                    const centerY = gridSize / 2;
+                    const dist = Math.sqrt((i - centerX) ** 2 + (j - centerY) ** 2);
+                    
+                    // Create a main central dune and some smaller ones
+                    sandHeight[i][j] = 0.8 * Math.exp(-dist * dist / 100);
+                    
+                    // Add some random small dunes
+                    if (Math.random() < 0.05) {
+                        sandHeight[i][j] += 0.3 * Math.random() * Math.exp(-Math.random() * 5);
+                    }
+                }
+            }
+            updateHeightRange();
+        }
+
+        // Update min and max height values for color scaling
+        function updateHeightRange() {
+            minHeight = Infinity;
+            maxHeight = -Infinity;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    minHeight = Math.min(minHeight, sandHeight[i][j]);
+                    maxHeight = Math.max(maxHeight, sandHeight[i][j]);
+                }
+            }
+            
+            minHeightLabel.textContent = minHeight.toFixed(2);
+            maxHeightLabel.textContent = maxHeight.toFixed(2);
+        }
+
+        // Helper function to get height-dependent color
+        function getColor(height) {
+            // Normalize height between 0 and 1
+            const normalizedHeight = (height - minHeight) / (maxHeight - minHeight);
+            
+            // Color gradient: blue -> cyan -> green -> yellow -> red
+            let r, g, b;
+            
+            if (normalizedHeight < 0.25) {
+                // blue to cyan
+                r = 0;
+                g = Math.floor(255 * (normalizedHeight * 4));
+                b = 255;
+            } else if (normalizedHeight < 0.5) {
+                // cyan to green
+                r = 0;
+                g = 255;
+                b = Math.floor(255 * (1 - (normalizedHeight - 0.25) * 4));
+            } else if (normalizedHeight < 0.75) {
+                // green to yellow
+                r = Math.floor(255 * ((normalizedHeight - 0.5) * 4));
+                g = 255;
+                b = 0;
+            } else {
+                // yellow to red
+                r = 255;
+                g = Math.floor(255 * (1 - (normalizedHeight - 0.75) * 4));
+                b = 0;
+            }
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Draw the sand height field
+        function drawSand() {
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const x = i * dx;
+                    const y = j * dy;
+                    
+                    ctx.fillStyle = getColor(sandHeight[i][j]);
+                    ctx.fillRect(x, y, dx + 1, dy + 1); // +1 to avoid gaps
+                }
+            }
+        }
+
+        // Calculate PDE derivatives and update the sand height
+        function updateSand() {
+            const windSpeed = parseFloat(windSpeedInput.value);
+            const windDirection = parseFloat(windDirectionInput.value) * Math.PI / 180;
+            const transportRate = parseFloat(transportRateInput.value);
+            const criticalStress = parseFloat(criticalStressInput.value);
+            const exponent = parseFloat(exponentInput.value);
+            
+            // Wind vector components
+            const ux = windSpeed * Math.cos(windDirection);
+            const uy = windSpeed * Math.sin(windDirection);
+            
+            // Apply the PDE: ∂h/∂t = -∇·[h q_{s0} (τ/τ_c - 1)^n û]
+            for (let i = 1; i < gridSize - 1; i++) {
+                for (let j = 1; j < gridSize - 1; j++) {
+                    // Current height
+                    const h = sandHeight[i][j];
+                    
+                    // Calculate local slope in x and y directions
+                    const dhdx = (sandHeight[i+1][j] - sandHeight[i-1][j]) / (2 * dx);
+                    const dhdy = (sandHeight[i][j+1] - sandHeight[i][j-1]) / (2 * dy);
+                    
+                    // Simple model for wind shear stress depending on slope
+                    // When wind hits a positive slope, it increases; negative slope decreases
+                    const slopeEffectX = -dhdx * ux;
+                    const slopeEffectY = -dhdy * uy;
+                    const totalSlopeEffect = slopeEffectX + slopeEffectY;
+                    
+                    // Modified stress ratio with slope effect
+                    const stressRatio = criticalStress * (1 + 0.2 * totalSlopeEffect);
+                    
+                    // Only transport sand if stress exceeds critical stress
+                    let transportFactor = 0;
+                    if (stressRatio > 1) {
+                        transportFactor = Math.pow(stressRatio - 1, exponent);
+                    }
+                    
+                    // Flux components
+                    const qx = h * transportRate * transportFactor * ux;
+                    const qy = h * transportRate * transportFactor * uy;
+                    
+                    // Finite difference for divergence of flux
+                    const divQ = ((qx - (sandHeight[i-1][j] * transportRate * transportFactor * ux)) / dx) + 
+                                ((qy - (sandHeight[i][j-1] * transportRate * transportFactor * uy)) / dy);
+                    
+                    // Update height using the PDE
+                    newSandHeight[i][j] = h - dt * divQ;
+                    
+                    // Ensure non-negative height
+                    newSandHeight[i][j] = Math.max(0, newSandHeight[i][j]);
+                }
+            }
+            
+            // Copy new heights to the current state
+            for (let i = 1; i < gridSize - 1; i++) {
+                for (let j = 1; j < gridSize - 1; j++) {
+                    sandHeight[i][j] = newSandHeight[i][j];
+                }
+            }
+            
+            // Update height range for color scaling
+            updateHeightRange();
+        }
+
+        // Animation loop
+        function animate() {
+            updateSand();
+            drawSand();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Event listeners for controls
+        startButton.addEventListener('click', function() {
+            if (!animationId) {
+                animationId = requestAnimationFrame(animate);
+                startButton.disabled = true;
+                pauseButton.disabled = false;
+            }
+        });
+
+        pauseButton.addEventListener('click', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                startButton.disabled = false;
+                pauseButton.disabled = true;
+            }
+        });
+
+        resetButton.addEventListener('click', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                startButton.disabled = false;
+                pauseButton.disabled = true;
+            }
+            initializeSand();
+            drawSand();
+        });
+
+        // Update value displays for sliders
+        windSpeedInput.addEventListener('input', function() {
+            windSpeedValue.textContent = this.value;
+        });
+
+        windDirectionInput.addEventListener('input', function() {
+            windDirectionValue.textContent = `${this.value}°`;
+        });
+
+        transportRateInput.addEventListener('input', function() {
+            transportRateValue.textContent = this.value;
+        });
+
+        criticalStressInput.addEventListener('input', function() {
+            criticalStressValue.textContent = this.value;
+        });
+
+        exponentInput.addEventListener('input', function() {
+            exponentValue.textContent = this.value;
+        });
+
+        // Initialize and draw
+        initializeSand();
+        drawSand();
+    </script>
+</body>
+</html>

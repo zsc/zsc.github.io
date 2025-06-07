@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D热扩散模拟（周期边界条件）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        canvas {
+            display: block;
+            margin: 10px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .buttons {
+            margin-top: 15px;
+            text-align: center;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #colorbar {
+            height: 20px;
+            width: 80%;
+            margin: 10px auto;
+        }
+        .colorbar-container {
+            position: relative;
+            margin: 20px auto;
+            width: 80%;
+        }
+        .colorbar-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>2D热扩散模拟（周期边界条件）</h1>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="angle">热源倾斜角度（度）:</label>
+            <input type="range" id="angle" min="0" max="180" value="45" step="1">
+            <span id="angleValue">45°</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="xPosition">热源X位置:</label>
+            <input type="range" id="xPosition" min="0.1" max="0.9" value="0.5" step="0.01">
+            <span id="xPositionValue">0.5</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="yPosition">热源Y位置:</label>
+            <input type="range" id="yPosition" min="0.1" max="0.9" value="0.5" step="0.01">
+            <span id="yPositionValue">0.5</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="lineWidth">热源线宽:</label>
+            <input type="range" id="lineWidth" min="1" max="50" value="5" step="1">
+            <span id="lineWidthValue">5</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="diffusionRate">扩散系数:</label>
+            <input type="range" id="diffusionRate" min="0.01" max="0.3" value="0.1" step="0.01">
+            <span id="diffusionRateValue">0.1</span>
+        </div>
+        
+        <div class="control-group">
+            <label for="sourceTemp">热源温度:</label>
+            <input type="range" id="sourceTemp" min="1" max="100" value="50" step="1">
+            <span id="sourceTempValue">50</span>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn">开始/继续</button>
+            <button id="pauseBtn">暂停</button>
+            <button id="resetBtn">重置</button>
+        </div>
+    </div>
+    
+    <canvas id="heatCanvas" width="500" height="500"></canvas>
+    
+    <div class="colorbar-container">
+        <canvas id="colorbar" height="20"></canvas>
+        <div class="colorbar-labels">
+            <span id="minTemp">0</span>
+            <span id="maxTemp">50</span>
+        </div>
+    </div>
+    
+    <script>
+        // 在2D 长方形（周期边值条件) 上仿真一个斜大圆线热源的扩散，并用 all-in-one html/js 表示成动画，注意色阶要在动画过程中自动调整。热源位置可调
+        // 获取画布和上下文
+        const canvas = document.getElementById('heatCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorbar = document.getElementById('colorbar');
+        const colorbarCtx = colorbar.getContext('2d');
+        
+        // 获取控制元素
+        const angleSlider = document.getElementById('angle');
+        const xPositionSlider = document.getElementById('xPosition');
+        const yPositionSlider = document.getElementById('yPosition');
+        const lineWidthSlider = document.getElementById('lineWidth');
+        const diffusionRateSlider = document.getElementById('diffusionRate');
+        const sourceTempSlider = document.getElementById('sourceTemp');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // 显示值的元素
+        const angleValue = document.getElementById('angleValue');
+        const xPositionValue = document.getElementById('xPositionValue');
+        const yPositionValue = document.getElementById('yPositionValue');
+        const lineWidthValue = document.getElementById('lineWidthValue');
+        const diffusionRateValue = document.getElementById('diffusionRateValue');
+        const sourceTempValue = document.getElementById('sourceTempValue');
+        const minTempEl = document.getElementById('minTemp');
+        const maxTempEl = document.getElementById('maxTemp');
+        
+        // 网格和模拟参数
+        const gridSize = 100;
+        const cellSize = canvas.width / gridSize;
+        let grid = [];
+        let nextGrid = [];
+        let minTemp = 0;
+        let maxTemp = 50;
+        let animationId = null;
+        let isPaused = true;
+        
+        // 初始化网格
+        function initializeGrid() {
+            grid = [];
+            nextGrid = [];
+            
+            for (let i = 0; i < gridSize; i++) {
+                grid[i] = [];
+                nextGrid[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    grid[i][j] = 0;
+                    nextGrid[i][j] = 0;
+                }
+            }
+            
+            // 添加初始热源（斜线）
+            applyHeatSource();
+        }
+        
+        // 应用热源
+        function applyHeatSource() {
+            const angle = parseFloat(angleSlider.value) * Math.PI / 180;
+            const centerX = parseFloat(xPositionSlider.value) * gridSize;
+            const centerY = parseFloat(yPositionSlider.value) * gridSize;
+            const lineWidth = parseFloat(lineWidthSlider.value);
+            const sourceTemp = parseFloat(sourceTempSlider.value);
+            
+            // 热源线的长度（对角线长度）
+            const lineLength = Math.sqrt(2) * gridSize * 0.8;
+            const halfLength = lineLength / 2;
+            
+            // 从中心点出发，确定线的两个端点
+            const x1 = centerX - Math.cos(angle) * halfLength;
+            const y1 = centerY - Math.sin(angle) * halfLength;
+            const x2 = centerX + Math.cos(angle) * halfLength;
+            const y2 = centerY + Math.sin(angle) * halfLength;
+            
+            // 应用热源
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    // 计算点(i,j)到线段的距离
+                    const distance = distanceToLineSegment(i, j, x1, y1, x2, y2);
+                    if (distance <= lineWidth) {
+                        grid[i][j] = sourceTemp;
+                    }
+                }
+            }
+        }
+        
+        // 计算点到线段的距离
+        function distanceToLineSegment(x, y, x1, y1, x2, y2) {
+            const A = x - x1;
+            const B = y - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+            
+            const dot = A * C + B * D;
+            const len_sq = C * C + D * D;
+            let param = -1;
+            
+            if (len_sq !== 0) param = dot / len_sq;
+            
+            let xx, yy;
+            
+            if (param < 0) {
+                xx = x1;
+                yy = y1;
+            } else if (param > 1) {
+                xx = x2;
+                yy = y2;
+            } else {
+                xx = x1 + param * C;
+                yy = y1 + param * D;
+            }
+            
+            const dx = x - xx;
+            const dy = y - yy;
+            
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        // 应用周期边界条件的坐标计算
+        function periodicIndex(idx, size) {
+            return (idx + size) % size;
+        }
+        
+        // 更新热扩散
+        function updateGrid() {
+            const diffusionRate = parseFloat(diffusionRateSlider.value);
+            
+            // 计算扩散
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    // 使用周期边界条件获取相邻单元格
+                    const up = grid[periodicIndex(i-1, gridSize)][j];
+                    const down = grid[periodicIndex(i+1, gridSize)][j];
+                    const left = grid[i][periodicIndex(j-1, gridSize)];
+                    const right = grid[i][periodicIndex(j+1, gridSize)];
+                    const center = grid[i][j];
+                    
+                    // 计算拉普拉斯算子
+                    const laplacian = up + down + left + right - 4 * center;
+                    
+                    // 扩散方程
+                    nextGrid[i][j] = center + diffusionRate * laplacian;
+                }
+            }
+            
+            // 更新网格
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    grid[i][j] = nextGrid[i][j];
+                }
+            }
+            
+            // 计算最小和最大温度（用于色标）
+            minTemp = Number.MAX_VALUE;
+            maxTemp = Number.MIN_VALUE;
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    minTemp = Math.min(minTemp, grid[i][j]);
+                    maxTemp = Math.max(maxTemp, grid[i][j]);
+                }
+            }
+            
+            // 避免最大最小值相同时的除零错误
+            if (Math.abs(maxTemp - minTemp) < 0.001) {
+                maxTemp = minTemp + 0.001;
+            }
+            
+            // 更新色标标签
+            minTempEl.textContent = minTemp.toFixed(2);
+            maxTempEl.textContent = maxTemp.toFixed(2);
+        }
+        
+        // 绘制热图
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const temp = grid[i][j];
+                    const normalizedTemp = (temp - minTemp) / (maxTemp - minTemp);
+                    
+                    ctx.fillStyle = getHeatColor(normalizedTemp);
+                    ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                }
+            }
+            
+            // 绘制色标
+            drawColorbar();
+        }
+        
+        // 绘制色标
+        function drawColorbar() {
+            const gradient = colorbarCtx.createLinearGradient(0, 0, colorbar.width, 0);
+            
+            // 创建从蓝到红的热力图渐变
+            gradient.addColorStop(0, 'rgb(0, 0, 255)');      // 蓝色 - 冷
+            gradient.addColorStop(0.25, 'rgb(0, 255, 255)'); // 青色
+            gradient.addColorStop(0.5, 'rgb(0, 255, 0)');    // 绿色
+            gradient.addColorStop(0.75, 'rgb(255, 255, 0)'); // 黄色
+            gradient.addColorStop(1, 'rgb(255, 0, 0)');      // 红色 - 热
+            
+            colorbarCtx.fillStyle = gradient;
+            colorbarCtx.fillRect(0, 0, colorbar.width, colorbar.height);
+        }
+        
+        // 获取热图颜色
+        function getHeatColor(value) {
+            // 确保值在0-1范围内
+            value = Math.max(0, Math.min(1, value));
+            
+            let r, g, b;
+            
+            // 从蓝色过渡到红色
+            if (value < 0.25) {
+                // 蓝色到青色
+                r = 0;
+                g = value * 4 * 255;
+                b = 255;
+            } else if (value < 0.5) {
+                // 青色到绿色
+                r = 0;
+                g = 255;
+                b = (0.5 - value) * 4 * 255;
+            } else if (value < 0.75) {
+                // 绿色到黄色
+                r = (value - 0.5) * 4 * 255;
+                g = 255;
+                b = 0;
+            } else {
+                // 黄色到红色
+                r = 255;
+                g = (1 - value) * 4 * 255;
+                b = 0;
+            }
+            
+            return `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
+        }
+        
+        // 动画循环
+        function animate() {
+            if (!isPaused) {
+                updateGrid();
+                drawGrid();
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        // 事件监听器
+        startBtn.addEventListener('click', function() {
+            isPaused = false;
+            animate();
+        });
+        
+        pauseBtn.addEventListener('click', function() {
+            isPaused = true;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            isPaused = true;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            initializeGrid();
+            drawGrid();
+        });
+        
+        // 更新显示值
+        function updateDisplayValues() {
+            angleValue.textContent = `${angleSlider.value}°`;
+            xPositionValue.textContent = xPositionSlider.value;
+            yPositionValue.textContent = yPositionSlider.value;
+            lineWidthValue.textContent = lineWidthSlider.value;
+            diffusionRateValue.textContent = diffusionRateSlider.value;
+            sourceTempValue.textContent = sourceTempSlider.value;
+        }
+        
+        // 添加滑块事件监听器
+        angleSlider.addEventListener('input', function() {
+            updateDisplayValues();
+            if (isPaused) {
+                initializeGrid();
+                drawGrid();
+            }
+        });
+        
+        xPositionSlider.addEventListener('input', function() {
+            updateDisplayValues();
+            if (isPaused) {
+                initializeGrid();
+                drawGrid();
+            }
+        });
+        
+        yPositionSlider.addEventListener('input', function() {
+            updateDisplayValues();
+            if (isPaused) {
+                initializeGrid();
+                drawGrid();
+            }
+        });
+        
+        lineWidthSlider.addEventListener('input', function() {
+            updateDisplayValues();
+            if (isPaused) {
+                initializeGrid();
+                drawGrid();
+            }
+        });
+        
+        diffusionRateSlider.addEventListener('input', updateDisplayValues);
+        sourceTempSlider.addEventListener('input', updateDisplayValues);
+        
+        // 初始化显示
+        updateDisplayValues();
+        initializeGrid();
+        drawGrid();
+    </script>
+</body>
+</html>

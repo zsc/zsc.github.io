@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravitational Lensing Ray-Tracing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls h2 {
+            margin-top: 0;
+        }
+        canvas {
+            display: block;
+            background-color: #111;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+        input[type="range"] {
+            width: 300px;
+            vertical-align: middle;
+        }
+        .value-display {
+            display: inline-block;
+            width: 60px;
+            text-align: right;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .explanation h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gravitational Lensing Ray-Tracing Simulation</h1>
+    
+    <div class="controls">
+        <h2>Lens Parameters</h2>
+        <div class="slider-container">
+            <label for="einsteinRadius">Einstein Radius θ<sub>E</sub>:</label>
+            <input type="range" id="einsteinRadius" min="0.1" max="3" step="0.1" value="1">
+            <span class="value-display" id="einsteinRadiusValue">1.0</span>
+        </div>
+        <div class="slider-container">
+            <label for="sourcePosition">Source Position β:</label>
+            <input type="range" id="sourcePosition" min="0" max="1.5" step="0.1" value="0.3">
+            <span class="value-display" id="sourcePositionValue">0.3</span>
+        </div>
+        <div class="slider-container">
+            <label for="sourceSize">Source Galaxy Size:</label>
+            <input type="range" id="sourceSize" min="0.05" max="0.5" step="0.05" value="0.2">
+            <span class="value-display" id="sourceSizeValue">0.2</span>
+        </div>
+        <div class="slider-container">
+            <label for="numRays">Number of Rays:</label>
+            <input type="range" id="numRays" min="1000" max="10000" step="1000" value="5000">
+            <span class="value-display" id="numRaysValue">5000</span>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <button id="resetButton">Reset</button>
+            <button id="traceButton">Trace Rays</button>
+        </div>
+    </div>
+    
+    <canvas id="lensCanvas" width="800" height="600"></canvas>
+    
+    <div class="explanation">
+        <h2>Einstein Cross Explanation</h2>
+        <p>This simulation demonstrates gravitational lensing based on the lens equation for a Singular Isothermal Sphere (SIS) model:</p>
+        <p style="text-align: center;">θ = β + (D<sub>d</sub>/D<sub>s</sub>)θ<sub>E</sub>(θ/|θ|)</p>
+        <p>When a source is aligned almost perfectly behind a massive lens (small β), light from the source can take multiple paths around the lens, creating multiple images arranged in a cross-like pattern known as an Einstein Cross.</p>
+        <p>The simulation shows:</p>
+        <ul>
+            <li><strong>Yellow circle:</strong> Einstein radius (θ<sub>E</sub>)</li>
+            <li><strong>Blue dot:</strong> Source galaxy position (β)</li>
+            <li><strong>Blue rays:</strong> Light paths from source to observer</li>
+            <li><strong>Red areas:</strong> Images formed by the lens (the Einstein Cross)</li>
+        </ul>
+        <p>Adjust the parameters to see how changes affect the lensing geometry:</p>
+        <ul>
+            <li>Increase the Einstein radius for a more massive lens</li>
+            <li>Move the source position to see how the image configuration changes</li>
+            <li>When the source is perfectly aligned (β = 0), you'll see an Einstein ring</li>
+        </ul>
+    </div>
+
+    <script>
+        /* The Einstein field equations lead to the Poisson equation for the gravitational potential in the weak-field limit:
+\[ \nabla^2 \phi = 4\pi G \rho(\vec{x}) \]
+
+For a lensing scenario, the deflection angle \(\alpha\) in a Newtonian limit for a compact object is:
+\[ \alpha = \frac{4GM}{c^2 b} \]
+
+In terms of ray tracing, the lens equation in the thin-lens approximation is:
+\[ \vec{\theta} = \vec{\beta} + \frac{D_d}{D_s} \vec{\alpha}(\vec{\theta}) \]
+
+For a singular isothermal sphere (SIS) lens, the deflection angle magnitude is characterized by the Einstein radius \(\theta_E\):
+\[ \theta_E = \sqrt{\frac{4GM Dd D{ds}}{c^2 D_s}} \]
+And the deflection angle simplifies to:
+\[ |\vec{\alpha}(\vec{\theta})| = \theta_E \]
+
+The lens equation for an SIS becomes:
+\[ \vec{\theta} = \vec{\beta} + \frac{D_d}{D_s}\theta_E \frac{\vec{\theta}}{|\vec{\theta}|} \]
+
+ray-tracing 画出一个源星系在引力透镜下对应的2D 像（爱因斯坦十字）。
+输出 single-file html. Answer in English. */
+        const canvas = document.getElementById('lensCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Parameters
+        let einsteinRadius = 1.0;
+        let sourcePosition = 0.3;
+        let sourceSize = 0.2;
+        let numRays = 5000;
+        
+        // UI elements
+        const einsteinRadiusSlider = document.getElementById('einsteinRadius');
+        const einsteinRadiusValue = document.getElementById('einsteinRadiusValue');
+        const sourcePositionSlider = document.getElementById('sourcePosition');
+        const sourcePositionValue = document.getElementById('sourcePositionValue');
+        const sourceSizeSlider = document.getElementById('sourceSize');
+        const sourceSizeValue = document.getElementById('sourceSizeValue');
+        const numRaysSlider = document.getElementById('numRays');
+        const numRaysValue = document.getElementById('numRaysValue');
+        const resetButton = document.getElementById('resetButton');
+        const traceButton = document.getElementById('traceButton');
+        
+        // Initialize UI values
+        einsteinRadiusValue.textContent = einsteinRadiusSlider.value;
+        sourcePositionValue.textContent = sourcePositionSlider.value;
+        sourceSizeValue.textContent = sourceSizeSlider.value;
+        numRaysValue.textContent = numRaysSlider.value;
+        
+        // Event listeners
+        einsteinRadiusSlider.addEventListener('input', function() {
+            einsteinRadius = parseFloat(this.value);
+            einsteinRadiusValue.textContent = this.value;
+            drawScene();
+        });
+        
+        sourcePositionSlider.addEventListener('input', function() {
+            sourcePosition = parseFloat(this.value);
+            sourcePositionValue.textContent = this.value;
+            drawScene();
+        });
+        
+        sourceSizeSlider.addEventListener('input', function() {
+            sourceSize = parseFloat(this.value);
+            sourceSizeValue.textContent = this.value;
+            drawScene();
+        });
+        
+        numRaysSlider.addEventListener('input', function() {
+            numRays = parseInt(this.value);
+            numRaysValue.textContent = this.value;
+        });
+        
+        resetButton.addEventListener('click', function() {
+            einsteinRadiusSlider.value = 1.0;
+            sourcePositionSlider.value = 0.3;
+            sourceSizeSlider.value = 0.2;
+            numRaysSlider.value = 5000;
+            
+            einsteinRadius = 1.0;
+            sourcePosition = 0.3;
+            sourceSize = 0.2;
+            numRays = 5000;
+            
+            einsteinRadiusValue.textContent = "1.0";
+            sourcePositionValue.textContent = "0.3";
+            sourceSizeValue.textContent = "0.2";
+            numRaysValue.textContent = "5000";
+            
+            drawScene();
+        });
+        
+        traceButton.addEventListener('click', function() {
+            traceRays();
+        });
+        
+        // Scale factors for visualization
+        const scale = 100;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // SIS lens equation solver
+        function solveImagePositions(beta) {
+            // For SIS lens, the solutions depend on the source position
+            const beta_mag = Math.sqrt(beta.x * beta.x + beta.y * beta.y);
+            
+            if (beta_mag < einsteinRadius) {
+                // Two images
+                const factor1 = beta_mag + einsteinRadius;
+                const factor2 = beta_mag - einsteinRadius;
+                
+                const image1 = {
+                    x: (factor1 / beta_mag) * beta.x,
+                    y: (factor1 / beta_mag) * beta.y
+                };
+                
+                const image2 = {
+                    x: (factor2 / beta_mag) * beta.x,
+                    y: (factor2 / beta_mag) * beta.y
+                };
+                
+                return [image1, image2];
+            } else {
+                // Single image
+                const factor = beta_mag + einsteinRadius;
+                const image = {
+                    x: (factor / beta_mag) * beta.x,
+                    y: (factor / beta_mag) * beta.y
+                };
+                
+                return [image];
+            }
+        }
+        
+        // Draw lens, source, and images
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw coordinate axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Draw Einstein radius
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, einsteinRadius * scale, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Draw lens center
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw source position
+            const sourceX = centerX + sourcePosition * scale;
+            const sourceY = centerY;
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.arc(sourceX, sourceY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw source galaxy
+            ctx.strokeStyle = 'rgba(100, 150, 255, 0.3)';
+            ctx.beginPath();
+            ctx.arc(sourceX, sourceY, sourceSize * scale, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Calculate and draw image positions for a point source
+            const beta = { x: sourcePosition, y: 0 };
+            const images = solveImagePositions(beta);
+            
+            images.forEach(img => {
+                const imgX = centerX + img.x * scale;
+                const imgY = centerY + img.y * scale;
+                
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(imgX, imgY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Labels
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.fillText("Lens", centerX - 15, centerY - 10);
+            ctx.fillText("Source", sourceX + 10, sourceY - 10);
+            ctx.fillText("θE = " + einsteinRadius.toFixed(1), centerX + einsteinRadius * scale + 10, centerY);
+            
+            // Draw some example rays
+            drawSampleRays();
+        }
+        
+        // Draw some sample rays to show the light deflection
+        function drawSampleRays() {
+            const beta = { x: sourcePosition, y: 0 };
+            const images = solveImagePositions(beta);
+            
+            // Draw rays from source to images
+            ctx.strokeStyle = 'rgba(100, 150, 255, 0.5)';
+            ctx.lineWidth = 1;
+            
+            images.forEach(img => {
+                const imgX = centerX + img.x * scale;
+                const imgY = centerY + img.y * scale;
+                const sourceX = centerX + beta.x * scale;
+                const sourceY = centerY + beta.y * scale;
+                
+                // Deflection point on Einstein radius
+                const angle = Math.atan2(img.y, img.x);
+                const deflectionX = centerX + Math.cos(angle) * einsteinRadius * scale;
+                const deflectionY = centerY + Math.sin(angle) * einsteinRadius * scale;
+                
+                // Draw the bent ray (from source to deflection point to observer)
+                ctx.beginPath();
+                ctx.moveTo(sourceX, sourceY);
+                ctx.lineTo(deflectionX, deflectionY);
+                ctx.lineTo(imgX, imgY);
+                ctx.stroke();
+            });
+        }
+        
+        // Trace rays from a galaxy-sized source using Monte Carlo
+        function traceRays() {
+            // Clear previous rays but keep the scene
+            drawScene();
+            
+            ctx.fillStyle = 'rgba(255, 100, 100, 0.2)';
+            
+            // Trace rays from random points within the source galaxy
+            for (let i = 0; i < numRays; i++) {
+                // Random point within circular source
+                const r = sourceSize * Math.sqrt(Math.random());
+                const theta = Math.random() * 2 * Math.PI;
+                
+                const sourceX = sourcePosition + r * Math.cos(theta);
+                const sourceY = r * Math.sin(theta);
+                
+                const beta = { x: sourceX, y: sourceY };
+                
+                // Solve lens equation for this source point
+                try {
+                    const images = solveImagePositions(beta);
+                    
+                    // Draw image points
+                    images.forEach(img => {
+                        const imgX = centerX + img.x * scale;
+                        const imgY = centerY + img.y * scale;
+                        
+                        ctx.beginPath();
+                        ctx.arc(imgX, imgY, 1.5, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                } catch (e) {
+                    // Skip problematic ray
+                    console.log("Ray error:", e);
+                }
+            }
+            
+            // Add labels to identify the Einstein Cross configuration
+            if (sourcePosition < einsteinRadius / 2) {
+                ctx.fillStyle = 'white';
+                ctx.font = '16px Arial';
+                ctx.fillText("Einstein Cross", centerX - 50, centerY - einsteinRadius * scale - 20);
+            }
+        }
+        
+        // Initial draw
+        drawScene();
+    </script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCMC Sudoku Solver</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 10px; background-color: #f0f0f0; }
+        .container { display: flex; flex-direction: column; align-items: center; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; }
+        .controls, .solver-controls, .animation-controls { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        button, select, input[type="range"] { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; background-color: #e9e9e9; }
+        button:hover { background-color: #d0d0d0; }
+        button:disabled { cursor: not-allowed; background-color: #f5f5f5; color: #aaa; }
+        #sudoku-grid { border-collapse: collapse; margin-bottom: 15px; }
+        #sudoku-grid td {
+            width: 35px; height: 35px;
+            border: 1px solid #ccc;
+            text-align: center; font-size: 18px;
+            position: relative; /* For conflict markers */
+        }
+        /* Thick borders for 3x3 subgrids */
+        #sudoku-grid tr:nth-child(3n) td { border-bottom: 2px solid black; }
+        #sudoku-grid td:nth-child(3n) { border-right: 2px solid black; }
+        #sudoku-grid tr:first-child td { border-top: 2px solid black; }
+        #sudoku-grid td:first-child { border-left: 2px solid black; }
+
+        .fixed-cell { background-color: #e0e0e0; font-weight: bold; }
+        
+        .conflict-cell { /* General conflict, can be overridden */ }
+        .conflict-row { box-shadow: inset 0 0 0 2px red; }
+        .conflict-col { box-shadow: inset 0 0 0 2px blue; }
+        .conflict-box { box-shadow: inset 0 0 0 2px green; }
+        /* For multiple conflicts, we can combine box-shadows but it might get messy.
+           Let's prioritize or use a single indicator for simplicity in this example.
+           A better way would be SVG markers or multiple borders.
+           For now, simple box-shadow, last one wins or they overlay.
+        */
+        .conflict-row.conflict-col { box-shadow: inset 0 0 0 2px red, inset 0 0 0 4px blue; } /* Example */
+
+
+        .conflict-legend { display: flex; gap: 15px; font-size: 0.9em; margin-bottom: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-color { width: 15px; height: 15px; border: 1px solid #555; }
+        .legend-row { background-color: red; }
+        .legend-col { background-color: blue; }
+        .legend-box { background-color: green; }
+
+        #status { margin-top: 10px; font-style: italic; color: #555; min-height: 1.2em; }
+        #progress-bar-container { width: 80%; max-width: 300px; height: 10px; background-color: #e0e0e0; border-radius: 5px; overflow: hidden; margin: 5px 0; }
+        #progress-bar { width: 0%; height: 100%; background-color: #4CAF50; transition: width 0.1s linear; }
+        #iteration-info { font-size: 0.8em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MCMC Sudoku Solver</h1>
+
+        <div class="controls">
+            <button id="generate-btn">Generate New Sudoku</button>
+            Difficulty:
+            <select id="difficulty-select">
+                <option value="0.3">Easy (30% removed)</option>
+                <option value="0.5" selected>Medium (50% removed)</option>
+                <option value="0.65">Hard (65% removed)</option>
+                <option value="0.75">Very Hard (75% removed)</option>
+            </select>
+        </div>
+
+        <table id="sudoku-grid"></table>
+
+        <div class="conflict-legend">
+            <div class="legend-item"><div class="legend-color legend-row"></div> Row Conflict</div>
+            <div class="legend-item"><div class="legend-color legend-col"></div> Column Conflict</div>
+            <div class="legend-item"><div class="legend-color legend-box"></div> Box Conflict</div>
+        </div>
+        
+        <div id="status"></div>
+        <div id="progress-bar-container" style="display:none;"><div id="progress-bar"></div></div>
+        <div id="iteration-info"></div>
+
+
+        <div class="solver-controls">
+            <button id="solve-vanilla-btn" disabled>Solve with Vanilla MCMC</button>
+            <button id="solve-hmc-btn" disabled>Solve with Hamiltonian-Inspired MCMC</button>
+        </div>
+
+        <div class="animation-controls" style="display:none;">
+            <button id="play-pause-btn">Play</button>
+            <input type="range" id="anim-slider" min="0" value="0" style="flex-grow:1;">
+            Speed: <input type="range" id="anim-speed" min="10" max="1000" value="100" step="10"> (ms)
+            <span id="anim-frame-info">Frame: 0/0</span>
+        </div>
+    </div>
+
+    <script>
+        // single-file html 实现用 mcmc 解数独，包括 vanila 和 hamilton 两个变体。数独题目随机生成。求解在后台进行，但存下中间结果可以变成动画回放。
+        const GRID_SIZE = 9;
+        const BOX_SIZE = 3;
+
+        // --- Sudoku Core Utilities ---
+        function createEmptyBoard() {
+            return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+        }
+
+        function copyBoard(board) {
+            return board.map(row => [...row]);
+        }
+
+        function isSafe(board, row, col, num) {
+            for (let x = 0; x < GRID_SIZE; x++) {
+                if (board[row][x] === num || board[x][col] === num) return false;
+            }
+            const startRow = row - row % BOX_SIZE;
+            const startCol = col - col % BOX_SIZE;
+            for (let i = 0; i < BOX_SIZE; i++) {
+                for (let j = 0; j < BOX_SIZE; j++) {
+                    if (board[i + startRow][j + startCol] === num) return false;
+                }
+            }
+            return true;
+        }
+
+        function solveSudokuBacktrack(board) {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] === 0) {
+                        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5); // Shuffle for variety
+                        for (let num of numbers) {
+                            if (isSafe(board, r, c, num)) {
+                                board[r][c] = num;
+                                if (solveSudokuBacktrack(board)) return true;
+                                board[r][c] = 0; // Backtrack
+                            }
+                        }
+                        return false; // No valid number found
+                    }
+                }
+            }
+            return true; // All cells filled
+        }
+
+        function generateSudoku(removalRatio = 0.5) {
+            const board = createEmptyBoard();
+            solveSudokuBacktrack(board); // Creates a full, solved board
+
+            const puzzle = copyBoard(board);
+            let cellsToRemove = Math.floor(GRID_SIZE * GRID_SIZE * removalRatio);
+            
+            while (cellsToRemove > 0) {
+                const r = Math.floor(Math.random() * GRID_SIZE);
+                const c = Math.floor(Math.random() * GRID_SIZE);
+                if (puzzle[r][c] !== 0) {
+                    puzzle[r][c] = 0;
+                    cellsToRemove--;
+                }
+            }
+            return puzzle;
+        }
+
+        function getFixedCellsMap(board) {
+            const fixed = createEmptyBoard().map(row => row.map(() => false));
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] !== 0) {
+                        fixed[r][c] = true;
+                    }
+                }
+            }
+            return fixed;
+        }
+        
+        function getConflictDetails(board) {
+            // For each cell, determine if it's part of a row, col, or box conflict
+            const conflictMap = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null).map(() => ({
+                row: false, col: false, box: false, count: 0
+            })));
+            let totalConflicts = 0;
+
+            // Row conflicts
+            for (let r = 0; r < GRID_SIZE; r++) {
+                const counts = {};
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                }
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] !== 0 && counts[board[r][c]] > 1) {
+                        if (!conflictMap[r][c].row) totalConflicts++;
+                        conflictMap[r][c].row = true;
+                        conflictMap[r][c].count++;
+                    }
+                }
+            }
+
+            // Column conflicts
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const counts = {};
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                }
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    if (board[r][c] !== 0 && counts[board[r][c]] > 1) {
+                        if (!conflictMap[r][c].col && !conflictMap[r][c].row) totalConflicts++; // Count only if not already counted as row
+                        else if (!conflictMap[r][c].col && conflictMap[r][c].row) { /* already counted, but mark type */ }
+                        else if (!conflictMap[r][c].col) totalConflicts++;
+
+                        conflictMap[r][c].col = true;
+                        conflictMap[r][c].count++;
+                    }
+                }
+            }
+
+            // Box conflicts
+            for (let br = 0; br < BOX_SIZE; br++) {
+                for (let bc = 0; bc < BOX_SIZE; bc++) {
+                    const counts = {};
+                    for (let r_offset = 0; r_offset < BOX_SIZE; r_offset++) {
+                        for (let c_offset = 0; c_offset < BOX_SIZE; c_offset++) {
+                            const r = br * BOX_SIZE + r_offset;
+                            const c = bc * BOX_SIZE + c_offset;
+                            if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                        }
+                    }
+                    for (let r_offset = 0; r_offset < BOX_SIZE; r_offset++) {
+                        for (let c_offset = 0; c_offset < BOX_SIZE; c_offset++) {
+                            const r = br * BOX_SIZE + r_offset;
+                            const c = bc * BOX_SIZE + c_offset;
+                            if (board[r][c] !== 0 && counts[board[r][c]] > 1) {
+                                if (!conflictMap[r][c].box && !conflictMap[r][c].row && !conflictMap[r][c].col) totalConflicts++;
+                                else if (!conflictMap[r][c].box) { /* already counted, but mark type */ }
+                                
+                                conflictMap[r][c].box = true;
+                                conflictMap[r][c].count++;
+                            }
+                        }
+                    }
+                }
+            }
+            // Simpler energy: just sum counts of numbers > 1 in each unit
+            let energy = 0;
+            // Row conflicts
+            for (let r = 0; r < GRID_SIZE; r++) {
+                const counts = {};
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                }
+                for (const num in counts) if (counts[num] > 1) energy += (counts[num] - 1);
+            }
+            // Col conflicts
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const counts = {};
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                }
+                for (const num in counts) if (counts[num] > 1) energy += (counts[num] - 1);
+            }
+            // Box conflicts
+            for (let br = 0; br < BOX_SIZE; br++) {
+                for (let bc = 0; bc < BOX_SIZE; bc++) {
+                    const counts = {};
+                    for (let r_offset = 0; r_offset < BOX_SIZE; r_offset++) {
+                        for (let c_offset = 0; c_offset < BOX_SIZE; c_offset++) {
+                            const r = br * BOX_SIZE + r_offset;
+                            const c = bc * BOX_SIZE + c_offset;
+                            if (board[r][c] !== 0) counts[board[r][c]] = (counts[board[r][c]] || 0) + 1;
+                        }
+                    }
+                    for (const num in counts) if (counts[num] > 1) energy += (counts[num] - 1);
+                }
+            }
+            return { conflictMap, energy };
+        }
+        
+        function countConflictsEnergy(board) { // This is the energy function for MCMC
+            return getConflictDetails(board).energy;
+        }
+
+        function createInitialGuess(puzzleBoard, fixedCellsMap) {
+            const guess = copyBoard(puzzleBoard);
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (!fixedCellsMap[r][c]) {
+                        guess[r][c] = Math.floor(Math.random() * GRID_SIZE) + 1;
+                    }
+                }
+            }
+            return guess;
+        }
+
+        // --- MCMC Solvers ---
+        // Shared MCMC update logic
+        async function runMCMC(solverName, puzzleBoard, fixedCellsMap, maxIter, initialTemp, coolingRate, proposalFn, leapfrogSteps = 1) {
+            setStatus(`Initializing ${solverName}...`);
+            await new Promise(resolve => setTimeout(resolve, 10)); // Allow UI update
+
+            let currentBoard = createInitialGuess(puzzleBoard, fixedCellsMap);
+            let currentEnergy = countConflictsEnergy(currentBoard);
+            let bestBoard = copyBoard(currentBoard);
+            let bestEnergy = currentEnergy;
+            let temperature = initialTemp;
+            
+            const history = [];
+            const historyStep = Math.max(1, Math.floor(maxIter / 500)); // Store up to 500 frames
+
+            const progressBar = document.getElementById('progress-bar');
+            const progressBarContainer = document.getElementById('progress-bar-container');
+            const iterationInfo = document.getElementById('iteration-info');
+            progressBarContainer.style.display = 'block';
+
+            for (let i = 0; i < maxIter; i++) {
+                const { proposedBoard, logProposalRatio } = proposalFn(currentBoard, fixedCellsMap, leapfrogSteps, temperature); // logProposalRatio for detailed balance if needed, not strictly for these proposals
+                const proposedEnergy = countConflictsEnergy(proposedBoard);
+
+                const deltaE = proposedEnergy - currentEnergy;
+                if (deltaE < 0 || Math.random() < Math.exp(-deltaE / temperature)) {
+                    currentBoard = proposedBoard; // Accepted (implicitly copied by proposalFn)
+                    currentEnergy = proposedEnergy;
+                }
+
+                if (currentEnergy < bestEnergy) {
+                    bestBoard = copyBoard(currentBoard);
+                    bestEnergy = currentEnergy;
+                }
+
+                temperature *= coolingRate;
+                if (temperature < 1e-5) temperature = 1e-5; // Prevent underflow or too greedy
+
+                if (i % historyStep === 0 || i === maxIter - 1) {
+                    history.push({
+                        board: copyBoard(currentBoard),
+                        conflicts: getConflictDetails(currentBoard).conflictMap,
+                        energy: currentEnergy,
+                        iteration: i,
+                        temp: temperature
+                    });
+                }
+                
+                if (i % (maxIter / 100) === 0) { // Update progress bar and status
+                    const progress = ((i + 1) / maxIter) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    setStatus(`Solving with ${solverName}... Iteration ${i}/${maxIter}, Energy: ${currentEnergy}, Best: ${bestEnergy}, Temp: ${temperature.toExponential(2)}`);
+                    iterationInfo.textContent = `Iter: ${i}, E: ${currentEnergy}, Best E: ${bestEnergy}, T: ${temperature.toExponential(2)}`;
+                    await new Promise(resolve => setTimeout(resolve, 0)); // Yield for UI
+                }
+
+                if (bestEnergy === 0) {
+                    setStatus(`${solverName} found a solution at iteration ${i}!`);
+                    history.push({ // Ensure final solution is in history
+                        board: copyBoard(bestBoard),
+                        conflicts: getConflictDetails(bestBoard).conflictMap,
+                        energy: bestEnergy,
+                        iteration: i,
+                        temp: temperature
+                    });
+                    break;
+                }
+            }
+            
+            progressBar.style.width = `100%`;
+            if (bestEnergy !== 0) {
+                setStatus(`${solverName} finished. Best solution has ${bestEnergy} conflicts.`);
+            }
+            iterationInfo.textContent += ` | Final Best Energy: ${bestEnergy}`;
+            
+            // Add best board to history if it's different from last currentBoard
+            if (history.length > 0) {
+                const lastHistEnergy = history[history.length-1].energy;
+                if (bestEnergy < lastHistEnergy) {
+                     history.push({
+                        board: copyBoard(bestBoard),
+                        conflicts: getConflictDetails(bestBoard).conflictMap,
+                        energy: bestEnergy,
+                        iteration: maxIter, // Mark as final best
+                        temp: temperature
+                    });
+                }
+            } else if (bestEnergy > 0) { // If loop finished early due to no solution
+                 history.push({
+                    board: copyBoard(bestBoard),
+                    conflicts: getConflictDetails(bestBoard).conflictMap,
+                    energy: bestEnergy,
+                    iteration: maxIter,
+                    temp: temperature
+                });
+            }
+
+
+            return { bestBoard, bestEnergy, history };
+        }
+
+        function vanillaProposal(currentBoard, fixedCellsMap, _) {
+            const proposedBoard = copyBoard(currentBoard);
+            const nonFixedCellsInBlock = [];
+            
+            // Try to swap two cells in the same block for a more effective proposal
+            const blockR = Math.floor(Math.random() * BOX_SIZE);
+            const blockC = Math.floor(Math.random() * BOX_SIZE);
+            
+            for (let r_offset = 0; r_offset < BOX_SIZE; r_offset++) {
+                for (let c_offset = 0; c_offset < BOX_SIZE; c_offset++) {
+                    const r = blockR * BOX_SIZE + r_offset;
+                    const c = blockC * BOX_SIZE + c_offset;
+                    if (!fixedCellsMap[r][c]) {
+                        nonFixedCellsInBlock.push({r, c});
+                    }
+                }
+            }
+
+            if (nonFixedCellsInBlock.length >= 2) {
+                const idx1 = Math.floor(Math.random() * nonFixedCellsInBlock.length);
+                let idx2 = Math.floor(Math.random() * nonFixedCellsInBlock.length);
+                while (idx1 === idx2) { // Ensure different cells
+                     idx2 = Math.floor(Math.random() * nonFixedCellsInBlock.length);
+                }
+                const cell1 = nonFixedCellsInBlock[idx1];
+                const cell2 = nonFixedCellsInBlock[idx2];
+                // Swap values
+                [proposedBoard[cell1.r][cell1.c], proposedBoard[cell2.r][cell2.c]] = 
+                [proposedBoard[cell2.r][cell2.c], proposedBoard[cell1.r][cell1.c]];
+            } else { // Fallback: change one random non-fixed cell's value
+                const nonFixedCells = [];
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        if (!fixedCellsMap[r][c]) nonFixedCells.push({r, c});
+                    }
+                }
+                if (nonFixedCells.length > 0) {
+                    const {r, c} = nonFixedCells[Math.floor(Math.random() * nonFixedCells.length)];
+                    proposedBoard[r][c] = Math.floor(Math.random() * GRID_SIZE) + 1;
+                }
+            }
+            return { proposedBoard, logProposalRatio: 0 }; // Symmetric proposal
+        }
+        
+        function hamiltonianInspiredProposal(currentBoard, fixedCellsMap, leapfrogSteps) {
+            let proposedBoard = copyBoard(currentBoard); // Start with current board for the trajectory
+            
+            const nonFixedCells = [];
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (!fixedCellsMap[r][c]) nonFixedCells.push({r, c});
+                }
+            }
+
+            if (nonFixedCells.length === 0) return { proposedBoard, logProposalRatio: 0 }; // No non-fixed cells
+
+            for (let step = 0; step < leapfrogSteps; step++) {
+                // Pick a random non-fixed cell
+                const {r, c} = nonFixedCells[Math.floor(Math.random() * nonFixedCells.length)];
+                // Change its value to a new random digit
+                proposedBoard[r][c] = Math.floor(Math.random() * GRID_SIZE) + 1;
+            }
+            // The final board after L steps is the proposal
+            return { proposedBoard, logProposalRatio: 0 }; // Symmetric if choices are uniform
+        }
+
+
+        // --- UI and Animation ---
+        const sudokuGridElement = document.getElementById('sudoku-grid');
+        const statusElement = document.getElementById('status');
+        const generateBtn = document.getElementById('generate-btn');
+        const difficultySelect = document.getElementById('difficulty-select');
+        const solveVanillaBtn = document.getElementById('solve-vanilla-btn');
+        const solveHmcBtn = document.getElementById('solve-hmc-btn');
+        
+        const animControlsDiv = document.querySelector('.animation-controls');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const animSlider = document.getElementById('anim-slider');
+        const animSpeedInput = document.getElementById('anim-speed');
+        const animFrameInfo = document.getElementById('anim-frame-info');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+
+
+        let currentPuzzle = null;
+        let currentFixedCellsMap = null;
+        let animationHistory = [];
+        let animationPlayer = {
+            currentIndex: 0,
+            isPlaying: false,
+            timerId: null,
+            speedMs: 100
+        };
+
+        function setStatus(text) {
+            statusElement.textContent = text;
+        }
+
+        function drawBoard(board, fixedMap, conflictDetailsMap) {
+            sudokuGridElement.innerHTML = ''; // Clear previous grid
+            for (let r = 0; r < GRID_SIZE; r++) {
+                const tr = sudokuGridElement.insertRow();
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const td = tr.insertCell();
+                    td.textContent = board[r][c] === 0 ? '' : board[r][c];
+                    if (fixedMap && fixedMap[r][c]) {
+                        td.classList.add('fixed-cell');
+                    }
+                    if (conflictDetailsMap && conflictDetailsMap[r][c]) {
+                        const conflicts = conflictDetailsMap[r][c];
+                        if (conflicts.count > 0) td.classList.add('conflict-cell');
+                        if (conflicts.row) td.classList.add('conflict-row');
+                        if (conflicts.col) td.classList.add('conflict-col');
+                        if (conflicts.box) td.classList.add('conflict-box');
+                    }
+                }
+            }
+        }
+        
+        function updateAnimationUI() {
+            animSlider.value = animationPlayer.currentIndex;
+            animFrameInfo.textContent = `Frame: ${animationPlayer.currentIndex}/${animationHistory.length - 1} (Iter: ${animationHistory[animationPlayer.currentIndex].iteration}, E: ${animationHistory[animationPlayer.currentIndex].energy})`;
+            const { board, conflicts } = animationHistory[animationPlayer.currentIndex];
+            drawBoard(board, currentFixedCellsMap, conflicts);
+        }
+
+        function playStep() {
+            if (!animationPlayer.isPlaying || animationHistory.length === 0) return;
+            
+            animationPlayer.currentIndex++;
+            if (animationPlayer.currentIndex >= animationHistory.length) {
+                animationPlayer.currentIndex = animationHistory.length - 1; // Stay on last frame
+                animationPlayer.isPlaying = false;
+                playPauseBtn.textContent = 'Play';
+            }
+            updateAnimationUI();
+
+            if (animationPlayer.isPlaying) {
+                animationPlayer.timerId = setTimeout(playStep, animationPlayer.speedMs);
+            }
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (animationHistory.length === 0) return;
+            animationPlayer.isPlaying = !animationPlayer.isPlaying;
+            playPauseBtn.textContent = animationPlayer.isPlaying ? 'Pause' : 'Play';
+            if (animationPlayer.isPlaying) {
+                if (animationPlayer.currentIndex >= animationHistory.length -1 && animationHistory.length > 0) { // If at end, restart
+                    animationPlayer.currentIndex = 0;
+                }
+                clearTimeout(animationPlayer.timerId); // Clear any existing timer
+                playStep();
+            } else {
+                clearTimeout(animationPlayer.timerId);
+            }
+        });
+
+        animSlider.addEventListener('input', () => {
+            if (animationHistory.length === 0) return;
+            animationPlayer.currentIndex = parseInt(animSlider.value);
+            animationPlayer.isPlaying = false; // Stop playback when slider is moved
+            playPauseBtn.textContent = 'Play';
+            clearTimeout(animationPlayer.timerId);
+            updateAnimationUI();
+        });
+
+        animSpeedInput.addEventListener('input', () => {
+            animationPlayer.speedMs = parseInt(animSpeedInput.value);
+        });
+        
+        function resetSolverUI() {
+            solveVanillaBtn.disabled = true;
+            solveHmcBtn.disabled = true;
+            animControlsDiv.style.display = 'none';
+            animationHistory = [];
+            animationPlayer.currentIndex = 0;
+            animationPlayer.isPlaying = false;
+            clearTimeout(animationPlayer.timerId);
+            playPauseBtn.textContent = 'Play';
+            animSlider.max = 0; animSlider.value = 0;
+            animFrameInfo.textContent = 'Frame: 0/0';
+            document.getElementById('progress-bar').style.width = '0%';
+            progressBarContainer.style.display = 'none';
+            document.getElementById('iteration-info').textContent = '';
+        }
+
+        generateBtn.addEventListener('click', () => {
+            resetSolverUI();
+            setStatus('Generating Sudoku...');
+            // Use a timeout to allow UI update before potentially long generation
+            setTimeout(() => {
+                const removalRatio = parseFloat(difficultySelect.value);
+                currentPuzzle = generateSudoku(removalRatio);
+                currentFixedCellsMap = getFixedCellsMap(currentPuzzle);
+                drawBoard(currentPuzzle, currentFixedCellsMap, null); // No conflicts for initial puzzle
+                solveVanillaBtn.disabled = false;
+                solveHmcBtn.disabled = false;
+                setStatus('New Sudoku generated. Ready to solve.');
+            }, 10);
+        });
+
+        async function handleSolve(solverFn, solverName, leapfrogSteps = 1) {
+            if (!currentPuzzle) {
+                setStatus('Please generate a Sudoku first.');
+                return;
+            }
+            resetSolverUI(); // Clear previous animation/solve state but keep puzzle
+            drawBoard(currentPuzzle, currentFixedCellsMap, null); // Redraw current puzzle clean
+
+            solveVanillaBtn.disabled = true;
+            solveHmcBtn.disabled = true;
+            generateBtn.disabled = true;
+
+            setStatus(`Preparing to solve with ${solverName}...`);
+            // Config (could be UI elements)
+            const maxIter = 50000; // Increased for harder puzzles
+            const initialTemp = 10.0;
+            const coolingRate = 0.9995; // Slower cooling for more exploration
+
+            const result = await runMCMC(solverName, currentPuzzle, currentFixedCellsMap, maxIter, initialTemp, coolingRate, solverFn, leapfrogSteps);
+            
+            animationHistory = result.history;
+            if (animationHistory.length > 0) {
+                animControlsDiv.style.display = 'flex';
+                animSlider.max = animationHistory.length - 1;
+                animSlider.value = 0;
+                animationPlayer.currentIndex = 0;
+                updateAnimationUI(); // Show first frame
+                setStatus(`${solverName} finished. ${result.bestEnergy === 0 ? 'Solution found!' : `Best energy: ${result.bestEnergy}`}. History has ${animationHistory.length} frames.`);
+            } else {
+                setStatus(`${solverName} finished but no history was recorded.`);
+            }
+            solveVanillaBtn.disabled = false;
+            solveHmcBtn.disabled = false;
+            generateBtn.disabled = false;
+        }
+
+        solveVanillaBtn.addEventListener('click', () => {
+            handleSolve(vanillaProposal, 'Vanilla MCMC');
+        });
+
+        solveHmcBtn.addEventListener('click', () => {
+            const leapfrogStepsForHMC = 3; // Number of internal random moves for HMC-inspired proposal
+            handleSolve(hamiltonianInspiredProposal, 'Hamiltonian-Inspired MCMC', leapfrogStepsForHMC);
+        });
+
+        // Initial state
+        document.addEventListener('DOMContentLoaded', () => {
+            generateBtn.click(); // Generate a puzzle on load
+        });
+
+    </script>
+</body>
+</html>

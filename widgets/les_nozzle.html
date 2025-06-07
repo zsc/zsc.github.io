@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LES Gas Jet Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .simulation {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            width: 100%;
+            justify-content: center;
+        }
+        button, select {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4285f4;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .parameter {
+            display: flex;
+            flex-direction: column;
+            margin: 5px 10px;
+        }
+        label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 150px;
+        }
+        .parameter-value {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 10px;
+            margin-right: 5px;
+        }
+        .title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Gas Jet LES Simulation in Vacuum</h1>
+        <p class="subtitle">A 2D visualization of Large Eddy Simulation for a gas jet flowing into vacuum</p>
+        
+        <div class="simulation">
+            <canvas id="velocityCanvas" width="800" height="400"></canvas>
+            <canvas id="particleCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: blue;"></div>
+                <span>Low Velocity</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: green;"></div>
+                <span>Medium Velocity</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: red;"></div>
+                <span>High Velocity</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+            
+            <div class="parameter">
+                <label for="nozzleWidth">Nozzle Width</label>
+                <input type="range" id="nozzleWidth" min="10" max="100" value="40">
+                <div class="parameter-value" id="nozzleWidthValue">40 px</div>
+            </div>
+            
+            <div class="parameter">
+                <label for="jetVelocity">Jet Velocity</label>
+                <input type="range" id="jetVelocity" min="1" max="10" value="5">
+                <div class="parameter-value" id="jetVelocityValue">5</div>
+            </div>
+            
+            <div class="parameter">
+                <label for="viscosity">SGS Viscosity</label>
+                <input type="range" id="viscosity" min="0.01" max="0.2" step="0.01" value="0.05">
+                <div class="parameter-value" id="viscosityValue">0.05</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      /*     LES的目标：LES旨在直接模拟湍流的大尺度和中尺度运动，同时建模小尺度、未解析尺度的影响。这种方法是在直接数值模拟（DNS）和雷诺平均纳维-斯托克斯（RANS）方法之间的折衷，平衡了计算成本和准确性。
+    LES中的滤波：它涉及对纳维-斯托克斯方程进行滤波，将流变量分为解析和亚格子尺度（未解析）部分。如果 $$ u $$ 是实际速度，它分为：
+        $$ U $$：大尺度的解析速度场。
+        $$ u' $$：小尺度的未解析速度波动。 数学上，$$ u(\mathbf{x}, t) = U(\mathbf{x}, t) + u'(\mathbf{x}, t) $$。
+    滤波后的纳维-斯托克斯方程：滤波后，纳维-斯托克斯方程因对流项的非线性性而产生额外项。新的项是亚格子尺度（SGS）应力张量 $$ \tau $$，因为波动 $$ u' $$ 的乘积在滤波后不为零。滤波后的动量方程包括： \[ \frac{\partial U}{\partial t} + \nabla \cdot (U U) = -\frac{1}{\rho} \nabla P + \nu \nabla^2 U -\nabla \cdot \tau + f. \] SGS应力张量 $$ \tau $$ 表示未解析的小尺度对解析尺度的影响。
+    SGS应力的建模：由于 $$ \tau = -\overline{u' u'} $$，其中 $$ \overline{u' u'} $$ 是亚格子波动的协方差张量，建模这个项是关键。一个常见的模型是斯马戈林斯基模型，它近似为： \[ \tau_{ij} \approx - \left( C_s \Delta \right)^2 \left| S \right| \left( \frac{\partial U_i}{\partial x_j} + \frac{\partial U_j}{\partial x_i} \right), \] 其中：
+        $$ C_s $$ 是斯马戈林斯基常数，
+        $$ \Delta $$ 是滤波宽度，
+        $$ S $$ 是解析应变率张量 $$ S_{ij} = \frac{1}{2} \left( \frac{\partial U_i}{\partial x_j} + \frac{\partial U_j}{\partial x_i} \right) $$ 的大小，
+        $$ \left| S \right| = \sqrt{2 S{kl} S{kl}} $$，应变率张量的大小。
+
+用 LES 仿真一股气流在真空中的喷射，用 2D 动画表示，输出为 single-file html
+*/
+        // Canvas setup
+        const velocityCanvas = document.getElementById('velocityCanvas');
+        const velocityCtx = velocityCanvas.getContext('2d');
+        const particleCanvas = document.getElementById('particleCanvas');
+        const particleCtx = particleCanvas.getContext('2d');
+        
+        const width = velocityCanvas.width;
+        const height = velocityCanvas.height;
+        
+        // Simulation parameters
+        let nozzleWidth = 40;
+        let jetVelocity = 5;
+        let viscosity = 0.05;  // SGS viscosity (Smagorinsky coefficient)
+        
+        // Grid setup for LES
+        const cellSize = 8;  // Grid cell size
+        const gridWidth = Math.ceil(width / cellSize);
+        const gridHeight = Math.ceil(height / cellSize);
+        
+        // Velocity field grids
+        let u = create2DArray(gridWidth, gridHeight);
+        let v = create2DArray(gridWidth, gridHeight);
+        let u_prev = create2DArray(gridWidth, gridHeight);
+        let v_prev = create2DArray(gridWidth, gridHeight);
+        
+        // Pressure field
+        let p = create2DArray(gridWidth, gridHeight);
+        let div = create2DArray(gridWidth, gridHeight);
+        
+        // SGS stress tensors components
+        let tau_xx = create2DArray(gridWidth, gridHeight);
+        let tau_xy = create2DArray(gridWidth, gridHeight);
+        let tau_yy = create2DArray(gridWidth, gridHeight);
+        
+        // Particle system for visualization
+        const numParticles = 500;
+        let particles = [];
+        
+        // Animation control
+        let animationId = null;
+        let isRunning = false;
+        
+        // Nozzle position calculations
+        let nozzleStart = Math.floor((gridHeight - nozzleWidth/cellSize) / 2);
+        let nozzleEnd = nozzleStart + Math.floor(nozzleWidth/cellSize);
+        
+        // Helper function to create 2D arrays
+        function create2DArray(width, height) {
+            let arr = new Array(width);
+            for (let i = 0; i < width; i++) {
+                arr[i] = new Array(height).fill(0);
+            }
+            return arr;
+        }
+        
+        // Initialize the simulation
+        function initSimulation() {
+            // Calculate nozzle position based on current nozzle width
+            nozzleStart = Math.floor((gridHeight - nozzleWidth/cellSize) / 2);
+            nozzleEnd = nozzleStart + Math.floor(nozzleWidth/cellSize);
+            
+            // Reset fields
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    u[i][j] = 0;
+                    v[i][j] = 0;
+                    u_prev[i][j] = 0;
+                    v_prev[i][j] = 0;
+                    p[i][j] = 0;
+                    div[i][j] = 0;
+                    tau_xx[i][j] = 0;
+                    tau_xy[i][j] = 0;
+                    tau_yy[i][j] = 0;
+                }
+            }
+            
+            // Initialize particles
+            particles = [];
+            for (let i = 0; i < numParticles; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: 0,
+                    vy: 0,
+                    age: Math.random() * 100
+                });
+            }
+            
+            clearCanvas();
+        }
+        
+        // Clear canvas
+        function clearCanvas() {
+            velocityCtx.clearRect(0, 0, width, height);
+            particleCtx.clearRect(0, 0, width, height);
+        }
+        
+        // Calculate SGS stress terms using Smagorinsky model
+        function calculateSGSStress() {
+            const Cs = viscosity;  // Smagorinsky constant
+            const delta = cellSize;  // Filter width
+            
+            for (let i = 1; i < gridWidth - 1; i++) {
+                for (let j = 1; j < gridHeight - 1; j++) {
+                    // Calculate strain rate tensor components
+                    const dudx = (u[i+1][j] - u[i-1][j]) / (2 * cellSize);
+                    const dudy = (u[i][j+1] - u[i][j-1]) / (2 * cellSize);
+                    const dvdx = (v[i+1][j] - v[i-1][j]) / (2 * cellSize);
+                    const dvdy = (v[i][j+1] - v[i][j-1]) / (2 * cellSize);
+                    
+                    const S_xx = dudx;
+                    const S_xy = 0.5 * (dudy + dvdx);
+                    const S_yy = dvdy;
+                    
+                    // Calculate |S| = sqrt(2*S_ij*S_ij)
+                    const S_magnitude = Math.sqrt(2 * (S_xx*S_xx + 2*S_xy*S_xy + S_yy*S_yy));
+                    
+                    // Calculate SGS eddy viscosity
+                    const nu_sgs = Math.pow(Cs * delta, 2) * S_magnitude;
+                    
+                    // Calculate SGS stress tensor components
+                    tau_xx[i][j] = -2 * nu_sgs * S_xx;
+                    tau_xy[i][j] = -2 * nu_sgs * S_xy;
+                    tau_yy[i][j] = -2 * nu_sgs * S_yy;
+                }
+            }
+        }
+        
+        // Update velocity field using SGS model
+        function updateVelocityField() {
+            // Update nozzle position (in case nozzle width has changed)
+            nozzleStart = Math.floor((gridHeight - nozzleWidth/cellSize) / 2);
+            nozzleEnd = nozzleStart + Math.floor(nozzleWidth/cellSize);
+            
+            // Set jet inlet boundary condition
+            for (let j = nozzleStart; j < nozzleEnd; j++) {
+                u[0][j] = jetVelocity;
+                v[0][j] = 0;
+            }
+            
+            // Copy current velocities to previous
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    u_prev[i][j] = u[i][j];
+                    v_prev[i][j] = v[i][j];
+                }
+            }
+            
+            // Calculate SGS stress terms
+            calculateSGSStress();
+            
+            // Update velocity using Navier-Stokes with SGS stress
+            for (let i = 1; i < gridWidth - 1; i++) {
+                for (let j = 1; j < gridHeight - 1; j++) {
+                    // Advection terms (simplified)
+                    const u_adv = u_prev[i][j] * (u_prev[i+1][j] - u_prev[i-1][j]) / (2 * cellSize) +
+                                 v_prev[i][j] * (u_prev[i][j+1] - u_prev[i][j-1]) / (2 * cellSize);
+                    
+                    const v_adv = u_prev[i][j] * (v_prev[i+1][j] - v_prev[i-1][j]) / (2 * cellSize) +
+                                 v_prev[i][j] * (v_prev[i][j+1] - v_prev[i][j-1]) / (2 * cellSize);
+                    
+                    // Diffusion terms (simplified)
+                    const u_diff = viscosity * (u_prev[i+1][j] + u_prev[i-1][j] + u_prev[i][j+1] + u_prev[i][j-1] - 4*u_prev[i][j]) / (cellSize * cellSize);
+                    const v_diff = viscosity * (v_prev[i+1][j] + v_prev[i-1][j] + v_prev[i][j+1] + v_prev[i][j-1] - 4*v_prev[i][j]) / (cellSize * cellSize);
+                    
+                    // SGS stress gradient terms
+                    const tau_x_grad = (tau_xx[i+1][j] - tau_xx[i-1][j]) / (2 * cellSize) + 
+                                      (tau_xy[i][j+1] - tau_xy[i][j-1]) / (2 * cellSize);
+                    
+                    const tau_y_grad = (tau_xy[i+1][j] - tau_xy[i-1][j]) / (2 * cellSize) + 
+                                      (tau_yy[i][j+1] - tau_yy[i][j-1]) / (2 * cellSize);
+                    
+                    // Update velocities
+                    u[i][j] = u_prev[i][j] - 0.1 * u_adv + 0.1 * u_diff + 0.05 * tau_x_grad;
+                    v[i][j] = v_prev[i][j] - 0.1 * v_adv + 0.1 * v_diff + 0.05 * tau_y_grad;
+                    
+                    // Add slight diffusion for vacuum expansion effect
+                    const diffusionRate = 0.01;
+                    u[i][j] *= (1 - diffusionRate);
+                    v[i][j] *= (1 - diffusionRate);
+                    
+                    // Add some randomness to simulate turbulence
+                    if (Math.random() < 0.1) {
+                        const turbulenceScale = 0.05 * Math.sqrt(u[i][j]*u[i][j] + v[i][j]*v[i][j]);
+                        u[i][j] += (Math.random() - 0.5) * turbulenceScale;
+                        v[i][j] += (Math.random() - 0.5) * turbulenceScale;
+                    }
+                }
+            }
+            
+            // Boundary conditions
+            for (let j = 0; j < gridHeight; j++) {
+                // Right boundary: open (outflow)
+                u[gridWidth-1][j] = u[gridWidth-2][j];
+                v[gridWidth-1][j] = v[gridWidth-2][j];
+                
+                // Top and bottom boundaries: slip
+                if (j === 0) {
+                    u[0][j] = 0;
+                    v[0][j] = 0;
+                    u[gridWidth-1][j] = 0;
+                    v[gridWidth-1][j] = 0;
+                }
+                if (j === gridHeight-1) {
+                    u[0][j] = 0;
+                    v[0][j] = 0;
+                    u[gridWidth-1][j] = 0;
+                    v[gridWidth-1][j] = 0;
+                }
+            }
+            
+            // Left boundary: jet inlet and walls
+            for (let j = 0; j < gridHeight; j++) {
+                if (j < nozzleStart || j >= nozzleEnd) {
+                    u[0][j] = 0;
+                    v[0][j] = 0;
+                }
+            }
+        }
+        
+        // Update particle positions based on velocity field
+        function updateParticles() {
+            // Update nozzle position calculations (needed for particle respawn)
+            const nozzleStartPx = nozzleStart * cellSize;
+            const nozzleHeightPx = nozzleWidth;
+            
+            for (let p = 0; p < particles.length; p++) {
+                const particle = particles[p];
+                
+                // Get grid cell containing the particle
+                const i = Math.floor(particle.x / cellSize);
+                const j = Math.floor(particle.y / cellSize);
+                
+                // Interpolate velocity at particle position
+                if (i >= 0 && i < gridWidth-1 && j >= 0 && j < gridHeight-1) {
+                    // Bilinear interpolation
+                    const x_frac = (particle.x / cellSize) - i;
+                    const y_frac = (particle.y / cellSize) - j;
+                    
+                    particle.vx = (1-x_frac)*(1-y_frac)*u[i][j] +
+                                 x_frac*(1-y_frac)*u[i+1][j] +
+                                 (1-x_frac)*y_frac*u[i][j+1] +
+                                 x_frac*y_frac*u[i+1][j+1];
+                    
+                    particle.vy = (1-x_frac)*(1-y_frac)*v[i][j] +
+                                 x_frac*(1-y_frac)*v[i+1][j] +
+                                 (1-x_frac)*y_frac*v[i][j+1] +
+                                 x_frac*y_frac*v[i+1][j+1];
+                }
+                
+                // Update particle position
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.age += 0.5;
+                
+                // Respawn particles that leave the domain or get too old
+                if (particle.x < 0 || particle.x > width || 
+                    particle.y < 0 || particle.y > height ||
+                    particle.age > 100) {
+                    // Reset particle at nozzle
+                    particle.x = 0;
+                    particle.y = nozzleStartPx + Math.random() * nozzleHeightPx;
+                    particle.vx = jetVelocity;
+                    particle.vy = 0;
+                    particle.age = 0;
+                }
+            }
+        }
+        
+        // Render velocity field
+        function renderVelocityField() {
+            velocityCtx.clearRect(0, 0, width, height);
+            
+            // Draw velocity magnitude field
+            const imageData = velocityCtx.createImageData(width, height);
+            
+            for (let i = 0; i < gridWidth; i++) {
+                for (let j = 0; j < gridHeight; j++) {
+                    const magnitude = Math.sqrt(u[i][j]*u[i][j] + v[i][j]*v[i][j]);
+                    const normalizedMag = Math.min(1, magnitude / jetVelocity);
+                    
+                    // Color based on velocity magnitude (blue->green->red)
+                    let r = 0, g = 0, b = 0;
+                    if (normalizedMag < 0.5) {
+                        // Blue to green
+                        b = 255 * (1 - 2 * normalizedMag);
+                        g = 255 * (2 * normalizedMag);
+                    } else {
+                        // Green to red
+                        g = 255 * (2 - 2 * normalizedMag);
+                        r = 255 * (2 * normalizedMag - 1);
+                    }
+                    
+                    // Apply color to all pixels in the cell
+                    for (let dx = 0; dx < cellSize; dx++) {
+                        for (let dy = 0; dy < cellSize; dy++) {
+                            const x = i * cellSize + dx;
+                            const y = j * cellSize + dy;
+                            
+                            if (x < width && y < height) {
+                                const idx = (y * width + x) * 4;
+                                imageData.data[idx] = r;
+                                imageData.data[idx+1] = g;
+                                imageData.data[idx+2] = b;
+                                imageData.data[idx+3] = 100;  // semi-transparent
+                            }
+                        }
+                    }
+                }
+            }
+            
+            velocityCtx.putImageData(imageData, 0, 0);
+            
+            // Draw nozzle
+            velocityCtx.fillStyle = 'white';
+            velocityCtx.fillRect(0, 0, 10, height);
+            
+            const nozzleStartPx = Math.floor((height - nozzleWidth) / 2);
+            velocityCtx.fillStyle = 'black';
+            velocityCtx.fillRect(0, nozzleStartPx, 10, nozzleWidth);
+        }
+        
+        // Render particles
+        function renderParticles() {
+            particleCtx.clearRect(0, 0, width, height);
+            
+            for (let p = 0; p < particles.length; p++) {
+                const particle = particles[p];
+                
+                const magnitude = Math.sqrt(particle.vx*particle.vx + particle.vy*particle.vy);
+                const normalizedMag = Math.min(1, magnitude / jetVelocity);
+                
+                // Color based on velocity magnitude (blue->green->red)
+                let r = 0, g = 0, b = 0;
+                if (normalizedMag < 0.5) {
+                    // Blue to green
+                    b = 255 * (1 - 2 * normalizedMag);
+                    g = 255 * (2 * normalizedMag);
+                } else {
+                    // Green to red
+                    g = 255 * (2 - 2 * normalizedMag);
+                    r = 255 * (2 * normalizedMag - 1);
+                }
+                
+                // Draw particle
+                particleCtx.beginPath();
+                particleCtx.arc(particle.x, particle.y, 1.5, 0, 2 * Math.PI);
+                particleCtx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.7)`;
+                particleCtx.fill();
+                
+                // Draw velocity vector
+                if (magnitude > 0.1) {  // Only draw vectors for moving particles
+                    const lineLength = 5 * normalizedMag;
+                    particleCtx.beginPath();
+                    particleCtx.moveTo(particle.x, particle.y);
+                    particleCtx.lineTo(particle.x + lineLength * particle.vx / magnitude, 
+                                     particle.y + lineLength * particle.vy / magnitude);
+                    particleCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
+                    particleCtx.stroke();
+                }
+            }
+        }
+        
+        // Main simulation step
+        function simulationStep() {
+            updateVelocityField();
+            updateParticles();
+            renderVelocityField();
+            renderParticles();
+            
+            if (isRunning) {
+                animationId = requestAnimationFrame(simulationStep);
+            }
+        }
+        
+        // UI Controls
+        document.getElementById('startBtn').addEventListener('click', function() {
+            if (!isRunning) {
+                isRunning = true;
+                simulationStep();
+            }
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            // Apply current UI parameters
+            nozzleWidth = parseInt(document.getElementById('nozzleWidth').value);
+            jetVelocity = parseFloat(document.getElementById('jetVelocity').value);
+            viscosity = parseFloat(document.getElementById('viscosity').value);
+            
+            initSimulation();
+        });
+        
+        // Slider events
+        document.getElementById('nozzleWidth').addEventListener('input', function(e) {
+            nozzleWidth = parseInt(e.target.value);
+            document.getElementById('nozzleWidthValue').textContent = nozzleWidth + ' px';
+        });
+        
+        document.getElementById('jetVelocity').addEventListener('input', function(e) {
+            jetVelocity = parseFloat(e.target.value);
+            document.getElementById('jetVelocityValue').textContent = jetVelocity;
+        });
+        
+        document.getElementById('viscosity').addEventListener('input', function(e) {
+            viscosity = parseFloat(e.target.value);
+            document.getElementById('viscosityValue').textContent = viscosity;
+        });
+        
+        // Initialize
+        initSimulation();
+        
+        // Display initial parameter values
+        document.getElementById('nozzleWidthValue').textContent = nozzleWidth + ' px';
+        document.getElementById('jetVelocityValue').textContent = jetVelocity;
+        document.getElementById('viscosityValue').textContent = viscosity;
+    </script>
+</body>
+</html>

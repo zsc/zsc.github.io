@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einstein's Puzzle MCMC Solver</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #5a5a5a; }
+        .controls, .clues-container, .puzzle-grid-container, .animation-controls, .status {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        select { padding: 8px; border-radius: 4px; }
+        .clues-list { list-style-type: decimal; padding-left: 20px; }
+        .puzzle-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
+        .grid-header, .grid-cell {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+            min-height: 20px;
+            font-size: 0.9em;
+        }
+        .grid-header { background-color: #e9e9e9; font-weight: bold; }
+        .conflict { background-color: #ffdddd !important; color: red; font-weight: bold; }
+        .conflict-neighbor-lhs { box-shadow: -3px 0 0 0 red inset; }
+        .conflict-neighbor-rhs { box-shadow: 3px 0 0 0 red inset; }
+        .conflict-expected { border: 2px dashed orange !important; }
+        #status { white-space: pre-wrap; font-family: monospace; max-height: 150px; overflow-y: auto; background: #eee; padding: 5px;}
+        .solution-found { color: green; font-weight: bold; }
+        .solution-not-found { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Einstein's Puzzle MCMC Solver</h1>
+
+        <div class="controls">
+            <button id="generateCluesBtn">Generate Clues & Solve</button>
+            <select id="mcmcVariant">
+                <option value="vanilla">Vanilla MCMC</option>
+                <option value="hmc">HMC-Inspired (Multi-Step)</option>
+            </select>
+            <label for="maxIterations">Max Iterations:</label>
+            <input type="number" id="maxIterations" value="20000" min="1000" style="width: 80px;">
+            <label for="hmcSteps" style="display:none;">HMC Leapfrog Steps (L):</label>
+            <input type="number" id="hmcSteps" value="3" min="1" style="width: 40px; display:none;">
+        </div>
+
+        <div class="clues-container">
+            <h2>Clues</h2>
+            <div id="cluesList">No clues generated yet.</div>
+        </div>
+
+        <div class="puzzle-grid-container">
+            <h2>Puzzle Grid (Animation)</h2>
+            <div id="puzzleGrid" class="puzzle-grid"></div>
+        </div>
+
+        <div class="animation-controls">
+            <button id="playBtn" disabled>Play</button>
+            <button id="pauseBtn" disabled>Pause</button>
+            <button id="resetBtn" disabled>Reset Anim</button>
+            <label for="animSpeed">Speed:</label>
+            <input type="range" id="animSpeed" min="10" max="1000" value="200" step="10">
+            <span>Frame: <span id="currentFrame">0</span> / <span id="totalFrames">0</span></span>
+            <span>Energy: <span id="currentEnergy">N/A</span></span>
+        </div>
+        
+        <div class="status">
+            <h2>Status / Log</h2>
+            <div id="status">Solver not run yet.</div>
+        </div>
+    </div>
+
+    <script>
+        // single-file html 实现用 mcmc 解爱因斯坦 puzzle，包括 vanila 和 Hamiltonian Monte Carlo  两个变体。题目 Clues 按键随机生成（要检查保证有解）。所有求解在后台无可视化快速进行，但存下中间结果可以变成动画回放（播放动画时，把 conflicts 按种类高亮出来）。
+        // --- Constants for the Puzzle ---
+        const CATEGORIES = ["Nationality", "Color", "Pet", "Drink", "Smoke"];
+        const NUM_HOUSES = 5;
+
+        const CANONICAL_VALUES = {
+            Nationality: ["Englishman", "Spaniard", "Ukrainian", "Norwegian", "Japanese"],
+            Color:       ["Red", "Green", "Ivory", "Yellow", "Blue"],
+            Pet:         ["Dog", "Snails", "Fox", "Horse", "Zebra"],
+            Drink:       ["Coffee", "Tea", "Milk", "OrangeJuice", "Water"],
+            Smoke:       ["OldGold", "Kools", "Chesterfields", "LuckyStrike", "Parliaments"]
+        };
+
+        // Canonical clues based on the common Zebra Puzzle version
+        // Properties are: category1, value1, category2, value2, house_index, relation_type
+        const CANONICAL_CLUES_STRUCTURE = [
+            { type: "SAME_HOUSE", cat1: "Nationality", val1: "Englishman", cat2: "Color", val2: "Red" },
+            { type: "SAME_HOUSE", cat1: "Nationality", val1: "Spaniard", cat2: "Pet", val2: "Dog" },
+            { type: "SAME_HOUSE", cat1: "Drink", val1: "Coffee", cat2: "Color", val2: "Green" },
+            { type: "SAME_HOUSE", cat1: "Nationality", val1: "Ukrainian", cat2: "Drink", val2: "Tea" },
+            { type: "NEIGHBOR_REL", cat1: "Color", val1: "Green", cat2: "Color", val2: "Ivory", relation: "RIGHT_OF" }, // Green is immediately right of Ivory
+            { type: "SAME_HOUSE", cat1: "Smoke", val1: "OldGold", cat2: "Pet", val2: "Snails" },
+            { type: "SAME_HOUSE_VAL_AT_IDX", cat1: "Smoke", val1: "Kools", cat2: "Color", val2: "Yellow" }, // Kools smoked in Yellow house
+            { type: "VALUE_AT_HOUSE", cat: "Drink", val: "Milk", house_idx: 2 }, // Middle house (0-indexed)
+            { type: "VALUE_AT_HOUSE", cat: "Nationality", val: "Norwegian", house_idx: 0 }, // First house
+            { type: "NEIGHBOR", cat1: "Smoke", val1: "Chesterfields", cat2: "Pet", val2: "Fox" },
+            { type: "NEIGHBOR", cat1: "Smoke", val1: "Kools", cat2: "Pet", val2: "Horse" },
+            { type: "SAME_HOUSE", cat1: "Smoke", val1: "LuckyStrike", cat2: "Drink", val2: "OrangeJuice" },
+            { type: "SAME_HOUSE", cat1: "Nationality", val1: "Japanese", cat2: "Smoke", val2: "Parliaments" },
+            { type: "NEIGHBOR", cat1: "Nationality", val1: "Norwegian", cat2: "Color", val2: "Blue" },
+        ];
+        
+        // Canonical solution for the above clues
+        const CANONICAL_SOLUTION = { // house index 0 to 4
+            Color:       ["Yellow", "Blue",   "Red",        "Ivory",      "Green"],
+            Nationality: ["Norwegian", "Ukrainian", "Englishman", "Spaniard",   "Japanese"],
+            Drink:       ["Water",  "Tea",    "Milk",       "OrangeJuice",   "Coffee"],
+            Smoke:       ["Kools",  "Chesterfields",  "OldGold",   "LuckyStrike",  "Parliaments"],
+            Pet:         ["Fox",    "Horse",  "Snails",     "Dog",        "Zebra"]
+        };
+
+
+        // --- Global Variables ---
+        let currentClues = [];
+        let currentLabelMappings = {}; // To store the shuffled labels
+        let animationHistory = [];
+        let animationFrame = 0;
+        let animationInterval = null;
+        let isPaused = true;
+
+        // --- UI Elements ---
+        const generateCluesBtn = document.getElementById('generateCluesBtn');
+        const mcmcVariantSelect = document.getElementById('mcmcVariant');
+        const maxIterationsInput = document.getElementById('maxIterations');
+        const hmcStepsInput = document.getElementById('hmcSteps');
+        const hmcStepsLabel = document.querySelector('label[for="hmcSteps"]');
+        const cluesListDiv = document.getElementById('cluesList');
+        const puzzleGridDiv = document.getElementById('puzzleGrid');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const animSpeedSlider = document.getElementById('animSpeed');
+        const currentFrameSpan = document.getElementById('currentFrame');
+        const totalFramesSpan = document.getElementById('totalFrames');
+        const currentEnergySpan = document.getElementById('currentEnergy');
+        const statusDiv = document.getElementById('status');
+
+        // --- Helper Functions ---
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function deepCopyState(state) {
+            const newState = {};
+            for (const category in state) {
+                newState[category] = [...state[category]];
+            }
+            return newState;
+        }
+
+        // --- Puzzle Generation ---
+        function generatePuzzle() {
+            logMessage("Generating new puzzle...");
+            currentLabelMappings = {};
+            CATEGORIES.forEach(cat => {
+                currentLabelMappings[cat] = {};
+                const shuffledValues = shuffleArray(CANONICAL_VALUES[cat]);
+                CANONICAL_VALUES[cat].forEach((origVal, i) => {
+                    currentLabelMappings[cat][origVal] = shuffledValues[i];
+                });
+            });
+
+            currentClues = CANONICAL_CLUES_STRUCTURE.map(clueTemplate => {
+                const newClue = { type: clueTemplate.type };
+                if (clueTemplate.cat1) newClue.cat1 = clueTemplate.cat1;
+                if (clueTemplate.val1) newClue.val1 = currentLabelMappings[clueTemplate.cat1][clueTemplate.val1];
+                if (clueTemplate.cat2) newClue.cat2 = clueTemplate.cat2;
+                if (clueTemplate.val2) newClue.val2 = currentLabelMappings[clueTemplate.cat2][clueTemplate.val2];
+                if (clueTemplate.cat) newClue.cat = clueTemplate.cat;
+                if (clueTemplate.val) newClue.val = currentLabelMappings[clueTemplate.cat][clueTemplate.val];
+                if (clueTemplate.house_idx !== undefined) newClue.house_idx = clueTemplate.house_idx;
+                if (clueTemplate.relation) newClue.relation = clueTemplate.relation;
+                return newClue;
+            });
+
+            displayClues();
+            logMessage("Puzzle and clues generated.");
+            // For debugging: check if canonical solution maps correctly
+            // const mappedSolution = {};
+            // CATEGORIES.forEach(cat => {
+            //     mappedSolution[cat] = CANONICAL_SOLUTION[cat].map(val => currentLabelMappings[cat][val]);
+            // });
+            // const { energy: checkEnergy } = calculateEnergyAndConflicts(mappedSolution, currentClues);
+            // logMessage(`Mapped solution energy check: ${checkEnergy} (should be 0)`);
+        }
+
+        function displayClues() {
+            let html = "<ol class='clues-list'>";
+            currentClues.forEach(clue => {
+                let text = "";
+                switch (clue.type) {
+                    case "SAME_HOUSE": text = `${clue.val1} (${clue.cat1}) lives with / in the same house as ${clue.val2} (${clue.cat2}).`; break;
+                    case "SAME_HOUSE_VAL_AT_IDX": text = `${clue.val1} (${clue.cat1}) is in the house that is ${clue.val2} (${clue.cat2}).`; break;
+                    case "NEIGHBOR_REL": text = `${clue.val1} (${clue.cat1}) house is ${clue.relation.toLowerCase().replace('_',' ')} ${clue.val2} (${clue.cat2}) house.`; break;
+                    case "VALUE_AT_HOUSE": text = `${clue.val} (${clue.cat}) is in house #${clue.house_idx + 1}.`; break;
+                    case "NEIGHBOR": text = `${clue.val1} (${clue.cat1}) lives next to ${clue.val2} (${clue.cat2}).`; break;
+                }
+                html += `<li>${text}</li>`;
+            });
+            html += "</ol>";
+            cluesListDiv.innerHTML = html;
+        }
+        
+        // --- MCMC State Evaluation ---
+        function calculateEnergyAndConflicts(state, clues) {
+            let energy = 0;
+            const conflicts = [];
+
+            clues.forEach((clue, clueIndex) => {
+                let satisfied = true;
+                let conflictDetails = { clueIndex, type: clue.type, involved: [] };
+
+                const findHouse = (category, value) => state[category].indexOf(value);
+
+                switch (clue.type) {
+                    case "SAME_HOUSE": { // e.g., Englishman (Nat) lives with Dog (Pet)
+                        const houseOfVal1 = findHouse(clue.cat1, clue.val1);
+                        const val2InHouseOfVal1 = state[clue.cat2][houseOfVal1];
+                        if (val2InHouseOfVal1 !== clue.val2) {
+                            satisfied = false;
+                            conflictDetails.involved.push({ cat: clue.cat1, val: clue.val1, house_idx: houseOfVal1 });
+                            conflictDetails.involved.push({ cat: clue.cat2, val: clue.val2, house_idx: houseOfVal1, actual_val: val2InHouseOfVal1 });
+                        }
+                        break;
+                    }
+                     case "SAME_HOUSE_VAL_AT_IDX": { // e.g. Kools (Smoke) in Yellow (Color) house
+                        const houseOfVal1 = findHouse(clue.cat1, clue.val1); // House where Kools are smoked
+                        const colorOfThatHouse = state[clue.cat2][houseOfVal1]; // Color of that house
+                        if (colorOfThatHouse !== clue.val2) { // If color is not Yellow
+                            satisfied = false;
+                            conflictDetails.involved.push({cat: clue.cat1, val: clue.val1, house_idx: houseOfVal1});
+                            conflictDetails.involved.push({cat: clue.cat2, val: clue.val2, house_idx: houseOfVal1, actual_val: colorOfThatHouse});
+                        }
+                        break;
+                    }
+                    case "NEIGHBOR_REL": { // e.g., Green house is RIGHT_OF Ivory house
+                        const houseOfVal1 = findHouse(clue.cat1, clue.val1); // Green
+                        const houseOfVal2 = findHouse(clue.cat2, clue.val2); // Ivory
+                        if (clue.relation === "RIGHT_OF" && houseOfVal1 !== houseOfVal2 + 1) satisfied = false;
+                        else if (clue.relation === "LEFT_OF" && houseOfVal1 !== houseOfVal2 - 1) satisfied = false;
+                        
+                        if (!satisfied) {
+                             conflictDetails.involved.push({cat: clue.cat1, val: clue.val1, house_idx: houseOfVal1 });
+                             conflictDetails.involved.push({cat: clue.cat2, val: clue.val2, house_idx: houseOfVal2, relation_violated: true});
+                        }
+                        break;
+                    }
+                    case "VALUE_AT_HOUSE": { // e.g., Milk (Drink) in house #3 (idx 2)
+                        if (state[clue.cat][clue.house_idx] !== clue.val) {
+                            satisfied = false;
+                            conflictDetails.involved.push({ cat: clue.cat, val: clue.val, expected_house_idx: clue.house_idx, actual_house_idx: findHouse(clue.cat, clue.val) });
+                        }
+                        break;
+                    }
+                    case "NEIGHBOR": { // e.g., Chesterfields (Smoke) next to Fox (Pet)
+                        const houseOfVal1 = findHouse(clue.cat1, clue.val1);
+                        const houseOfVal2 = findHouse(clue.cat2, clue.val2);
+                        if (Math.abs(houseOfVal1 - houseOfVal2) !== 1) {
+                            satisfied = false;
+                            conflictDetails.involved.push({ cat: clue.cat1, val: clue.val1, house_idx: houseOfVal1, is_neighbor_lhs: houseOfVal2 === houseOfVal1 - 1, is_neighbor_rhs: houseOfVal2 === houseOfVal1 + 1 });
+                            conflictDetails.involved.push({ cat: clue.cat2, val: clue.val2, house_idx: houseOfVal2, is_neighbor_lhs: houseOfVal1 === houseOfVal2 - 1, is_neighbor_rhs: houseOfVal1 === houseOfVal2 + 1 });
+                        }
+                        break;
+                    }
+                }
+
+                if (!satisfied) {
+                    energy++;
+                    conflicts.push(conflictDetails);
+                }
+            });
+            return { energy, conflicts };
+        }
+
+        // --- MCMC Logic ---
+        function generateInitialState() {
+            const state = {};
+            CATEGORIES.forEach(cat => {
+                state[cat] = shuffleArray(CANONICAL_VALUES[cat].map(val => currentLabelMappings[cat][val]));
+            });
+            return state;
+        }
+
+        function proposeStateVanilla(currentState) {
+            const newState = deepCopyState(currentState);
+            const categoryToSwap = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+            
+            let idx1 = Math.floor(Math.random() * NUM_HOUSES);
+            let idx2 = Math.floor(Math.random() * NUM_HOUSES);
+            while (idx1 === idx2) {
+                idx2 = Math.floor(Math.random() * NUM_HOUSES);
+            }
+            
+            [newState[categoryToSwap][idx1], newState[categoryToSwap][idx2]] = [newState[categoryToSwap][idx2], newState[categoryToSwap][idx1]];
+            return newState;
+        }
+
+        function proposeStateHMCInspired(currentState, L_steps) {
+            let proposedState = deepCopyState(currentState);
+            for (let i = 0; i < L_steps; i++) {
+                // Each step in the "leapfrog" is a vanilla proposal
+                proposedState = proposeStateVanilla(proposedState); 
+            }
+            return proposedState;
+        }
+        
+        async function runMCMC() {
+            logMessage("Starting MCMC solver...");
+            generateCluesBtn.disabled = true;
+            playBtn.disabled = true;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            const variant = mcmcVariantSelect.value;
+            const maxIter = parseInt(maxIterationsInput.value);
+            const L_steps_hmc = parseInt(hmcStepsInput.value); // For HMC-inspired
+
+            let currentState = generateInitialState();
+            let { energy: currentEnergy, conflicts: currentConflicts } = calculateEnergyAndConflicts(currentState, currentClues);
+            
+            animationHistory = [{ state: deepCopyState(currentState), energy: currentEnergy, conflicts: currentConflicts, iteration: 0, accepted_proposal: true }];
+
+            const T = 1.0; // Temperature for Metropolis criterion
+
+            for (let i = 1; i <= maxIter; i++) {
+                let proposedState;
+                if (variant === "vanilla") {
+                    proposedState = proposeStateVanilla(currentState);
+                } else { // hmc
+                    proposedState = proposeStateHMCInspired(currentState, L_steps_hmc);
+                }
+
+                const { energy: proposedEnergy, conflicts: proposedConflicts } = calculateEnergyAndConflicts(proposedState, currentClues);
+                let accepted_proposal = false;
+
+                if (proposedEnergy < currentEnergy) {
+                    currentState = proposedState;
+                    currentEnergy = proposedEnergy;
+                    currentConflicts = proposedConflicts;
+                    accepted_proposal = true;
+                } else {
+                    const acceptanceProb = Math.exp(-(proposedEnergy - currentEnergy) / T);
+                    if (Math.random() < acceptanceProb) {
+                        currentState = proposedState;
+                        currentEnergy = proposedEnergy;
+                        currentConflicts = proposedConflicts;
+                        accepted_proposal = true;
+                    }
+                }
+                
+                // Store state for animation (can be thinned out if too many iterations)
+                if (i % Math.max(1, Math.floor(maxIter/1000)) === 0 || currentEnergy === 0 || accepted_proposal) { // Store more often if change occurs or solution found
+                     animationHistory.push({ state: deepCopyState(currentState), energy: currentEnergy, conflicts: currentConflicts, iteration: i, accepted_proposal });
+                }
+
+
+                if (i % 100 === 0) { // Update status periodically and yield to browser
+                    logMessage(`Iteration ${i}/${maxIter}, Energy: ${currentEnergy}`);
+                    await new Promise(resolve => setTimeout(resolve, 0)); 
+                }
+
+                if (currentEnergy === 0) {
+                    logMessage(`Solution found at iteration ${i} with energy ${currentEnergy}!`, "solution-found");
+                    animationHistory.push({ state: deepCopyState(currentState), energy: currentEnergy, conflicts: currentConflicts, iteration: i, accepted_proposal: true });
+                    break;
+                }
+            }
+
+            if (currentEnergy > 0) {
+                logMessage(`Solver finished. Max iterations reached. Final energy: ${currentEnergy}.`, "solution-not-found");
+            }
+
+            totalFramesSpan.textContent = animationHistory.length -1;
+            logMessage(`Total animation frames: ${animationHistory.length}`);
+            generateCluesBtn.disabled = false;
+            playBtn.disabled = false;
+            resetBtn.disabled = false;
+            animationFrame = 0;
+            isPaused = true;
+            updateAnimation();
+        }
+
+
+        // --- Animation Logic ---
+        function updateGridDisplay(state, conflicts) {
+            let html = '<div class="grid-header">House #</div>';
+            for (let i = 0; i < NUM_HOUSES; i++) {
+                html += `<div class="grid-header">${i + 1}</div>`;
+            }
+
+            CATEGORIES.forEach(cat => {
+                html += `<div class="grid-header">${cat}</div>`;
+                for (let i = 0; i < NUM_HOUSES; i++) {
+                    const value = state[cat][i];
+                    let cellClasses = "grid-cell";
+                    
+                    // Check for conflicts involving this cell
+                    conflicts.forEach(conflict => {
+                        conflict.involved.forEach(item => {
+                            if (item.cat === cat && item.house_idx === i) {
+                                cellClasses += " conflict";
+                                if (item.is_neighbor_lhs) cellClasses += " conflict-neighbor-lhs";
+                                if (item.is_neighbor_rhs) cellClasses += " conflict-neighbor-rhs";
+                            }
+                            // For VALUE_AT_HOUSE, highlight expected location too
+                            if (clue.type === "VALUE_AT_HOUSE" && item.cat === cat && item.val === value && item.expected_house_idx === i) {
+                                cellClasses += " conflict-expected"; // This is where it *should* be
+                            }
+                        });
+                    });
+                    html += `<div class="${cellClasses}">${value}</div>`;
+                }
+            });
+            puzzleGridDiv.innerHTML = html;
+        }
+
+        function updateAnimation() {
+            if (animationHistory.length === 0) return;
+            const frameData = animationHistory[animationFrame];
+            updateGridDisplay(frameData.state, frameData.conflicts);
+            currentFrameSpan.textContent = animationFrame;
+            currentEnergySpan.textContent = frameData.energy;
+            
+            // Add a visual cue for accepted proposals if desired
+            // puzzleGridDiv.style.borderColor = frameData.accepted_proposal ? "green" : "red";
+            // setTimeout(() => { puzzleGridDiv.style.borderColor = "#ddd"; }, 100);
+        }
+
+        function playAnimation() {
+            if (animationHistory.length === 0 || !isPaused) return;
+            isPaused = false;
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+            
+            function nextFrame() {
+                if (isPaused || animationFrame >= animationHistory.length - 1) {
+                    pauseAnimation(); // Also handles end of animation
+                    return;
+                }
+                animationFrame++;
+                updateAnimation();
+                animationInterval = setTimeout(nextFrame, animSpeedSlider.value);
+            }
+            animationInterval = setTimeout(nextFrame, animSpeedSlider.value);
+        }
+
+        function pauseAnimation() {
+            isPaused = true;
+            clearTimeout(animationInterval);
+            playBtn.disabled = animationFrame >= animationHistory.length - 1;
+            pauseBtn.disabled = true;
+        }
+        
+        function resetAnimation() {
+            pauseAnimation();
+            animationFrame = 0;
+            updateAnimation();
+            playBtn.disabled = animationHistory.length === 0;
+        }
+
+        function logMessage(message, className = "") {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            if (className) logEntry.className = className;
+            logEntry.textContent = `[${time}] ${message}`;
+            statusDiv.appendChild(logEntry);
+            statusDiv.scrollTop = statusDiv.scrollHeight; // Auto-scroll
+        }
+        
+        // --- Event Listeners ---
+        generateCluesBtn.addEventListener('click', () => {
+            generatePuzzle();
+            runMCMC();
+        });
+
+        mcmcVariantSelect.addEventListener('change', function() {
+            if (this.value === 'hmc') {
+                hmcStepsInput.style.display = 'inline-block';
+                hmcStepsLabel.style.display = 'inline-block';
+            } else {
+                hmcStepsInput.style.display = 'none';
+                hmcStepsLabel.style.display = 'none';
+            }
+        });
+
+        playBtn.addEventListener('click', playAnimation);
+        pauseBtn.addEventListener('click', pauseAnimation);
+        resetBtn.addEventListener('click', resetAnimation);
+        animSpeedSlider.addEventListener('input', () => {
+            if (!isPaused) { // If playing, restart with new speed
+                pauseAnimation();
+                playAnimation();
+            }
+        });
+
+        // --- Initial Setup ---
+        function init() {
+            logMessage("Application initialized. Awaiting clue generation.");
+            // Default grid display
+            let html = '<div class="grid-header">House #</div>';
+            for (let i = 0; i < NUM_HOUSES; i++) { html += `<div class="grid-header">${i + 1}</div>`; }
+            CATEGORIES.forEach(cat => {
+                html += `<div class="grid-header">${cat}</div>`;
+                for (let i = 0; i < NUM_HOUSES; i++) { html += `<div class="grid-cell">-</div>`; }
+            });
+            puzzleGridDiv.innerHTML = html;
+             // Trigger change to hide HMC steps if vanilla is default
+            mcmcVariantSelect.dispatchEvent(new Event('change'));
+        }
+
+        init();
+    </script>
+</body>
+</html>

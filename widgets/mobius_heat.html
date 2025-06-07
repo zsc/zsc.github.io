@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>莫比乌斯带热扩散仿真</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #container {
+            margin: 0 auto;
+            width: 800px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+        .controls {
+            margin: 10px 0 20px;
+            text-align: left;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>莫比乌斯带热扩散仿真</h1>
+        <canvas id="heatCanvas" width="600" height="400"></canvas>
+        <div class="controls">
+            <div>
+                <label for="sourceX">热源X位置:</label>
+                <input type="range" id="sourceX" min="0" max="1" step="0.01" value="0.5">
+                <span id="sourceXValue">0.5</span>
+            </div>
+            <div>
+                <label for="sourceY">热源Y位置:</label>
+                <input type="range" id="sourceY" min="0" max="1" step="0.01" value="0.5">
+                <span id="sourceYValue">0.5</span>
+            </div>
+            <div>
+                <label for="sourceAngle">热源角度:</label>
+                <input type="range" id="sourceAngle" min="0" max="180" value="45">
+                <span id="sourceAngleValue">45°</span>
+            </div>
+            <div>
+                <label for="diffusionRate">扩散速率:</label>
+                <input type="range" id="diffusionRate" min="0.01" max="0.5" step="0.01" value="0.1">
+                <span id="diffusionRateValue">0.1</span>
+            </div>
+            <div>
+                <label for="sourceStrength">热源强度:</label>
+                <input type="range" id="sourceStrength" min="1" max="50" value="20">
+                <span id="sourceStrengthValue">20</span>
+            </div>
+            <div>
+                <button id="startButton">开始</button>
+                <button id="stopButton">停止</button>
+                <button id="resetButton">重置</button>
+            </div>
+        </div>
+        <div>
+            <p><strong>莫比乌斯带边界条件说明:</strong> 在x方向上，左边界与右边界相连但有翻转，即(0,y)连接到(width,height-y)</p>
+        </div>
+    </div>
+
+    <script>
+        // 在2D 长方形（莫比乌斯带的周期边值条件) 上仿真一个斜大圆线热源的扩散，并用 all-in-one html/js 表示成动画，注意色阶要在动画过程中自动调整。热源位置x,y可调
+        // 获取画布和上下文
+        const canvas = document.getElementById('heatCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 控制参数
+        let sourceX = 0.5;
+        let sourceY = 0.5;
+        let sourceAngle = 45;
+        let diffusionRate = 0.1;
+        let sourceStrength = 20;
+        let isSimulating = false;
+        let animationId = null;
+        
+        // 网格尺寸
+        const gridWidth = 150;
+        const gridHeight = 100;
+        const dx = canvas.width / gridWidth;
+        const dy = canvas.height / gridHeight;
+        
+        // 温度网格
+        let grid = [];
+        let nextGrid = [];
+        
+        // 初始化网格
+        function initializeGrid() {
+            grid = [];
+            nextGrid = [];
+            for (let i = 0; i < gridHeight; i++) {
+                grid[i] = [];
+                nextGrid[i] = [];
+                for (let j = 0; j < gridWidth; j++) {
+                    grid[i][j] = 0;
+                    nextGrid[i][j] = 0;
+                }
+            }
+        }
+        
+        // 根据斜线热源更新温度
+        function applyHeatSource() {
+            const xCenter = Math.floor(sourceX * gridWidth);
+            const yCenter = Math.floor(sourceY * gridHeight);
+            const angleRadians = sourceAngle * Math.PI / 180;
+            const lineLength = Math.min(gridWidth, gridHeight) / 2;
+            
+            // 计算线段的起点和终点
+            const x1 = Math.floor(xCenter - Math.cos(angleRadians) * lineLength);
+            const y1 = Math.floor(yCenter - Math.sin(angleRadians) * lineLength);
+            const x2 = Math.floor(xCenter + Math.cos(angleRadians) * lineLength);
+            const y2 = Math.floor(yCenter + Math.sin(angleRadians) * lineLength);
+            
+            // 使用Bresenham算法绘制线段上的热源
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const sx = (x1 < x2) ? 1 : -1;
+            const sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+            
+            let x = x1;
+            let y = y1;
+            
+            while (true) {
+                // 检查点是否在网格内
+                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+                    grid[y][x] += sourceStrength;
+                }
+                
+                if (x === x2 && y === y2) break;
+                
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y += sy;
+                }
+            }
+        }
+        
+        // 计算热扩散步骤
+        function diffuse() {
+            // 首先应用热源
+            applyHeatSource();
+            
+            // 然后计算热扩散
+            for (let i = 0; i < gridHeight; i++) {
+                for (let j = 0; j < gridWidth; j++) {
+                    // 获取当前温度
+                    const current = grid[i][j];
+                    
+                    // 获取相邻点温度，考虑莫比乌斯带边界条件
+                    const left = (j === 0) ? grid[gridHeight - 1 - i][gridWidth - 1] : grid[i][j - 1];
+                    const right = (j === gridWidth - 1) ? grid[gridHeight - 1 - i][0] : grid[i][j + 1];
+                    const top = (i === 0) ? grid[i + 1][j] : grid[i - 1][j];
+                    const bottom = (i === gridHeight - 1) ? grid[i - 1][j] : grid[i + 1][j];
+                    
+                    // 拉普拉斯算子计算热扩散
+                    const laplacian = (left + right + top + bottom - 4 * current);
+                    nextGrid[i][j] = current + diffusionRate * laplacian;
+                }
+            }
+            
+            // 交换网格
+            [grid, nextGrid] = [nextGrid, grid];
+        }
+        
+        // 绘制热图
+        function draw() {
+            // 找出最大和最小温度值用于动态色阶
+            let minTemp = Number.MAX_VALUE;
+            let maxTemp = Number.MIN_VALUE;
+            
+            for (let i = 0; i < gridHeight; i++) {
+                for (let j = 0; j < gridWidth; j++) {
+                    minTemp = Math.min(minTemp, grid[i][j]);
+                    maxTemp = Math.max(maxTemp, grid[i][j]);
+                }
+            }
+            
+            // 防止除零错误
+            if (maxTemp === minTemp) {
+                maxTemp = minTemp + 1;
+            }
+            
+            // 绘制每个单元格
+            for (let i = 0; i < gridHeight; i++) {
+                for (let j = 0; j < gridWidth; j++) {
+                    const temp = grid[i][j];
+                    const normalizedTemp = (temp - minTemp) / (maxTemp - minTemp);
+                    
+                    // 使用HSL色彩模式，从蓝色(240度)到红色(0度)
+                    const hue = 240 * (1 - normalizedTemp);
+                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                    ctx.fillRect(j * dx, i * dy, dx, dy);
+                }
+            }
+            
+            // 显示色阶范围
+            ctx.fillStyle = 'black';
+            ctx.font = '12px Arial';
+            ctx.fillText(`温度范围: ${minTemp.toFixed(2)} - ${maxTemp.toFixed(2)}`, 10, 15);
+        }
+        
+        // 动画循环
+        function animate() {
+            if (!isSimulating) return;
+            
+            diffuse();
+            draw();
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // 初始化
+        function init() {
+            initializeGrid();
+            draw();
+            
+            // 更新UI显示
+            document.getElementById('sourceXValue').textContent = sourceX.toFixed(2);
+            document.getElementById('sourceYValue').textContent = sourceY.toFixed(2);
+            document.getElementById('sourceAngleValue').textContent = sourceAngle + '°';
+            document.getElementById('diffusionRateValue').textContent = diffusionRate.toFixed(2);
+            document.getElementById('sourceStrengthValue').textContent = sourceStrength;
+            
+            // 添加事件监听器
+            document.getElementById('sourceX').addEventListener('input', function(e) {
+                sourceX = parseFloat(e.target.value);
+                document.getElementById('sourceXValue').textContent = sourceX.toFixed(2);
+            });
+            
+            document.getElementById('sourceY').addEventListener('input', function(e) {
+                sourceY = parseFloat(e.target.value);
+                document.getElementById('sourceYValue').textContent = sourceY.toFixed(2);
+            });
+            
+            document.getElementById('sourceAngle').addEventListener('input', function(e) {
+                sourceAngle = parseFloat(e.target.value);
+                document.getElementById('sourceAngleValue').textContent = sourceAngle + '°';
+            });
+            
+            document.getElementById('diffusionRate').addEventListener('input', function(e) {
+                diffusionRate = parseFloat(e.target.value);
+                document.getElementById('diffusionRateValue').textContent = diffusionRate.toFixed(2);
+            });
+            
+            document.getElementById('sourceStrength').addEventListener('input', function(e) {
+                sourceStrength = parseFloat(e.target.value);
+                document.getElementById('sourceStrengthValue').textContent = sourceStrength;
+            });
+            
+            document.getElementById('startButton').addEventListener('click', function() {
+                if (!isSimulating) {
+                    isSimulating = true;
+                    animate();
+                }
+            });
+            
+            document.getElementById('stopButton').addEventListener('click', function() {
+                isSimulating = false;
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            });
+            
+            document.getElementById('resetButton').addEventListener('click', function() {
+                isSimulating = false;
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                initializeGrid();
+                draw();
+            });
+        }
+        
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>

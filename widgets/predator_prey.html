@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Predator-Prey Flocking Dynamics</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f5f5f5;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+      max-width: 800px;
+    }
+    .control-group {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    label {
+      display: inline-block;
+      width: 200px;
+      margin-right: 10px;
+    }
+    input[type="range"] {
+      width: 150px;
+    }
+    .value-display {
+      display: inline-block;
+      width: 50px;
+      text-align: right;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .stats {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Predator-Prey Flocking Dynamics</h1>
+  
+  <div class="controls">
+    <div class="control-group">
+      <h3>Simulation Controls</h3>
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+    
+    <div class="control-group">
+      <h3>Population Parameters</h3>
+      <div>
+        <label for="preyCount">Initial Prey Count:</label>
+        <input type="range" id="preyCount" min="10" max="200" value="100">
+        <span id="preyCountValue" class="value-display">100</span>
+      </div>
+      <div>
+        <label for="predatorCount">Initial Predator Count:</label>
+        <input type="range" id="predatorCount" min="5" max="100" value="30">
+        <span id="predatorCountValue" class="value-display">30</span>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <h3>Birth/Death Parameters</h3>
+      <div>
+        <label for="alpha">α (Prey birth rate):</label>
+        <input type="range" id="alpha" min="0" max="0.2" step="0.01" value="0.05">
+        <span id="alphaValue" class="value-display">0.05</span>
+      </div>
+      <div>
+        <label for="beta">β (Predation rate):</label>
+        <input type="range" id="beta" min="0" max="0.2" step="0.01" value="0.1">
+        <span id="betaValue" class="value-display">0.1</span>
+      </div>
+      <div>
+        <label for="gamma">γ (Predator death rate):</label>
+        <input type="range" id="gamma" min="0" max="0.2" step="0.01" value="0.1">
+        <span id="gammaValue" class="value-display">0.1</span>
+      </div>
+      <div>
+        <label for="delta">δ (Conversion efficiency):</label>
+        <input type="range" id="delta" min="0" max="0.2" step="0.01" value="0.05">
+        <span id="deltaValue" class="value-display">0.05</span>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <h3>Movement Parameters</h3>
+      <div>
+        <label for="chi">χ (Prey evade predator):</label>
+        <input type="range" id="chi" min="0" max="2" step="0.1" value="1">
+        <span id="chiValue" class="value-display">1</span>
+      </div>
+      <div>
+        <label for="eta">η (Predator chase prey):</label>
+        <input type="range" id="eta" min="0" max="2" step="0.1" value="0.8">
+        <span id="etaValue" class="value-display">0.8</span>
+      </div>
+      <div>
+        <label for="preyFlockStrength">Prey flocking strength:</label>
+        <input type="range" id="preyFlockStrength" min="0" max="1" step="0.05" value="0.3">
+        <span id="preyFlockStrengthValue" class="value-display">0.3</span>
+      </div>
+      <div>
+        <label for="predatorFlockStrength">Predator flocking strength:</label>
+        <input type="range" id="predatorFlockStrength" min="0" max="1" step="0.05" value="0.2">
+        <span id="predatorFlockStrengthValue" class="value-display">0.2</span>
+      </div>
+    </div>
+  </div>
+  
+  <canvas id="simulationCanvas" width="800" height="600"></canvas>
+  
+  <div class="stats">
+    <p>Prey population: <span id="preyPopulation">100</span> | Predator population: <span id="predatorPopulation">30</span></p>
+  </div>
+
+  <script>
+    /* <answer>
+Given the discussion, let's succinctly summarize the predator-prey flock dynamics PDE system derived for two flocks with the predator-prey relationship:
+The densities of the prey and predator, \( u(\mathbf{x}, t) \) and \( v(\mathbf{x}, t) \) respectively, are governed by:
+\[
+\begin{cases}
+\frac{\partial u}{\partial t} + \nabla \cdot (\mathbf{v}_u u) = \alpha u - \beta u v, \\
+\frac{\partial v}{\partial t} + \nabla \cdot (\mathbf{v}_v v) = -\gamma v + \delta u v,
+\end{cases}
+\]
+where:
+- \( \alpha \) is the prey's birth rate in the absence of predators.
+- \( \beta \) measures the rate at which prey are lost due to predation.
+- \( -\gamma \) indicates the predator's death rate in the absence of prey.
+- \( \delta \) represents the efficiency with which consumed prey is converted into predator offspring.
+The velocity fields \( \mathbf{v}_u \) and \( \mathbf{v}_v \) that dictate the movement of individuals within the prey and predator flocks, respectively, are:
+\[
+\mathbf{v}_u(\mathbf{x}, t) = \mathbf{U}u(\mathbf{x}, t) - \chi \nabla{\mathbf{x}} v(\mathbf{x}, t),
+\]
+\[
+\mathbf{v}_v(\mathbf{x}, t) = \mathbf{U}v(\mathbf{x}, t) + \eta \nabla{\mathbf{x}} u(\mathbf{x}, t).
+\]
+Here:
+- \( \mathbf{U}_u(\mathbf{x}, t) \) represents the internal dynamics velocity field within the prey flock, accounting for their natural flocking behaviors like alignment, cohesion, and separation.
+- \( \mathbf{U}_v(\mathbf{x}, t) \) captures the analogous internal flocking behaviors within the predator population.
+- \( \chi > 0 \) is the sensitivity of the prey to the gradient of the predator density, driving their evasive movements.
+- \( \eta > 0 \) measures how sensitively predators react to the gradient of the prey density, directing their chasing behavior.
+This system combines the local movement decisions (through \( \mathbf{v}_u \) and \( \mathbf{v}_v \)) with the global population dynamics (birth, death, and interaction terms on the right side of the continuity equations), offering a comprehensive view of how predator-prey flocks might evolve and interact over time and space.
+</answer>. The final PDE system for the densities \( u(\mathbf{x}, t) \) (prey) and \( v(\mathbf{x}, t) \) (predator) is boxed as follows:
+\[
+\boxed{
+\begin{aligned}
+&\text{For the prey:} \quad \frac{\partial u}{\partial t} + \nabla \cdot \left[ \left( \mathbf{U}_u - \chi \nabla v \right) u \right] = \alpha u - \beta u v, \\
+&\text{For the predators:} \quad \frac{\partial v}{\partial t} + \nabla \cdot \left[ \left( \mathbf{U}_v + \eta \nabla u \right) v \right] = -\gamma v + \delta u v.
+\end{aligned}
+}
+\]
+These equations depict the ultra-detailed dynamics of the predator-prey interaction, including their flocking behaviors and the adjustments in their velocities in response to the density gradients of each other.
+
+根据上面的讨论，用二维平面上一些不同颜色的点来仿真以上行为 */
+    // Canvas setup
+    const canvas = document.getElementById('simulationCanvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Simulation parameters
+    let simulation = {
+      running: false,
+      prey: [],
+      predators: [],
+      // Parameters with default values
+      preyCount: 100,
+      predatorCount: 30,
+      alpha: 0.05,  // prey birth rate
+      beta: 0.1,    // predation rate
+      gamma: 0.1,   // predator death rate
+      delta: 0.05,  // conversion efficiency
+      chi: 1,       // prey sensitivity to predator gradient
+      eta: 0.8,     // predator sensitivity to prey gradient
+      preyFlockStrength: 0.3,
+      predatorFlockStrength: 0.2,
+      maxSpeed: 3,
+      perceptionRadius: 50,
+      // Animation request ID
+      animationId: null,
+      timeSinceLastUpdate: 0
+    };
+    
+    // Individual agent (prey or predator)
+    class Agent {
+      constructor(x, y, isPredator) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.isPredator = isPredator;
+        this.radius = isPredator ? 5 : 4;
+        this.color = isPredator ? 'red' : 'blue';
+        this.energy = 100; // Energy level for reproduction/survival
+      }
+      
+      update(simulation) {
+        // Calculate flocking forces
+        let align = {x: 0, y: 0};
+        let cohesion = {x: 0, y: 0};
+        let separation = {x: 0, y: 0};
+        let avoidance = {x: 0, y: 0};
+        let attraction = {x: 0, y: 0};
+        
+        const flockStrength = this.isPredator ? 
+          simulation.predatorFlockStrength : 
+          simulation.preyFlockStrength;
+        
+        // Flocking behavior - similar agents
+        const similarAgents = this.isPredator ? simulation.predators : simulation.prey;
+        let nearbyCount = 0;
+        
+        for (const other of similarAgents) {
+          if (other === this) continue;
+          
+          const dx = other.x - this.x;
+          const dy = other.y - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < simulation.perceptionRadius) {
+            // Alignment
+            align.x += other.vx;
+            align.y += other.vy;
+            
+            // Cohesion
+            cohesion.x += other.x;
+            cohesion.y += other.y;
+            
+            // Separation
+            if (distance < simulation.perceptionRadius / 2) {
+              separation.x -= dx / (distance || 1);
+              separation.y -= dy / (distance || 1);
+            }
+            
+            nearbyCount++;
+          }
+        }
+        
+        if (nearbyCount > 0) {
+          // Normalize alignment
+          const speed = Math.sqrt(align.x * align.x + align.y * align.y);
+          if (speed > 0) {
+            align.x = (align.x / speed) * simulation.maxSpeed;
+            align.y = (align.y / speed) * simulation.maxSpeed;
+          }
+          
+          // Calculate cohesion target
+          cohesion.x /= nearbyCount;
+          cohesion.y /= nearbyCount;
+          
+          cohesion.x = (cohesion.x - this.x) / 100;
+          cohesion.y = (cohesion.y - this.y) / 100;
+        }
+        
+        // Interaction between predator and prey - avoidance/attraction
+        const otherAgents = this.isPredator ? simulation.prey : simulation.predators;
+        let nearbyOtherCount = 0;
+        
+        for (const other of otherAgents) {
+          const dx = other.x - this.x;
+          const dy = other.y - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < simulation.perceptionRadius * 1.5) {
+            if (this.isPredator) {
+              // Predator is attracted to prey
+              attraction.x += dx / (distance || 1);
+              attraction.y += dy / (distance || 1);
+            } else {
+              // Prey avoids predators
+              avoidance.x -= dx / (distance || 1);
+              avoidance.y -= dy / (distance || 1);
+            }
+            nearbyOtherCount++;
+          }
+        }
+        
+        // Apply all forces
+        // Flocking behaviors (alignment, cohesion, separation)
+        this.vx += align.x * flockStrength * 0.3;
+        this.vy += align.y * flockStrength * 0.3;
+        
+        this.vx += cohesion.x * flockStrength * 0.5;
+        this.vy += cohesion.y * flockStrength * 0.5;
+        
+        this.vx += separation.x * flockStrength * 0.5;
+        this.vy += separation.y * flockStrength * 0.5;
+        
+        // Predator-prey interactions
+        if (this.isPredator) {
+          // Predator chases prey - using eta parameter
+          this.vx += attraction.x * simulation.eta * 0.5;
+          this.vy += attraction.y * simulation.eta * 0.5;
+        } else {
+          // Prey evades predators - using chi parameter
+          this.vx += avoidance.x * simulation.chi * 0.5;
+          this.vy += avoidance.y * simulation.chi * 0.5;
+        }
+        
+        // Add small random movement
+        this.vx += (Math.random() - 0.5) * 0.1;
+        this.vy += (Math.random() - 0.5) * 0.1;
+        
+        // Limit speed
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (speed > simulation.maxSpeed) {
+          this.vx = (this.vx / speed) * simulation.maxSpeed;
+          this.vy = (this.vy / speed) * simulation.maxSpeed;
+        }
+        
+        // Update position
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // Wrap around boundaries
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+        if (this.y < 0) this.y = height;
+        if (this.y > height) this.y = 0;
+        
+        // Update energy
+        if (this.isPredator) {
+          // Predators lose energy over time
+          this.energy -= simulation.gamma * 0.5;
+          
+          // Predators gain energy by being near prey
+          for (const prey of simulation.prey) {
+            const dx = prey.x - this.x;
+            const dy = prey.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < this.radius + prey.radius) {
+              this.energy += simulation.delta * 20;
+              prey.energy -= simulation.beta * 50;
+            }
+          }
+        } else {
+          // Prey gain energy over time (foraging)
+          this.energy += simulation.alpha * 0.5;
+          
+          // Prey lose energy by being near predators
+          for (const predator of simulation.predators) {
+            const dx = predator.x - this.x;
+            const dy = predator.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < this.radius + predator.radius + 2) {
+              this.energy -= simulation.beta * 10;
+            }
+          }
+        }
+        
+        // Cap energy
+        this.energy = Math.min(this.energy, 150);
+        
+        return this.energy > 0; // Return true if still alive
+      }
+      
+      draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw velocity vector
+        ctx.strokeStyle = this.isPredator ? 'rgba(255,0,0,0.3)' : 'rgba(0,0,255,0.3)';
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.vx * 3, this.y + this.vy * 3);
+        ctx.stroke();
+      }
+    }
+    
+    // Initialize agents
+    function initializeAgents() {
+      simulation.prey = [];
+      simulation.predators = [];
+      
+      // Create prey
+      for (let i = 0; i < simulation.preyCount; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        simulation.prey.push(new Agent(x, y, false));
+      }
+      
+      // Create predators
+      for (let i = 0; i < simulation.predatorCount; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        simulation.predators.push(new Agent(x, y, true));
+      }
+      
+      updatePopulationStats();
+    }
+    
+    // Main simulation loop
+    function simulationLoop(timestamp) {
+      if (!simulation.lastTimestamp) {
+        simulation.lastTimestamp = timestamp;
+      }
+      
+      const deltaTime = timestamp - simulation.lastTimestamp;
+      simulation.lastTimestamp = timestamp;
+      
+      simulation.timeSinceLastUpdate += deltaTime;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      // Update all agents
+      simulation.prey = simulation.prey.filter(prey => prey.update(simulation));
+      simulation.predators = simulation.predators.filter(predator => predator.update(simulation));
+      
+      // Process births and deaths periodically to avoid sudden population changes
+      if (simulation.timeSinceLastUpdate > 500) { // every 500ms
+        processReproduction();
+        simulation.timeSinceLastUpdate = 0;
+        updatePopulationStats();
+      }
+      
+      // Draw all agents
+      for (const prey of simulation.prey) {
+        prey.draw(ctx);
+      }
+      
+      for (const predator of simulation.predators) {
+        predator.draw(ctx);
+      }
+      
+      // Continue animation loop
+      if (simulation.running) {
+        simulation.animationId = requestAnimationFrame(simulationLoop);
+      }
+    }
+    
+    function processReproduction() {
+      // Prey reproduction based on energy
+      const newPrey = [];
+      for (const prey of simulation.prey) {
+        if (prey.energy > 120 && Math.random() < simulation.alpha) {
+          const childPrey = new Agent(
+            prey.x + (Math.random() - 0.5) * 10,
+            prey.y + (Math.random() - 0.5) * 10,
+            false
+          );
+          newPrey.push(childPrey);
+          prey.energy *= 0.7; // Reduce parent's energy after reproduction
+        }
+      }
+      
+      // Predator reproduction based on energy
+      const newPredators = [];
+      for (const predator of simulation.predators) {
+        if (predator.energy > 130 && Math.random() < simulation.delta) {
+          const childPredator = new Agent(
+            predator.x + (Math.random() - 0.5) * 10,
+            predator.y + (Math.random() - 0.5) * 10,
+            true
+          );
+          newPredators.push(childPredator);
+          predator.energy *= 0.6; // Reduce parent's energy after reproduction
+        }
+      }
+      
+      // Add new agents
+      simulation.prey = [...simulation.prey, ...newPrey];
+      simulation.predators = [...simulation.predators, ...newPredators];
+      
+      // Limit population to avoid overwhelming the browser
+      if (simulation.prey.length > 500) {
+        simulation.prey = simulation.prey.slice(0, 500);
+      }
+      
+      if (simulation.predators.length > 200) {
+        simulation.predators = simulation.predators.slice(0, 200);
+      }
+    }
+    
+    function updatePopulationStats() {
+      document.getElementById('preyPopulation').textContent = simulation.prey.length;
+      document.getElementById('predatorPopulation').textContent = simulation.predators.length;
+    }
+    
+    // UI Controls
+    document.getElementById('startBtn').addEventListener('click', () => {
+      if (!simulation.running) {
+        simulation.running = true;
+        simulation.lastTimestamp = null;
+        simulation.animationId = requestAnimationFrame(simulationLoop);
+      }
+    });
+    
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      simulation.running = false;
+      if (simulation.animationId) {
+        cancelAnimationFrame(simulation.animationId);
+      }
+    });
+    
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      simulation.running = false;
+      if (simulation.animationId) {
+        cancelAnimationFrame(simulation.animationId);
+      }
+      
+      // Get values from UI
+      simulation.preyCount = parseInt(document.getElementById('preyCount').value);
+      simulation.predatorCount = parseInt(document.getElementById('predatorCount').value);
+      
+      initializeAgents();
+    });
+    
+    // Slider event handlers
+    function setupSlider(id, property) {
+      const slider = document.getElementById(id);
+      const valueDisplay = document.getElementById(id + 'Value');
+      
+      slider.addEventListener('input', () => {
+        simulation[property] = parseFloat(slider.value);
+        valueDisplay.textContent = slider.value;
+      });
+    }
+    
+    // Setup all sliders
+    setupSlider('preyCount', 'preyCount');
+    setupSlider('predatorCount', 'predatorCount');
+    setupSlider('alpha', 'alpha');
+    setupSlider('beta', 'beta');
+    setupSlider('gamma', 'gamma');
+    setupSlider('delta', 'delta');
+    setupSlider('chi', 'chi');
+    setupSlider('eta', 'eta');
+    setupSlider('preyFlockStrength', 'preyFlockStrength');
+    setupSlider('predatorFlockStrength', 'predatorFlockStrength');
+    
+    // Initialize simulation
+    initializeAgents();
+    
+    // Draw static scene initially
+    for (const prey of simulation.prey) {
+      prey.draw(ctx);
+    }
+    
+    for (const predator of simulation.predators) {
+      predator.draw(ctx);
+    }
+  </script>
+</body>
+</html>

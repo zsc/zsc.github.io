@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flocking Simulation with Surface Tension</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+        canvas {
+            display: block;
+            background-color: #87ceeb;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h2>Flock Simulation with Surface Tension</h2>
+        <div class="slider-container">
+            <label for="kappa">Surface Tension (κ):</label>
+            <input type="range" id="kappa" min="0" max="2" step="0.1" value="0.5">
+            <span id="kappaValue">0.5</span>
+        </div>
+        <div class="slider-container">
+            <label for="alignment">Alignment Force:</label>
+            <input type="range" id="alignment" min="0" max="2" step="0.1" value="1.0">
+            <span id="alignmentValue">1.0</span>
+        </div>
+        <div class="slider-container">
+            <label for="cohesion">Cohesion Force:</label>
+            <input type="range" id="cohesion" min="0" max="2" step="0.1" value="1.0">
+            <span id="cohesionValue">1.0</span>
+        </div>
+        <div class="slider-container">
+            <label for="separation">Separation Force:</label>
+            <input type="range" id="separation" min="0" max="2" step="0.1" value="1.2">
+            <span id="separationValue">1.2</span>
+        </div>
+        <div class="slider-container">
+            <label for="birdCount">Bird Count:</label>
+            <input type="range" id="birdCount" min="50" max="500" step="50" value="200">
+            <span id="birdCountValue">200</span>
+        </div>
+        <button id="reset">Reset Simulation</button>
+    </div>
+    <canvas id="flockCanvas"></canvas>
+
+    <script>
+      /* we explored the mathematical modeling of flock dynamics and the incorporation of a surface tension-like term to control the fragmentation of flocks. The PDE system included a continuity equation and an equation for the velocity field with an added term to simulate the effect of surface tension on minimizing small-scale flock structures. From our detailed dialogue, we summarized the modified velocity equation as:
+\[ \frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla) \mathbf{u} = \int{\Omega} \psi(\mathbf{y} - \mathbf{x})(\mathbf{u}(\mathbf{y}, t) - \mathbf{u}(\mathbf{x}, t)) \rho(\mathbf{y}, t) \, d\mathbf{y} - \kappa \nabla (\nabla^2 \rho), \]
+where \( \kappa \) is the coefficient analogous to the surface tension coefficient, discouraging sharp changes in the flock's density distribution and promoting fewer, larger flocks.
+While the question did not ask for a specific quantity to solve for or a particular code to write, the central inquiry was to detail flock dynamics using PDEs and illustrate the effect of a surface tension term in reducing the number of flocks. From the analysis:
+- The continuity equation remains:
+\[ \frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{u}) = 0. \]
+- The modified velocity equation with the surface tension effect is:
+\[ \frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla) \mathbf{u} = \int{\Omega} \psi(\mathbf{y} - \mathbf{x})(\mathbf{u}(\mathbf{y}, t) - \mathbf{u}(\mathbf{x}, t)) \rho(\mathbf{y}, t) \, d\mathbf{y} - \kappa \nabla (\nabla^2 \rho). \]
+Through a linear stability analysis, the influence of the \( - \kappa \nabla (\nabla^2 \rho) \) term was shown to introduce a stabilizing effect against small-scale density fluctuations, promoting smoother flock formations.
+
+用 2D 动画仿真一个 3D 鸟群的运动（影子投射到2维表示密度），输出 single-file html */
+        const canvas = document.getElementById('flockCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Simulation parameters
+        let params = {
+            kappa: 0.5,
+            alignment: 1.0,
+            cohesion: 1.0,
+            separation: 1.2,
+            birdCount: 200,
+            perceptionRadius: 50,
+            maxSpeed: 4,
+            maxForce: 0.2,
+            edgeBehavior: 'wrap' // 'wrap' or 'bounce'
+        };
+        
+        // Initialize birds
+        let birds = [];
+        
+        // Grid for spatial partitioning to optimize neighbor search
+        const grid = {
+            cellSize: params.perceptionRadius,
+            cells: {}
+        };
+        
+        function initializeBirds() {
+            birds = [];
+            for (let i = 0; i < params.birdCount; i++) {
+                birds.push({
+                    id: i,
+                    position: {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        z: Math.random() * 200 // 3D z-coordinate
+                    },
+                    velocity: {
+                        x: (Math.random() * 2 - 1) * params.maxSpeed,
+                        y: (Math.random() * 2 - 1) * params.maxSpeed,
+                        z: (Math.random() * 2 - 1) * params.maxSpeed
+                    },
+                    acceleration: { x: 0, y: 0, z: 0 },
+                    size: 3 + Math.random() * 2
+                });
+            }
+        }
+        
+        // Update grid cells
+        function updateGrid() {
+            grid.cells = {};
+            
+            birds.forEach(bird => {
+                const cellX = Math.floor(bird.position.x / grid.cellSize);
+                const cellY = Math.floor(bird.position.y / grid.cellSize);
+                const cellZ = Math.floor(bird.position.z / grid.cellSize);
+                const cellKey = `${cellX},${cellY},${cellZ}`;
+                
+                if (!grid.cells[cellKey]) {
+                    grid.cells[cellKey] = [];
+                }
+                
+                grid.cells[cellKey].push(bird);
+            });
+        }
+        
+        // Find neighbors of a bird within perception radius
+        function getNeighbors(bird) {
+            const neighbors = [];
+            const cellX = Math.floor(bird.position.x / grid.cellSize);
+            const cellY = Math.floor(bird.position.y / grid.cellSize);
+            const cellZ = Math.floor(bird.position.z / grid.cellSize);
+            
+            // Check neighboring cells
+            for (let x = cellX - 1; x <= cellX + 1; x++) {
+                for (let y = cellY - 1; y <= cellY + 1; y++) {
+                    for (let z = cellZ - 1; z <= cellZ + 1; z++) {
+                        const cellKey = `${x},${y},${z}`;
+                        
+                        if (grid.cells[cellKey]) {
+                            grid.cells[cellKey].forEach(neighbor => {
+                                if (neighbor.id !== bird.id) {
+                                    const dx = neighbor.position.x - bird.position.x;
+                                    const dy = neighbor.position.y - bird.position.y;
+                                    const dz = neighbor.position.z - bird.position.z;
+                                    const distanceSquared = dx * dx + dy * dy + dz * dz;
+                                    
+                                    if (distanceSquared < params.perceptionRadius * params.perceptionRadius) {
+                                        neighbors.push({
+                                            bird: neighbor,
+                                            distance: Math.sqrt(distanceSquared)
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return neighbors;
+        }
+        
+        // Apply alignment force - steer towards average heading of neighbors
+        function align(bird, neighbors) {
+            if (neighbors.length === 0) return { x: 0, y: 0, z: 0 };
+            
+            const steering = { x: 0, y: 0, z: 0 };
+            
+            neighbors.forEach(n => {
+                steering.x += n.bird.velocity.x;
+                steering.y += n.bird.velocity.y;
+                steering.z += n.bird.velocity.z;
+            });
+            
+            if (neighbors.length > 0) {
+                steering.x /= neighbors.length;
+                steering.y /= neighbors.length;
+                steering.z /= neighbors.length;
+                
+                // Scale to max speed
+                const mag = Math.sqrt(steering.x * steering.x + steering.y * steering.y + steering.z * steering.z);
+                if (mag > 0) {
+                    steering.x = (steering.x / mag) * params.maxSpeed;
+                    steering.y = (steering.y / mag) * params.maxSpeed;
+                    steering.z = (steering.z / mag) * params.maxSpeed;
+                }
+                
+                // Subtract current velocity
+                steering.x -= bird.velocity.x;
+                steering.y -= bird.velocity.y;
+                steering.z -= bird.velocity.z;
+                
+                // Limit force
+                const forceMag = Math.sqrt(steering.x * steering.x + steering.y * steering.y + steering.z * steering.z);
+                if (forceMag > params.maxForce) {
+                    steering.x = (steering.x / forceMag) * params.maxForce;
+                    steering.y = (steering.y / forceMag) * params.maxForce;
+                    steering.z = (steering.z / forceMag) * params.maxForce;
+                }
+            }
+            
+            return steering;
+        }
+        
+        // Apply cohesion force - steer towards center of mass of neighbors
+        function cohesion(bird, neighbors) {
+            if (neighbors.length === 0) return { x: 0, y: 0, z: 0 };
+            
+            const center = { x: 0, y: 0, z: 0 };
+            
+            neighbors.forEach(n => {
+                center.x += n.bird.position.x;
+                center.y += n.bird.position.y;
+                center.z += n.bird.position.z;
+            });
+            
+            center.x /= neighbors.length;
+            center.y /= neighbors.length;
+            center.z /= neighbors.length;
+            
+            // Vector towards center
+            const desired = {
+                x: center.x - bird.position.x,
+                y: center.y - bird.position.y,
+                z: center.z - bird.position.z
+            };
+            
+            // Scale to max speed
+            const mag = Math.sqrt(desired.x * desired.x + desired.y * desired.y + desired.z * desired.z);
+            if (mag > 0) {
+                desired.x = (desired.x / mag) * params.maxSpeed;
+                desired.y = (desired.y / mag) * params.maxSpeed;
+                desired.z = (desired.z / mag) * params.maxSpeed;
+            }
+            
+            // Steering = desired - velocity
+            const steering = {
+                x: desired.x - bird.velocity.x,
+                y: desired.y - bird.velocity.y,
+                z: desired.z - bird.velocity.z
+            };
+            
+            // Limit force
+            const forceMag = Math.sqrt(steering.x * steering.x + steering.y * steering.y + steering.z * steering.z);
+            if (forceMag > params.maxForce) {
+                steering.x = (steering.x / forceMag) * params.maxForce;
+                steering.y = (steering.y / forceMag) * params.maxForce;
+                steering.z = (steering.z / forceMag) * params.maxForce;
+            }
+            
+            return steering;
+        }
+        
+        // Apply separation force - steer to avoid crowding neighbors
+        function separation(bird, neighbors) {
+            if (neighbors.length === 0) return { x: 0, y: 0, z: 0 };
+            
+            const steering = { x: 0, y: 0, z: 0 };
+            
+            neighbors.forEach(n => {
+                const diff = {
+                    x: bird.position.x - n.bird.position.x,
+                    y: bird.position.y - n.bird.position.y,
+                    z: bird.position.z - n.bird.position.z
+                };
+                
+                // Weight by distance (closer = stronger)
+                const dist = n.distance;
+                if (dist > 0) {
+                    diff.x /= dist * dist;
+                    diff.y /= dist * dist;
+                    diff.z /= dist * dist;
+                }
+                
+                steering.x += diff.x;
+                steering.y += diff.y;
+                steering.z += diff.z;
+            });
+            
+            if (neighbors.length > 0) {
+                steering.x /= neighbors.length;
+                steering.y /= neighbors.length;
+                steering.z /= neighbors.length;
+                
+                // Scale to max speed
+                const mag = Math.sqrt(steering.x * steering.x + steering.y * steering.y + steering.z * steering.z);
+                if (mag > 0) {
+                    steering.x = (steering.x / mag) * params.maxSpeed;
+                    steering.y = (steering.y / mag) * params.maxSpeed;
+                    steering.z = (steering.z / mag) * params.maxSpeed;
+                }
+                
+                // Steering = desired - velocity
+                steering.x -= bird.velocity.x;
+                steering.y -= bird.velocity.y;
+                steering.z -= bird.velocity.z;
+                
+                // Limit force
+                const forceMag = Math.sqrt(steering.x * steering.x + steering.y * steering.y + steering.z * steering.z);
+                if (forceMag > params.maxForce) {
+                    steering.x = (steering.x / forceMag) * params.maxForce;
+                    steering.y = (steering.y / forceMag) * params.maxForce;
+                    steering.z = (steering.z / forceMag) * params.maxForce;
+                }
+            }
+            
+            return steering;
+        }
+        
+        // Apply surface tension effect to reduce flock fragmentation
+        function surfaceTension(bird, neighbors) {
+            if (neighbors.length === 0 || params.kappa === 0) return { x: 0, y: 0, z: 0 };
+            
+            // Calculate local density gradient
+            const densityGradient = { x: 0, y: 0, z: 0 };
+            const localDensity = {};
+            
+            // Estimate local density distribution
+            neighbors.forEach(n => {
+                const dx = n.bird.position.x - bird.position.x;
+                const dy = n.bird.position.y - bird.position.y;
+                const dz = n.bird.position.z - bird.position.z;
+                const dist = n.distance;
+                
+                // Weight contribution by distance
+                const weight = Math.max(0, 1 - dist / params.perceptionRadius);
+                
+                densityGradient.x += dx * weight;
+                densityGradient.y += dy * weight;
+                densityGradient.z += dz * weight;
+            });
+            
+            // Calculate Laplacian of density (∇²ρ)
+            // For simplicity, we use a discrete approximation
+            let laplacian = neighbors.length / (Math.PI * params.perceptionRadius * params.perceptionRadius);
+            
+            // Surface tension force: -κ∇(∇²ρ)
+            // We approximate this by steering towards density gradient scaled by kappa
+            const steeringForce = {
+                x: -params.kappa * densityGradient.x * laplacian,
+                y: -params.kappa * densityGradient.y * laplacian,
+                z: -params.kappa * densityGradient.z * laplacian
+            };
+            
+            // Limit the force
+            const forceMag = Math.sqrt(steeringForce.x * steeringForce.x + steeringForce.y * steeringForce.y + steeringForce.z * steeringForce.z);
+            if (forceMag > params.maxForce) {
+                steeringForce.x = (steeringForce.x / forceMag) * params.maxForce;
+                steeringForce.y = (steeringForce.y / forceMag) * params.maxForce;
+                steeringForce.z = (steeringForce.z / forceMag) * params.maxForce;
+            }
+            
+            return steeringForce;
+        }
+        
+        // Handle edge behavior for birds
+        function handleEdges(bird) {
+            if (params.edgeBehavior === 'wrap') {
+                // Wrap around edges
+                if (bird.position.x < 0) bird.position.x = canvas.width;
+                if (bird.position.x > canvas.width) bird.position.x = 0;
+                if (bird.position.y < 0) bird.position.y = canvas.height;
+                if (bird.position.y > canvas.height) bird.position.y = 0;
+                if (bird.position.z < 0) bird.position.z = 200;
+                if (bird.position.z > 200) bird.position.z = 0;
+            } else if (params.edgeBehavior === 'bounce') {
+                // Bounce off edges
+                if (bird.position.x < 20) {
+                    bird.position.x = 20;
+                    bird.velocity.x *= -1;
+                }
+                if (bird.position.x > canvas.width - 20) {
+                    bird.position.x = canvas.width - 20;
+                    bird.velocity.x *= -1;
+                }
+                if (bird.position.y < 20) {
+                    bird.position.y = 20;
+                    bird.velocity.y *= -1;
+                }
+                if (bird.position.y > canvas.height - 20) {
+                    bird.position.y = canvas.height - 20;
+                    bird.velocity.y *= -1;
+                }
+                if (bird.position.z < 10) {
+                    bird.position.z = 10;
+                    bird.velocity.z *= -1;
+                }
+                if (bird.position.z > 190) {
+                    bird.position.z = 190;
+                    bird.velocity.z *= -1;
+                }
+            }
+        }
+        
+        // Create density map for shadow projection
+        function createDensityMap() {
+            const gridSize = 20;
+            const densityMap = new Array(Math.ceil(canvas.width / gridSize)).fill().map(() => 
+                new Array(Math.ceil(canvas.height / gridSize)).fill(0)
+            );
+            
+            birds.forEach(bird => {
+                const gridX = Math.floor(bird.position.x / gridSize);
+                const gridY = Math.floor(bird.position.y / gridSize);
+                
+                if (gridX >= 0 && gridX < densityMap.length && gridY >= 0 && gridY < densityMap[0].length) {
+                    densityMap[gridX][gridY] += 1 - (bird.position.z / 200);
+                }
+            });
+            
+            return { map: densityMap, gridSize };
+        }
+        
+        // Draw the simulation
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw sky gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB'); // Sky blue at top
+            gradient.addColorStop(1, '#E0F7FF'); // Lighter blue at bottom
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Create and draw density map for ground shadows
+            const densityData = createDensityMap();
+            const densityMap = densityData.map;
+            const gridSize = densityData.gridSize;
+            
+            for (let x = 0; x < densityMap.length; x++) {
+                for (let y = 0; y < densityMap[0].length; y++) {
+                    if (densityMap[x][y] > 0) {
+                        const alpha = Math.min(0.5, densityMap[x][y] * 0.2);
+                        ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+                        ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
+                    }
+                }
+            }
+            
+            // Draw ground plane
+            ctx.fillStyle = '#8FBC8F'; // Dark sea green
+            ctx.globalAlpha = 0.2;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1.0;
+            
+            // Sort birds by z-position for rendering (painter's algorithm)
+            const sortedBirds = [...birds].sort((a, b) => b.position.z - a.position.z);
+            
+            // Draw birds
+            sortedBirds.forEach(bird => {
+                // Calculate bird size based on z-position (perspective)
+                const scale = 0.5 + ((200 - bird.position.z) / 200);
+                const size = bird.size * scale;
+                
+                // Calculate bird color based on z-position
+                const brightness = Math.max(50, 150 - bird.position.z * 0.5);
+                
+                // Draw bird body
+                ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness + 30})`;
+                ctx.beginPath();
+                
+                // Direction of bird
+                const angle = Math.atan2(bird.velocity.y, bird.velocity.x);
+                
+                // Bird shape (triangular for simplicity)
+                ctx.save();
+                ctx.translate(bird.position.x, bird.position.y);
+                ctx.rotate(angle);
+                
+                // Draw bird body
+                ctx.beginPath();
+                ctx.moveTo(size * 2, 0);
+                ctx.lineTo(-size, size);
+                ctx.lineTo(-size, -size);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            });
+            
+            // Draw info text
+            ctx.fillStyle = 'black';
+            ctx.font = '14px Arial';
+            ctx.fillText(`Birds: ${birds.length}, Surface Tension: ${params.kappa.toFixed(1)}`, 10, canvas.height - 20);
+        }
+        
+        // Update simulation
+        function update() {
+            // Update spatial partitioning grid
+            updateGrid();
+            
+            // Update each bird
+            birds.forEach(bird => {
+                const neighbors = getNeighbors(bird);
+                
+                // Calculate forces
+                const alignForce = align(bird, neighbors);
+                const cohesionForce = cohesion(bird, neighbors);
+                const separationForce = separation(bird, neighbors);
+                const surfaceForce = surfaceTension(bird, neighbors);
+                
+                // Apply forces with weights
+                bird.acceleration.x = alignForce.x * params.alignment + 
+                                     cohesionForce.x * params.cohesion + 
+                                     separationForce.x * params.separation +
+                                     surfaceForce.x;
+                
+                bird.acceleration.y = alignForce.y * params.alignment + 
+                                     cohesionForce.y * params.cohesion + 
+                                     separationForce.y * params.separation +
+                                     surfaceForce.y;
+                
+                bird.acceleration.z = alignForce.z * params.alignment + 
+                                     cohesionForce.z * params.cohesion + 
+                                     separationForce.z * params.separation +
+                                     surfaceForce.z;
+                
+                // Update velocity
+                bird.velocity.x += bird.acceleration.x;
+                bird.velocity.y += bird.acceleration.y;
+                bird.velocity.z += bird.acceleration.z;
+                
+                // Limit speed
+                const speed = Math.sqrt(bird.velocity.x * bird.velocity.x + 
+                                       bird.velocity.y * bird.velocity.y + 
+                                       bird.velocity.z * bird.velocity.z);
+                                       
+                if (speed > params.maxSpeed) {
+                    bird.velocity.x = (bird.velocity.x / speed) * params.maxSpeed;
+                    bird.velocity.y = (bird.velocity.y / speed) * params.maxSpeed;
+                    bird.velocity.z = (bird.velocity.z / speed) * params.maxSpeed;
+                }
+                
+                // Update position
+                bird.position.x += bird.velocity.x;
+                bird.position.y += bird.velocity.y;
+                bird.position.z += bird.velocity.z;
+                
+                // Handle edges
+                handleEdges(bird);
+                
+                // Reset acceleration
+                bird.acceleration.x = 0;
+                bird.acceleration.y = 0;
+                bird.acceleration.z = 0;
+            });
+        }
+        
+        // Animation loop
+        function animate() {
+            update();
+            draw();
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize and start simulation
+        initializeBirds();
+        animate();
+        
+        // Handle UI controls
+        document.getElementById('kappa').addEventListener('input', function() {
+            params.kappa = parseFloat(this.value);
+            document.getElementById('kappaValue').textContent = params.kappa.toFixed(1);
+        });
+        
+        document.getElementById('alignment').addEventListener('input', function() {
+            params.alignment = parseFloat(this.value);
+            document.getElementById('alignmentValue').textContent = params.alignment.toFixed(1);
+        });
+        
+        document.getElementById('cohesion').addEventListener('input', function() {
+            params.cohesion = parseFloat(this.value);
+            document.getElementById('cohesionValue').textContent = params.cohesion.toFixed(1);
+        });
+        
+        document.getElementById('separation').addEventListener('input', function() {
+            params.separation = parseFloat(this.value);
+            document.getElementById('separationValue').textContent = params.separation.toFixed(1);
+        });
+        
+        document.getElementById('birdCount').addEventListener('input', function() {
+            params.birdCount = parseInt(this.value);
+            document.getElementById('birdCountValue').textContent = params.birdCount;
+        });
+        
+        document.getElementById('reset').addEventListener('click', function() {
+            initializeBirds();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

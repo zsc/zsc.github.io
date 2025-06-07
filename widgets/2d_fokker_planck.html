@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SDE Monte Carlo vs PDF FDM Animation</title>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; font-family: sans-serif; }
+        canvas { border: 1px solid black; background-color: white; }
+        #controls { margin-top: 10px; }
+        #info { margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        Simulating 2D Ornstein-Uhlenbeck process: dX = -θXdt + σdW <br>
+        Red dots: Monte Carlo simulation of SDE. Color heatmap: FDM solution of the Fokker-Planck equation (PDF).
+    </div>
+    <canvas id="simulationCanvas"></canvas>
+    <div id="controls">
+        <span id="timeDisplay">Time: 0.00</span>
+    </div>
+
+    <script>
+        /* 生成一个 2D 动画，同时用 monte carlo 仿真 SDE（以点表示），和用 FDM 仿真对应的 PDF（以颜色表示 prob. density）。两者的实现逻辑要独立，因为demo 的目的是验证两者的一致性。
+输出 single-file html. Answer in English. */
+        // --- Configuration ---
+        const config = {
+            canvasWidth: 600,
+            canvasHeight: 600,
+            domainMinX: -3.0, // Min X value for simulation domain
+            domainMaxX: 3.0,  // Max X value
+            domainMinY: -3.0, // Min Y value
+            domainMaxY: 3.0,  // Max Y value
+
+            // SDE parameters
+            sde: {
+                numParticles: 300,      // Number of particles for Monte Carlo
+                thetaX: 0.5,            // Mean reversion strength for X
+                thetaY: 0.5,            // Mean reversion strength for Y
+                sigmaX: 0.5,            // Volatility for X
+                sigmaY: 0.5,            // Volatility for Y
+                initialX: 0.0,          // Initial X position of particles
+                initialY: 0.0,          // Initial Y position of particles
+                particleColor: 'rgba(255, 0, 0, 0.7)', // Red for particles
+                particleRadius: 2
+            },
+
+            // FDM parameters
+            fdm: {
+                gridSizeX: 60,          // Number of grid cells in X dimension
+                gridSizeY: 60,          // Number of grid cells in Y dimension
+                thetaX: 0.5,            // Same as SDE for consistency
+                thetaY: 0.5,
+                sigmaX: 0.5,
+                sigmaY: 0.5,
+                initialPdfCenterX: 0.0, // Center of initial PDF peak (simulation coordinates)
+                initialPdfCenterY: 0.0,
+                dt: 0.002,              // FDM time step (must be small for stability)
+                                        // Stability requires dt < dx^2 / (2*D) and dt < dx/v_max
+                // PDF color: white (low density) to blue (high density)
+                pdfColorHigh: { r: 0, g: 0, b: 255 },    // Color for max density
+                pdfColorLow: { r: 255, g: 255, b: 255 } // Color for zero density
+            },
+            
+            simulationTimeStepPerFrame: 0.02 // How much simulation time advances per animation frame
+        };
+
+        // Derived FDM parameters
+        config.fdm.dx = (config.domainMaxX - config.domainMinX) / config.fdm.gridSizeX; // Cell width
+        config.fdm.dy = (config.domainMaxY - config.domainMinY) / config.fdm.gridSizeY; // Cell height
+        config.fdm.Dx = config.fdm.sigmaX * config.fdm.sigmaX / 2.0; // Diffusion coefficient D = sigma^2 / 2 for X
+        config.fdm.Dy = config.fdm.sigmaY * config.fdm.sigmaY / 2.0; // Diffusion coefficient D = sigma^2 / 2 for Y
+        // Number of FDM steps per animation frame to match simulationTimeStepPerFrame
+        config.fdm.stepsPerFrame = Math.round(config.simulationTimeStepPerFrame / config.fdm.dt);
+
+
+        // --- Canvas Setup ---
+        const canvas = document.getElementById('simulationCanvas');
+        canvas.width = config.canvasWidth;
+        canvas.height = config.canvasHeight;
+        const ctx = canvas.getContext('2d');
+        const timeDisplay = document.getElementById('timeDisplay');
+        let simTime = 0; // Total elapsed simulation time
+
+        // --- Utility: Standard Normal Random Number (Box-Muller Transform) ---
+        // Returns an array [n1, n2] of two independent standard normal variates.
+        function randn_bm() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+            while (v === 0) v = Math.random();
+            const R = Math.sqrt(-2.0 * Math.log(u));
+            const Theta = 2.0 * Math.PI * v;
+            return [R * Math.cos(Theta), R * Math.sin(Theta)];
+        }
+
+        // --- SDE Simulator ---
+        class SdeSimulator {
+            constructor(params, domainParams) {
+                this.params = params;
+                this.domain = domainParams; // For coordinate mapping and context
+                this.particles = [];
+                this.init();
+            }
+
+            init() {
+                this.particles = [];
+                for (let i = 0; i < this.params.numParticles; i++) {
+                    this.particles.push({ x: this.params.initialX, y: this.params.initialY });
+                }
+            }
+
+            // Advance simulation by one SDE time step (config.simulationTimeStepPerFrame)
+            step() {
+                const dt = config.simulationTimeStepPerFrame; // SDE uses the full frame's time step
+                const sqrt_dt = Math.sqrt(dt);
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
+                    const [randN1, randN2] = randn_bm(); // Get two independent random numbers
+
+                    // Euler-Maruyama update for dX = -theta*X*dt + sigma*dW
+                    p.x += -this.params.thetaX * p.x * dt + this.params.sigmaX * sqrt_dt * randN1;
+                    p.y += -this.params.thetaY * p.y * dt + this.params.sigmaY * sqrt_dt * randN2;
+                }
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = this.params.particleColor;
+                for (const p of this.particles) {
+                    // Map simulation coordinates to canvas coordinates
+                    const canvasX = ((p.x - this.domain.domainMinX) / (this.domain.domainMaxX - this.domain.domainMinX)) * config.canvasWidth;
+                    // Canvas Y is inverted (0 at top)
+                    const canvasY = config.canvasHeight - (((p.y - this.domain.domainMinY) / (this.domain.domainMaxY - this.domain.domainMinY)) * config.canvasHeight);
+                    
+                    ctx.beginPath();
+                    ctx.arc(canvasX, canvasY, this.params.particleRadius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // --- FDM Simulator (Fokker-Planck Equation) ---
+        class FdmSimulator {
+            constructor(params, domainParams) {
+                this.params = params;
+                this.domain = domainParams;
+                // Initialize 2D arrays for current PDF and the next time step's PDF
+                this.pdfGrid = this.createGrid();
+                this.nextPdfGrid = this.createGrid(); // Buffer for updates
+                this.init();
+            }
+
+            createGrid() {
+                // Creates a 2D array initialized to 0.0
+                return Array(this.params.gridSizeX).fill(null).map(() => Array(this.params.gridSizeY).fill(0.0));
+            }
+
+            init() {
+                // Initialize PDF as a narrow peak (approx. delta function) at (initialPdfCenterX, initialPdfCenterY)
+                // Find grid cell corresponding to the peak center
+                const peakGridX = Math.floor((this.params.initialPdfCenterX - this.domain.domainMinX) / this.params.dx);
+                const peakGridY = Math.floor((this.params.initialPdfCenterY - this.domain.domainMinY) / this.params.dy);
+
+                for (let i = 0; i < this.params.gridSizeX; i++) {
+                    for (let j = 0; j < this.params.gridSizeY; j++) {
+                        this.pdfGrid[i][j] = 0.0;
+                    }
+                }
+                
+                // Set the peak if it's within grid boundaries
+                if (peakGridX >= 0 && peakGridX < this.params.gridSizeX && 
+                    peakGridY >= 0 && peakGridY < this.params.gridSizeY) {
+                    // Value set so that total probability (sum of p_ij * dx * dy) is 1
+                    this.pdfGrid[peakGridX][peakGridY] = 1.0 / (this.params.dx * this.params.dy); 
+                }
+                this.normalize(); // Ensure total probability is 1
+            }
+            
+            normalize() {
+                let sumP_times_area = 0;
+                for (let i = 0; i < this.params.gridSizeX; i++) {
+                    for (let j = 0; j < this.params.gridSizeY; j++) {
+                        sumP_times_area += this.pdfGrid[i][j];
+                    }
+                }
+                sumP_times_area *= (this.params.dx * this.params.dy); // This is the integral of PDF
+
+                if (sumP_times_area === 0) return; // Avoid division by zero if grid is empty
+
+                const normFactor = 1.0 / sumP_times_area;
+                for (let i = 0; i < this.params.gridSizeX; i++) {
+                    for (let j = 0; j < this.params.gridSizeY; j++) {
+                        this.pdfGrid[i][j] *= normFactor;
+                    }
+                }
+            }
+
+            // Advance simulation by one FDM time step (this.params.dt)
+            step() {
+                const dt = this.params.dt;
+                const dx = this.params.dx;
+                const dy = this.params.dy;
+                const Nx = this.params.gridSizeX;
+                const Ny = this.params.gridSizeY;
+
+                // Update interior points first, storing results in nextPdfGrid
+                for (let i = 1; i < Nx - 1; i++) { 
+                    for (let j = 1; j < Ny - 1; j++) {
+                        const p_ij = this.pdfGrid[i][j];
+                        const p_ip1j = this.pdfGrid[i+1][j];
+                        const p_im1j = this.pdfGrid[i-1][j];
+                        const p_ijp1 = this.pdfGrid[i][j+1];
+                        const p_ijm1 = this.pdfGrid[i][j-1];
+
+                        // x and y coordinates at grid cell (i,j)
+                        // Note: x_i is center of cell i, y_j is center of cell j.
+                        // For FDM terms like x * dp/dx, it's common to use x_i.
+                        const x_i = this.domain.domainMinX + (i + 0.5) * dx; 
+                        const y_j = this.domain.domainMinY + (j + 0.5) * dy;
+
+                        // Central differences for spatial derivatives
+                        const dp_dx = (p_ip1j - p_im1j) / (2 * dx);
+                        const d2p_dx2 = (p_ip1j - 2 * p_ij + p_im1j) / (dx * dx);
+                        const dp_dy = (p_ijp1 - p_ijm1) / (2 * dy);
+                        const d2p_dy2 = (p_ijp1 - 2 * p_ij + p_ijm1) / (dy * dy);
+
+                        // Fokker-Planck terms: ∂p/∂t = θ_x(p + x ∂p/∂x) + θ_y(p + y ∂p/∂y) + D_x ∂²p/∂x² + D_y ∂²p/∂y²
+                        const drift_x_term = this.params.thetaX * (p_ij + x_i * dp_dx);
+                        const drift_y_term = this.params.thetaY * (p_ij + y_j * dp_dy);
+                        const diffusion_x_term = this.params.Dx * d2p_dx2;
+                        const diffusion_y_term = this.params.Dy * d2p_dy2;
+                        
+                        this.nextPdfGrid[i][j] = p_ij + dt * (drift_x_term + drift_y_term + diffusion_x_term + diffusion_y_term);
+                        
+                        // Ensure non-negativity (numerical errors can sometimes cause small negative values)
+                        if (this.nextPdfGrid[i][j] < 0) this.nextPdfGrid[i][j] = 0;
+                    }
+                }
+                
+                // Apply boundary conditions (zero density at edges)
+                // For explicit scheme, we can just set boundary cells of nextPdfGrid to 0.
+                for (let i = 0; i < Nx; i++) {
+                    this.nextPdfGrid[i][0] = 0; 
+                    this.nextPdfGrid[i][Ny-1] = 0;
+                }
+                for (let j = 0; j < Ny; j++) {
+                    this.nextPdfGrid[0][j] = 0; 
+                    this.nextPdfGrid[Nx-1][j] = 0;
+                }
+
+                // Swap grids for the next iteration
+                [this.pdfGrid, this.nextPdfGrid] = [this.nextPdfGrid, this.pdfGrid];
+                
+                this.normalize(); // Re-normalize after each step to conserve probability
+            }
+
+            draw(ctx) {
+                const cellWidthCanvas = config.canvasWidth / this.params.gridSizeX;
+                const cellHeightCanvas = config.canvasHeight / this.params.gridSizeY;
+
+                let maxPdfVal = 0; // Find max PDF value for color scaling
+                for (let i = 0; i < this.params.gridSizeX; i++) {
+                    for (let j = 0; j < this.params.gridSizeY; j++) {
+                        if (this.pdfGrid[i][j] > maxPdfVal) {
+                            maxPdfVal = this.pdfGrid[i][j];
+                        }
+                    }
+                }
+                if (maxPdfVal === 0) maxPdfVal = 1; // Avoid division by zero if grid is all zeros
+
+                for (let i = 0; i < this.params.gridSizeX; i++) {
+                    for (let j = 0; j < this.params.gridSizeY; j++) {
+                        const p_val = this.pdfGrid[i][j];
+                        // Intensity for color, normalized by max PDF value
+                        const intensity = Math.min(1.0, Math.max(0.0, p_val / maxPdfVal)); 
+
+                        // Interpolate color between low and high density colors
+                        const r = Math.floor(this.params.pdfColorLow.r * (1 - intensity) + this.params.pdfColorHigh.r * intensity);
+                        const g = Math.floor(this.params.pdfColorLow.g * (1 - intensity) + this.params.pdfColorHigh.g * intensity);
+                        const b = Math.floor(this.params.pdfColorLow.b * (1 - intensity) + this.params.pdfColorHigh.b * intensity);
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+
+                        const canvasX = i * cellWidthCanvas;
+                        // PDF grid y-index j corresponds to increasing y-coordinate in simulation.
+                        // Canvas y-coordinate increases downwards, so we invert.
+                        const canvasY = config.canvasHeight - (j + 1) * cellHeightCanvas;
+                        
+                        ctx.fillRect(canvasX, canvasY, cellWidthCanvas, cellHeightCanvas);
+                    }
+                }
+            }
+        }
+
+        // --- Main Simulation & Animation Loop ---
+        const sdeSim = new SdeSimulator(config.sde, config);
+        const fdmSim = new FdmSimulator(config.fdm, config);
+
+        function animate(timestamp) {
+            // Advance SDE simulation by one step
+            sdeSim.step(); 
+
+            // Advance FDM simulation by multiple smaller steps to match the SDE's time progression
+            for (let k = 0; k < config.fdm.stepsPerFrame; k++) {
+                fdmSim.step(); 
+            }
+            
+            simTime += config.simulationTimeStepPerFrame; // Increment total simulation time
+            timeDisplay.textContent = `Time: ${simTime.toFixed(2)}`;
+
+            // Clear canvas for redrawing
+            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+            
+            // Draw FDM (PDF heatmap) first, as it's the background
+            fdmSim.draw(ctx);
+
+            // Draw SDE (particles) on top of the PDF
+            sdeSim.draw(ctx);
+
+            requestAnimationFrame(animate); // Request the next animation frame
+        }
+
+        // Start the animation loop
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>
+

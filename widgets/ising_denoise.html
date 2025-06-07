@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Ising Model Denoising</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f0f0f0; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3 { text-align: center; color: #333; }
+        .controls, .params, .solvers, .canvases-container, .animation-controls {
+            margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;
+        }
+        label { display: inline-block; margin-right: 10px; margin-bottom: 8px; }
+        input[type="text"], input[type="number"] {
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 80px;
+        }
+        input[type="range"] { vertical-align: middle; }
+        button {
+            padding: 10px 15px; background-color: #007bff; color: white; border: none;
+            border-radius: 4px; cursor: pointer; margin-right: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        canvas { border: 1px solid black; display: block; margin: 10px auto; }
+        .canvases-container { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .canvas-group { text-align: center; margin: 10px; }
+        #status { margin-top:10px; padding:10px; background-color:#e9ecef; border-radius:4px; text-align: center; }
+        .animation-controls { display: none; } /* Initially hidden */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>2D Ising Model Image Denoising</h1>
+
+    <div class="controls">
+        <h2>Image Generation</h2>
+        <label>Text: <input type="text" id="inputText" value="你好 AB"></label>
+        <label>Canvas Size: <input type="number" id="canvasSize" value="64" step="8"></label>
+        <label>Font Size (px): <input type="number" id="fontSize" value="24" step="1"></label>
+        <label>Noise Level (0-1): <input type="range" id="noiseLevel" min="0" max="1" step="0.05" value="0.2">
+            <span id="noiseLevelValue">0.2</span>
+        </label>
+        <button id="generateBtn">Generate Noisy Image</button>
+    </div>
+
+    <div class="params">
+        <h2>Ising Model Parameters</h2>
+        <label>J (Coupling): <input type="number" id="paramJ" value="1.0" step="0.1"></label>
+        <label>H<sub>ext</sub> Strength: <input type="number" id="paramH" value="2.0" step="0.1"></label>
+        <label>Initial Temp (T<sub>0</sub>): <input type="number" id="initialT" value="3.0" step="0.1"></label>
+        <label>Final Temp (T<sub>f</sub>): <input type="number" id="finalT" value="0.1" step="0.01"></label>
+        <label>Cooling Rate (alpha): <input type="number" id="coolingRate" value="0.95" step="0.005" min="0.8" max="0.999"></label>
+        <label>MC Sweeps/Temp: <input type="number" id="sweepsPerTemp" value="1" step="1" min="1"></label>
+    </div>
+
+    <div class="solvers">
+        <h2>Denoising Solvers</h2>
+        <button id="denoiseVanillaBtn" disabled>Denoise (Vanilla MMC)</button>
+        <button id="denoiseGibbsBtn" disabled>Denoise (Gibbs Sampler)</button>
+    </div>
+
+    <div id="status">Status: Idle. Generate an image first.</div>
+
+    <div class="canvases-container">
+        <div class="canvas-group">
+            <h3>Original</h3>
+            <canvas id="originalCanvas"></canvas>
+        </div>
+        <div class="canvas-group">
+            <h3>Noisy</h3>
+            <canvas id="noisyCanvas"></canvas>
+        </div>
+        <div class="canvas-group">
+            <h3>Denoised</h3>
+            <canvas id="denoisedCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="animation-controls" id="animationControls">
+        <h3>Animation Playback</h3>
+        <button id="playBtn">Play</button>
+        <button id="pauseBtn">Pause</button>
+        <input type="range" id="frameSlider" min="0" max="100" value="0" style="width: 70%;">
+        Frame: <span id="currentFrameDisplay">0</span> / <span id="totalFramesDisplay">0</span>
+        (Temp: <span id="tempDisplay">N/A</span>)
+    </div>
+</div>
+
+<script>
+    // single-file html 实现用 2D ising model 给二值图像去噪，求解包括 vanila 和 Hamiltonian Monte Carlo  两个变体。题目用英文字母汉字加上随机噪声生成（噪声程度可控），作为 ising model 的 external potential。所有求解在后台无可视化快速进行，但存下中间结果可以变成动画回放。
+    // --- DOM Elements ---
+    const inputText = document.getElementById('inputText');
+    const canvasSizeInput = document.getElementById('canvasSize');
+    const fontSizeInput = document.getElementById('fontSize');
+    const noiseLevelSlider = document.getElementById('noiseLevel');
+    const noiseLevelValue = document.getElementById('noiseLevelValue');
+    const generateBtn = document.getElementById('generateBtn');
+
+    const paramJInput = document.getElementById('paramJ');
+    const paramHInput = document.getElementById('paramH');
+    const initialTInput = document.getElementById('initialT');
+    const finalTInput = document.getElementById('finalT');
+    const coolingRateInput = document.getElementById('coolingRate');
+    const sweepsPerTempInput = document.getElementById('sweepsPerTemp');
+
+    const denoiseVanillaBtn = document.getElementById('denoiseVanillaBtn');
+    const denoiseGibbsBtn = document.getElementById('denoiseGibbsBtn');
+
+    const originalCanvas = document.getElementById('originalCanvas');
+    const noisyCanvas = document.getElementById('noisyCanvas');
+    const denoisedCanvas = document.getElementById('denoisedCanvas');
+
+    const animationControlsDiv = document.getElementById('animationControls');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const frameSlider = document.getElementById('frameSlider');
+    const currentFrameDisplay = document.getElementById('currentFrameDisplay');
+    const totalFramesDisplay = document.getElementById('totalFramesDisplay');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const statusDiv = document.getElementById('status');
+
+    // --- Global State ---
+    let originalSpins = null;
+    let noisySpins = null; // This will be the one passed as external field reference
+    let currentSpins = null; // This will be the one evolving
+    let width = 0;
+    let height = 0;
+    let animationFrames = [];
+    let animationTemperatures = [];
+    let animationInterval = null;
+
+    // --- Helper Functions ---
+    function updateStatus(message) {
+        statusDiv.textContent = `Status: ${message}`;
+        console.log(`Status: ${message}`);
+    }
+
+    function setButtonDisabled(button, disabled) {
+        button.disabled = disabled;
+    }
+
+    noiseLevelSlider.oninput = () => {
+        noiseLevelValue.textContent = noiseLevelSlider.value;
+    };
+
+    // --- Image Generation ---
+    generateBtn.addEventListener('click', () => {
+        width = parseInt(canvasSizeInput.value);
+        height = parseInt(canvasSizeInput.value);
+        const text = inputText.value;
+        const fontSize = parseInt(fontSizeInput.value);
+        const noise = parseFloat(noiseLevelSlider.value);
+
+        updateStatus('Generating image...');
+        setButtonDisabled(generateBtn, true);
+        setButtonDisabled(denoiseVanillaBtn, true);
+        setButtonDisabled(denoiseGibbsBtn, true);
+        
+        // Use a timeout to allow UI to update status
+        setTimeout(() => {
+            originalSpins = generateBinaryImage(text, width, height, fontSize);
+            drawSpinsToCanvas(originalSpins, width, height, originalCanvas);
+
+            noisySpins = addNoise([...originalSpins], width, height, noise);
+            currentSpins = [...noisySpins]; // Initialize current spins with noisy version
+            drawSpinsToCanvas(noisySpins, width, height, noisyCanvas);
+            drawSpinsToCanvas(noisySpins, width, height, denoisedCanvas); // Show noisy initially
+
+            animationControlsDiv.style.display = 'none';
+            animationFrames = [];
+            animationTemperatures = [];
+
+            updateStatus('Image generated. Ready for denoising.');
+            setButtonDisabled(generateBtn, false);
+            setButtonDisabled(denoiseVanillaBtn, false);
+            setButtonDisabled(denoiseGibbsBtn, false);
+        }, 10);
+    });
+
+    function generateBinaryImage(text, w, h, fontSize) {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = 'white'; // Background
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = 'black'; // Text color
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, w / 2, h / 2);
+
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const spins = new Array(w * h);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            // Simple thresholding: if not white, consider it foreground
+            // Luminance could be R*0.299 + G*0.587 + B*0.114
+            // For simplicity, just check if R is less than a threshold (e.g. 128)
+            const r = imageData.data[i];
+            spins[i / 4] = (r < 128) ? 1 : -1; // +1 for foreground (text), -1 for background
+        }
+        return spins;
+    }
+
+    function addNoise(spins, w, h, noiseLevel) {
+        const newSpins = [...spins];
+        for (let i = 0; i < w * h; i++) {
+            if (Math.random() < noiseLevel) {
+                newSpins[i] *= -1; // Flip spin
+            }
+        }
+        return newSpins;
+    }
+
+    function drawSpinsToCanvas(spins, w, h, canvasElement) {
+        canvasElement.width = w;
+        canvasElement.height = h;
+        const ctx = canvasElement.getContext('2d');
+        const imageData = ctx.createImageData(w, h);
+        for (let i = 0; i < spins.length; i++) {
+            const color = (spins[i] === 1) ? 0 : 255; // 0 for black (+1), 255 for white (-1)
+            imageData.data[i * 4] = color;     // R
+            imageData.data[i * 4 + 1] = color; // G
+            imageData.data[i * 4 + 2] = color; // B
+            imageData.data[i * 4 + 3] = 255;   // Alpha
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    // --- Ising Model Logic ---
+    class IsingSolver {
+        constructor(initialSpins, externalFieldSpins, w, h, J, H_ext_strength) {
+            this.currentSpins = [...initialSpins];
+            this.externalFieldSpins = externalFieldSpins; // The noisy image acts as external field
+            this.w = w;
+            this.h = h;
+            this.J = J; // Coupling constant
+            this.H_ext_strength = H_ext_strength; // Strength of external field
+            this.N = w * h;
+        }
+
+        getSpin(x, y) {
+            // Periodic boundary conditions
+            const px = (x + this.w) % this.w;
+            const py = (y + this.h) % this.h;
+            return this.currentSpins[py * this.w + px];
+        }
+
+        getExternalFieldSpin(x, y) {
+            const px = (x + this.w) % this.w;
+            const py = (y + this.h) % this.h;
+            return this.externalFieldSpins[py * this.w + px];
+        }
+
+        // Calculate sum of neighboring spins for site (x,y)
+        sumNeighbors(x, y) {
+            return this.getSpin(x + 1, y) +
+                   this.getSpin(x - 1, y) +
+                   this.getSpin(x, y + 1) +
+                   this.getSpin(x, y - 1);
+        }
+
+        // Calculate energy change if spin (x,y) is flipped
+        deltaE_MMC(x, y) {
+            const siteSpin = this.getSpin(x, y);
+            const sum_neighbors = this.sumNeighbors(x, y);
+            const h_i = this.H_ext_strength * this.getExternalFieldSpin(x,y);
+            // dE = E_new - E_old. E = -J sum(s_i s_j) - sum(h_i s_i)
+            // If s_k flips to -s_k:
+            // Change in interaction term: 2 * J * s_k * sum_neighbors_of_k
+            // Change in external field term: 2 * h_k * s_k
+            return 2 * siteSpin * (this.J * sum_neighbors + h_i);
+        }
+
+        solveVanillaMMC(initialT, finalT, coolingRate, sweepsPerTemp) {
+            animationFrames = [];
+            animationTemperatures = [];
+            let T = initialT;
+            const iterationsPerSweep = this.N;
+
+            updateStatus(`MMC: Starting. T=${T.toFixed(3)}`);
+            animationFrames.push([...this.currentSpins]);
+            animationTemperatures.push(T);
+
+            let stepCount = 0;
+            while (T > finalT) {
+                stepCount++;
+                if (stepCount % 10 === 0) { // Update status less frequently
+                     updateStatus(`MMC: T=${T.toFixed(3)}, Step ${stepCount}`);
+                }
+
+                for (let sweep = 0; sweep < sweepsPerTemp; sweep++) {
+                    for (let i = 0; i < iterationsPerSweep; i++) {
+                        const randX = Math.floor(Math.random() * this.w);
+                        const randY = Math.floor(Math.random() * this.h);
+                        const dE = this.deltaE_MMC(randX, randY);
+                        if (dE < 0 || Math.random() < Math.exp(-dE / T)) {
+                            const index = randY * this.w + randX;
+                            this.currentSpins[index] *= -1; // Flip spin
+                        }
+                    }
+                }
+                T *= coolingRate;
+                animationFrames.push([...this.currentSpins]);
+                animationTemperatures.push(T);
+            }
+            // One final sweep at very low T (or T=finalT)
+            T = finalT > 0 ? finalT : 0.001; // Ensure T is not zero for exp
+            for (let sweep = 0; sweep < sweepsPerTemp * 2; sweep++) { // More sweeps at final T
+                 for (let i = 0; i < iterationsPerSweep; i++) {
+                    const randX = Math.floor(Math.random() * this.w);
+                    const randY = Math.floor(Math.random() * this.h);
+                    const dE = this.deltaE_MMC(randX, randY);
+                    if (dE < 0 || (T > 0 && Math.random() < Math.exp(-dE / T))) {
+                        const index = randY * this.w + randX;
+                        this.currentSpins[index] *= -1;
+                    }
+                }
+            }
+            animationFrames.push([...this.currentSpins]);
+            animationTemperatures.push(T);
+            updateStatus('MMC: Denoising complete.');
+            return this.currentSpins;
+        }
+
+        solveGibbsSampler(initialT, finalT, coolingRate, sweepsPerTemp) {
+            animationFrames = [];
+            animationTemperatures = [];
+            let T = initialT;
+
+            updateStatus(`Gibbs: Starting. T=${T.toFixed(3)}`);
+            animationFrames.push([...this.currentSpins]);
+            animationTemperatures.push(T);
+
+            let stepCount = 0;
+            const siteOrder = Array.from({length: this.N}, (_, i) => i); // For random iteration order
+
+            while (T > finalT) {
+                stepCount++;
+                 if (stepCount % 5 === 0) { // Update status less frequently
+                     updateStatus(`Gibbs: T=${T.toFixed(3)}, Step ${stepCount}`);
+                }
+                
+                for (let sweep = 0; sweep < sweepsPerTemp; sweep++) {
+                    // Shuffle site order for each sweep
+                    for (let i = siteOrder.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [siteOrder[i], siteOrder[j]] = [siteOrder[j], siteOrder[i]];
+                    }
+
+                    for (let k = 0; k < this.N; k++) {
+                        const siteIndex = siteOrder[k];
+                        const x = siteIndex % this.w;
+                        const y = Math.floor(siteIndex / this.w);
+
+                        const sum_neighbors = this.sumNeighbors(x, y);
+                        const h_i = this.H_ext_strength * this.getExternalFieldSpin(x,y);
+                        
+                        // Local field acting on spin s_i
+                        const localField = this.J * sum_neighbors + h_i;
+                        
+                        // Probability P(s_i = +1) = 1 / (1 + exp(-2 * localField / T))
+                        // (sigmoid function of localField/T)
+                        const prob_plus_one = 1.0 / (1.0 + Math.exp(-2 * localField / T));
+
+                        if (Math.random() < prob_plus_one) {
+                            this.currentSpins[siteIndex] = 1;
+                        } else {
+                            this.currentSpins[siteIndex] = -1;
+                        }
+                    }
+                }
+                T *= coolingRate;
+                animationFrames.push([...this.currentSpins]);
+                animationTemperatures.push(T);
+            }
+             // One final sweep at very low T (or T=finalT)
+            T = finalT > 0 ? finalT : 0.001; // Ensure T is not zero for exp
+            for (let sweep = 0; sweep < sweepsPerTemp * 2; sweep++) { // More sweeps at final T
+                for (let k = 0; k < this.N; k++) {
+                    const siteIndex = siteOrder[k]; // Can reuse last shuffled order or re-shuffle
+                    const x = siteIndex % this.w;
+                    const y = Math.floor(siteIndex / this.w);
+                    const sum_neighbors = this.sumNeighbors(x, y);
+                    const h_i = this.H_ext_strength * this.getExternalFieldSpin(x,y);
+                    const localField = this.J * sum_neighbors + h_i;
+                     let prob_plus_one = 0.5; // Default for T=0 or very small T
+                    if (T > 1e-9) { // Avoid division by zero or extreme exponents
+                        prob_plus_one = 1.0 / (1.0 + Math.exp(-2 * localField / T));
+                    } else { // Effectively T=0, pick state that minimizes local energy
+                        if (localField > 0) prob_plus_one = 1.0;
+                        else if (localField < 0) prob_plus_one = 0.0;
+                        else prob_plus_one = 0.5; // Degenerate
+                    }
+
+                    if (Math.random() < prob_plus_one) this.currentSpins[siteIndex] = 1;
+                    else this.currentSpins[siteIndex] = -1;
+                }
+            }
+            animationFrames.push([...this.currentSpins]);
+            animationTemperatures.push(T);
+
+            updateStatus('Gibbs: Denoising complete.');
+            return this.currentSpins;
+        }
+    }
+
+    // --- Solver Execution and Animation ---
+    function runSolver(solverFunction) {
+        if (!originalSpins) {
+            alert("Please generate an image first.");
+            return;
+        }
+        setButtonDisabled(generateBtn, true);
+        setButtonDisabled(denoiseVanillaBtn, true);
+        setButtonDisabled(denoiseGibbsBtn, true);
+        animationControlsDiv.style.display = 'none';
+        pauseAnimation(); // Stop any ongoing animation
+
+        // Use setTimeout to allow UI to update (show disabled buttons, status)
+        // before the potentially long computation starts.
+        setTimeout(() => {
+            const J = parseFloat(paramJInput.value);
+            const H_ext = parseFloat(paramHInput.value);
+            const initialT = parseFloat(initialTInput.value);
+            const finalT = parseFloat(finalTInput.value);
+            const coolingRate = parseFloat(coolingRateInput.value);
+            const sweepsPerTemp = parseInt(sweepsPerTempInput.value);
+            
+            // IMPORTANT: The external field (h_i) comes from the *original noisy image*,
+            // and the solver evolves a *copy* of the noisy image.
+            const solver = new IsingSolver(noisySpins, noisySpins, width, height, J, H_ext);
+
+            const startTime = performance.now();
+            const denoisedResult = solverFunction.call(solver, initialT, finalT, coolingRate, sweepsPerTemp);
+            const endTime = performance.now();
+            
+            updateStatus(`Denoising finished in ${(endTime - startTime).toFixed(2)} ms. Total frames: ${animationFrames.length}`);
+
+            drawSpinsToCanvas(denoisedResult, width, height, denoisedCanvas);
+            setupAnimation();
+
+            setButtonDisabled(generateBtn, false);
+            setButtonDisabled(denoiseVanillaBtn, false);
+            setButtonDisabled(denoiseGibbsBtn, false);
+        }, 10); // Small delay
+    }
+
+    denoiseVanillaBtn.addEventListener('click', () => {
+        runSolver(IsingSolver.prototype.solveVanillaMMC);
+    });
+
+    denoiseGibbsBtn.addEventListener('click', () => {
+        runSolver(IsingSolver.prototype.solveGibbsSampler);
+    });
+
+    function setupAnimation() {
+        if (animationFrames.length === 0) return;
+        animationControlsDiv.style.display = 'block';
+        frameSlider.max = animationFrames.length - 1;
+        frameSlider.value = animationFrames.length - 1; // Start at the last frame (denoised result)
+        updateAnimationDisplay(animationFrames.length - 1);
+    }
+
+    function updateAnimationDisplay(frameIndex) {
+        if (frameIndex < 0 || frameIndex >= animationFrames.length) return;
+        drawSpinsToCanvas(animationFrames[frameIndex], width, height, denoisedCanvas);
+        currentFrameDisplay.textContent = frameIndex;
+        totalFramesDisplay.textContent = animationFrames.length - 1;
+        frameSlider.value = frameIndex;
+        if (animationTemperatures[frameIndex] !== undefined) {
+            tempDisplay.textContent = animationTemperatures[frameIndex].toFixed(4);
+        } else {
+            tempDisplay.textContent = "N/A";
+        }
+    }
+
+    frameSlider.addEventListener('input', () => {
+        pauseAnimation();
+        updateAnimationDisplay(parseInt(frameSlider.value));
+    });
+
+    playBtn.addEventListener('click', () => {
+        pauseAnimation(); // Ensure no multiple intervals
+        let currentFrame = parseInt(frameSlider.value);
+        if (currentFrame >= animationFrames.length - 1) {
+            currentFrame = 0; // Restart if at end
+        }
+        animationInterval = setInterval(() => {
+            updateAnimationDisplay(currentFrame);
+            currentFrame++;
+            if (currentFrame >= animationFrames.length) {
+                pauseAnimation();
+                currentFrame = animationFrames.length - 1; // Stay at last frame
+                frameSlider.value = currentFrame; // Update slider to last frame
+            }
+        }, 100); // Adjust speed as needed (milliseconds per frame)
+        setButtonDisabled(playBtn, true);
+        setButtonDisabled(pauseBtn, false);
+    });
+
+    pauseBtn.addEventListener('click', pauseAnimation);
+
+    function pauseAnimation() {
+        clearInterval(animationInterval);
+        animationInterval = null;
+        setButtonDisabled(playBtn, false);
+        setButtonDisabled(pauseBtn, true);
+    }
+    
+    // Initial setup
+    pauseAnimation(); // Ensure pause button is initially disabled correctly
+    noiseLevelSlider.dispatchEvent(new Event('input')); // Trigger display update
+    updateStatus('Page loaded. Generate an image to start.');
+
+</script>
+
+</body>
+</html>

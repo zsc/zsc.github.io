@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sudoku Gibbs Sampler with MH</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding-top:10px; background-color: #f4f4f4; }
+        #main-container { display: flex; flex-direction: row; gap: 20px; align-items: flex-start; }
+        #grid-container { display: grid; grid-template-columns: repeat(9, 40px); grid-template-rows: repeat(9, 40px); border: 3px solid black; width: 363px; height: 363px; background-color: white; }
+        .cell { width: 40px; height: 40px; border: 1px solid #ccc; text-align: center; font-size: 20px; line-height: 40px; box-sizing: border-box; user-select: none; position: relative; }
+        .cell.fixed { font-weight: bold; background-color: #e0e0e0; color: black; }
+        .cell.initial-empty { color: #007bff; } /* Color for numbers filled by algorithm */
+        
+        /* Thick borders for 3x3 blocks */
+        .cell:nth-child(3n) { border-right: 2px solid black; }
+        .cell:nth-child(9n) { border-right: 1px solid #ccc; } /* Reset last col border if not block border */
+        #grid-container > div:nth-child(n+19):nth-child(-n+27),
+        #grid-container > div:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 2px solid black;
+        }
+        /* Ensure the very last cell of a row has the correct right border */
+         #grid-container > div:nth-child(9n):not(:nth-child(3n)) { border-right: 1px solid #ccc !important; }
+         #grid-container > div:nth-child(3n):nth-child(even) { /* e.g. cell 6 needs right border #ccc not black */
+            /* This is tricky; specific overrides might be needed if general rules conflict */
+         }
+
+
+        .cell.selected-candidate { background-color: #ffefb3 !important; /* Light yellow for the cell being sampled, overrides conflict colors */ }
+        
+        /* Conflict Visualization using pseudo-elements for distinct indicators */
+        .cell.cfl-r::before { content: ''; position: absolute; left: 2px; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; background-color: rgba(255,0,0,0.7); border-radius: 2px; }
+        .cell.cfl-c::after { content: ''; position: absolute; top: 2px; left: 50%; transform: translateX(-50%); height: 4px; width: 60%; background-color: rgba(0,0,255,0.7); border-radius: 2px; }
+        .cell.cfl-b { outline: 2px dashed rgba(0,128,0,0.7); outline-offset: -3px; }
+
+
+        #controls-panel { display:flex; flex-direction: column; gap:10px; width: 300px; }
+        #controls, #hyperparams, #playback-controls, #stats {
+            border: 1px solid #ccc; padding: 10px; border-radius: 5px; background-color: white;
+        }
+        #controls button, #playback-controls button { margin: 3px; padding: 5px 10px; border-radius: 3px; border: 1px solid #999; cursor:pointer; background-color: #e9e9e9; }
+        #controls button:hover, #playback-controls button:hover { background-color: #d0d0d0; }
+        #controls button:disabled, #playback-controls button:disabled { background-color: #f0f0f0; color: #aaa; cursor: not-allowed;}
+
+        #hyperparams label { display: block; margin-top: 8px; font-size: 0.9em; }
+        #hyperparams input[type="number"] { width: 70px; padding: 3px; margin-left: 5px; border: 1px solid #ccc; border-radius: 3px;}
+        #stats { font-size: 0.9em; }
+        #stats span { font-weight: bold; }
+        h1, h4 { text-align: center; margin-top:0; color: #333; }
+        h4 { margin-bottom: 10px;}
+    </style>
+</head>
+<body>
+    <h1>Sudoku Gibbs Sampler (MH)</h1>
+    <div id="main-container">
+        <div id="grid-container"></div>
+        <div id="controls-panel">
+            <div id="controls">
+                <h4>Controls</h4>
+                <button id="generateBtn">Generate New Puzzle</button>
+                <button id="solveBtn">Solve</button>
+                <button id="pauseBtn" disabled>Pause</button>
+                <button id="resetBtn">Reset to Initial</button>
+            </div>
+            <div id="hyperparams">
+                <h4>Hyperparameters</h4>
+                <label>Beta (Gibbs/MH): <input type="number" id="beta" value="1.5" step="0.1" min="0"></label>
+                <label>Beta Source (ECN): <input type="number" id="beta_source" value="0.5" step="0.1" min="0"></label>
+                <label>Conflict Wt (Select): <input type="number" id="conflict_weight" value="10" step="0.5" min="0"></label>
+                <label>Age Wt (Select): <input type="number" id="age_weight" value="1" step="0.1" min="0"></label>
+                <label>Greedy Select Prob: <input type="number" id="greedy_prob" value="0.9" step="0.05" min="0" max="1"></label>
+                <label>Speed (ms/step): <input type="number" id="speed" value="10" step="10" min="0"></label>
+            </div>
+            <div id="stats">
+                <h4>Stats</h4>
+                Iteration: <span id="iteration">0</span><br>
+                Total Conflicts: <span id="totalConflicts">N/A</span><br>
+                Selected Cell: <span id="selectedCellInfo">-</span><br>
+                Status: <span id="status">Idle</span>
+            </div>
+            <div id="playback-controls" style="display:none;">
+                <h4>Animation Playback</h4>
+                <button id="playAnimBtn">Play Animation</button>
+                <button id="pauseAnimBtn" disabled>Pause Animation</button>
+                <button id="prevFrameBtn"><< Prev</button>
+                <button id="nextFrameBtn">Next >></button><br>
+                <label for="animSlider">Frame: <span id="currentFrame">0</span> / <span id="totalFrames">0</span></label><br>
+                <input type="range" id="animSlider" min="0" value="0" style="width:100%; margin-top:5px;"><br>
+                <label>Anim Speed (ms/fr): <input type="number" id="animSpeed" value="100" step="10" min="10"></label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // single-file html 实现用 gibbs sampling 搭配 MH 条件解数独。选择更新项时优先选 conflict 多和最近未更新的（但所有的都有概率），每个 cell 进行 gibbs sampling 时的概率按 exp(-\beta effective-conflict-number)，effective-conflict-number 是 propose 的更新后所有 source（棋盘上其他 cell）贡献的 conflict-number 按 source 的 exp(- \beta source-conflict-number) 加权。conflict-number 计算要 solid。数独题目随机生成。求解在后台进行，但存下中间结果可以变成动画回放。超参界面可调。用颜色区分不同种类的 conflict。
+        const GRID_SIZE = 9;
+        const BLOCK_SIZE = 3;
+        const gridContainer = document.getElementById('grid-container');
+        
+        let currentBoard = []; 
+        let initialBoard = []; 
+        let fixedMask = []; 
+        let emptyCells = []; // Array of {r, c} for non-fixed cells
+        let cellLastUpdate = []; 
+
+        let history = []; 
+        let solverInterval = null;
+        let animationInterval = null;
+        let currentIteration = 0;
+        let globalTotalConflicts = 0;
+
+        let params = {}; // Will be populated by updateParamsFromUI
+
+        // --- Sudoku Generation Logic ---
+        function checkValid(board, r, c, num) { // Check if num can be placed at board[r][c]
+            for (let i = 0; i < GRID_SIZE; i++) {
+                if (board[r][i] === num && i !== c) return false;
+                if (board[i][c] === num && i !== r) return false;
+            }
+            const startRow = Math.floor(r / BLOCK_SIZE) * BLOCK_SIZE;
+            const startCol = Math.floor(c / BLOCK_SIZE) * BLOCK_SIZE;
+            for (let i = 0; i < BLOCK_SIZE; i++) {
+                for (let j = 0; j < BLOCK_SIZE; j++) {
+                    if (board[startRow + i][startCol + j] === num && (startRow + i !== r || startCol + j !== c)) return false;
+                }
+            }
+            return true;
+        }
+        
+        function solveSudokuGeneratorHelper(board) {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] === 0) {
+                        const numbers = Array.from({length: 9}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+                        for (let num of numbers) {
+                            if (checkValid(board, r, c, num)) { // checkValid assumes (r,c) is target, so doesn't check itself
+                                board[r][c] = num;
+                                if (solveSudokuGeneratorHelper(board)) return true;
+                                board[r][c] = 0; 
+                            }
+                        }
+                        return false; 
+                    }
+                }
+            }
+            return true; 
+        }
+
+        function generateSudokuSolution() {
+            let board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+            solveSudokuGeneratorHelper(board);
+            return board;
+        }
+
+        function createPuzzleFromSolution(fullBoard, cellsToRemove = 40) {
+            let puzzle = fullBoard.map(row => [...row]);
+            fixedMask = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(true));
+            emptyCells = [];
+            
+            let removedCount = 0;
+            let attempts = cellsToRemove * 3; // Limit attempts
+            while (removedCount < cellsToRemove && attempts > 0) {
+                const r = Math.floor(Math.random() * GRID_SIZE);
+                const c = Math.floor(Math.random() * GRID_SIZE);
+                if (puzzle[r][c] !== 0) {
+                    puzzle[r][c] = 0;
+                    fixedMask[r][c] = false;
+                    removedCount++;
+                }
+                attempts--;
+            }
+            // Populate emptyCells list (cells that are not fixed and were made empty)
+            for (let r_idx = 0; r_idx < GRID_SIZE; r_idx++) {
+                for (let c_idx = 0; c_idx < GRID_SIZE; c_idx++) {
+                    if (!fixedMask[r_idx][c_idx]) {
+                        emptyCells.push({ r: r_idx, c: c_idx });
+                    }
+                }
+            }
+            return puzzle;
+        }
+
+        // --- Conflict Calculation ---
+        function getCellConflictInfo(board, r_cell, c_cell) {
+            // Returns details about conflicts for the cell (r_cell, c_cell)
+            // based on its current value board[r_cell][c_cell]
+            const val = board[r_cell][c_cell];
+            if (val === 0) return { types: { r: false, c: false, b: false }, count: 0 };
+
+            let conflictTypes = { r: false, c: false, b: false };
+            let conflictCount = 0; // Number of other cells this one conflicts with
+
+            // Row conflicts
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (c !== c_cell && board[r_cell][c] === val) {
+                    conflictTypes.r = true;
+                    conflictCount++; // Count each conflicting cell once.
+                                     // If a cell is in row and block conflict, it's one conflicting cell.
+                                     // This needs to be careful: if we just sum, then a cell in row+block conflict counts twice.
+                                     // Let's use a set to count unique conflicting cells.
+                    break; // Found one, enough for type
+                }
+            }
+             // Col conflicts
+            for (let r = 0; r < GRID_SIZE; r++) {
+                if (r !== r_cell && board[r][c_cell] === val) {
+                    conflictTypes.c = true;
+                    break; 
+                }
+            }
+            // Block conflicts
+            const startRow = Math.floor(r_cell / BLOCK_SIZE) * BLOCK_SIZE;
+            const startCol = Math.floor(c_cell / BLOCK_SIZE) * BLOCK_SIZE;
+            for (let i = 0; i < BLOCK_SIZE; i++) {
+                let breakBlockLoop = false;
+                for (let j = 0; j < BLOCK_SIZE; j++) {
+                    const br = startRow + i;
+                    const bc = startCol + j;
+                    if ((br !== r_cell || bc !== c_cell) && board[br][bc] === val) {
+                        conflictTypes.b = true;
+                        breakBlockLoop = true;
+                        break;
+                    }
+                }
+                if(breakBlockLoop) break;
+            }
+            
+            // To get the actual count of conflicting peers for cell (r_cell,c_cell)
+            const conflictingPeers = new Set();
+            for (let c = 0; c < GRID_SIZE; c++) if (c !== c_cell && board[r_cell][c] === val) conflictingPeers.add(`${r_cell}-${c}`);
+            for (let r = 0; r < GRID_SIZE; r++) if (r !== r_cell && board[r][c_cell] === val) conflictingPeers.add(`${r}-${c_cell}`);
+            for (let i = 0; i < BLOCK_SIZE; i++) for (let j = 0; j < BLOCK_SIZE; j++) {
+                const br = startRow + i; const bc = startCol + j;
+                if ((br !== r_cell || bc !== c_cell) && board[br][bc] === val) conflictingPeers.add(`${br}-${bc}`);
+            }
+            conflictCount = conflictingPeers.size;
+
+            return { types: conflictTypes, count: conflictCount };
+        }
+        
+        function getTotalBoardConflicts(board) { // Energy function
+            let conflicts = 0;
+            for (let i = 0; i < GRID_SIZE; i++) { // Rows and Cols
+                const rowCounts = {}; const colCounts = {};
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    if (board[i][j] !== 0) rowCounts[board[i][j]] = (rowCounts[board[i][j]] || 0) + 1;
+                    if (board[j][i] !== 0) colCounts[board[j][i]] = (colCounts[board[j][i]] || 0) + 1;
+                }
+                for (const k in rowCounts) if (rowCounts[k] > 1) conflicts += (rowCounts[k] - 1);
+                for (const k in colCounts) if (colCounts[k] > 1) conflicts += (colCounts[k] - 1);
+            }
+            // Blocks
+            for (let br = 0; br < BLOCK_SIZE; br++) {
+                for (let bc = 0; bc < BLOCK_SIZE; bc++) {
+                    const counts = {};
+                    for (let r_offset = 0; r_offset < BLOCK_SIZE; r_offset++) {
+                        for (let c_offset = 0; c_offset < BLOCK_SIZE; c_offset++) {
+                            const val = board[br*BLOCK_SIZE + r_offset][bc*BLOCK_SIZE + c_offset];
+                            if (val !== 0) counts[val] = (counts[val] || 0) + 1;
+                        }
+                    }
+                    for (const k in counts) if (counts[k] > 1) conflicts += (counts[k] - 1);
+                }
+            }
+            return conflicts;
+        }
+
+        // --- Gibbs Sampler Core Logic ---
+        function calculateEffectiveConflictNumber(board, r_target, c_target, val_proposal) {
+            let ecn = 0;
+            const hypotheticalBoard = board.map(row => [...row]);
+            hypotheticalBoard[r_target][c_target] = val_proposal;
+
+            const processPeer = (r_peer, c_peer) => {
+                if (board[r_peer][c_peer] === val_proposal) { // This peer (source) matches the proposed value
+                    const conflicts_of_source = getCellConflictInfo(hypotheticalBoard, r_peer, c_peer).count;
+                    const weight = Math.exp(-params.beta_source * conflicts_of_source);
+                    ecn += weight;
+                }
+            };
+
+            // Row peers
+            for (let c = 0; c < GRID_SIZE; c++) if (c !== c_target) processPeer(r_target, c);
+            // Col peers
+            for (let r = 0; r < GRID_SIZE; r++) if (r !== r_target) processPeer(r, c_target);
+            // Block peers (avoid double counting row/col peers already processed)
+            const startRow = Math.floor(r_target / BLOCK_SIZE) * BLOCK_SIZE;
+            const startCol = Math.floor(c_target / BLOCK_SIZE) * BLOCK_SIZE;
+            for (let i = 0; i < BLOCK_SIZE; i++) {
+                for (let j = 0; j < BLOCK_SIZE; j++) {
+                    const pr = startRow + i; const pc = startCol + j;
+                    // Ensure it's a block peer not already covered by row/col check for this ECN logic
+                    if ((pr === r_target && pc === c_target)) continue; // Skip target cell itself
+                    if (pr === r_target || pc === c_target) continue; // Skip row/column peers (already handled)
+                    processPeer(pr, pc);
+                }
+            }
+            return ecn;
+        }
+        
+        function selectCellToUpdate() {
+            if (emptyCells.length === 0) return null;
+
+            let scoredCells = [];
+            for (const cell of emptyCells) {
+                const r = cell.r; const c = cell.c;
+                const conflicts = getCellConflictInfo(currentBoard, r, c).count;
+                const age = currentIteration - cellLastUpdate[r][c];
+                const score = params.conflict_weight * conflicts + params.age_weight * age + Math.random() * 0.01;
+                scoredCells.push({ r, c, score });
+            }
+
+            if (Math.random() < params.greedy_prob && scoredCells.length > 0) {
+                scoredCells.sort((a, b) => b.score - a.score);
+                return scoredCells[0];
+            } else {
+                return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+        }
+
+        function solverStep() {
+            if (emptyCells.length === 0) {
+                setStatus("Board full. Checking solution...");
+                if(getTotalBoardConflicts(currentBoard) === 0) setStatus("Solution Found!"); else setStatus("Board full but not solved.");
+                pauseSolver(); return;
+            }
+
+            currentIteration++;
+            document.getElementById('iteration').innerText = currentIteration;
+
+            const E_current_total = getTotalBoardConflicts(currentBoard);
+            globalTotalConflicts = E_current_total;
+            document.getElementById('totalConflicts').innerText = E_current_total;
+
+            if (E_current_total === 0 && !emptyCells.some(cell => currentBoard[cell.r][cell.c] === 0)) {
+                setStatus("Solution Found!");
+                renderBoard(currentBoard, null, { r: -1, c: -1 });
+                pauseSolver(); enablePlaybackControls(); return;
+            }
+
+            const selectedCell = selectCellToUpdate();
+            if (!selectedCell) { pauseSolver(); return; }
+            
+            const { r, c } = selectedCell;
+            document.getElementById('selectedCellInfo').innerText = `(${r}, ${c})`;
+            const v_old = currentBoard[r][c];
+
+            let proposalProbs = [];
+            let totalProbWeight = 0;
+            for (let k = 1; k <= GRID_SIZE; k++) {
+                const ecn_k = calculateEffectiveConflictNumber(currentBoard, r, c, k);
+                const prob_k = Math.exp(-params.beta * ecn_k);
+                proposalProbs.push({ val: k, prob: prob_k, ecn: ecn_k });
+                totalProbWeight += prob_k;
+            }
+
+            let v_new;
+            if (totalProbWeight === 0 || isNaN(totalProbWeight)) {
+                v_new = Math.floor(Math.random() * GRID_SIZE) + 1;
+            } else {
+                const randSample = Math.random() * totalProbWeight;
+                let cumulativeProb = 0;
+                for (const p of proposalProbs) {
+                    cumulativeProb += p.prob;
+                    if (randSample <= cumulativeProb) { v_new = p.val; break; }
+                }
+                if (v_new === undefined) v_new = proposalProbs[proposalProbs.length-1].val;
+            }
+
+            const boardWithNewVal = currentBoard.map(row => [...row]);
+            boardWithNewVal[r][c] = v_new;
+            const E_proposed_total = getTotalBoardConflicts(boardWithNewVal);
+            const delta_E_total = E_proposed_total - E_current_total;
+            
+            let accepted = false;
+            if (delta_E_total < 0) {
+                accepted = true;
+            } else {
+                const acceptProb = Math.exp(-params.beta * delta_E_total);
+                if (Math.random() < acceptProb) accepted = true;
+            }
+
+            const old_board_for_history = currentBoard.map(row => [...row]);
+            if (accepted) {
+                currentBoard[r][c] = v_new;
+                globalTotalConflicts = E_proposed_total;
+                document.getElementById('totalConflicts').innerText = globalTotalConflicts;
+            }
+            cellLastUpdate[r][c] = currentIteration;
+
+            history.push({
+                board: old_board_for_history, r, c, v_old, v_new_proposed: v_new, accepted, 
+                iteration: currentIteration, totalConflicts: E_current_total, delta_E: delta_E_total,
+                ecn_details: proposalProbs.map(p => ({v:p.val, p:(p.prob/totalProbWeight).toFixed(3), ecn:p.ecn.toFixed(2)}))
+            });
+
+            renderBoard(currentBoard, getCellConflictInfo, {r,c});
+            
+            if (currentIteration > 100000 && globalTotalConflicts > 0) { // Max iterations
+                 setStatus("Max iterations reached.");
+                 pauseSolver(); enablePlaybackControls();
+            }
+        }
+        
+        // --- UI and Control ---
+        function renderBoard(boardToRender, conflictInfoFn = getCellConflictInfo, highlightedCell = null) {
+            gridContainer.innerHTML = '';
+            for (let r_idx = 0; r_idx < GRID_SIZE; r_idx++) {
+                for (let c_idx = 0; c_idx < GRID_SIZE; c_idx++) {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.classList.add('cell');
+                    cellDiv.dataset.r = r_idx; cellDiv.dataset.c = c_idx;
+                    
+                    const isFixed = fixedMask[r_idx] && fixedMask[r_idx][c_idx];
+                    if (isFixed) cellDiv.classList.add('fixed');
+                    else cellDiv.classList.add('initial-empty');
+                        
+                    cellDiv.textContent = boardToRender[r_idx][c_idx] === 0 ? '' : boardToRender[r_idx][c_idx];
+
+                    if (boardToRender[r_idx][c_idx] !== 0 && conflictInfoFn) {
+                         const conflicts = conflictInfoFn(boardToRender, r_idx, c_idx);
+                         if (conflicts.types.r) cellDiv.classList.add('cfl-r');
+                         if (conflicts.types.c) cellDiv.classList.add('cfl-c');
+                         if (conflicts.types.b) cellDiv.classList.add('cfl-b');
+                    }
+                    if (highlightedCell && highlightedCell.r === r_idx && highlightedCell.c === c_idx) {
+                        cellDiv.classList.add('selected-candidate');
+                    }
+                    gridContainer.appendChild(cellDiv);
+                }
+            }
+        }
+
+        function initializeNewPuzzle() {
+            pauseSolver(); pauseAnimation();
+            document.getElementById('playback-controls').style.display = 'none';
+            history = []; currentIteration = 0;
+            
+            const fullSolution = generateSudokuSolution();
+            initialBoard = createPuzzleFromSolution(fullSolution, parseInt(prompt("Number of cells to remove (e.g., 30-55):", "45")) || 45);
+            currentBoard = initialBoard.map(row => [...row]);
+            
+            emptyCells.forEach(cell => { // Initial random fill for variable cells
+                currentBoard[cell.r][cell.c] = Math.floor(Math.random() * GRID_SIZE) + 1;
+            });
+
+            cellLastUpdate = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+            
+            globalTotalConflicts = getTotalBoardConflicts(currentBoard);
+            document.getElementById('iteration').innerText = '0';
+            document.getElementById('totalConflicts').innerText = globalTotalConflicts;
+            document.getElementById('selectedCellInfo').innerText = '-';
+            setStatus("New puzzle generated. Random fill for empty cells.");
+            renderBoard(currentBoard);
+        }
+        
+        function resetToInitialPuzzle() {
+            pauseSolver(); pauseAnimation();
+            document.getElementById('playback-controls').style.display = 'none';
+            history = []; currentIteration = 0;
+
+            if (initialBoard.length === 0) { initializeNewPuzzle(); return; }
+            currentBoard = initialBoard.map(row => [...row]);
+            emptyCells.forEach(cell => {
+                currentBoard[cell.r][cell.c] = Math.floor(Math.random() * GRID_SIZE) + 1;
+            });
+            cellLastUpdate = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+            globalTotalConflicts = getTotalBoardConflicts(currentBoard);
+            document.getElementById('iteration').innerText = '0';
+            document.getElementById('totalConflicts').innerText = globalTotalConflicts;
+            document.getElementById('selectedCellInfo').innerText = '-';
+            setStatus("Puzzle reset. New random fill.");
+            renderBoard(currentBoard);
+        }
+
+        function updateParamsFromUI() {
+            params.beta = parseFloat(document.getElementById('beta').value);
+            params.beta_source = parseFloat(document.getElementById('beta_source').value);
+            params.conflict_weight = parseFloat(document.getElementById('conflict_weight').value);
+            params.age_weight = parseFloat(document.getElementById('age_weight').value);
+            params.greedy_prob = parseFloat(document.getElementById('greedy_prob').value);
+            params.speed = parseInt(document.getElementById('speed').value);
+        }
+
+        function startSolver() {
+            if (solverInterval) return;
+            if (initialBoard.length === 0) { setStatus("Generate a puzzle first."); return; }
+            if (emptyCells.length === 0 && getTotalBoardConflicts(currentBoard) === 0 && !emptyCells.some(cell=>currentBoard[cell.r][cell.c]===0) ) {
+                 setStatus("Already solved!"); return;
+            }
+            
+            updateParamsFromUI();
+            setStatus("Solving...");
+            document.getElementById('solveBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = true;
+            
+            solverInterval = setInterval(solverStep, params.speed);
+        }
+
+        function pauseSolver() {
+            clearInterval(solverInterval); solverInterval = null;
+            if (currentIteration > 0) {
+                 setStatus("Solver paused."); enablePlaybackControls();
+            }
+            document.getElementById('solveBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+        }
+        
+        function setStatus(message) { document.getElementById('status').innerText = message; }
+
+        let currentFrameIdx = 0;
+        function enablePlaybackControls() {
+            if (history.length > 0) {
+                document.getElementById('playback-controls').style.display = 'block';
+                document.getElementById('totalFrames').innerText = history.length -1;
+                document.getElementById('animSlider').max = history.length - 1;
+                document.getElementById('animSlider').value = currentFrameIdx > history.length -1 ? history.length-1 : currentFrameIdx; // Ensure slider value is valid
+                document.getElementById('currentFrame').innerText = document.getElementById('animSlider').value;
+            }
+        }
+
+        function playAnimation() {
+            if (animationInterval) return;
+            document.getElementById('playAnimBtn').disabled = true;
+            document.getElementById('pauseAnimBtn').disabled = false;
+            const animSpeed = parseInt(document.getElementById('animSpeed').value);
+            animationInterval = setInterval(() => {
+                if (currentFrameIdx < history.length - 1) {
+                    currentFrameIdx++;
+                    showFrame(currentFrameIdx);
+                } else {
+                    pauseAnimation();
+                }
+            }, animSpeed);
+        }
+
+        function pauseAnimation() {
+            clearInterval(animationInterval); animationInterval = null;
+            document.getElementById('playAnimBtn').disabled = false;
+            document.getElementById('pauseAnimBtn').disabled = true;
+        }
+
+        function showFrame(idx) {
+            if (idx < 0 || idx >= history.length) return;
+            currentFrameIdx = idx;
+            const frame = history[idx];
+            renderBoard(frame.board, getCellConflictInfo, {r: frame.r, c: frame.c});
+            document.getElementById('iteration').innerText = frame.iteration; // Show iteration of this specific frame
+            document.getElementById('totalConflicts').innerText = frame.totalConflicts;
+            document.getElementById('selectedCellInfo').innerText = `(${frame.r},${frame.c}), old:${frame.v_old}, new:${frame.v_new_proposed}, acc:${frame.accepted}`;
+            document.getElementById('currentFrame').innerText = idx;
+            document.getElementById('animSlider').value = idx;
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', initializeNewPuzzle);
+        document.getElementById('solveBtn').addEventListener('click', startSolver);
+        document.getElementById('pauseBtn').addEventListener('click', pauseSolver);
+        document.getElementById('resetBtn').addEventListener('click', resetToInitialPuzzle);
+
+        document.getElementById('playAnimBtn').addEventListener('click', playAnimation);
+        document.getElementById('pauseAnimBtn').addEventListener('click', pauseAnimation);
+        document.getElementById('prevFrameBtn').addEventListener('click', () => { if (currentFrameIdx > 0) showFrame(--currentFrameIdx); });
+        document.getElementById('nextFrameBtn').addEventListener('click', () => { if (currentFrameIdx < history.length - 1) showFrame(++currentFrameIdx); });
+        document.getElementById('animSlider').addEventListener('input', (e) => showFrame(parseInt(e.target.value)));
+
+        window.onload = () => {
+            updateParamsFromUI(); // Load default params into params object
+            initializeNewPuzzle(); 
+            ['beta', 'beta_source', 'conflict_weight', 'age_weight', 'greedy_prob', 'speed', 'animSpeed'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateParamsFromUI);
+            });
+        };
+    </script>
+</body>
+</html>

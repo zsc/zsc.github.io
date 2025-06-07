@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Through Fractal Forest Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background-color: #87CEEB;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+        }
+        .slider-container {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="simulationCanvas"></canvas>
+    <div class="controls">
+        <h3>Wind Forest Simulation</h3>
+        <div class="slider-container">
+            <label for="windStrength">Wind Strength: </label>
+            <input type="range" id="windStrength" min="0" max="10" step="0.1" value="3">
+            <span id="windStrengthValue">3</span>
+        </div>
+        <div class="slider-container">
+            <label for="treeCount">Tree Count: </label>
+            <input type="range" id="treeCount" min="1" max="20" step="1" value="5">
+            <span id="treeCountValue">5</span>
+        </div>
+        <div class="slider-container">
+            <label for="branchDepth">Branch Depth: </label>
+            <input type="range" id="branchDepth" min="1" max="7" step="1" value="4">
+            <span id="branchDepthValue">4</span>
+        </div>
+        <button id="regenerateBtn">Regenerate Forest</button>
+        <button id="windGustBtn">Generate Wind Gust</button>
+        <div id="fpsCounter">FPS: 0</div>
+    </div>
+
+    <script>
+      /* ### 1. Discretization of the Geometry
+
+**a. Spatial Discretization of the Forest:**
+- Professor Linden’s fractal algorithm generates the forest, providing a tree structure where each tree consists of branches located at specific coordinates in space and characterized by their length, orientation, and cross-sectional properties.
+- For the fluid domain, the entire forest area is discretized into a grid or mesh. Given the complexity introduced by the fractal branching pattern, unstructured meshes or adaptive mesh refinement techniques might be employed to capture the flow around branches accurately. For CFD, methods like finite volume or finite element are ready for complex geometries.
+
+**b. Discretization for Structural Elements:**
+- Each branch, modeled as an Euler-Bernoulli beam, would also be discretized typically using the finite element method (FEM). Beam elements would run along the length of each branch. The deflection \(w(x,t)\) would be approximated within each element, often using interpolation functions like Hermite polynomials that respect both displacement and slope continuity.
+
+### 2. Fluid Dynamics (CFD) Simulation
+
+**a. Governing Equations:**
+- The incompressible Navier-Stokes equations govern the air flow:
+    \[\rho_F \left(\frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u}\right) = -\nabla p + \mu \nabla^2 \mathbf{u} + \mathbf{f}_{\text{porous}}.\]
+
+**b. Porous Media Force:**
+- The term \(\mathbf{f}_{\text{porous}}\) accounts for the presence of branches. It can be modeled in several ways; a simple yet effective macroscopic approach might use Darcy's law or a drag force formulation:
+    \[\mathbf{f}_{\text{porous}} = -\rho_F C_D \frac{A_{\bot}}{L} |\mathbf{u}| \mathbf{u},\] 
+    where \(C_D\) is the drag coefficient, \(A_{\bot}\) is the total cross-sectional area of branches perpendicular to flow direction in a control volume, and \(L\) is the characteristic length of the medium. For higher accuracy, local drag forces around each branch can be calculated as detailed earlier.
+
+**c. Boundary and Initial Conditions:**
+- Appropriate boundary conditions at the forest's external boundaries (velocity inlet, pressure outlet, walls, etc.) are set.
+- Initial guess for \(\mathbf{u}(\mathbf{x}, t=0)\) is provided, perhaps a uniform wind velocity far upstream of the forest.
+
+**d. Numerical Solution:**
+- The equations are solved numerically using methods like finite volume or finite element over each time step \(\Delta t\), updating the velocity field \(\mathbf{u}(\mathbf{x}, t)\).
+
+### 3. Structural Dynamics Simulation
+
+**a. Beam Equation Discretization:**
+- With the wind velocity field \(\mathbf{u}(\mathbf{x}, t)\) obtained from the CFD solution, the dynamic wind force \(F_{\text{wind}}(x,t)\) on each beam element is computed:
+    \[F_{\text{wind}}(x,t) = -\frac{1}{2} \rho_F C_D A_{\bot}(x) \left| \mathbf{u}(x,t) - \frac{\partial w(x,t)}{\partial t} \hat{\mathbf{j}} \right| \left( \mathbf{u}(x,t) - \frac{\partial w(x,t)}{\partial t} \hat{\mathbf{j}} \right).\]
+- The beam equation for each branch segment,
+    \[\rho_B A \frac{\partial^2 w(x,t)}{\partial t^2} + EI \frac{\partial^4 w(x,t)}{\partial x^4} = F_{\text{wind}}(x,t),\]
+is discretized in space using finite elements. This converts the PDE to a set of ordinary differential equations (ODEs) in time for the unknown nodal displacements.
+
+**b. Time Integration:**
+- These ODEs are solved using a time-marching scheme such as Newmark's method, Runge-Kutta, or other suitable integration techniques, updating the branch deflections \(w(x,t)\) and velocities \(\frac{\partial w(x,t)}{\partial t}\) at each time step.
+
+### 4. Coupling and Iteration
+
+For a partitioned approach:
+
+**a. Initial Guess:**
+- Start with an initial guess, often \(w(x, 0) = 0\) and an assumed or given wind velocity profile \(\mathbf{u}(\mathbf{x}, 0)\).
+
+**b. Fluid Solver Iteration:**
+- Solve the Navier-Stokes equations to obtain \(\mathbf{u}(\mathbf{x}, t = \Delta t)\) through the forest.
+
+**c. Force Calculation:**
+- Compute the dynamic wind forces \(F_{\text{wind}}(x,t)\) on the branches using the current wind field \(\mathbf{u}(\mathbf{x}, t)\).
+
+**d. Structural Solver Iteration:**
+- Use these forces as input to solve the beam equations and update the branch deflections to \(w(x, t = \Delta t)\).
+
+**e. Update and Repeat:**
+- The new deflected positions of branches might require recalculating the flow resistance terms if they significantly alter the flow path and velocity. The process then repeats from the fluid solver step with the updated configuration until the desired end time or steady-state is reached if applicable.
+
+按照给定的思路，用 pde 计算风吹过森林的枝条振动。森林用分形生成，从主干到枝条逐渐变细（反应到 beam simulation 时的bending上）。生成完整的 single-file html。
+整个动画是二维，先把森林用分形生成。然后模拟阵风吹过。 */
+        // Main simulation class
+        class ForestWindSimulation {
+            constructor() {
+                this.canvas = document.getElementById('simulationCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.trees = [];
+                this.windParticles = [];
+                this.windStrength = 3;
+                this.treeCount = 5;
+                this.branchDepth = 4;
+                this.groundLevel = 0;
+                this.frameCount = 0;
+                this.lastTime = 0;
+                this.fps = 0;
+                
+                // PDE solver parameters
+                this.dt = 0.016; // Time step
+                this.gravity = 9.81;
+                this.airDensity = 1.225; // kg/m^3
+                
+                this.setupCanvas();
+                this.setupControls();
+                this.initializeSimulation();
+                this.animate();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.groundLevel = this.canvas.height * 0.8;
+                
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                    this.groundLevel = this.canvas.height * 0.8;
+                    this.initializeSimulation();
+                });
+            }
+            
+            setupControls() {
+                const windStrengthSlider = document.getElementById('windStrength');
+                const windStrengthValue = document.getElementById('windStrengthValue');
+                
+                windStrengthSlider.addEventListener('input', () => {
+                    this.windStrength = parseFloat(windStrengthSlider.value);
+                    windStrengthValue.textContent = this.windStrength;
+                });
+                
+                const treeCountSlider = document.getElementById('treeCount');
+                const treeCountValue = document.getElementById('treeCountValue');
+                
+                treeCountSlider.addEventListener('input', () => {
+                    this.treeCount = parseInt(treeCountSlider.value);
+                    treeCountValue.textContent = this.treeCount;
+                });
+                
+                const branchDepthSlider = document.getElementById('branchDepth');
+                const branchDepthValue = document.getElementById('branchDepthValue');
+                
+                branchDepthSlider.addEventListener('input', () => {
+                    this.branchDepth = parseInt(branchDepthSlider.value);
+                    branchDepthValue.textContent = this.branchDepth;
+                });
+                
+                const regenerateBtn = document.getElementById('regenerateBtn');
+                regenerateBtn.addEventListener('click', () => {
+                    this.initializeSimulation();
+                });
+                
+                const windGustBtn = document.getElementById('windGustBtn');
+                windGustBtn.addEventListener('click', () => {
+                    this.generateWindGust();
+                });
+            }
+            
+            initializeSimulation() {
+                this.trees = [];
+                this.windParticles = [];
+                
+                // Generate trees
+                const spacing = this.canvas.width / (this.treeCount + 1);
+                for (let i = 1; i <= this.treeCount; i++) {
+                    const x = i * spacing;
+                    const treeHeight = this.canvas.height * 0.2 + Math.random() * this.canvas.height * 0.15;
+                    this.trees.push(new FractalTree(x, this.groundLevel, treeHeight, this.branchDepth));
+                }
+            }
+            
+            generateWindGust() {
+                const particleCount = 200;
+                for (let i = 0; i < particleCount; i++) {
+                    this.windParticles.push(new WindParticle(
+                        -20,
+                        this.groundLevel - 300 + Math.random() * 300,
+                        this.windStrength * (0.8 + Math.random() * 0.4)
+                    ));
+                }
+            }
+            
+            update() {
+                // Update wind particles
+                for (let i = this.windParticles.length - 1; i >= 0; i--) {
+                    this.windParticles[i].update();
+                    if (this.windParticles[i].x > this.canvas.width + 50) {
+                        this.windParticles.splice(i, 1);
+                    }
+                }
+                
+                // Update trees
+                this.trees.forEach(tree => {
+                    tree.update(this.windParticles, this.dt, this.airDensity);
+                });
+                
+                // Calculate FPS
+                this.frameCount++;
+                const currentTime = performance.now();
+                if (currentTime - this.lastTime >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastTime = currentTime;
+                    document.getElementById('fpsCounter').textContent = `FPS: ${this.fps}`;
+                }
+            }
+            
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw sky
+                this.ctx.fillStyle = '#87CEEB';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.groundLevel);
+                
+                // Draw ground
+                this.ctx.fillStyle = '#3A5F0B';
+                this.ctx.fillRect(0, this.groundLevel, this.canvas.width, this.canvas.height - this.groundLevel);
+                
+                // Draw trees
+                this.trees.forEach(tree => tree.render(this.ctx));
+                
+                // Draw wind particles
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                this.windParticles.forEach(particle => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            }
+            
+            animate(timestamp) {
+                this.update();
+                this.render();
+                requestAnimationFrame(this.animate.bind(this));
+            }
+        }
+        
+        // Tree branch class with physical properties
+        class Branch {
+            constructor(startX, startY, length, angle, depth, maxDepth) {
+                this.startX = startX;
+                this.startY = startY;
+                this.length = length;
+                this.originalLength = length;
+                this.angle = angle;
+                this.depth = depth;
+                this.maxDepth = maxDepth;
+                
+                // Calculate the end point based on start point, length, and angle
+                this.endX = this.startX + Math.cos(this.angle) * this.length;
+                this.endY = this.startY + Math.sin(this.angle) * this.length;
+                
+                // Physical properties
+                this.thickness = 10 * Math.pow(0.7, this.depth); // Thickness decreases with depth
+                this.stiffness = 1000 * Math.pow(0.6, this.depth); // EI value decreases with depth
+                this.mass = 1 * Math.pow(0.7, this.depth); // Mass decreases with depth
+                
+                // Dynamic properties
+                this.velocity = 0;
+                this.acceleration = 0;
+                this.deflection = 0; // Perpendicular deflection
+                this.dampingFactor = 0.95;
+                
+                // Cross-sectional area decreases with depth
+                this.crossSectionalArea = Math.PI * Math.pow(this.thickness / 2, 2);
+                
+                // Drag coefficient
+                this.dragCoefficient = 1.2;
+                
+                // Child branches
+                this.children = [];
+                
+                // Generate children if not at max depth
+                if (this.depth < this.maxDepth) {
+                    // Left branch
+                    const leftAngle = this.angle - Math.PI / 4 - Math.random() * 0.2;
+                    const leftLength = this.length * 0.7;
+                    this.children.push(new Branch(this.endX, this.endY, leftLength, leftAngle, this.depth + 1, this.maxDepth));
+                    
+                    // Right branch
+                    const rightAngle = this.angle + Math.PI / 4 + Math.random() * 0.2;
+                    const rightLength = this.length * 0.7;
+                    this.children.push(new Branch(this.endX, this.endY, rightLength, rightAngle, this.depth + 1, this.maxDepth));
+                }
+            }
+            
+            update(windParticles, dt, airDensity) {
+                // Calculate wind force perpendicular to branch
+                let totalForce = 0;
+                
+                // Add forces from wind particles nearby
+                windParticles.forEach(particle => {
+                    // Calculate distance from wind particle to branch
+                    const dx = this.endX - particle.x;
+                    const dy = this.endY - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Only apply force if wind particle is close enough
+                    if (distance < 200) {
+                        // Compute perpendicular component of wind force
+                        const windDirection = Math.atan2(particle.vy, particle.vx);
+                        const relativeAngle = Math.abs((windDirection - this.angle) % (Math.PI * 2));
+                        
+                        // Calculate wind force magnitude based on relative angle
+                        const windForce = Math.sin(relativeAngle) * particle.speed * airDensity * this.crossSectionalArea * this.dragCoefficient;
+                        
+                        // Apply inverse square law based on distance
+                        totalForce += windForce * (1 / (1 + distance * 0.01));
+                    }
+                });
+                
+                // Apply Euler-Bernoulli beam equation principles
+                // F = -EI(d^4w/dx^4)
+                // For our simplified model, acceleration = force / mass
+                this.acceleration = totalForce / this.mass;
+                
+                // Add restoring force proportional to deflection and stiffness
+                this.acceleration -= this.deflection * this.stiffness / this.mass;
+                
+                // Update velocity and position
+                this.velocity += this.acceleration * dt;
+                this.velocity *= this.dampingFactor; // Apply damping
+                this.deflection += this.velocity * dt;
+                
+                // Limit deflection based on branch properties
+                const maxDeflection = this.length * 0.2;
+                this.deflection = Math.max(-maxDeflection, Math.min(maxDeflection, this.deflection));
+                
+                // Update position of branch end
+                const perpX = -Math.sin(this.angle);
+                const perpY = Math.cos(this.angle);
+                this.endX = this.startX + Math.cos(this.angle) * this.length + perpX * this.deflection;
+                this.endY = this.startY + Math.sin(this.angle) * this.length + perpY * this.deflection;
+                
+                // Update children
+                this.children.forEach(child => {
+                    // Update child start position to match parent end position
+                    child.startX = this.endX;
+                    child.startY = this.endY;
+                    child.update(windParticles, dt, airDensity);
+                });
+            }
+            
+            render(ctx) {
+                // Draw branch
+                ctx.beginPath();
+                ctx.moveTo(this.startX, this.startY);
+                ctx.lineTo(this.endX, this.endY);
+                ctx.lineWidth = this.thickness;
+                ctx.strokeStyle = '#5D4037';
+                ctx.stroke();
+                
+                // Draw children
+                this.children.forEach(child => child.render(ctx));
+            }
+        }
+        
+        // Fractal tree class
+        class FractalTree {
+            constructor(x, y, height, maxDepth) {
+                this.x = x;
+                this.y = y;
+                this.trunk = new Branch(x, y, height, -Math.PI / 2, 0, maxDepth);
+            }
+            
+            update(windParticles, dt, airDensity) {
+                this.trunk.update(windParticles, dt, airDensity);
+            }
+            
+            render(ctx) {
+                this.trunk.render(ctx);
+            }
+        }
+        
+        // Wind particle class
+        class WindParticle {
+            constructor(x, y, speed) {
+                this.x = x;
+                this.y = y;
+                this.speed = speed;
+                this.vx = this.speed;
+                this.vy = Math.random() * 0.2 - 0.1; // Small vertical component
+                this.size = 3 + Math.random() * 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+        }
+        
+        // Start the simulation when the window loads
+        window.addEventListener('load', () => {
+            const simulation = new ForestWindSimulation();
+            
+            // Generate an initial wind gust
+            setTimeout(() => {
+                simulation.generateWindGust();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

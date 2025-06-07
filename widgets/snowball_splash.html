@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowball Splash and Drip Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            background-color: #333;
+        }
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="snowballCanvas"></canvas>
+    <div class="control-panel">
+        <button id="resetBtn">Reset Animation</button>
+        <button id="pauseBtn">Pause/Resume</button>
+    </div>
+    <div class="info">
+        <p>Physics simulation of a snowball hitting a wall:</p>
+        <p>1. Initial impact (solid mechanics)</p>
+        <p>2. Splashing (fluid dynamics)</p>
+        <p>3. Dripping (surface tension & gravity)</p>
+        <p id="phaseDisplay">Current phase: Initial approach</p>
+    </div>
+
+    <script>
+      /*     Model the Wall: Represent the wall as a rigid body with a boundary condition. A vertical wall perpendicular to the x-axis can be described by the plane \( x = 0 \).
+    Initial Snowball Model (Solid Mechanics): Use the Navier-Cauchy equation for the elastic deformation of the snowball: \[ \rho \frac{\partial^2 \mathbf{u}}{\partial t^2} = \mu \nabla^2 \mathbf{u} + (\lambda + \mu) \nabla (\nabla \cdot \mathbf{u}) + \mathbf{f}, \] where \(\mathbf{u}\) is the displacement, \(\rho\) is the density, \(\mu\) and \(\lambda\) are the Lamé parameters, and \(\mathbf{f}\) are external forces.
+    Contact Conditions: At the wall boundary, apply non-penetration conditions like: \[ \mathbf{u} \cdot \mathbf{n} = 0, \] where \(\mathbf{n}\) is the normal vector to the wall.
+    Transition to Fluid Dynamics: As the snowball deforms or fractures upon impact, switch to the incompressible Navier-Stokes equations for the fluid dynamics of the snow's water content: \[ \rho \left( \frac{\partial \mathbf{v}}{\partial t} + \mathbf{v} \cdot \nabla \mathbf{v} \right) = -\nabla p + \mu \nabla^2 \mathbf{v} + \rho \mathbf{g}, \] \[ \nabla \cdot \mathbf{v} = 0, \] where \(\mathbf{v}\) is the fluid velocity, \(p\) is the pressure, \(\mu\) is the dynamic viscosity, and \(\mathbf{g}\) is the gravitational acceleration.
+    Free Surface Tracking: Employ the Level Set method to track the fluid-air interface, using the scalar level set function \(\phi\):
+        \(\phi < 0\) inside the fluid
+        \(\phi = 0\) at the interface
+        \(\phi > 0\) in the air The level set function evolves according to: \[ \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0. \]
+    Surface Tension Effects: Include surface tension in the Navier-Stokes equations: \[ \mathbf{f}{\text{st}} = -\sigma \kappa \nabla \delta(\phi) \bigg|{\text{interface}}, \] where \(\sigma\) is the surface tension coefficient, \(\kappa\) is the curvature, and \(\delta(\cdot)\) is the Dirac delta function. The curvature is given by: \[ \kappa = \nabla \cdot \left( \frac{\nabla \phi}{\| \nabla \phi \|} \right) \bigg|_{\text{interface}}. \]
+    Droplet Formation and Dripping: Continue solving the Navier-Stokes equations as the fluid spreads, adheres, and eventually forms droplets on the wall. Monitor droplet pinch-off dynamics, and once droplets separate, continue solving the Navier-Stokes equations for the individual droplets until they drip off under gravity. 按上述建模从雪球splash接触墙 并有液滴 drooping 全过程的 2D 动画。墙面占满视野。视角垂直于墙面。雪球垂直于墙面。动画开始时只有雪球接触墙面的一个点，然后是 splash 形状，然后是 dropping。 输出 single-file html
+      */
+        // Canvas setup
+        const canvas = document.getElementById('snowballCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const phaseDisplay = document.getElementById('phaseDisplay');
+        
+        // Physics parameters
+        const params = {
+            gravity: 0.05,
+            elasticity: 0.3,
+            viscosity: 0.02,
+            surfaceTension: 0.3,
+            splashParticles: 150,
+            wallThickness: 20,
+            initialVelocity: 4,
+            snowballRadius: 40,
+            splashDuration: 100,
+            paused: false,
+            currentPhase: 'approach' // approach, impact, splash, drip
+        };
+
+        // Simulation state
+        let time = 0;
+        let impactTime = 0;
+        let snowballX;
+        let snowballVelocity;
+        let particles = [];
+        let droplets = [];
+        
+        class Particle {
+            constructor(x, y, vx, vy, radius, life) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.radius = radius;
+                this.maxLife = life;
+                this.life = life;
+                this.color = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.6})`;
+            }
+            
+            update() {
+                // Apply gravity
+                this.vy += params.gravity;
+                
+                // Apply viscosity (air resistance)
+                this.vx *= (1 - params.viscosity);
+                this.vy *= (1 - params.viscosity);
+                
+                // Wall collision
+                if (this.x - this.radius < params.wallThickness) {
+                    this.x = params.wallThickness + this.radius;
+                    this.vx = -this.vx * params.elasticity;
+                }
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Update lifetime
+                this.life--;
+                
+                return this.life > 0;
+            }
+            
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        class Droplet {
+            constructor(x, y, radius) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.radius = radius;
+                this.attached = true;
+                this.accumulatedWater = 0;
+                this.maxWater = radius * 10; // When to detach
+                this.oscillation = 0;
+                this.oscillationSpeed = 0.05 + Math.random() * 0.05;
+                this.alpha = 0.8;
+            }
+            
+            addWater(amount) {
+                this.accumulatedWater += amount;
+                this.radius = Math.sqrt(this.radius * this.radius + amount / 5);
+                
+                if (this.accumulatedWater > this.maxWater) {
+                    this.attached = false;
+                }
+            }
+            
+            update() {
+                // Oscillate if attached
+                if (this.attached) {
+                    this.oscillation += this.oscillationSpeed;
+                    this.x = params.wallThickness + this.radius * 0.8 + Math.sin(this.oscillation) * 2;
+                } else {
+                    // Apply gravity if detached
+                    this.vy += params.gravity * 0.5;
+                    this.y += this.vy;
+                }
+                
+                return this.y < canvas.height + 50;
+            }
+            
+            draw() {
+                // Draw droplet body
+                ctx.fillStyle = `rgba(200, 220, 255, ${this.alpha})`;
+                ctx.beginPath();
+                
+                if (this.attached) {
+                    // Draw attached droplet with teardrop shape
+                    ctx.ellipse(
+                        this.x, 
+                        this.y, 
+                        this.radius * 0.8, 
+                        this.radius * (1 + this.accumulatedWater / this.maxWater * 0.5), 
+                        0, 0, Math.PI * 2
+                    );
+                } else {
+                    // Draw falling droplet
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                }
+                
+                ctx.fill();
+                
+                // Add highlight
+                ctx.fillStyle = `rgba(255, 255, 255, 0.3)`;
+                ctx.beginPath();
+                ctx.arc(
+                    this.x - this.radius * 0.3, 
+                    this.y - this.radius * 0.3,
+                    this.radius * 0.4, 
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+        }
+        
+        // Initialize simulation
+        function initSimulation() {
+            time = 0;
+            impactTime = 0;
+            snowballX = canvas.width * 0.7;
+            snowballVelocity = -params.initialVelocity;
+            particles = [];
+            droplets = [];
+            params.currentPhase = 'approach';
+            updatePhaseDisplay();
+        }
+        
+        function createSplash() {
+            // Create splash particles
+            for (let i = 0; i < params.splashParticles; i++) {
+                const angle = Math.random() * Math.PI - Math.PI/2;
+                const speed = Math.random() * 5 + 3;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                const radius = Math.random() * 5 + 2;
+                const life = Math.random() * 100 + 50;
+                
+                particles.push(new Particle(
+                    params.wallThickness + Math.random() * 10,
+                    canvas.height / 2 + Math.random() * 40 - 20,
+                    vx, vy, radius, life
+                ));
+            }
+            
+            // Create initial wall droplets
+            for (let i = 0; i < 15; i++) {
+                const y = canvas.height / 2 + Math.random() * 120 - 60;
+                const radius = Math.random() * 3 + 2;
+                droplets.push(new Droplet(params.wallThickness, y, radius));
+            }
+        }
+        
+        function updatePhaseDisplay() {
+            let phaseText = '';
+            switch (params.currentPhase) {
+                case 'approach':
+                    phaseText = 'Initial approach';
+                    break;
+                case 'impact':
+                    phaseText = 'Impact (solid mechanics)';
+                    break;
+                case 'splash':
+                    phaseText = 'Splash (fluid dynamics)';
+                    break;
+                case 'drip':
+                    phaseText = 'Dripping (surface tension & gravity)';
+                    break;
+            }
+            phaseDisplay.textContent = `Current phase: ${phaseText}`;
+        }
+        
+        // Animation loop
+        function animate() {
+            if (!params.paused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw wall
+                ctx.fillStyle = '#555';
+                ctx.fillRect(0, 0, params.wallThickness, canvas.height);
+                
+                // ----------------------------------------
+                // Snowball approach phase
+                // ----------------------------------------
+                if (params.currentPhase === 'approach') {
+                    snowballX += snowballVelocity;
+                    
+                    // Check for wall collision
+                    if (snowballX - params.snowballRadius <= params.wallThickness) {
+                        impactTime = time;
+                        params.currentPhase = 'impact';
+                        updatePhaseDisplay();
+                    }
+                    
+                    // Draw snowball
+                    drawSnowball(snowballX, canvas.height / 2, params.snowballRadius);
+                }
+                // ----------------------------------------
+                // Impact phase
+                // ----------------------------------------
+                else if (params.currentPhase === 'impact') {
+                    const impactProgress = (time - impactTime) / 20;
+                    
+                    // Deformation animation
+                    const deformation = Math.min(impactProgress * 1.5, 0.7);
+                    const impactX = params.wallThickness + params.snowballRadius * (1 - deformation);
+                    const impactWidthScale = 1 + deformation * 0.8;
+                    const impactHeightScale = 1 - deformation * 0.5;
+                    
+                    // Draw deformed snowball
+                    drawDeformedSnowball(
+                        impactX, 
+                        canvas.height / 2, 
+                        params.snowballRadius,
+                        impactWidthScale,
+                        impactHeightScale
+                    );
+                    
+                    // Transition to splash phase
+                    if (impactProgress >= 1) {
+                        params.currentPhase = 'splash';
+                        createSplash();
+                        updatePhaseDisplay();
+                    }
+                }
+                // ----------------------------------------
+                // Splash and drip phases
+                // ----------------------------------------
+                else if (params.currentPhase === 'splash' || params.currentPhase === 'drip') {
+                    // Update splash particles
+                    particles = particles.filter(particle => {
+                        const active = particle.update();
+                        if (active) particle.draw();
+                        return active;
+                    });
+                    
+                    // Update droplets
+                    droplets = droplets.filter(droplet => {
+                        const active = droplet.update();
+                        if (active) droplet.draw();
+                        return active;
+                    });
+                    
+                    // Water accumulation on the wall
+                    if (Math.random() < 0.1 && params.currentPhase === 'splash') {
+                        // Randomly select a droplet to add water to
+                        if (droplets.length > 0) {
+                            const droplet = droplets[Math.floor(Math.random() * droplets.length)];
+                            if (droplet.attached) {
+                                droplet.addWater(Math.random() * 0.5 + 0.1);
+                            }
+                        }
+                    }
+                    
+                    // Occasionally create new droplets on the wall during splash
+                    if (Math.random() < 0.03 && time - impactTime < params.splashDuration && params.currentPhase === 'splash') {
+                        const y = canvas.height / 2 + Math.random() * 200 - 100;
+                        const radius = Math.random() * 3 + 1;
+                        droplets.push(new Droplet(params.wallThickness, y, radius));
+                    }
+                    
+                    // Transition from splash to drip phase
+                    if (params.currentPhase === 'splash' && particles.length < params.splashParticles * 0.1) {
+                        params.currentPhase = 'drip';
+                        updatePhaseDisplay();
+                    }
+                    
+                    // Draw water streaks on wall during drip phase
+                    if (params.currentPhase === 'drip') {
+                        drawWaterStreaks();
+                    }
+                }
+                
+                time++;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        function drawSnowball(x, y, radius) {
+            // Draw main snowball body
+            ctx.fillStyle = 'rgba(240, 250, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw texture and highlights
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            const numDetails = 12;
+            for (let i = 0; i < numDetails; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * radius * 0.7;
+                const detailX = x + Math.cos(angle) * distance;
+                const detailY = y + Math.sin(angle) * distance;
+                const detailSize = Math.random() * radius * 0.3 + radius * 0.1;
+                
+                ctx.beginPath();
+                ctx.arc(detailX, detailY, detailSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawDeformedSnowball(x, y, radius, widthScale, heightScale) {
+            // Draw deformed snowball shape
+            ctx.fillStyle = 'rgba(240, 250, 255, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(x, y, radius * widthScale, radius * heightScale, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add some texture
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            for (let i = 0; i < 8; i++) {
+                const angle = Math.random() * Math.PI;
+                const distance = Math.random() * radius * widthScale * 0.6;
+                const detailX = x + Math.cos(angle) * distance;
+                const detailY = y + Math.sin(angle) * distance * heightScale / widthScale;
+                const detailSize = Math.random() * radius * 0.2 + radius * 0.05;
+                
+                ctx.beginPath();
+                ctx.arc(detailX, detailY, detailSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawWaterStreaks() {
+            ctx.strokeStyle = 'rgba(200, 220, 255, 0.3)';
+            ctx.lineWidth = 1.5;
+            
+            // Draw a few random water streaks down the wall
+            for (let i = 0; i < 8; i++) {
+                const startX = params.wallThickness;
+                const startY = canvas.height / 2 - 50 + Math.random() * 100;
+                const length = Math.random() * 100 + 50;
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                
+                // Create wavy path
+                for (let j = 0; j < 5; j++) {
+                    const segment = length / 5;
+                    const offsetX = Math.random() * 2 - 1;
+                    const offsetY = segment * j;
+                    ctx.lineTo(
+                        startX + offsetX, 
+                        startY + offsetY
+                    );
+                }
+                
+                ctx.stroke();
+            }
+        }
+        
+        // Event handlers
+        resetBtn.addEventListener('click', initSimulation);
+        
+        pauseBtn.addEventListener('click', () => {
+            params.paused = !params.paused;
+        });
+        
+        // Start the simulation
+        initSimulation();
+        animate();
+    </script>
+</body>
+</html>
