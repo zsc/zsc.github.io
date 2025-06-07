@@ -62,6 +62,7 @@
     </div>
 
 <script>
+// single-file html 实现一个二级倒立摆(开局时摆应该在上面，然后下面的滑块通过移动保持摆在上面)，用 ppo 进行控制（用的 NN 两个隐藏层 hidden_dim 16），可视化训练过程（定期生成一条trajectory 演示）。并提供独立的测试按钮，对训完的策略进行测试。多暴露一些超参到 UI。测试时不限时长直到有个按钮停止。UI 上显示下 actor/critic loss 曲线，但控制高度。
 // --- MATH UTILITIES ---
 const Mat = {
     zeros: (rows, cols) => Array(rows).fill(0).map(() => Array(cols).fill(0)),
