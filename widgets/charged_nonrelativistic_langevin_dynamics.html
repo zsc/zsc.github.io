@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langevin Dynamics of Charged Particles</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        #controls {
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-start;
+            max-width: 90vw;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+        .control-group label {
+            font-size: 0.9em;
+            margin-bottom: 3px;
+        }
+        .control-group input[type="range"],
+        .control-group input[type="number"] {
+            width: 100%;
+        }
+        #simulationCanvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: crosshair;
+        }
+        #langButton {
+            padding: 8px 12px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        #langButton:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 data-lang-key="title">Langevin Dynamics of Charged Particles</h1>
+
+    <div id="controls">
+        <div class="control-group">
+            <label for="massSlider" data-lang-key="mass">Mass (<span id="massValue">1.0</span>):</label>
+            <input type="range" id="massSlider" min="0" max="10" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label for="frictionSlider" data-lang-key="friction">Friction (<span id="frictionValue">0.10</span>):</label>
+            <input type="range" id="frictionSlider" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="control-group">
+            <label for="noiseSlider" data-lang-key="noise">Brownian Noise σ (<span id="noiseValue">10.0</span>):</label>
+            <input type="range" id="noiseSlider" min="0" max="100" step="1" value="10">
+        </div>
+        <div class="control-group">
+            <label for="chargeSlider" data-lang-key="charge">Particle Charge (<span id="chargeValue">1.0</span>):</label>
+            <input type="range" id="chargeSlider" min="-5" max="5" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label for="gaussiansSlider" data-lang-key="numGaussians">Potential Gaussians (<span id="gaussiansValue">5</span>):</label>
+            <input type="range" id="gaussiansSlider" min="0" max="20" step="1" value="5">
+        </div>
+         <div class="control-group">
+            <label for="kCoulombSlider" data-lang-key="kCoulomb">Coulomb Constant k (<span id="kCoulombValue">100</span>):</label>
+            <input type="range" id="kCoulombSlider" min="0" max="1000" step="10" value="100">
+        </div>
+        <div class="control-group">
+            <label for="dtSlider" data-lang-key="dt">Time Step dt (<span id="dtValue">0.20</span>):</label>
+            <input type="range" id="dtSlider" min="0.01" max="1" step="0.01" value="0.2">
+        </div>
+        <div class="control-group" style="align-items: center;">
+            <button id="langButton" data-lang-key="langSwitch">Switch to Chinese</button>
+            <button id="resetGaussiansButton" data-lang-key="resetGaussians" style="margin-top: 5px;">Reset Gaussians</button>
+            <button id="clearParticlesButton" data-lang-key="clearParticles" style="margin-top: 5px;">Clear Particles</button>
+        </div>
+    </div>
+
+    <canvas id="simulationCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const langStrings = {
+            en: {
+                title: "Langevin Dynamics of Charged Particles",
+                mass: "Mass",
+                friction: "Friction",
+                noise: "Brownian Noise σ",
+                charge: "Particle Charge",
+                numGaussians: "Potential Gaussians",
+                kCoulomb: "Coulomb Constant k",
+                dt: "Time Step dt",
+                langSwitch: "Switch to Chinese",
+                resetGaussians: "Reset Gaussians",
+                clearParticles: "Clear Particles"
+            },
+            cn: {
+                title: "带电粒子朗之万动力学",
+                mass: "质量",
+                friction: "摩擦系数",
+                noise: "布朗运动噪声 σ",
+                charge: "粒子电荷",
+                numGaussians: "高斯势函数数量",
+                kCoulomb: "库仑常数 k",
+                dt: "时间步长 dt",
+                langSwitch: "切换到英文",
+                resetGaussians: "重置高斯势",
+                clearParticles: "清除粒子"
+            }
+        };
+        let currentLang = 'en';
+
+        // UI Elements
+        const massSlider = document.getElementById('massSlider');
+        const frictionSlider = document.getElementById('frictionSlider');
+        const noiseSlider = document.getElementById('noiseSlider');
+        const chargeSlider = document.getElementById('chargeSlider');
+        const gaussiansSlider = document.getElementById('gaussiansSlider');
+        const kCoulombSlider = document.getElementById('kCoulombSlider');
+        const dtSlider = document.getElementById('dtSlider');
+
+        const massValueSpan = document.getElementById('massValue');
+        const frictionValueSpan = document.getElementById('frictionValue');
+        const noiseValueSpan = document.getElementById('noiseValue');
+        const chargeValueSpan = document.getElementById('chargeValue');
+        const gaussiansValueSpan = document.getElementById('gaussiansValue');
+        const kCoulombValueSpan = document.getElementById('kCoulombValue');
+        const dtValueSpan = document.getElementById('dtValue');
+        
+        const langButton = document.getElementById('langButton');
+        const resetGaussiansButton = document.getElementById('resetGaussiansButton');
+        const clearParticlesButton = document.getElementById('clearParticlesButton');
+
+        // Simulation Parameters
+        let PARAMS = {
+            mass: parseFloat(massSlider.value),
+            friction: parseFloat(frictionSlider.value),
+            noiseSigma: parseFloat(noiseSlider.value), // Represents sqrt(2 * gamma_coeff * k_B_T_eff)
+            defaultCharge: parseFloat(chargeSlider.value),
+            numGaussians: parseInt(gaussiansSlider.value),
+            kCoulomb: parseFloat(kCoulombSlider.value),
+            dt: parseFloat(dtSlider.value),
+            trailLength: 50,
+            potentialGridSize: 20, 
+            coulombSoftening: 10,
+            restitution: 0.8 // Coefficient of restitution for bounces
+        };
+
+        let particles = [];
+        let potentialGaussians = [];
+        let potentialFieldImage = null; 
+
+        function updateLangUI() {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langStrings[currentLang][key]) {
+                    if (el.tagName === 'LABEL' && el.htmlFor && el.htmlFor.endsWith('Slider')) {
+                        const spanId = el.htmlFor.replace('Slider', 'Value');
+                        const span = document.getElementById(spanId);
+                        if (span) {
+                             el.innerHTML = `${langStrings[currentLang][key]} (<span id="${spanId}">${span.textContent}</span>):`;
+                        } else {
+                            el.textContent = langStrings[currentLang][key];
+                        }
+                    } else if (el.id === 'langButton') {
+                         el.textContent = currentLang === 'en' ? langStrings.cn.langSwitch : langStrings.en.langSwitch;
+                    }
+                    else {
+                        el.textContent = langStrings[currentLang][key];
+                    }
+                }
+            });
+            document.title = langStrings[currentLang].title || document.title;
+        }
+
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'en') ? 'cn' : 'en';
+            updateLangUI();
+        }
+        
+        langButton.addEventListener('click', toggleLanguage);
+
+        function updateParamDisplay() {
+            massValueSpan.textContent = PARAMS.mass.toFixed(1);
+            frictionValueSpan.textContent = PARAMS.friction.toFixed(2);
+            noiseValueSpan.textContent = PARAMS.noiseSigma.toFixed(1); // Adjusted to reflect new scale
+            chargeValueSpan.textContent = PARAMS.defaultCharge.toFixed(1);
+            gaussiansValueSpan.textContent = PARAMS.numGaussians;
+            kCoulombValueSpan.textContent = PARAMS.kCoulomb.toFixed(0);
+            dtValueSpan.textContent = PARAMS.dt.toFixed(2); // Adjusted to reflect new scale
+        }
+
+        massSlider.addEventListener('input', () => { PARAMS.mass = parseFloat(massSlider.value); updateParamDisplay(); });
+        frictionSlider.addEventListener('input', () => { PARAMS.friction = parseFloat(frictionSlider.value); updateParamDisplay(); });
+        noiseSlider.addEventListener('input', () => { PARAMS.noiseSigma = parseFloat(noiseSlider.value); updateParamDisplay(); });
+        chargeSlider.addEventListener('input', () => { PARAMS.defaultCharge = parseFloat(chargeSlider.value); updateParamDisplay(); });
+        gaussiansSlider.addEventListener('input', () => { 
+            PARAMS.numGaussians = parseInt(gaussiansSlider.value); 
+            generatePotentialGaussians();
+            renderPotentialFieldToOffscreenCanvas();
+            updateParamDisplay(); 
+        });
+        kCoulombSlider.addEventListener('input', () => { PARAMS.kCoulomb = parseFloat(kCoulombSlider.value); updateParamDisplay(); });
+        dtSlider.addEventListener('input', () => { PARAMS.dt = parseFloat(dtSlider.value); updateParamDisplay(); });
+        
+        resetGaussiansButton.addEventListener('click', () => {
+            generatePotentialGaussians();
+            renderPotentialFieldToOffscreenCanvas();
+        });
+
+        clearParticlesButton.addEventListener('click', () => {
+            particles = [];
+        });
+
+
+        function resizeCanvas() {
+            canvas.width = Math.min(window.innerWidth * 0.9, 800);
+            canvas.height = Math.min(window.innerHeight * 0.7, 600);
+            if (potentialGaussians.length > 0 || PARAMS.numGaussians === 0) renderPotentialFieldToOffscreenCanvas();
+        }
+
+        class Particle {
+            constructor(x, y, charge) {
+                this.pos = { x: x, y: y };
+                this.vel = { x: 0, y: 0 };
+                this.charge = charge;
+                this.trail = [];
+                this.color = charge > 0 ? 'rgba(255,0,0,' : (charge < 0 ? 'rgba(0,0,255,' : 'rgba(128,128,128,');
+                this.radius = 3 + Math.abs(charge) * 0.5;
+            }
+
+            update(force) {
+                // N_x, N_y are approximations of N(0,1) Gaussian random numbers
+                // For more accuracy, use Box-Muller transform.
+                // Current (Math.random() - 0.5) * 2 is Uniform on [-1, 1], variance 1/3.
+                // To make variance 1, multiply by sqrt(12) ~ 3.46
+                const N_x = (Math.random() - 0.5) * 2; 
+                const N_y = (Math.random() - 0.5) * 2; 
+                
+                // randomImpulse is sqrt(2 * gamma_coeff * k_B_T_eff * dt) * N(0,1)
+                // PARAMS.noiseSigma is defined as sqrt(2 * gamma_coeff * k_B_T_eff)
+                const randomImpulse_x = PARAMS.noiseSigma * N_x * Math.sqrt(PARAMS.dt);
+                const randomImpulse_y = PARAMS.noiseSigma * N_y * Math.sqrt(PARAMS.dt);
+
+                if (PARAMS.mass > 1e-6) { // Inertial Langevin dynamics
+                    // dv = (F_deterministic/m - (gamma/m)v)dt + random_impulse/m
+                    const F_det_x = force.x;
+                    const F_det_y = force.y;
+
+                    this.vel.x += ((F_det_x - PARAMS.friction * this.vel.x) / PARAMS.mass) * PARAMS.dt;
+                    this.vel.y += ((F_det_y - PARAMS.friction * this.vel.y) / PARAMS.mass) * PARAMS.dt;
+
+                    // Add stochastic kick (random_impulse / mass)
+                    this.vel.x += randomImpulse_x / PARAMS.mass;
+                    this.vel.y += randomImpulse_y / PARAMS.mass;
+
+                } else { // Overdamped (mass is effectively zero)
+                    // v = dx/dt = F_det/gamma + random_impulse/(gamma*dt)
+                    // (random_impulse / (gamma*dt)) is equivalent to sqrt(2D/dt) * N(0,1)
+                    const frictionCoeff = PARAMS.friction + 1e-9; // Add epsilon to avoid division by zero
+
+                    this.vel.x = (force.x / frictionCoeff) + randomImpulse_x / (frictionCoeff * PARAMS.dt);
+                    this.vel.y = (force.y / frictionCoeff) + randomImpulse_y / (frictionCoeff * PARAMS.dt);
+                    
+                    if (PARAMS.friction < 1e-8) { // If friction is truly zero (and mass is zero)
+                        // This case is ill-defined. Velocity could be extremely large.
+                        // Let random part dominate, scaled to be somewhat reasonable.
+                        // v = random_impulse / dt = PARAMS.noiseSigma * N_x / sqrt(PARAMS.dt)
+                        this.vel.x = PARAMS.noiseSigma * N_x / Math.sqrt(PARAMS.dt + 1e-9);
+                        this.vel.y = PARAMS.noiseSigma * N_y / Math.sqrt(PARAMS.dt + 1e-9);
+                    }
+                }
+                
+                this.pos.x += this.vel.x * PARAMS.dt;
+                this.pos.y += this.vel.y * PARAMS.dt;
+
+                // Boundary conditions (reflect) - apply *before* adding to trail
+                if (this.pos.x - this.radius < 0) {
+                    this.pos.x = this.radius;
+                    this.vel.x *= -PARAMS.restitution;
+                } else if (this.pos.x + this.radius > canvas.width) {
+                    this.pos.x = canvas.width - this.radius;
+                    this.vel.x *= -PARAMS.restitution;
+                }
+
+                if (this.pos.y - this.radius < 0) {
+                    this.pos.y = this.radius;
+                    this.vel.y *= -PARAMS.restitution;
+                } else if (this.pos.y + this.radius > canvas.height) {
+                    this.pos.y = canvas.height - this.radius;
+                    this.vel.y *= -PARAMS.restitution;
+                }
+                
+                // Add to trail (with corrected position)
+                this.trail.push({ x: this.pos.x, y: this.pos.y });
+                if (this.trail.length > PARAMS.trailLength) {
+                    this.trail.shift();
+                }
+            }
+
+            draw() {
+                // Draw trail
+                for (let i = 0; i < this.trail.length; i++) {
+                    const p = this.trail[i];
+                    const alpha = (i / this.trail.length) * 0.5; 
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, this.radius * (i / this.trail.length) * 0.8, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color + alpha + ')';
+                    ctx.fill();
+                }
+
+                // Draw particle
+                ctx.beginPath();
+                ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + '1)';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        function generatePotentialGaussians() {
+            potentialGaussians = [];
+            for (let i = 0; i < PARAMS.numGaussians; i++) {
+                potentialGaussians.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    amplitude: (Math.random() - 0.5) * 200, 
+                    sigmaX: Math.random() * (canvas.width / 8) + (canvas.width / 20),
+                    sigmaY: Math.random() * (canvas.height / 8) + (canvas.height / 20),
+                });
+            }
+        }
+
+        function getPotentialValue(x, y) {
+            let potential = 0;
+            potentialGaussians.forEach(g => {
+                const dx = x - g.x;
+                const dy = y - g.y;
+                potential += g.amplitude * Math.exp(-( (dx*dx)/(2*g.sigmaX*g.sigmaX) + (dy*dy)/(2*g.sigmaY*g.sigmaY) ));
+            });
+            return potential;
+        }
+
+        function getPotentialForce(x, y) {
+            const h = 1; 
+            const Vx_plus = getPotentialValue(x + h, y);
+            const Vx_minus = getPotentialValue(x - h, y);
+            const Vy_plus = getPotentialValue(x, y + h);
+            const Vy_minus = getPotentialValue(x, y - h);
+
+            const Fx = -(Vx_plus - Vx_minus) / (2 * h);
+            const Fy = -(Vy_plus - Vy_minus) / (2 * h);
+            return { x: Fx, y: Fy };
+        }
+        
+        function getCoulombForce(p1, p2) {
+            const dx = p2.pos.x - p1.pos.x;
+            const dy = p2.pos.y - p1.pos.y;
+            const distSq = dx * dx + dy * dy + PARAMS.coulombSoftening * PARAMS.coulombSoftening; 
+            const dist = Math.sqrt(distSq);
+
+            if (dist < 1e-6) return { x: 0, y: 0 }; 
+
+            const forceMagnitude = PARAMS.kCoulomb * p1.charge * p2.charge / distSq;
+            
+            return {
+                x: -forceMagnitude * (dx / dist),
+                y: -forceMagnitude * (dy / dist)
+            };
+        }
+
+        function renderPotentialFieldToOffscreenCanvas() {
+            if (!canvas.width || !canvas.height) return; 
+
+            const offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = canvas.width;
+            offscreenCanvas.height = canvas.height;
+            const offCtx = offscreenCanvas.getContext('2d');
+            
+            if (PARAMS.numGaussians === 0) { 
+                offCtx.fillStyle = 'rgb(128,128,128)'; 
+                offCtx.fillRect(0,0, offscreenCanvas.width, offscreenCanvas.height);
+                potentialFieldImage = offscreenCanvas;
+                return;
+            }
+
+            const imageData = offCtx.createImageData(offscreenCanvas.width, offscreenCanvas.height);
+            const data = imageData.data;
+
+            let minPot = Infinity, maxPot = -Infinity;
+            const potentials = new Float32Array(offscreenCanvas.width * offscreenCanvas.height);
+            
+            for (let y = 0; y < offscreenCanvas.height; y++) {
+                for (let x = 0; x < offscreenCanvas.width; x++) {
+                    const pot = getPotentialValue(x, y);
+                    potentials[y * offscreenCanvas.width + x] = pot;
+                    if (pot < minPot) minPot = pot;
+                    if (pot > maxPot) maxPot = pot;
+                }
+            }
+
+            const range = maxPot - minPot;
+            if (range < 1e-6) { 
+                 for (let i = 0; i < data.length; i += 4) {
+                    data[i] = 128; data[i + 1] = 128; data[i + 2] = 128; data[i + 3] = 255;
+                }
+            } else {
+                for (let y = 0; y < offscreenCanvas.height; y++) {
+                    for (let x = 0; x < offscreenCanvas.width; x++) {
+                        const pot = potentials[y * offscreenCanvas.width + x];
+                        const normalizedPot = (pot - minPot) / range;
+                        const colorVal = Math.floor(normalizedPot * 255);
+                        const idx = (y * offscreenCanvas.width + x) * 4;
+                        data[idx] = colorVal; data[idx + 1] = colorVal; data[idx + 2] = colorVal; data[idx + 3] = 255;
+                    }
+                }
+            }
+            offCtx.putImageData(imageData, 0, 0);
+            potentialFieldImage = offscreenCanvas;
+        }
+
+        function drawForceField() {
+            const gridSize = PARAMS.potentialGridSize;
+            const arrowLength = 10;
+            ctx.strokeStyle = 'rgba(100, 100, 100, 0.7)';
+            ctx.lineWidth = 1;
+
+            for (let xGrid = gridSize / 2; xGrid < canvas.width; xGrid += gridSize) {
+                for (let yGrid = gridSize / 2; yGrid < canvas.height; yGrid += gridSize) {
+                    const force = getPotentialForce(xGrid, yGrid);
+                    const magnitude = Math.sqrt(force.x * force.x + force.y * force.y);
+                    if (magnitude < 1e-3) continue;
+
+                    const angle = Math.atan2(force.y, force.x);
+                    const dx = arrowLength * Math.cos(angle);
+                    const dy = arrowLength * Math.sin(angle);
+
+                    ctx.beginPath();
+                    ctx.moveTo(xGrid, yGrid);
+                    ctx.lineTo(xGrid + dx, yGrid + dy);
+                    
+                    ctx.lineTo(xGrid + dx - arrowLength/3 * Math.cos(angle - Math.PI/6), yGrid + dy - arrowLength/3 * Math.sin(angle - Math.PI/6));
+                    ctx.moveTo(xGrid + dx, yGrid + dy);
+                    ctx.lineTo(xGrid + dx - arrowLength/3 * Math.cos(angle + Math.PI/6), yGrid + dy - arrowLength/3 * Math.sin(angle + Math.PI/6));
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        function gameLoop() {
+            particles.forEach(p1 => {
+                let totalForce = getPotentialForce(p1.pos.x, p1.pos.y);
+                
+                particles.forEach(p2 => {
+                    if (p1 === p2) return;
+                    const coulombForce = getCoulombForce(p1, p2);
+                    totalForce.x += coulombForce.x;
+                    totalForce.y += coulombForce.y;
+                });
+                p1.update(totalForce);
+            });
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (potentialFieldImage) {
+                ctx.drawImage(potentialFieldImage, 0, 0);
+            }
+            
+            if (PARAMS.numGaussians > 0) {
+                drawForceField();
+            }
+
+            particles.forEach(p => p.draw());
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            particles.push(new Particle(x, y, PARAMS.defaultCharge));
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if (PARAMS.numGaussians > 0) {
+                 generatePotentialGaussians(); 
+                 renderPotentialFieldToOffscreenCanvas();
+            }
+        });
+        
+        updateLangUI(); 
+        updateParamDisplay(); 
+        resizeCanvas();
+        generatePotentialGaussians();
+        // renderPotentialFieldToOffscreenCanvas(); // Called by resizeCanvas or generatePotentialGaussians
+        gameLoop();
+
+    </script>
+</body>
+</html>
