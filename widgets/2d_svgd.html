@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inertial SVGD Animation</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; background-color: #f0f0f0; }
+        #container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+        #canvasContainer { position: relative; border: 1px solid #ccc; }
+        canvas { display: block; background-color: #fff; }
+        #controls { padding: 15px; background-color: #fff; border: 1px solid #ccc; border-radius: 5px; min-width: 250px; }
+        .control-group { margin-bottom: 15px; }
+        .control-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .control-group input[type="range"], .control-group select, .control-group input[type="number"] {
+            width: calc(100% - 10px); padding: 5px;
+        }
+        .control-group input[type="checkbox"] { margin-right: 5px; }
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #langToggle { position: absolute; top: 10px; right: 10px; }
+        .value-display { font-size: 0.9em; color: #555; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="canvasContainer">
+            <canvas id="mainCanvas"></canvas>
+            <button id="langToggle">中文</button>
+        </div>
+        <div id="controls">
+            <h3 data-lang-key="controlsTitle">Controls</h3>
+
+            <div class="control-group">
+                <label data-lang-key="massLabel">Mass:</label>
+                <input type="range" id="massSlider" min="0" max="5" step="0.05" value="1">
+                <span id="massValue" class="value-display">1.00</span>
+            </div>
+
+            <div class="control-group">
+                <label data-lang-key="kernelTypeLabel">Kernel Type:</label>
+                <select id="kernelType">
+                    <option value="rbf" data-lang-key="rbfKernel">RBF Kernel</option>
+                    <option value="imq" data-lang-key="imqKernel">IMQ Kernel</option>
+                </select>
+            </div>
+
+            <div id="rbfParams" class="control-group">
+                <label data-lang-key="rbfBandwidthLabel">RBF Bandwidth (h):</label>
+                <input type="range" id="rbfBandwidth" min="1" max="200" step="1" value="50">
+                <span id="rbfBandwidthValue" class="value-display">50</span>
+            </div>
+
+            <div id="imqParams" class="control-group" style="display: none;">
+                <label data-lang-key="imqCLabel">IMQ C:</label>
+                <input type="range" id="imqC" min="0.1" max="10" step="0.1" value="1">
+                <span id="imqCValue" class="value-display">1.0</span>
+                 <label data-lang-key="imqBetaLabel">IMQ Beta (typically -0.5):</label>
+                <input type="range" id="imqBeta" min="-2" max="0" step="0.1" value="-0.5">
+                <span id="imqBetaValue" class="value-display">-0.5</span>
+            </div>
+            
+            <div class="control-group">
+                <label data-lang-key="numGaussiansLabel">Number of Gaussians:</label>
+                <input type="range" id="numGaussians" min="1" max="10" step="1" value="5">
+                <span id="numGaussiansValue" class="value-display">5</span>
+            </div>
+
+            <div class="control-group">
+                <label data-lang-key="timeStepLabel">Time Step (dt):</label>
+                <input type="range" id="timeStep" min="0.01" max="0.5" step="0.01" value="0.1">
+                <span id="timeStepValue" class="value-display">0.10</span>
+            </div>
+
+             <div class="control-group">
+                <label data-lang-key="trailLengthLabel">Trail Length:</label>
+                <input type="range" id="trailLength" min="10" max="200" step="10" value="50">
+                <span id="trailLengthValue" class="value-display">50</span>
+            </div>
+
+            <div class="control-group">
+                <input type="checkbox" id="showForceField" checked>
+                <label for="showForceField" data-lang-key="showForceFieldLabel" style="display:inline;">Show Force Field</label>
+            </div>
+             <div class="control-group">
+                <input type="checkbox" id="showPotentialField" checked>
+                <label for="showPotentialField" data-lang-key="showPotentialFieldLabel" style="display:inline;">Show Potential Field</label>
+            </div>
+
+            <button id="resetGaussians" data-lang-key="resetGaussiansBtn">Reset Gaussians</button>
+            <button id="clearParticles" data-lang-key="clearParticlesBtn">Clear Particles</button>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWidth = 600;
+        const canvasHeight = 400;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        let particles = [];
+        let gaussians = [];
+        let potentialFieldImage = null; // For caching depth map
+
+        // --- Parameters ---
+        let particleMass = 1;
+        let kernelType = 'rbf';
+        let rbfBandwidth = 50;
+        let imqC = 1;
+        let imqBeta = -0.5;
+        let numGaussians = 5;
+        let dt = 0.1; // Time step
+        let trailLength = 50;
+        let showForceField = true;
+        let showPotentialField = true;
+        const forceFieldGridSize = 25; // Grid cells for force field visualization
+
+        // --- Language Content ---
+        const langContent = {
+            EN: {
+                controlsTitle: "Controls",
+                massLabel: "Mass:",
+                kernelTypeLabel: "Kernel Type:",
+                rbfKernel: "RBF Kernel",
+                imqKernel: "IMQ Kernel",
+                rbfBandwidthLabel: "RBF Bandwidth (h):",
+                imqCLabel: "IMQ C:",
+                imqBetaLabel: "IMQ Beta (typically -0.5):",
+                numGaussiansLabel: "Number of Gaussians:",
+                timeStepLabel: "Time Step (dt):",
+                trailLengthLabel: "Trail Length:",
+                showForceFieldLabel: "Show Force Field",
+                showPotentialFieldLabel: "Show Potential Field",
+                resetGaussiansBtn: "Reset Gaussians",
+                clearParticlesBtn: "Clear Particles",
+                langToggleTo: "中文"
+            },
+            CN: {
+                controlsTitle: "控制面板",
+                massLabel: "质量:",
+                kernelTypeLabel: "核函数类型:",
+                rbfKernel: "RBF 核",
+                imqKernel: "IMQ 核",
+                rbfBandwidthLabel: "RBF 带宽 (h):",
+                imqCLabel: "IMQ C值:",
+                imqBetaLabel: "IMQ Beta (通常 -0.5):",
+                numGaussiansLabel: "高斯分布数量:",
+                timeStepLabel: "时间步长 (dt):",
+                trailLengthLabel: "拖尾长度:",
+                showForceFieldLabel: "显示力场",
+                showPotentialFieldLabel: "显示势场",
+                resetGaussiansBtn: "重置高斯分布",
+                clearParticlesBtn: "清除粒子",
+                langToggleTo: "English"
+            }
+        };
+        let currentLang = 'EN';
+
+        // --- UI Elements ---
+        const massSlider = document.getElementById('massSlider');
+        const massValue = document.getElementById('massValue');
+        const kernelTypeSelect = document.getElementById('kernelType');
+        const rbfParamsDiv = document.getElementById('rbfParams');
+        const rbfBandwidthSlider = document.getElementById('rbfBandwidth');
+        const rbfBandwidthValue = document.getElementById('rbfBandwidthValue');
+        const imqParamsDiv = document.getElementById('imqParams');
+        const imqCSlider = document.getElementById('imqC');
+        const imqCValue = document.getElementById('imqCValue');
+        const imqBetaSlider = document.getElementById('imqBeta');
+        const imqBetaValue = document.getElementById('imqBetaValue');
+        const numGaussiansSlider = document.getElementById('numGaussians');
+        const numGaussiansValue = document.getElementById('numGaussiansValue');
+        const timeStepSlider = document.getElementById('timeStep');
+        const timeStepValue = document.getElementById('timeStepValue');
+        const trailLengthSlider = document.getElementById('trailLength');
+        const trailLengthValue = document.getElementById('trailLengthValue');
+        const showForceFieldCheckbox = document.getElementById('showForceField');
+        const showPotentialFieldCheckbox = document.getElementById('showPotentialField');
+        const resetGaussiansBtn = document.getElementById('resetGaussians');
+        const clearParticlesBtn = document.getElementById('clearParticles');
+        const langToggleButton = document.getElementById('langToggle');
+
+        // --- Utility Functions ---
+        function random(min, max) { return Math.random() * (max - min) + min; }
+        function distSq(p1, p2) { return (p1.x - p2.x)**2 + (p1.y - p2.y)**2; }
+
+        // --- Language Switching ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (langContent[lang][key]) {
+                    if (el.tagName === 'OPTION') {
+                        el.textContent = langContent[lang][key];
+                    } else {
+                        el.childNodes[0].nodeValue = langContent[lang][key]; // More robust for labels
+                    }
+                }
+            });
+            langToggleButton.textContent = langContent[lang].langToggleTo;
+            document.documentElement.lang = lang.toLowerCase(); // Set page lang
+        }
+
+        langToggleButton.addEventListener('click', () => {
+            setLanguage(currentLang === 'EN' ? 'CN' : 'EN');
+        });
+
+
+        // --- Potential Field ---
+        function generateGaussians() {
+            gaussians = [];
+            for (let i = 0; i < numGaussians; i++) {
+                gaussians.push({
+                    mean: { x: random(50, canvasWidth - 50), y: random(50, canvasHeight - 50) },
+                    // Using isotropic Gaussians for simplicity, sx = sy
+                    stdDev: random(30, 80), // Effective standard deviation
+                    amplitude: random(-200, -50) // Negative for attractive wells, positive for hills
+                });
+            }
+            potentialFieldImage = null; // Invalidate cache
+        }
+
+        function potential(x, y) {
+            let p = 0;
+            for (const g of gaussians) {
+                const dx = x - g.mean.x;
+                const dy = y - g.mean.y;
+                const exponent = -0.5 * (dx*dx + dy*dy) / (g.stdDev * g.stdDev);
+                p += g.amplitude * Math.exp(exponent);
+            }
+            return p;
+        }
+
+        function gradPotential(x, y) {
+            let gx = 0, gy = 0;
+            for (const g of gaussians) {
+                const dx = x - g.mean.x;
+                const dy = y - g.mean.y;
+                const stdDevSq = g.stdDev * g.stdDev;
+                const commonFactor = g.amplitude * Math.exp(-0.5 * (dx*dx + dy*dy) / stdDevSq) / stdDevSq;
+                gx -= dx * commonFactor; // derivative of exp(u) is exp(u)*du, here u = -0.5*(...), du/dx = -dx/stdDevSq
+                gy -= dy * commonFactor; // so - (x-mux)/sx^2 * G(...)
+            }
+            return { x: gx, y: gy };
+        }
+        
+        // --- Kernel Functions ---
+        // RBF Kernel: K(x, y) = exp(-||x-y||^2 / (2*h^2))
+        function rbfKernel(p1, p2, h) {
+            const d2 = distSq(p1, p2);
+            return Math.exp(-d2 / (2 * h * h));
+        }
+
+        // Gradient of RBF Kernel w.r.t. p1: grad_p1 K(p1, p2) = - (p1-p2)/h^2 * K(p1, p2)
+        function gradRbfKernel(p1, p2, h) {
+            const k_val = rbfKernel(p1, p2, h);
+            const hSq = h * h;
+            return {
+                x: -(p1.x - p2.x) / hSq * k_val,
+                y: -(p1.y - p2.y) / hSq * k_val
+            };
+        }
+
+        // IMQ Kernel: K(x,y) = (c^2 + ||x-y||^2)^beta
+        function imqKernel(p1, p2, c, beta) {
+            const d2 = distSq(p1, p2);
+            return Math.pow(c*c + d2, beta);
+        }
+        
+        // Gradient of IMQ Kernel w.r.t p1: grad_p1 K(p1, p2) = beta * (c^2 + ||x-y||^2)^(beta-1) * 2 * (p1-p2)
+        function gradImqKernel(p1, p2, c, beta) {
+            const d2 = distSq(p1, p2);
+            const base = c*c + d2;
+            if (base < 1e-9) return {x:0, y:0}; // Avoid division by zero if beta-1 is negative
+            const commonFactor = beta * Math.pow(base, beta - 1) * 2;
+            return {
+                x: commonFactor * (p1.x - p2.x),
+                y: commonFactor * (p1.y - p2.y)
+            };
+        }
+
+
+        // --- Particle Class ---
+        class Particle {
+            constructor(x, y, mass) {
+                this.pos = { x, y };
+                this.vel = { x: 0, y: 0 };
+                this.mass = mass;
+                this.color = `hsl(${random(0,360)}, 70%, 50%)`;
+                this.trail = [];
+                this.id = Math.random(); // For debugging
+            }
+
+            update(force, dt_step) {
+                if (this.mass > 1e-6) { // Inertial
+                    const acc = { x: force.x / this.mass, y: force.y / this.mass };
+                    this.vel.x += acc.x * dt_step;
+                    this.vel.y += acc.y * dt_step;
+                } else { // Massless (force directly determines velocity) - effectively non-inertial SVGD
+                    // Scale force to be velocity-like. This scaling factor might need tuning.
+                    const velocityScaling = 0.1 / dt; // Make it somewhat independent of dt for feel
+                    this.vel.x = force.x * velocityScaling;
+                    this.vel.y = force.y * velocityScaling;
+                }
+
+                // Simple velocity damping (optional, can help stability)
+                // this.vel.x *= 0.99;
+                // this.vel.y *= 0.99;
+
+                this.pos.x += this.vel.x * dt_step;
+                this.pos.y += this.vel.y * dt_step;
+
+                // Add to trail
+                this.trail.push({ x: this.pos.x, y: this.pos.y });
+                if (this.trail.length > trailLength) {
+                    this.trail.shift();
+                }
+
+                // Boundary conditions (bounce)
+                if (this.pos.x < 0 || this.pos.x > canvasWidth) {
+                    this.pos.x = Math.max(0, Math.min(canvasWidth, this.pos.x));
+                    this.vel.x *= -0.8; // Reflect with some energy loss
+                }
+                if (this.pos.y < 0 || this.pos.y > canvasHeight) {
+                    this.pos.y = Math.max(0, Math.min(canvasHeight, this.pos.y));
+                    this.vel.y *= -0.8; // Reflect with some energy loss
+                }
+            }
+
+            draw(ctx) {
+                // Draw trail
+                ctx.beginPath();
+                if (this.trail.length > 0) {
+                     ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                }
+                for (let i = 1; i < this.trail.length; i++) {
+                    const alpha = i / this.trail.length; // Fades out
+                    const R = parseInt(this.color.substring(4, this.color.indexOf(',')));
+                    const G = parseInt(this.color.substring(this.color.indexOf(',') + 1, this.color.lastIndexOf(',')));
+                    const B = parseInt(this.color.substring(this.color.lastIndexOf(',') + 1, this.color.indexOf('%')));
+                    
+                    // This is a bit hacky for HSL, need to parse properly or use fixed color with alpha
+                    // For simplicity, using particle color with varying alpha
+                    ctx.strokeStyle = `rgba(${R},${G},${B}, ${alpha * 0.5})`; // Example, this won't parse HSL directly
+                    // A simpler way for trails:
+                    ctx.strokeStyle = this.color.replace('hsl', 'hsla').replace(')', `, ${alpha * 0.7})`);
+                    ctx.lineWidth = Math.max(1, 3 * alpha);
+                    ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                }
+                ctx.stroke();
+
+
+                // Draw particle
+                ctx.beginPath();
+                ctx.arc(this.pos.x, this.pos.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        // --- SVGD Update ---
+        function calculateSVGDForces() {
+            if (particles.length === 0) return [];
+
+            const forces = [];
+            const N = particles.length;
+
+            // Precompute gradLogP for all particles
+            const gradLogPs = particles.map(p => {
+                const gradP = gradPotential(p.pos.x, p.pos.y);
+                // SVGD aims to move particles towards high probability (low potential)
+                // So log p(x) = -Potential(x) / T (T=1 here)
+                // grad log p(x) = -grad Potential(x)
+                return { x: -gradP.x, y: -gradP.y };
+            });
+
+            for (let i = 0; i < N; i++) {
+                const pi = particles[i];
+                let phi = { x: 0, y: 0 }; // Total force on particle i
+
+                for (let j = 0; j < N; j++) {
+                    const pj = particles[j];
+                    
+                    let K_ij, grad_K_ij;
+
+                    if (kernelType === 'rbf') {
+                        K_ij = rbfKernel(pi.pos, pj.pos, rbfBandwidth);
+                        grad_K_ij = gradRbfKernel(pi.pos, pj.pos, rbfBandwidth);
+                    } else { // imq
+                        K_ij = imqKernel(pi.pos, pj.pos, imqC, imqBeta);
+                        grad_K_ij = gradImqKernel(pi.pos, pj.pos, imqC, imqBeta);
+                    }
+                    
+                    // Driving force term: K_ij * grad_log_p(x_j)
+                    phi.x += K_ij * gradLogPs[j].x;
+                    phi.y += K_ij * gradLogPs[j].y;
+
+                    // Repulsive force term: grad_x_i K(x_i, x_j)
+                    phi.x += grad_K_ij.x;
+                    phi.y += grad_K_ij.y;
+                }
+                
+                phi.x /= N;
+                phi.y /= N;
+                forces.push(phi);
+            }
+            return forces;
+        }
+
+
+        // --- Rendering ---
+        function renderPotentialField() {
+            if (!showPotentialField) return;
+            if (!potentialFieldImage) { // Cache the potential field rendering
+                const offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = canvasWidth;
+                offscreenCanvas.height = canvasHeight;
+                const offCtx = offscreenCanvas.getContext('2d');
+                const imageData = offCtx.createImageData(canvasWidth, canvasHeight);
+                const data = imageData.data;
+
+                let minP = Infinity, maxP = -Infinity;
+                const pValues = [];
+
+                for (let y = 0; y < canvasHeight; y++) {
+                    for (let x = 0; x < canvasWidth; x++) {
+                        const p = potential(x, y);
+                        pValues.push(p);
+                        minP = Math.min(minP, p);
+                        maxP = Math.max(maxP, p);
+                    }
+                }
+                
+                // Normalize and color
+                for (let i = 0; i < pValues.length; i++) {
+                    const p = pValues[i];
+                    const normalized = (maxP - minP > 1e-6) ? (p - minP) / (maxP - minP) : 0.5;
+                    
+                    // Simple grayscale for depth: darker is lower potential (more attractive)
+                    const colorVal = Math.floor(normalized * 255); 
+                    const idx = i * 4;
+                    data[idx] = colorVal;     // R
+                    data[idx + 1] = colorVal; // G
+                    data[idx + 2] = colorVal; // B
+                    data[idx + 3] = 150;      // Alpha (semi-transparent)
+                }
+                offCtx.putImageData(imageData, 0, 0);
+                potentialFieldImage = offscreenCanvas;
+            }
+            ctx.drawImage(potentialFieldImage, 0, 0);
+        }
+        
+        function renderForceField() {
+            if (!showForceField) return;
+            ctx.strokeStyle = 'rgba(100, 100, 255, 0.7)';
+            ctx.lineWidth = 1;
+            const arrowLength = 10;
+
+            for (let y = forceFieldGridSize / 2; y < canvasHeight; y += forceFieldGridSize) {
+                for (let x = forceFieldGridSize / 2; x < canvasWidth; x += forceFieldGridSize) {
+                    const grad = gradPotential(x, y);
+                    const magnitude = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+                    
+                    if (magnitude < 1e-3) continue; // Skip tiny forces
+
+                    const normX = grad.x / magnitude;
+                    const normY = grad.y / magnitude;
+
+                    // Scale arrow length by magnitude, but cap it
+                    const currentArrowLength = Math.min(arrowLength * magnitude * 0.1, arrowLength * 1.5);
+
+
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - normX * currentArrowLength, y - normY * currentArrowLength); // Points towards lower potential
+                    ctx.stroke();
+
+                    // Arrowhead
+                    ctx.save();
+                    ctx.translate(x - normX * currentArrowLength, y - normY * currentArrowLength);
+                    ctx.rotate(Math.atan2(-normY, -normX));
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-5, -3);
+                    ctx.moveTo(0,0);
+                    ctx.lineTo(-5, 3);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        }
+
+        // --- Main Loop ---
+        function animate() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            if (showPotentialField) renderPotentialField();
+            if (showForceField) renderForceField();
+
+            const svgdForces = calculateSVGDForces();
+
+            particles.forEach((p, i) => {
+                if (svgdForces[i]) {
+                    p.update(svgdForces[i], dt);
+                }
+                p.draw(ctx);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners for Controls ---
+        massSlider.addEventListener('input', (e) => {
+            particleMass = parseFloat(e.target.value);
+            massValue.textContent = particleMass.toFixed(2);
+        });
+
+        kernelTypeSelect.addEventListener('change', (e) => {
+            kernelType = e.target.value;
+            rbfParamsDiv.style.display = (kernelType === 'rbf') ? 'block' : 'none';
+            imqParamsDiv.style.display = (kernelType === 'imq') ? 'block' : 'none';
+        });
+
+        rbfBandwidthSlider.addEventListener('input', (e) => {
+            rbfBandwidth = parseFloat(e.target.value);
+            rbfBandwidthValue.textContent = rbfBandwidth;
+        });
+        
+        imqCSlider.addEventListener('input', (e) => {
+            imqC = parseFloat(e.target.value);
+            imqCValue.textContent = imqC.toFixed(1);
+        });
+        imqBetaSlider.addEventListener('input', (e) => {
+            imqBeta = parseFloat(e.target.value);
+            imqBetaValue.textContent = imqBeta.toFixed(1);
+        });
+
+        numGaussiansSlider.addEventListener('input', (e) => {
+            numGaussians = parseInt(e.target.value);
+            numGaussiansValue.textContent = numGaussians;
+            generateGaussians(); // Regenerate potential
+        });
+        
+        timeStepSlider.addEventListener('input', (e) => {
+            dt = parseFloat(e.target.value);
+            timeStepValue.textContent = dt.toFixed(2);
+        });
+
+        trailLengthSlider.addEventListener('input', (e) => {
+            trailLength = parseInt(e.target.value);
+            trailLengthValue.textContent = trailLength;
+             particles.forEach(p => { // Trim existing trails
+                while(p.trail.length > trailLength) p.trail.shift();
+            });
+        });
+
+        showForceFieldCheckbox.addEventListener('change', (e) => {
+            showForceField = e.target.checked;
+        });
+        showPotentialFieldCheckbox.addEventListener('change', (e) => {
+            showPotentialField = e.target.checked;
+            if (!showPotentialField) potentialFieldImage = null; // Clear cache if hiding
+            else generateGaussians(); // Force re-render if enabling
+        });
+
+
+        resetGaussiansBtn.addEventListener('click', () => {
+            generateGaussians();
+        });
+
+        clearParticlesBtn.addEventListener('click', () => {
+            particles = [];
+        });
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            particles.push(new Particle(x, y, particleMass));
+        });
+        
+        // --- Initialization ---
+        function init() {
+            // Set initial UI values from JS variables
+            massSlider.value = particleMass; massValue.textContent = particleMass.toFixed(2);
+            kernelTypeSelect.value = kernelType;
+            rbfBandwidthSlider.value = rbfBandwidth; rbfBandwidthValue.textContent = rbfBandwidth;
+            imqCSlider.value = imqC; imqCValue.textContent = imqC.toFixed(1);
+            imqBetaSlider.value = imqBeta; imqBetaValue.textContent = imqBeta.toFixed(1);
+            numGaussiansSlider.value = numGaussians; numGaussiansValue.textContent = numGaussians;
+            timeStepSlider.value = dt; timeStepValue.textContent = dt.toFixed(2);
+            trailLengthSlider.value = trailLength; trailLengthValue.textContent = trailLength;
+            showForceFieldCheckbox.checked = showForceField;
+            showPotentialFieldCheckbox.checked = showPotentialField;
+
+
+            // Trigger change event to set correct param div visibility
+            kernelTypeSelect.dispatchEvent(new Event('change'));
+            
+            setLanguage(currentLang); // Set default language display
+            generateGaussians();
+            animate();
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
