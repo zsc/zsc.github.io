@@ -9,16 +9,17 @@
         #container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
         #canvasContainer { position: relative; border: 1px solid #ccc; }
         canvas { display: block; background-color: #fff; }
-        #controls { padding: 15px; background-color: #fff; border: 1px solid #ccc; border-radius: 5px; min-width: 250px; }
+        #controls { padding: 15px; background-color: #fff; border: 1px solid #ccc; border-radius: 5px; min-width: 250px; max-width: 300px; }
         .control-group { margin-bottom: 15px; }
         .control-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .control-group input[type="range"], .control-group select, .control-group input[type="number"] {
-            width: calc(100% - 10px); padding: 5px;
+            width: calc(100% - 10px); padding: 5px; box-sizing: border-box;
         }
-        .control-group input[type="checkbox"] { margin-right: 5px; }
-        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .control-group input[type="checkbox"] { margin-right: 5px; vertical-align: middle; }
+        .control-group label[for*="Checkbox"] { font-weight: normal; display:inline; } 
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; margin-right: 5px;}
         button:hover { background-color: #0056b3; }
-        #langToggle { position: absolute; top: 10px; right: 10px; }
+        #langToggle { position: absolute; top: 10px; right: 10px; z-index: 10; }
         .value-display { font-size: 0.9em; color: #555; margin-left: 5px; }
     </style>
 </head>
@@ -33,13 +34,19 @@
             <h3 data-lang-key="controlsTitle">Controls</h3>
 
             <div class="control-group">
-                <label data-lang-key="massLabel">Mass:</label>
-                <input type="range" id="massSlider" min="0" max="5" step="0.05" value="1">
+                <label data-lang-key="massLabel" for="massSlider">Mass:</label>
+                <input type="range" id="massSlider" min="0" max="5" step="0.01" value="1">
                 <span id="massValue" class="value-display">1.00</span>
+            </div>
+            
+            <div class="control-group">
+                <label data-lang-key="temperatureLabel" for="temperatureSlider">Temperature:</label>
+                <input type="range" id="temperatureSlider" min="0.1" max="100" step="0.1" value="10"> <!-- Min temp 0.1 -->
+                <span id="temperatureValue" class="value-display">10.0</span>
             </div>
 
             <div class="control-group">
-                <label data-lang-key="kernelTypeLabel">Kernel Type:</label>
+                <label data-lang-key="kernelTypeLabel" for="kernelType">Kernel Type:</label>
                 <select id="kernelType">
                     <option value="rbf" data-lang-key="rbfKernel">RBF Kernel</option>
                     <option value="imq" data-lang-key="imqKernel">IMQ Kernel</option>
@@ -47,49 +54,49 @@
             </div>
 
             <div id="rbfParams" class="control-group">
-                <label data-lang-key="rbfBandwidthLabel">RBF Bandwidth (h):</label>
-                <input type="range" id="rbfBandwidth" min="1" max="200" step="1" value="50">
-                <span id="rbfBandwidthValue" class="value-display">50</span>
+                <label data-lang-key="rbfBandwidthLabel" for="rbfBandwidth">RBF Bandwidth (h):</label>
+                <input type="range" id="rbfBandwidth" min="1" max="200" step="1" value="20">
+                <span id="rbfBandwidthValue" class="value-display">20</span>
             </div>
 
             <div id="imqParams" class="control-group" style="display: none;">
-                <label data-lang-key="imqCLabel">IMQ C:</label>
+                <label data-lang-key="imqCLabel" for="imqC">IMQ C:</label>
                 <input type="range" id="imqC" min="0.1" max="10" step="0.1" value="1">
                 <span id="imqCValue" class="value-display">1.0</span>
-                 <label data-lang-key="imqBetaLabel">IMQ Beta (typically -0.5):</label>
+                 <label data-lang-key="imqBetaLabel" for="imqBeta">IMQ Beta (typically -0.5):</label>
                 <input type="range" id="imqBeta" min="-2" max="0" step="0.1" value="-0.5">
                 <span id="imqBetaValue" class="value-display">-0.5</span>
             </div>
             
             <div class="control-group">
-                <label data-lang-key="numGaussiansLabel">Number of Gaussians:</label>
-                <input type="range" id="numGaussians" min="1" max="10" step="1" value="5">
-                <span id="numGaussiansValue" class="value-display">5</span>
+                <label data-lang-key="numGaussiansLabel" for="numGaussians">Number of Gaussians:</label>
+                <input type="range" id="numGaussians" min="1" max="10" step="1" value="3">
+                <span id="numGaussiansValue" class="value-display">3</span>
             </div>
 
             <div class="control-group">
-                <label data-lang-key="timeStepLabel">Time Step (dt):</label>
+                <label data-lang-key="timeStepLabel" for="timeStep">Time Step (dt):</label>
                 <input type="range" id="timeStep" min="0.01" max="0.5" step="0.01" value="0.1">
                 <span id="timeStepValue" class="value-display">0.10</span>
             </div>
 
              <div class="control-group">
-                <label data-lang-key="trailLengthLabel">Trail Length:</label>
+                <label data-lang-key="trailLengthLabel" for="trailLength">Trail Length:</label>
                 <input type="range" id="trailLength" min="10" max="200" step="10" value="50">
                 <span id="trailLengthValue" class="value-display">50</span>
             </div>
 
             <div class="control-group">
-                <input type="checkbox" id="showForceField" checked>
-                <label for="showForceField" data-lang-key="showForceFieldLabel" style="display:inline;">Show Force Field</label>
+                <input type="checkbox" id="showForceFieldCheckbox" checked>
+                <label for="showForceFieldCheckbox" data-lang-key="showForceFieldLabel">Show Force Field</label>
             </div>
              <div class="control-group">
-                <input type="checkbox" id="showPotentialField" checked>
-                <label for="showPotentialField" data-lang-key="showPotentialFieldLabel" style="display:inline;">Show Potential Field</label>
+                <input type="checkbox" id="showPotentialFieldCheckbox" checked>
+                <label for="showPotentialFieldCheckbox" data-lang-key="showPotentialFieldLabel">Show Potential Field</label>
             </div>
 
-            <button id="resetGaussians" data-lang-key="resetGaussiansBtn">Reset Gaussians</button>
-            <button id="clearParticles" data-lang-key="clearParticlesBtn">Clear Particles</button>
+            <button id="resetGaussiansBtn" data-lang-key="resetGaussiansBtn">Reset Gaussians</button>
+            <button id="clearParticlesBtn" data-lang-key="clearParticlesBtn">Clear Particles</button>
 
         </div>
     </div>
@@ -104,26 +111,30 @@
 
         let particles = [];
         let gaussians = [];
-        let potentialFieldImage = null; // For caching depth map
+        let potentialFieldImage = null; 
 
         // --- Parameters ---
         let particleMass = 1;
+        let temperature = 10; 
         let kernelType = 'rbf';
-        let rbfBandwidth = 50;
+        let rbfBandwidth = 20; 
         let imqC = 1;
         let imqBeta = -0.5;
-        let numGaussians = 5;
-        let dt = 0.1; // Time step
+        let numGaussians = 3; 
+        let dt = 0.1; 
         let trailLength = 50;
         let showForceField = true;
         let showPotentialField = true;
-        const forceFieldGridSize = 25; // Grid cells for force field visualization
+        const forceFieldGridSize = 25; 
+        const masslessSpeedScale = 5.0; 
+        const MIN_MASS_FOR_INERTIA = 1e-5; // Threshold for treating mass as non-zero
 
         // --- Language Content ---
         const langContent = {
             EN: {
                 controlsTitle: "Controls",
                 massLabel: "Mass:",
+                temperatureLabel: "Temperature:",
                 kernelTypeLabel: "Kernel Type:",
                 rbfKernel: "RBF Kernel",
                 imqKernel: "IMQ Kernel",
@@ -142,6 +153,7 @@
             CN: {
                 controlsTitle: "控制面板",
                 massLabel: "质量:",
+                temperatureLabel: "温度:",
                 kernelTypeLabel: "核函数类型:",
                 rbfKernel: "RBF 核",
                 imqKernel: "IMQ 核",
@@ -163,6 +175,8 @@
         // --- UI Elements ---
         const massSlider = document.getElementById('massSlider');
         const massValue = document.getElementById('massValue');
+        const temperatureSlider = document.getElementById('temperatureSlider');
+        const temperatureValue = document.getElementById('temperatureValue');
         const kernelTypeSelect = document.getElementById('kernelType');
         const rbfParamsDiv = document.getElementById('rbfParams');
         const rbfBandwidthSlider = document.getElementById('rbfBandwidth');
@@ -178,15 +192,19 @@
         const timeStepValue = document.getElementById('timeStepValue');
         const trailLengthSlider = document.getElementById('trailLength');
         const trailLengthValue = document.getElementById('trailLengthValue');
-        const showForceFieldCheckbox = document.getElementById('showForceField');
-        const showPotentialFieldCheckbox = document.getElementById('showPotentialField');
-        const resetGaussiansBtn = document.getElementById('resetGaussians');
-        const clearParticlesBtn = document.getElementById('clearParticles');
+        const showForceFieldCheckbox = document.getElementById('showForceFieldCheckbox');
+        const showPotentialFieldCheckbox = document.getElementById('showPotentialFieldCheckbox');
+        const resetGaussiansBtn = document.getElementById('resetGaussiansBtn');
+        const clearParticlesBtn = document.getElementById('clearParticlesBtn');
         const langToggleButton = document.getElementById('langToggle');
 
         // --- Utility Functions ---
         function random(min, max) { return Math.random() * (max - min) + min; }
-        function distSq(p1, p2) { return (p1.x - p2.x)**2 + (p1.y - p2.y)**2; }
+        function distSq(p1, p2) { 
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            return dx*dx + dy*dy; 
+        }
 
         // --- Language Switching ---
         function setLanguage(lang) {
@@ -194,15 +212,11 @@
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.getAttribute('data-lang-key');
                 if (langContent[lang][key]) {
-                    if (el.tagName === 'OPTION') {
-                        el.textContent = langContent[lang][key];
-                    } else {
-                        el.childNodes[0].nodeValue = langContent[lang][key]; // More robust for labels
-                    }
+                    el.textContent = langContent[lang][key];
                 }
             });
             langToggleButton.textContent = langContent[lang].langToggleTo;
-            document.documentElement.lang = lang.toLowerCase(); // Set page lang
+            document.documentElement.lang = lang.toLowerCase(); 
         }
 
         langToggleButton.addEventListener('click', () => {
@@ -215,13 +229,12 @@
             gaussians = [];
             for (let i = 0; i < numGaussians; i++) {
                 gaussians.push({
-                    mean: { x: random(50, canvasWidth - 50), y: random(50, canvasHeight - 50) },
-                    // Using isotropic Gaussians for simplicity, sx = sy
-                    stdDev: random(30, 80), // Effective standard deviation
-                    amplitude: random(-200, -50) // Negative for attractive wells, positive for hills
+                    mean: { x: random(canvasWidth*0.2, canvasWidth * 0.8), y: random(canvasHeight*0.2, canvasHeight * 0.8) },
+                    stdDev: random(40, 100), 
+                    amplitude: random(-200, -80) 
                 });
             }
-            potentialFieldImage = null; // Invalidate cache
+            potentialFieldImage = null; 
         }
 
         function potential(x, y) {
@@ -229,54 +242,82 @@
             for (const g of gaussians) {
                 const dx = x - g.mean.x;
                 const dy = y - g.mean.y;
-                const exponent = -0.5 * (dx*dx + dy*dy) / (g.stdDev * g.stdDev);
+                const stdDevSq = g.stdDev * g.stdDev;
+                if (stdDevSq < 1e-9) continue; // Safeguard
+                const exponent = -0.5 * (dx*dx + dy*dy) / stdDevSq;
                 p += g.amplitude * Math.exp(exponent);
             }
             return p;
         }
 
-        function gradPotential(x, y) {
+        function gradPotential(x, y) { 
             let gx = 0, gy = 0;
             for (const g of gaussians) {
                 const dx = x - g.mean.x;
                 const dy = y - g.mean.y;
                 const stdDevSq = g.stdDev * g.stdDev;
-                const commonFactor = g.amplitude * Math.exp(-0.5 * (dx*dx + dy*dy) / stdDevSq) / stdDevSq;
-                gx -= dx * commonFactor; // derivative of exp(u) is exp(u)*du, here u = -0.5*(...), du/dx = -dx/stdDevSq
-                gy -= dy * commonFactor; // so - (x-mux)/sx^2 * G(...)
+                if (stdDevSq < 1e-9) continue; // Safeguard for division by zero
+                
+                const exponentVal = -0.5 * (dx*dx + dy*dy) / stdDevSq;
+                if (exponentVal < -100) continue; // exp(-100) is ~0, avoid underflow issues if far away
+
+                const commonFactor = g.amplitude * Math.exp(exponentVal) / stdDevSq;
+                gx -= dx * commonFactor; 
+                gy -= dy * commonFactor; 
             }
             return { x: gx, y: gy };
         }
         
         // --- Kernel Functions ---
-        // RBF Kernel: K(x, y) = exp(-||x-y||^2 / (2*h^2))
         function rbfKernel(p1, p2, h) {
+            const hSq = h*h;
+            if (hSq < 1e-9) return 0; // Avoid division by zero if h is tiny
             const d2 = distSq(p1, p2);
-            return Math.exp(-d2 / (2 * h * h));
+            if (d2 === Infinity) return 0;
+            return Math.exp(-d2 / (2 * hSq));
         }
 
-        // Gradient of RBF Kernel w.r.t. p1: grad_p1 K(p1, p2) = - (p1-p2)/h^2 * K(p1, p2)
-        function gradRbfKernel(p1, p2, h) {
-            const k_val = rbfKernel(p1, p2, h);
+        function gradRbfKernel_wrt_p1(p1, p2, h) {
             const hSq = h * h;
+            if (hSq < 1e-9) return {x:0, y:0};
+
+            const d2 = distSq(p1, p2);
+            if (d2 === Infinity) return {x:0, y:0}; 
+
+            const k_val = Math.exp(-d2 / (2 * hSq));
+            // If k_val is extremely small, its gradient contribution is also negligible
+            // and helps prevent (potentially large difference vector) * (near zero k_val) problems.
+            if (k_val < 1e-9) return {x:0, y:0}; 
+
+            const factor = -k_val / hSq;
             return {
-                x: -(p1.x - p2.x) / hSq * k_val,
-                y: -(p1.y - p2.y) / hSq * k_val
+                x: factor * (p1.x - p2.x),
+                y: factor * (p1.y - p2.y)
             };
         }
 
-        // IMQ Kernel: K(x,y) = (c^2 + ||x-y||^2)^beta
         function imqKernel(p1, p2, c, beta) {
             const d2 = distSq(p1, p2);
-            return Math.pow(c*c + d2, beta);
+            if (d2 === Infinity) return 0; // (c^2 + Inf)^beta -> 0 if beta < 0
+            const base = c*c + d2;
+            if (base < 1e-9) return beta < 0 ? Infinity : 0; // Avoid pow(0, negative)
+            return Math.pow(base, beta);
         }
         
-        // Gradient of IMQ Kernel w.r.t p1: grad_p1 K(p1, p2) = beta * (c^2 + ||x-y||^2)^(beta-1) * 2 * (p1-p2)
-        function gradImqKernel(p1, p2, c, beta) {
+        function gradImqKernel_wrt_p1(p1, p2, c, beta) {
             const d2 = distSq(p1, p2);
+            if (d2 === Infinity) return {x:0, y:0};
+
             const base = c*c + d2;
-            if (base < 1e-9) return {x:0, y:0}; // Avoid division by zero if beta-1 is negative
+            if (base < 1e-9) return {x:0, y:0}; // Avoid issues if particles are identical with c=0
+
+            // K_val equivalent for IMQ to check if it's near zero
+            const k_val_imq = Math.pow(base, beta);
+            if (k_val_imq < 1e-9 && beta < 0) return {x:0, y:0}; // If K is tiny, gradient is tiny
+
             const commonFactor = beta * Math.pow(base, beta - 1) * 2;
+            if (!isFinite(commonFactor)) return {x:0, y:0}; // Safeguard
+
             return {
                 x: commonFactor * (p1.x - p2.x),
                 y: commonFactor * (p1.y - p2.y)
@@ -292,69 +333,85 @@
                 this.mass = mass;
                 this.color = `hsl(${random(0,360)}, 70%, 50%)`;
                 this.trail = [];
-                this.id = Math.random(); // For debugging
             }
 
             update(force, dt_step) {
-                if (this.mass > 1e-6) { // Inertial
-                    const acc = { x: force.x / this.mass, y: force.y / this.mass };
-                    this.vel.x += acc.x * dt_step;
-                    this.vel.y += acc.y * dt_step;
-                } else { // Massless (force directly determines velocity) - effectively non-inertial SVGD
-                    // Scale force to be velocity-like. This scaling factor might need tuning.
-                    const velocityScaling = 0.1 / dt; // Make it somewhat independent of dt for feel
-                    this.vel.x = force.x * velocityScaling;
-                    this.vel.y = force.y * velocityScaling;
+                if (isNaN(force.x) || isNaN(force.y)) {
+                    // console.warn("Particle received NaN force, skipping update", this, force);
+                    force.x = 0; force.y = 0; // Prevent NaN propagation
                 }
 
-                // Simple velocity damping (optional, can help stability)
-                // this.vel.x *= 0.99;
-                // this.vel.y *= 0.99;
+                if (this.mass >= MIN_MASS_FOR_INERTIA) { 
+                    const invMass = 1.0 / this.mass;
+                    const acc = { x: force.x * invMass, y: force.y * invMass };
+                    
+                    // Cap acceleration to prevent velocity overflow with tiny mass
+                    const max_acc = 10000; 
+                    acc.x = Math.max(-max_acc, Math.min(max_acc, acc.x));
+                    acc.y = Math.max(-max_acc, Math.min(max_acc, acc.y));
+
+                    this.vel.x += acc.x * dt_step;
+                    this.vel.y += acc.y * dt_step;
+                } else { 
+                    this.vel.x = force.x * masslessSpeedScale;
+                    this.vel.y = force.y * masslessSpeedScale;
+                }
+                
+                // Cap velocity
+                const max_vel = canvasWidth / dt_step; // Max travel full canvas in one step
+                this.vel.x = Math.max(-max_vel, Math.min(max_vel, this.vel.x));
+                this.vel.y = Math.max(-max_vel, Math.min(max_vel, this.vel.y));
+
 
                 this.pos.x += this.vel.x * dt_step;
                 this.pos.y += this.vel.y * dt_step;
 
-                // Add to trail
+                if (isNaN(this.pos.x) || isNaN(this.pos.y)) {
+                    // console.error("Particle position became NaN!", this, this.vel, force);
+                    // Reset to center if NaN occurs
+                    this.pos.x = canvasWidth / 2; this.pos.y = canvasHeight / 2;
+                    this.vel.x = 0; this.vel.y = 0;
+                }
+
+
                 this.trail.push({ x: this.pos.x, y: this.pos.y });
                 if (this.trail.length > trailLength) {
                     this.trail.shift();
                 }
 
-                // Boundary conditions (bounce)
                 if (this.pos.x < 0 || this.pos.x > canvasWidth) {
                     this.pos.x = Math.max(0, Math.min(canvasWidth, this.pos.x));
-                    this.vel.x *= -0.8; // Reflect with some energy loss
+                    this.vel.x *= -0.8; 
                 }
                 if (this.pos.y < 0 || this.pos.y > canvasHeight) {
                     this.pos.y = Math.max(0, Math.min(canvasHeight, this.pos.y));
-                    this.vel.y *= -0.8; // Reflect with some energy loss
+                    this.vel.y *= -0.8; 
                 }
             }
 
             draw(ctx) {
                 // Draw trail
-                ctx.beginPath();
-                if (this.trail.length > 0) {
-                     ctx.moveTo(this.trail[0].x, this.trail[0].y);
-                }
-                for (let i = 1; i < this.trail.length; i++) {
-                    const alpha = i / this.trail.length; // Fades out
-                    const R = parseInt(this.color.substring(4, this.color.indexOf(',')));
-                    const G = parseInt(this.color.substring(this.color.indexOf(',') + 1, this.color.lastIndexOf(',')));
-                    const B = parseInt(this.color.substring(this.color.lastIndexOf(',') + 1, this.color.indexOf('%')));
-                    
-                    // This is a bit hacky for HSL, need to parse properly or use fixed color with alpha
-                    // For simplicity, using particle color with varying alpha
-                    ctx.strokeStyle = `rgba(${R},${G},${B}, ${alpha * 0.5})`; // Example, this won't parse HSL directly
-                    // A simpler way for trails:
-                    ctx.strokeStyle = this.color.replace('hsl', 'hsla').replace(')', `, ${alpha * 0.7})`);
-                    ctx.lineWidth = Math.max(1, 3 * alpha);
-                    ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                }
-                ctx.stroke();
+                if (this.trail.length > 1) {
+                    for (let i = 0; i < this.trail.length - 1; i++) {
+                        const p1 = this.trail[i];
+                        const p2 = this.trail[i+1];
+                        if(isNaN(p1.x) || isNaN(p1.y) || isNaN(p2.x) || isNaN(p2.y)) continue;
 
+                        const segmentProgress = (i + 1) / this.trail.length; 
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        
+                        const trailAlpha = segmentProgress * 0.7; 
+                        ctx.strokeStyle = this.color.replace('hsl', 'hsla').replace(')', `, ${trailAlpha})`);
+                        ctx.lineWidth = Math.max(0.5, 5 * segmentProgress); 
+                        ctx.stroke();
+                    }
+                }
 
                 // Draw particle
+                if(isNaN(this.pos.x) || isNaN(this.pos.y)) return; // Don't draw if NaN
                 ctx.beginPath();
                 ctx.arc(this.pos.x, this.pos.y, 5, 0, Math.PI * 2);
                 ctx.fillStyle = this.color;
@@ -371,44 +428,58 @@
 
             const forces = [];
             const N = particles.length;
+            const safeTemperature = Math.max(1e-6, temperature); // Ensure temperature is not zero
 
-            // Precompute gradLogP for all particles
-            const gradLogPs = particles.map(p => {
-                const gradP = gradPotential(p.pos.x, p.pos.y);
-                // SVGD aims to move particles towards high probability (low potential)
-                // So log p(x) = -Potential(x) / T (T=1 here)
-                // grad log p(x) = -grad Potential(x)
-                return { x: -gradP.x, y: -gradP.y };
+            const gradLogPs_scaled = particles.map(p => {
+                if (isNaN(p.pos.x) || isNaN(p.pos.y)) return {x:0, y:0}; // Skip if particle is NaN
+                const gradU = gradPotential(p.pos.x, p.pos.y);
+                return { 
+                    x: -gradU.x / safeTemperature, 
+                    y: -gradU.y / safeTemperature
+                };
             });
 
             for (let i = 0; i < N; i++) {
-                const pi = particles[i];
-                let phi = { x: 0, y: 0 }; // Total force on particle i
+                const pi = particles[i]; 
+                if (isNaN(pi.pos.x) || isNaN(pi.pos.y)) { // If current particle is NaN, its force is 0
+                    forces.push({x:0,y:0}); 
+                    continue;
+                }
+                let phi = { x: 0, y: 0 }; 
 
                 for (let j = 0; j < N; j++) {
-                    const pj = particles[j];
+                    const pj = particles[j]; 
+                    if (isNaN(pj.pos.x) || isNaN(pj.pos.y)) continue; // Skip interaction with NaN particle
                     
-                    let K_ij, grad_K_ij;
+                    let K_ij, grad_K_xi_of_K_xi_xj; 
 
                     if (kernelType === 'rbf') {
                         K_ij = rbfKernel(pi.pos, pj.pos, rbfBandwidth);
-                        grad_K_ij = gradRbfKernel(pi.pos, pj.pos, rbfBandwidth);
-                    } else { // imq
+                        grad_K_xi_of_K_xi_xj = gradRbfKernel_wrt_p1(pi.pos, pj.pos, rbfBandwidth);
+                    } else { 
                         K_ij = imqKernel(pi.pos, pj.pos, imqC, imqBeta);
-                        grad_K_ij = gradImqKernel(pi.pos, pj.pos, imqC, imqBeta);
+                        grad_K_xi_of_K_xi_xj = gradImqKernel_wrt_p1(pi.pos, pj.pos, imqC, imqBeta);
+                    }
+
+                    if(isNaN(K_ij) || isNaN(grad_K_xi_of_K_xi_xj.x) || isNaN(grad_K_xi_of_K_xi_xj.y)) {
+                        // console.warn("NaN in kernel calc", K_ij, grad_K_xi_of_K_xi_xj);
+                        continue; // Skip this problematic interaction
                     }
                     
-                    // Driving force term: K_ij * grad_log_p(x_j)
-                    phi.x += K_ij * gradLogPs[j].x;
-                    phi.y += K_ij * gradLogPs[j].y;
+                    phi.x += K_ij * gradLogPs_scaled[j].x;
+                    phi.y += K_ij * gradLogPs_scaled[j].y;
 
-                    // Repulsive force term: grad_x_i K(x_i, x_j)
-                    phi.x += grad_K_ij.x;
-                    phi.y += grad_K_ij.y;
+                    phi.x -= grad_K_xi_of_K_xi_xj.x; 
+                    phi.y -= grad_K_xi_of_K_xi_xj.y;
                 }
                 
                 phi.x /= N;
                 phi.y /= N;
+
+                if (isNaN(phi.x) || isNaN(phi.y)) {
+                    // console.warn(`NaN detected in final SVGD force for particle ${i}. Resetting force to 0.`);
+                    phi.x = 0; phi.y = 0;
+                }
                 forces.push(phi);
             }
             return forces;
@@ -418,7 +489,7 @@
         // --- Rendering ---
         function renderPotentialField() {
             if (!showPotentialField) return;
-            if (!potentialFieldImage) { // Cache the potential field rendering
+            if (!potentialFieldImage) { 
                 const offscreenCanvas = document.createElement('canvas');
                 offscreenCanvas.width = canvasWidth;
                 offscreenCanvas.height = canvasHeight;
@@ -429,27 +500,24 @@
                 let minP = Infinity, maxP = -Infinity;
                 const pValues = [];
 
-                for (let y = 0; y < canvasHeight; y++) {
-                    for (let x = 0; x < canvasWidth; x++) {
-                        const p = potential(x, y);
-                        pValues.push(p);
-                        minP = Math.min(minP, p);
-                        maxP = Math.max(maxP, p);
+                for (let r = 0; r < canvasHeight; r++) { 
+                    for (let c = 0; c < canvasWidth; c++) { 
+                        const pVal = potential(c, r);
+                        pValues.push(pVal);
+                        minP = Math.min(minP, pVal);
+                        maxP = Math.max(maxP, pVal);
                     }
                 }
                 
-                // Normalize and color
                 for (let i = 0; i < pValues.length; i++) {
-                    const p = pValues[i];
-                    const normalized = (maxP - minP > 1e-6) ? (p - minP) / (maxP - minP) : 0.5;
-                    
-                    // Simple grayscale for depth: darker is lower potential (more attractive)
+                    const pVal = pValues[i];
+                    const normalized = (maxP - minP > 1e-6) ? (pVal - minP) / (maxP - minP) : 0.5;
                     const colorVal = Math.floor(normalized * 255); 
                     const idx = i * 4;
-                    data[idx] = colorVal;     // R
-                    data[idx + 1] = colorVal; // G
-                    data[idx + 2] = colorVal; // B
-                    data[idx + 3] = 150;      // Alpha (semi-transparent)
+                    data[idx] = colorVal;     
+                    data[idx + 1] = colorVal; 
+                    data[idx + 2] = colorVal; 
+                    data[idx + 3] = 150;      
                 }
                 offCtx.putImageData(imageData, 0, 0);
                 potentialFieldImage = offscreenCanvas;
@@ -461,31 +529,28 @@
             if (!showForceField) return;
             ctx.strokeStyle = 'rgba(100, 100, 255, 0.7)';
             ctx.lineWidth = 1;
-            const arrowLength = 10;
+            const arrowBaseLength = 10;
 
-            for (let y = forceFieldGridSize / 2; y < canvasHeight; y += forceFieldGridSize) {
-                for (let x = forceFieldGridSize / 2; x < canvasWidth; x += forceFieldGridSize) {
-                    const grad = gradPotential(x, y);
-                    const magnitude = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            for (let r = forceFieldGridSize / 2; r < canvasHeight; r += forceFieldGridSize) {
+                for (let c = forceFieldGridSize / 2; c < canvasWidth; c += forceFieldGridSize) {
+                    const gradU = gradPotential(c, r); 
+                    const forceMag = Math.sqrt(gradU.x * gradU.x + gradU.y * gradU.y);
                     
-                    if (magnitude < 1e-3) continue; // Skip tiny forces
+                    if (forceMag < 1e-3) continue;
 
-                    const normX = grad.x / magnitude;
-                    const normY = grad.y / magnitude;
+                    const normFx = -gradU.x / forceMag;
+                    const normFy = -gradU.y / forceMag;
 
-                    // Scale arrow length by magnitude, but cap it
-                    const currentArrowLength = Math.min(arrowLength * magnitude * 0.1, arrowLength * 1.5);
-
+                    const currentArrowLength = Math.min(arrowBaseLength * forceMag * 0.05, arrowBaseLength * 1.5); 
 
                     ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x - normX * currentArrowLength, y - normY * currentArrowLength); // Points towards lower potential
+                    ctx.moveTo(c, r);
+                    ctx.lineTo(c + normFx * currentArrowLength, r + normFy * currentArrowLength); 
                     ctx.stroke();
 
-                    // Arrowhead
                     ctx.save();
-                    ctx.translate(x - normX * currentArrowLength, y - normY * currentArrowLength);
-                    ctx.rotate(Math.atan2(-normY, -normX));
+                    ctx.translate(c + normFx * currentArrowLength, r + normFy * currentArrowLength);
+                    ctx.rotate(Math.atan2(normFy, normFx));
                     ctx.beginPath();
                     ctx.moveTo(0, 0);
                     ctx.lineTo(-5, -3);
@@ -498,7 +563,12 @@
         }
 
         // --- Main Loop ---
-        function animate() {
+        let lastTime = 0;
+        function animate(currentTime) {
+            // const actualDt = (currentTime - lastTime) / 1000.0; // For frame-rate independent physics
+            // lastTime = currentTime;
+            // For simplicity, using fixed dt from slider for now.
+
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             if (showPotentialField) renderPotentialField();
@@ -520,6 +590,11 @@
         massSlider.addEventListener('input', (e) => {
             particleMass = parseFloat(e.target.value);
             massValue.textContent = particleMass.toFixed(2);
+        });
+        
+        temperatureSlider.addEventListener('input', (e) => {
+            temperature = parseFloat(e.target.value);
+            temperatureValue.textContent = temperature.toFixed(1);
         });
 
         kernelTypeSelect.addEventListener('change', (e) => {
@@ -545,7 +620,7 @@
         numGaussiansSlider.addEventListener('input', (e) => {
             numGaussians = parseInt(e.target.value);
             numGaussiansValue.textContent = numGaussians;
-            generateGaussians(); // Regenerate potential
+            generateGaussians(); 
         });
         
         timeStepSlider.addEventListener('input', (e) => {
@@ -556,7 +631,7 @@
         trailLengthSlider.addEventListener('input', (e) => {
             trailLength = parseInt(e.target.value);
             trailLengthValue.textContent = trailLength;
-             particles.forEach(p => { // Trim existing trails
+             particles.forEach(p => { 
                 while(p.trail.length > trailLength) p.trail.shift();
             });
         });
@@ -566,8 +641,9 @@
         });
         showPotentialFieldCheckbox.addEventListener('change', (e) => {
             showPotentialField = e.target.checked;
-            if (!showPotentialField) potentialFieldImage = null; // Clear cache if hiding
-            else generateGaussians(); // Force re-render if enabling
+            if (showPotentialField && !potentialFieldImage) { 
+                 generateGaussians(); 
+            }
         });
 
 
@@ -583,13 +659,13 @@
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            particles.push(new Particle(x, y, particleMass));
+            particles.push(new Particle(x, y, particleMass)); 
         });
         
         // --- Initialization ---
         function init() {
-            // Set initial UI values from JS variables
             massSlider.value = particleMass; massValue.textContent = particleMass.toFixed(2);
+            temperatureSlider.value = temperature; temperatureValue.textContent = temperature.toFixed(1);
             kernelTypeSelect.value = kernelType;
             rbfBandwidthSlider.value = rbfBandwidth; rbfBandwidthValue.textContent = rbfBandwidth;
             imqCSlider.value = imqC; imqCValue.textContent = imqC.toFixed(1);
@@ -600,13 +676,11 @@
             showForceFieldCheckbox.checked = showForceField;
             showPotentialFieldCheckbox.checked = showPotentialField;
 
-
-            // Trigger change event to set correct param div visibility
             kernelTypeSelect.dispatchEvent(new Event('change'));
             
-            setLanguage(currentLang); // Set default language display
+            setLanguage(currentLang); 
             generateGaussians();
-            animate();
+            requestAnimationFrame(animate); // Start animation loop
         }
 
         init();
