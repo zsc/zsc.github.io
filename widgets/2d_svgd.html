@@ -102,6 +102,7 @@
     </div>
 
     <script>
+        // single-file html 生成一个2D 势场内的带惯性 SVGD 动画，势场由随机的多个 gaussian distribution 定义（以深度图可视化），在格点上可视化势场力的方向。 每点击一个就增加一个粒子并马上开始按 SVGD 运动。 撞上边界时要反弹。超参 UI 可调（mass、再生核种类及相应的超参等） 界面中英文显示可切换，默认英文。粒子带个长拖尾特效（随时间衰减）。质量要能取到 0. 注意 NaN 问题。
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const canvasWidth = 600;
