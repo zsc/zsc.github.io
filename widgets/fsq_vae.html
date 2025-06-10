@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSQ-VAE MNIST Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <!-- Create these files or paste their content directly into script tags below -->
+    <!-- Example mnist_train_labels.js: var mnistTrainLabels = [5,0,4, ...]; -->
+    <!-- Example mnist_test_labels.js:  var mnistTestLabels = [7,2,1, ...]; -->
+    <script src="mnist_train_labels.js"></script>
+    <script src="mnist_test_labels.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .controls { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;}
+        .controls div { margin-bottom: 10px; }
+        .controls label { display: inline-block; width: 150px; font-weight: bold;}
+        .controls input[type="number"], .controls input[type="text"] {
+            width: 100px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;
+        }
+        button {
+            background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px;
+            cursor: pointer; font-size: 16px; transition: background-color 0.3s;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #logArea {
+            width: 100%; height: 200px; background: #eee; border: 1px solid #ccc;
+            padding: 10px; overflow-y: scroll; font-family: monospace; white-space: pre-wrap;
+            margin-bottom: 20px; box-sizing: border-box;
+        }
+        .image-display { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .image-display div { text-align: center; }
+        .image-display canvas { border: 1px solid #999; margin: 5px; image-rendering: pixelated; }
+        .status { font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FSQ-VAE MNIST Demo</h1>
+
+        <div class="controls">
+            <div>
+                <label for="numTrainData">Train Images (max 60k):</label>
+                <input type="number" id="numTrainData" value="6000">
+            </div>
+            <div>
+                <label for="numTestData">Test Images (max 10k):</label>
+                <input type="number" id="numTestData" value="1000">
+            </div>
+            <div>
+                <label for="epochs">Epochs:</label>
+                <input type="number" id="epochs" value="5">
+            </div>
+            <div>
+                <label for="batchSize">Batch Size:</label>
+                <input type="number" id="batchSize" value="128">
+            </div>
+            <div>
+                <label for="learningRate">Learning Rate:</label>
+                <input type="text" id="learningRate" value="0.001">
+            </div>
+            <div>
+                <label for="fsqLevels">FSQ Levels (>=2):</label>
+                <input type="number" id="fsqLevels" value="8">
+            </div>
+            <div>
+                <label for="latentDim">Latent Channels (>=1):</label>
+                <input type="number" id="latentDim" value="8">
+            </div>
+            <button id="startButton">Start Training</button>
+        </div>
+
+        <div id="statusArea" class="status">Status: Idle</div>
+        <div id="logArea"></div>
+
+        <h2>Sample Reconstructions (Test Set)</h2>
+        <div class="image-display">
+            <div id="originalImages"><h3>Original</h3></div>
+            <div id="reconstructedImages"><h3>Reconstructed</h3></div>
+        </div>
+    </div>
+
+    <script>
+        // Global vars for data and model
+        let trainImagesTensor, testImagesTensor;
+        let model, optimizer;
+
+        const logArea = document.getElementById('logArea');
+        const statusArea = document.getElementById('statusArea');
+        const startButton = document.getElementById('startButton');
+
+        const IMG_WIDTH = 28;
+        const IMG_HEIGHT = 28;
+        const MNIST_CHANNELS = 1;
+
+        function logMessage(message) {
+            logArea.textContent += message + '\n';
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(message) {
+            statusArea.textContent = `Status: ${message}`;
+            console.log(`Status: ${message}`);
+        }
+
+        // FSQ Layer
+        class FSQ extends tf.layers.Layer {
+            constructor(levels, config) {
+                super(config);
+                if (typeof levels !== 'number' || isNaN(levels) || levels < 2) { 
+                    const msg = `FSQ Constructor Error: levels must be a number >= 2. Received: ${levels} (type: ${typeof levels})`;
+                    logMessage(msg);
+                    throw new Error(msg);
+                }
+                this.numLevels = levels;
+                this.halfBound = 0.5; 
+                logMessage(`FSQ Layer initialized with ${this.numLevels} levels.`);
+            }
+
+            computeOutputShape(inputShape) {
+                return inputShape;
+            }
+
+            call(inputs, kwargs) {
+                return tf.tidy(() => {
+                    const input = Array.isArray(inputs) ? inputs[0] : inputs;
+                    
+                    const q = tf.customGrad((x, save) => {
+                        save([x]); 
+
+                        const x_clipped = tf.clipByValue(x, -this.halfBound, this.halfBound);
+                        const x_scaled = x_clipped.add(this.halfBound)
+                                           .div(2 * this.halfBound) 
+                                           .mul(this.numLevels - 1); 
+                        const indices = tf.round(x_scaled);
+                        const quantized_value = indices.div(this.numLevels - 1)
+                                                  .mul(2 * this.halfBound)
+                                                  .sub(this.halfBound);
+                        
+                        return {
+                            value: quantized_value,
+                            gradFunc: (dy, saved) => {
+                                const [original_x] = saved;
+                                const grad_for_clip = tf.where(
+                                    tf.logicalAnd(original_x.greaterEqual(-this.halfBound), original_x.lessEqual(this.halfBound)),
+                                    tf.onesLike(original_x),
+                                    tf.zerosLike(original_x)
+                                );
+                                return dy.mul(grad_for_clip);
+                            }
+                        };
+                    })(input);
+                    return q;
+                });
+            }
+
+            static get className() {
+                return 'FSQ';
+            }
+        }
+        tf.serialization.registerClass(FSQ);
+
+
+        // Model Definition
+        function buildEncoder(inputShape, latentDim) {
+            const encoder = tf.sequential();
+            encoder.add(tf.layers.conv2d({
+                inputShape: inputShape, filters: 32, kernelSize: 3, strides: 2, padding: 'same', activation: 'relu'
+            })); 
+            encoder.add(tf.layers.conv2d({
+                filters: 64, kernelSize: 3, strides: 2, padding: 'same', activation: 'relu'
+            })); 
+            encoder.add(tf.layers.conv2d({
+                filters: latentDim, kernelSize: 1, padding: 'same', activation: 'tanh' 
+            })); 
+            encoder.add(tf.layers.rescaling({scale: 0.5}));
+            return encoder;
+        }
+
+        function buildDecoder(inputShapeForDecoder, latentDimChannels) { 
+            const decoder = tf.sequential();
+            decoder.add(tf.layers.conv2dTranspose({
+                inputShape: inputShapeForDecoder, filters: 64, kernelSize: 3, strides: 1, padding: 'same', activation: 'relu'
+            })); 
+            decoder.add(tf.layers.conv2dTranspose({
+                filters: 32, kernelSize: 3, strides: 2, padding: 'same', activation: 'relu'
+            })); 
+            decoder.add(tf.layers.conv2dTranspose({
+                filters: MNIST_CHANNELS, kernelSize: 3, strides: 2, padding: 'same', activation: 'sigmoid'
+            })); 
+            return decoder;
+        }
+
+        function buildFSQVAE(fsqLevels, latentDim) {
+            logMessage(`  buildFSQVAE: Starting. FSQ Levels=${fsqLevels}, Latent Dim=${latentDim}`);
+            const inputShape = [IMG_WIDTH, IMG_HEIGHT, MNIST_CHANNELS];
+            
+            logMessage('  buildFSQVAE: Building encoder...');
+            const encoder = buildEncoder(inputShape, latentDim);
+            logMessage('  buildFSQVAE: Encoder built.');
+
+            if (!encoder || !encoder.outputs || !encoder.outputs[0] || !encoder.outputs[0].shape) {
+                const errMsg = '  buildFSQVAE: CRITICAL ERROR - Encoder output shape is invalid after buildEncoder.';
+                logMessage(errMsg);
+                throw new Error(errMsg);
+            }
+            logMessage(`  buildFSQVAE: Encoder output shape (raw from TF): ${JSON.stringify(encoder.outputs[0].shape)}`);
+            const encoderOutputShape = encoder.outputs[0].shape.slice(1);
+            logMessage(`  buildFSQVAE: Encoder output shape for FSQ/Decoder input: ${JSON.stringify(encoderOutputShape)}`);
+
+            logMessage('  buildFSQVAE: Creating FSQ layer instance...');
+            const fsqLayer = new FSQ(fsqLevels);
+            logMessage('  buildFSQVAE: FSQ layer instance created.');
+            
+            logMessage('  buildFSQVAE: Building decoder...');
+            const decoder = buildDecoder(encoderOutputShape, latentDim);
+            logMessage('  buildFSQVAE: Decoder built.');
+
+            const vaeInput = tf.input({shape: inputShape});
+            logMessage('  buildFSQVAE: VAE symbolic input tensor created.');
+            
+            let encoded, quantized, decoded;
+            logMessage('  buildFSQVAE: Applying layers symbolically...');
+            try {
+                encoded = encoder.apply(vaeInput);
+                logMessage('  buildFSQVAE: Encoder applied symbolically.');
+                quantized = fsqLayer.apply(encoded);
+                logMessage('  buildFSQVAE: FSQ layer applied symbolically.');
+                decoded = decoder.apply(quantized);
+                logMessage('  buildFSQVAE: Decoder applied symbolically.');
+            } catch (e) {
+                logMessage(`  buildFSQVAE: ERROR during symbolic layer application: ${e.message}`);
+                logMessage(`  buildFSQVAE: Stack: ${e.stack}`);
+                throw e;
+            }
+            
+            logMessage('  buildFSQVAE: Creating final VAE tf.model...');
+            const vae = tf.model({inputs: vaeInput, outputs: decoded});
+            logMessage('  buildFSQVAE: Final VAE tf.model created.');
+            
+            return { vae, encoder, quantizer: null, decoder };
+        }
+
+        // Data Loading and Preprocessing
+        async function loadImageToCanvasAndTensor(imageUrl, canvasId, numTotalImages, imagesPerRow, numImagesToLoad) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.src = imageUrl;
+                const hiddenCanvas = document.createElement('canvas');
+                
+                img.onload = () => {
+                    logMessage(`Image ${imageUrl} loaded successfully for processing.`);
+                    hiddenCanvas.width = img.width;
+                    hiddenCanvas.height = img.height;
+                    const ctx = hiddenCanvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    const imageTensors = [];
+                    setStatus(`Processing ${numImagesToLoad} images from ${imageUrl.split('/').pop()}...`);
+                    
+                    const processedTensor = tf.tidy(() => { // Make tidy return the tensor
+                        const imageTensors = [];
+                        for (let i = 0; i < numImagesToLoad; i++) {
+                            if (i >= numTotalImages) break;
+                            const row = Math.floor(i / imagesPerRow);
+                            const col = i % imagesPerRow;
+                            const sx = col * IMG_WIDTH;
+                            const sy = row * IMG_HEIGHT;
+                            
+                            const imageData = ctx.getImageData(sx, sy, IMG_WIDTH, IMG_HEIGHT);
+                            const data = imageData.data;
+                            const buffer = tf.buffer([IMG_HEIGHT, IMG_WIDTH, MNIST_CHANNELS], 'float32');
+                            
+                            for (let y = 0; y < IMG_HEIGHT; y++) {
+                                for (let x = 0; x < IMG_WIDTH; x++) {
+                                    const offset = (y * IMG_WIDTH + x) * 4;
+                                    buffer.set(data[offset] / 255.0, y, x, 0);
+                                }
+                            }
+                            imageTensors.push(buffer.toTensor());
+                        }
+                        if (imageTensors.length === 0) {
+                            logMessage(`Warning: No images processed from ${imageUrl}. numImagesToLoad: ${numImagesToLoad}`);
+                            return tf.tensor([]); // Return empty tensor from tidy
+                        }
+                        const finalTensor = tf.stack(imageTensors);
+                        imageTensors.forEach(t => t.dispose());
+                        return finalTensor; // Return the finalTensor from tidy
+                    });
+                    resolve(processedTensor); // Resolve with the tensor returned by tidy 
+
+                };
+                img.onerror = (err) => {
+                    logMessage(`Error loading image ${imageUrl}: ${JSON.stringify(err)}`);
+                    reject(err);
+                };
+            });
+        }
+        
+        async function prepareData(numTrain, numTest) {
+            setStatus('Loading data...');
+            logMessage('Starting data preparation...');
+
+            if (typeof mnistTrainLabels === 'undefined' || typeof mnistTestLabels === 'undefined') {
+                logMessage("ERROR: MNIST labels not loaded. Ensure mnist_train_labels.js and mnist_test_labels.js are present.");
+                setStatus("Error: Label files missing.");
+                return false;
+            }
+            logMessage(`Found label arrays: Train labels: ${mnistTrainLabels.length}, Test labels: ${mnistTestLabels.length}`);
+
+            const trainUrl = 'https://zsc.github.io/widgets/mnist/mnist_train_stitched.png';
+            const testUrl = 'https://zsc.github.io/widgets/mnist/mnist_test_stitched.png';
+
+            const trainImagesTotalInFile = 60000;
+            const trainImagesPerRow = 245;
+            const testImagesTotalInFile = 10000;
+            const testImagesPerRow = 100;
+
+            numTrain = Math.min(numTrain, trainImagesTotalInFile);
+            numTest = Math.min(numTest, testImagesTotalInFile);
+            logMessage(`Will load ${numTrain} train images and ${numTest} test images.`);
+
+            try {
+                if (trainImagesTensor) { tf.dispose(trainImagesTensor); trainImagesTensor = null; logMessage("Disposed existing trainImagesTensor before new load.");} // Dispose if reloading
+                trainImagesTensor = await loadImageToCanvasAndTensor(trainUrl, 'trainCanvas', trainImagesTotalInFile, trainImagesPerRow, numTrain);
+                if (trainImagesTensor && trainImagesTensor.shape[0] > 0) {
+                    logMessage(`Training images tensor shape: ${trainImagesTensor.shape}`);
+                } else {
+                     logMessage(`Training images tensor is empty or invalid. Shape: ${trainImagesTensor ? trainImagesTensor.shape : 'undefined'}`);
+                     throw new Error("Failed to load sufficient training images.");
+                }
+                
+                if (testImagesTensor) { tf.dispose(testImagesTensor); testImagesTensor = null; logMessage("Disposed existing testImagesTensor before new load.");} // Dispose if reloading
+                testImagesTensor = await loadImageToCanvasAndTensor(testUrl, 'testCanvas', testImagesTotalInFile, testImagesPerRow, numTest);
+                 if (testImagesTensor && testImagesTensor.shape[0] > 0) {
+                    logMessage(`Test images tensor shape: ${testImagesTensor.shape}`);
+                } else if (numTest > 0 && (!testImagesTensor || testImagesTensor.shape[0] === 0)) {
+                     logMessage(`Warning: Test images requested (${numTest}) but tensor is empty or invalid. Shape: ${testImagesTensor ? testImagesTensor.shape : 'undefined'}`);
+                     logMessage("Reconstructions might not display or might use an empty tensor.");
+                } else if (numTest === 0) {
+                    logMessage("No test images requested, test tensor will be empty.");
+                }
+                setStatus('Data loaded successfully.');
+                return true;
+            } catch (error) {
+                logMessage(`Data loading failed: ${error.message ? error.message : error}`);
+                setStatus('Data loading failed.');
+                return false;
+            }
+        }
+
+        // Training
+        async function trainModel(epochs, batchSize, learningRate, fsqLevels, latentDim) {
+            setStatus('Building model...');
+            logMessage('Attempting to build FSQ-VAE model in trainModel function...');
+
+            try {
+                const { vae } = buildFSQVAE(fsqLevels, latentDim); 
+                model = vae; 
+                logMessage('FSQ-VAE model structure returned from buildFSQVAE.');
+
+                optimizer = tf.train.adam(learningRate);
+                logMessage('Optimizer (Adam) created.');
+
+                logMessage('Compiling model...');
+                model.compile({
+                    optimizer: optimizer,
+                    loss: tf.losses.meanSquaredError 
+                });
+                logMessage('Model compiled successfully.');
+
+            } catch (e) {
+                logMessage(`ERROR during model building or compilation: ${e.message}`);
+                logMessage(`Stack: ${e.stack ? e.stack : 'No stack available'}`);
+                setStatus('Error: Model building/compilation failed.');
+                startButton.disabled = false;
+                return; 
+            }
+            
+            logMessage('Model built and compiled. Ready for training.');
+            logMessage('Model Summary:');
+            model.summary(null, null, logMessage);
+
+            const numTrainExamples = trainImagesTensor.shape[0];
+            if (numTrainExamples === 0) {
+                logMessage("No training examples. Aborting training.");
+                setStatus("Error: No training data.");
+                return;
+            }
+            const numBatches = Math.ceil(numTrainExamples / batchSize);
+            logMessage(`Training with ${numTrainExamples} examples, ${numBatches} batches per epoch.`);
+
+            // --- Start of Patch from previous step ---
+            if (!trainImagesTensor || trainImagesTensor.isDisposedInternal) { 
+                logMessage(`CRITICAL: trainImagesTensor is invalid before cloning! Shape: ${trainImagesTensor ? trainImagesTensor.shape : 'N/A'}, Disposed: ${trainImagesTensor ? trainImagesTensor.isDisposedInternal : 'N/A'}`);
+                setStatus('Error: trainImagesTensor became invalid.');
+                startButton.disabled = false;
+                return;
+            }
+            logMessage(`Pre-clone: trainImagesTensor shape: ${trainImagesTensor.shape}, isDisposed: ${trainImagesTensor.isDisposedInternal}, rank: ${trainImagesTensor.rank}, dtype: ${trainImagesTensor.dtype}`);
+            
+            const clonedTrainImagesTensor = tf.tidy(() => trainImagesTensor.clone()); 
+            
+            logMessage(`Post-clone: clonedTrainImagesTensor shape: ${clonedTrainImagesTensor.shape}, isDisposed: ${clonedTrainImagesTensor.isDisposedInternal}, rank: ${clonedTrainImagesTensor.rank}, dtype: ${clonedTrainImagesTensor.dtype}`);
+            // --- End of Patch from previous step ---
+
+
+            setStatus('Starting training...');
+            for (let epoch = 0; epoch < epochs; epoch++) {
+                let epochLoss = 0;
+                const startTime = performance.now();
+                logMessage(`Starting Epoch ${epoch + 1}/${epochs}`);
+                
+                const shuffledIndicesArray = tf.util.createShuffledIndices(numTrainExamples);
+                const plainIndicesArray = Array.from(shuffledIndicesArray); // From previous patch
+                const shuffledIndicesTensor = tf.tensor1d(plainIndicesArray, 'int32'); 
+
+                // --- Part of Patch from previous step: Log before gather ---
+                if (clonedTrainImagesTensor.isDisposedInternal) {
+                     logMessage(`CRITICAL: clonedTrainImagesTensor is disposed before gather in epoch ${epoch+1}!`);
+                }
+                if (shuffledIndicesTensor.isDisposedInternal) {
+                     logMessage(`CRITICAL: shuffledIndicesTensor is disposed before gather in epoch ${epoch+1}!`);
+                }
+                logMessage(`  Epoch ${epoch+1} Pre-gather: clonedTrainImagesTensor.shape: ${clonedTrainImagesTensor.shape}, rank: ${clonedTrainImagesTensor.rank}`);
+                logMessage(`  Epoch ${epoch+1} Pre-gather: shuffledIndicesTensor.shape: ${shuffledIndicesTensor.shape}, rank: ${shuffledIndicesTensor.rank}`);
+                // --- End of Patch part from previous step ---
+                
+                const shuffledTrainImages = tf.gather(clonedTrainImagesTensor, shuffledIndicesTensor); // Use the clone
+
+                for (let batch = 0; batch < numBatches; batch++) {
+                    const start = batch * batchSize;
+                    const end = Math.min((batch + 1) * batchSize, numTrainExamples);
+                    
+                    if (start >= end) continue;
+
+                    const batchImages = tf.tidy(() => shuffledTrainImages.slice([start, 0, 0, 0], [end - start, IMG_HEIGHT, IMG_WIDTH, MNIST_CHANNELS]));
+                    
+                    const history = await model.trainOnBatch(batchImages, batchImages);
+                    const loss = history; 
+                    epochLoss += loss;
+                    
+                    tf.dispose(batchImages);
+
+                    if ((batch + 1) % 10 === 0 || batch === numBatches - 1) { 
+                        const progressPercent = (batch + 1) / numBatches;
+                        const barLength = 20;
+                        const filledLength = Math.round(barLength * progressPercent);
+                        const progressBar = '[' + '='.repeat(filledLength) + ' '.repeat(barLength - filledLength) + ']';
+                        logMessage(`  Epoch ${epoch + 1}, Batch ${batch + 1}/${numBatches} ${progressBar} Loss: ${loss.toFixed(4)}`);
+                    }
+                    await tf.nextFrame(); 
+                }
+                tf.dispose(shuffledIndicesTensor); 
+                tf.dispose(shuffledTrainImages);
+
+
+                const avgLoss = epochLoss / numBatches;
+                const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(1);
+                logMessage(`Epoch ${epoch + 1} completed. Avg Loss: ${avgLoss.toFixed(4)}. Time: ${elapsedTime}s`);
+                
+                if (testImagesTensor && !testImagesTensor.isDisposedInternal && testImagesTensor.shape[0] > 0) {
+                    await displayReconstructions(model, testImagesTensor, 5);
+                } else {
+                    logMessage("Skipping reconstructions as test data is unavailable or disposed.");
+                }
+                await tf.nextFrame(); 
+            }
+            
+            // --- Part of Patch from previous step: Dispose the clone ---
+            tf.dispose(clonedTrainImagesTensor);
+            logMessage("Disposed clonedTrainImagesTensor after training.");
+            // --- End of Patch part from previous step ---
+
+            setStatus('Training finished.');
+        }
+
+        // Visualization
+        async function displayReconstructions(modelToUse, testData, count) {
+            const originalContainer = document.getElementById('originalImages');
+            const reconstructedContainer = document.getElementById('reconstructedImages');
+            
+            originalContainer.innerHTML = '<h3>Original</h3>';
+            reconstructedContainer.innerHTML = '<h3>Reconstructed</h3>';
+
+            if (!testData || testData.isDisposedInternal || testData.shape[0] === 0) { // Added isDisposedInternal check
+                logMessage("DisplayReconstructions: No valid test data to display.");
+                return;
+            }
+            
+            const displayCount = Math.min(count, testData.shape[0]);
+            logMessage(`Displaying ${displayCount} reconstructions.`);
+            const testBatch = tf.tidy(() => testData.slice([0,0,0,0], [displayCount, IMG_HEIGHT, IMG_WIDTH, MNIST_CHANNELS]));
+            const reconstructions = tf.tidy(() => modelToUse.predict(testBatch));
+
+            for (let i = 0; i < displayCount; i++) {
+                const originalCanvas = document.createElement('canvas');
+                originalCanvas.width = IMG_WIDTH * 2; 
+                originalCanvas.height = IMG_HEIGHT * 2;
+                const originalImgTensor = tf.tidy(() => testBatch.slice([i,0,0,0],[1,IMG_HEIGHT,IMG_WIDTH,MNIST_CHANNELS]).reshape([IMG_HEIGHT,IMG_WIDTH,MNIST_CHANNELS]));
+                await tf.browser.toPixels(originalImgTensor, originalCanvas);
+                originalContainer.appendChild(originalCanvas);
+
+                const reconstructedCanvas = document.createElement('canvas');
+                reconstructedCanvas.width = IMG_WIDTH * 2;
+                reconstructedCanvas.height = IMG_HEIGHT * 2;
+                const reconstructedImgTensor = tf.tidy(() => reconstructions.slice([i,0,0,0],[1,IMG_HEIGHT,IMG_WIDTH,MNIST_CHANNELS]).reshape([IMG_HEIGHT,IMG_WIDTH,MNIST_CHANNELS]));
+                await tf.browser.toPixels(reconstructedImgTensor, reconstructedCanvas);
+                reconstructedContainer.appendChild(reconstructedCanvas);
+
+                tf.dispose([originalImgTensor, reconstructedImgTensor]);
+            }
+            tf.dispose([testBatch, reconstructions]);
+        }
+
+
+        // Main execution
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true;
+            logArea.textContent = ''; 
+
+            const numTrainData = parseInt(document.getElementById('numTrainData').value);
+            const numTestData = parseInt(document.getElementById('numTestData').value);
+            const epochsVal = parseInt(document.getElementById('epochs').value);
+            const batchSizeVal = parseInt(document.getElementById('batchSize').value);
+            const learningRateVal = parseFloat(document.getElementById('learningRate').value);
+            const fsqLevelsVal = parseInt(document.getElementById('fsqLevels').value);
+            const latentDimVal = parseInt(document.getElementById('latentDim').value);
+
+            logMessage("Validating hyperparameters...");
+            let validInputs = true;
+            if (isNaN(numTrainData) || numTrainData <= 0) { logMessage("ERROR: Invalid Train Images count. Must be > 0."); validInputs = false; }
+            if (isNaN(numTestData) || numTestData < 0) { logMessage("ERROR: Invalid Test Images count. Must be >= 0."); validInputs = false; }
+            if (isNaN(epochsVal) || epochsVal <= 0) { logMessage("ERROR: Invalid Epochs count. Must be > 0."); validInputs = false; }
+            if (isNaN(batchSizeVal) || batchSizeVal <= 0) { logMessage("ERROR: Invalid Batch Size. Must be > 0."); validInputs = false; }
+            if (isNaN(learningRateVal) || learningRateVal <= 0) { logMessage("ERROR: Invalid Learning Rate. Must be > 0."); validInputs = false; }
+            if (isNaN(fsqLevelsVal) || fsqLevelsVal < 2) { logMessage("ERROR: Invalid FSQ Levels. Must be an integer >= 2."); validInputs = false; }
+            if (isNaN(latentDimVal) || latentDimVal <= 0) { logMessage("ERROR: Invalid Latent Channels. Must be an integer > 0."); validInputs = false; }
+            
+            if (!validInputs) {
+                logMessage("Hyperparameter validation failed. Please correct the inputs.");
+                setStatus("Error: Invalid hyperparameters.");
+                startButton.disabled = false;
+                return;
+            }
+            logMessage("Hyperparameters validated successfully.");
+
+
+            logMessage('Configuration:');
+            logMessage(`  Train Images: ${numTrainData}`);
+            logMessage(`  Test Images:  ${numTestData}`);
+            logMessage(`  Epochs:       ${epochsVal}`);
+            logMessage(`  Batch Size:   ${batchSizeVal}`);
+            logMessage(`  Learning Rate:${learningRateVal}`);
+            logMessage(`  FSQ Levels:   ${fsqLevelsVal}`);
+            logMessage(`  Latent Dim:   ${latentDimVal}`);
+            
+            // Global tensors are disposed in prepareData if they exist, before new load.
+            // No need to dispose here if prepareData handles it.
+            // if (trainImagesTensor) { tf.dispose(trainImagesTensor); trainImagesTensor = null; logMessage("Disposed old trainImagesTensor."); }
+            // if (testImagesTensor) { tf.dispose(testImagesTensor); testImagesTensor = null; logMessage("Disposed old testImagesTensor."); }
+            if (model) { /* model is reassigned, tf.dispose not directly needed for tf.Model object itself */ }
+
+
+            const dataReady = await prepareData(numTrainData, numTestData);
+            if (dataReady) {
+                await trainModel(epochsVal, batchSizeVal, learningRateVal, fsqLevelsVal, latentDimVal);
+            } else {
+                logMessage("Failed to prepare data. Training aborted.");
+                setStatus("Error: Data preparation failed.");
+            }
+            startButton.disabled = false;
+            logMessage("Process finished. Ready for new run or parameter adjustment.");
+        });
+
+        // Initial message
+        setStatus("Ready. Configure parameters and click 'Start Training'.");
+        logMessage("FSQ-VAE MNIST Demo initialized.");
+        logMessage("Ensure mnist_train_labels.js and mnist_test_labels.js are accessible in the same directory or update script paths.");
+        logMessage("Stitched MNIST images will be loaded from zsc.github.io. Internet connection required for first load.");
+
+    </script>
+</body>
+</html>
