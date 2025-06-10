@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST K-Means Embedding Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <!-- Assuming labels are hosted similarly to other assets -->
+    <script src="https://zsc.github.io/widgets/mnist/mnist_train_labels.js"></script>
+    <script src="https://zsc.github.io/widgets/mnist/mnist_test_labels.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; display: flex; flex-direction: column; align-items: center; }
+        .controls { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; width: 90%; max-width: 800px;}
+        .controls div { margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: center;}
+        .controls label { margin-right: 5px; min-width: 100px; }
+        .controls input[type="number"] { width: 70px; margin-right: 15px; padding: 5px; border: 1px solid #ddd; border-radius: 3px;}
+        .controls button { padding: 10px 18px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top:10px; }
+        .controls button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #logArea { width: 90%; max-width: 800px; height: 150px; overflow-y: scroll; border: 1px solid #ddd; background-color: #222; color: #0f0; font-family: monospace; padding: 10px; margin-bottom: 20px; white-space: pre-wrap; }
+        .visualization-container { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-around; width: 95%; max-width: 1200px; }
+        #clustersDisplay { width: 60%; min-width: 400px; max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+        #centroidPlotContainer { width: 35%; min-width: 320px; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        #centroidCanvas { border: 1px solid #ccc; }
+        .cluster { margin-bottom: 15px; border: 1px solid #eee; padding: 5px; }
+        .cluster h3 { margin-top: 0; margin-bottom: 5px; font-size: 1em; }
+        .cluster-images { display: flex; flex-wrap: wrap; }
+        .cluster img { width: 28px; height: 28px; margin: 1px; border: 1px solid #f0f0f0; image-rendering: pixelated; } /* no gaps */
+        .color-palette { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 5px; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin: 2px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>MNIST K-Means Embedding Visualization</h1>
+
+    <div class="controls">
+        <div>
+            <label for="numSamples">Samples:</label>
+            <input type="number" id="numSamples" value="600" min="10" max="60000">
+            <label for="numClusters">K (Clusters):</label>
+            <input type="number" id="numClusters" value="10" min="2" max="20">
+            <label for="maxIterations">Max Iterations:</label>
+            <input type="number" id="maxIterations" value="20" min="1">
+        </div>
+        <div>
+            <label for="initialBrownianStrength">Brownian Strength:</label>
+            <input type="number" id="initialBrownianStrength" value="0.05" min="0" max="1" step="0.001" title="Initial strength of random noise added to centroids (0 to disable)">
+            <label for="brownianDecayRate">Brownian Decay:</label>
+            <input type="number" id="brownianDecayRate" value="0.1" min="0" max="1" step="0.01" title="Rate at which Brownian strength decreases each iteration (0 for no decay, 1 for decay to ~0 after first step)">
+        </div>
+        <button id="startButton">Start Clustering</button>
+    </div>
+
+    <div id="logArea"></div>
+
+    <div class="visualization-container">
+        <div id="centroidPlotContainer">
+            <h3>Centroid Projection (2D Random)</h3>
+            <div id="colorPaletteCentroids" class="color-palette"></div>
+            <canvas id="centroidCanvas" width="300" height="300"></canvas>
+        </div>
+        <div id="clustersDisplay">
+            <h3>Cluster Members (First ~20 of each)</h3>
+            <!-- Cluster content will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const logArea = document.getElementById('logArea');
+        const startButton = document.getElementById('startButton');
+        const numSamplesInput = document.getElementById('numSamples');
+        const numClustersInput = document.getElementById('numClusters');
+        const maxIterationsInput = document.getElementById('maxIterations');
+        const initialBrownianStrengthInput = document.getElementById('initialBrownianStrength');
+        const brownianDecayRateInput = document.getElementById('brownianDecayRate');
+        const clustersDisplay = document.getElementById('clustersDisplay');
+        const centroidCanvas = document.getElementById('centroidCanvas');
+        const centroidCtx = centroidCanvas.getContext('2d');
+        const colorPaletteCentroids = document.getElementById('colorPaletteCentroids');
+
+        const MNIST_TRAIN_STITCHED_URL = 'https://zsc.github.io/widgets/mnist/mnist_train_stitched.png';
+        const MODEL_JSON_URL = 'https://zsc.github.io/widgets/mnist/mnist-cnn-model.json';
+
+        const DIGIT_SIZE = 28;
+        const TRAIN_DIGITS_PER_ROW = 245;
+        const MAX_IMAGES_PER_CLUSTER_DISPLAY = 20;
+
+        let stitchedTrainImg = null;
+        let embeddingModel = null;
+        let allEmbeddingsData = []; // { embedding: tf.Tensor, image: ImageData, label: number, id: number }
+        let clusterColors = [];
+
+        function log(message) {
+            console.log(message);
+            logArea.textContent += message + '\n';
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function generateColors(numColors) {
+            const colors = [];
+            for (let i = 0; i < numColors; i++) {
+                const hue = (i * (360 / numColors)) % 360;
+                colors.push(`hsl(${hue}, 80%, 60%)`);
+            }
+            return colors;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function customSampleIndices(populationSize, numSamples) {
+            if (numSamples > populationSize) {
+                log(`Warning: Trying to sample ${numSamples} from ${populationSize}. Will sample all ${populationSize}.`);
+                numSamples = populationSize;
+            }
+            if (numSamples <= 0) return [];
+            const indices = Array.from({ length: populationSize }, (_, i) => i);
+            shuffleArray(indices);
+            return indices.slice(0, numSamples);
+        }
+
+        async function loadImage(imageUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = (err) => {
+                    log(`Error loading image: ${imageUrl}`);
+                    reject(err);
+                };
+                img.src = imageUrl;
+            });
+        }
+
+        function extractDigit(stitchedImgElement, index, digitsPerRow, digitSize) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = digitSize;
+            tempCanvas.height = digitSize;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            const row = Math.floor(index / digitsPerRow);
+            const col = index % digitsPerRow;
+            const sx = col * digitSize;
+            const sy = row * digitSize;
+
+            tempCtx.drawImage(stitchedImgElement, sx, sy, digitSize, digitSize, 0, 0, digitSize, digitSize);
+            return tempCtx.getImageData(0, 0, digitSize, digitSize);
+        }
+        
+        async function loadModelAndCreateEmbeddingModel() {
+            log('Loading classification model...');
+            try {
+                const model = await tf.loadLayersModel(MODEL_JSON_URL);
+                log('Classification model loaded.');
+                model.summary(null, null, (line) => log(`  ${line}`));
+
+                let embeddingLayerName = "dense_Dense1"; 
+
+                if (!model.getLayer(embeddingLayerName)) { 
+                    log(`Layer "${embeddingLayerName}" not found. Trying alternatives...`);
+                    embeddingLayerName = null; 
+                    for (let i = model.layers.length - 1; i >= 0; i--) {
+                        if (model.layers[i].name.toLowerCase().includes('flatten')) {
+                            embeddingLayerName = model.layers[i].name;
+                            log(`Found "flatten" layer: "${embeddingLayerName}"`);
+                            break;
+                        }
+                    }
+                    if (!embeddingLayerName && model.layers.length >= 2) {
+                        const potentialLayer = model.layers[model.layers.length - 2];
+                        if (potentialLayer && potentialLayer.name) {
+                             embeddingLayerName = potentialLayer.name;
+                             log(`Using layer "${embeddingLayerName}" (second to last) as potential embedding layer.`);
+                        }
+                    }
+                }
+                
+                if (!embeddingLayerName || !model.getLayer(embeddingLayerName)) {
+                    const availableLayers = model.layers.map(l => l.name).join(', ');
+                    throw new Error(`Could not find a suitable embedding layer. Tried "dense_Dense1", "flatten", and second-to-last. Available layers: ${availableLayers}. Please inspect model summary and specify.`);
+                }
+
+                log(`Using layer "${embeddingLayerName}" for embeddings.`);
+                const layer = model.getLayer(embeddingLayerName);
+                embeddingModel = tf.model({ inputs: model.inputs, outputs: layer.output });
+                log('Embedding model created.');
+                
+                const exampleInputShape = embeddingModel.inputs[0].shape;
+                const exampleOutputShape = embeddingModel.outputs[0].shape;
+                log(`Embedding model input shape: [${exampleInputShape.join(', ')}]`);
+                log(`Embedding model output shape (embedding dim): [${exampleOutputShape.join(', ')}]`);
+                
+                if (exampleOutputShape.length < 2 || exampleOutputShape[1] === null || exampleOutputShape[1] < 2) {
+                     throw new Error(`Embedding dimension is too small or undefined: ${exampleOutputShape[1]}. Check embedding layer choice.`);
+                }
+
+            } catch (error) {
+                log(`Error loading or preparing model: ${error.message}`);
+                console.error(error);
+                throw error;
+            }
+        }
+
+        async function generateEmbeddingsForUI(numImgs) {
+            if (!stitchedTrainImg || !embeddingModel) {
+                log('Stitched image or embedding model not loaded.');
+                return;
+            }
+            log(`Generating embeddings for ${numImgs} images...`);
+            
+            allEmbeddingsData.forEach(e => e.embedding.dispose());
+            allEmbeddingsData = [];
+
+            const tempEmbeddingsData = [];
+
+            for (let i = 0; i < numImgs; i++) {
+                if (i % 50 === 0 && i > 0) {
+                    log(`Processed ${i} images for embeddings...`);
+                    await new Promise(r => setTimeout(r, 0)); // Yield to UI thread
+                }
+                const imageData = extractDigit(stitchedTrainImg, i, TRAIN_DIGITS_PER_ROW, DIGIT_SIZE);
+                
+                const embTensor = tf.tidy(() => {
+                    const imgTensor = tf.browser.fromPixels(imageData, 1).toFloat();
+                    const normalized = imgTensor.div(tf.scalar(255.0));
+                    const batched = normalized.expandDims(0);
+                    return embeddingModel.predict(batched);
+                });
+
+                tempEmbeddingsData.push({ 
+                    embedding: embTensor, 
+                    image: imageData, 
+                    label: typeof mnistTrainLabels !== 'undefined' ? mnistTrainLabels[i] : -1,
+                    id: i 
+                });
+            }
+            allEmbeddingsData = tempEmbeddingsData;
+            log(`Generated ${allEmbeddingsData.length} embeddings. Example embedding dim: ${allEmbeddingsData[0].embedding.shape[1]}`);
+        }
+
+        async function kMeans(k, maxIter, initialBrownianStrength, brownianDecayRate) {
+            if (allEmbeddingsData.length === 0) {
+                log('No embeddings to cluster.');
+                return { centroids: null, assignments: [] };
+            }
+            log(`Starting K-Means with K=${k}, Max Iterations=${maxIter}`);
+            if (initialBrownianStrength > 0) {
+                log(`  Brownian Motion: Initial Strength=${initialBrownianStrength.toFixed(4)}, Decay Rate=${brownianDecayRate.toFixed(2)}`);
+            }
+
+
+            const embeddingDim = allEmbeddingsData[0].embedding.shape[1];
+            let randomProjectionMatrix;
+            if (embeddingDim > 2) {
+                randomProjectionMatrix = tf.randomNormal([embeddingDim, 2]);
+            } else if (embeddingDim === 2) {
+                 randomProjectionMatrix = tf.eye(2); 
+            } else { 
+                log("Embedding dimension is 1. Projecting to a line in 2D.");
+                randomProjectionMatrix = tf.tensor2d([[1],[0]], [1,2], 'float32'); // Map 1D to x-axis
+            }
+
+            let centroidsTensor = tf.tidy(() => {
+                const indices = customSampleIndices(allEmbeddingsData.length, k);
+                const initialCentroids = indices.map(idx => allEmbeddingsData[idx].embedding);
+                return tf.concat(initialCentroids);
+            });
+            
+            const actualK = centroidsTensor.shape[0];
+            if (actualK < k) {
+                log(`Adjusted K to ${actualK} due to sampling fewer initial centroids.`);
+                clusterColors = generateColors(actualK); // Re-generate colors if K changed
+            }
+
+
+            let assignments = new Array(allEmbeddingsData.length).fill(-1);
+            let iteration = 0;
+            let changed = true;
+
+            const allEmbeddingsTensor = tf.concat(allEmbeddingsData.map(e => e.embedding));
+
+            while (iteration < maxIter && changed) {
+                changed = false;
+                log(`K-Means Iteration: ${iteration + 1}`);
+
+                // Assign points to closest centroid
+                const newAssignmentsArray = tf.tidy(() => {
+                    const expandedEmbeddings = allEmbeddingsTensor.expandDims(1); // [numSamples, 1, embDim]
+                    const expandedCentroids = centroidsTensor.expandDims(0);   // [1, K, embDim]
+                    
+                    const distances = tf.sub(expandedEmbeddings, expandedCentroids).square().sum(2); // [numSamples, K]
+                    return distances.argMin(1).arraySync(); // [numSamples]
+                });
+
+                for (let i = 0; i < allEmbeddingsData.length; i++) {
+                    if (newAssignmentsArray[i] !== assignments[i]) {
+                        changed = true;
+                        assignments[i] = newAssignmentsArray[i];
+                    }
+                }
+
+                if (!changed && iteration > 0 && initialBrownianStrength === 0) { // Only break if no brownian motion or converged
+                    log('Assignments converged.');
+                    break;
+                }
+                if (!changed && iteration > 0 && initialBrownianStrength > 0) {
+                    log('Assignments converged, but continuing due to Brownian motion.');
+                    changed = true; // Force continuation if brownian motion is active
+                }
+
+
+                // Recalculate centroids
+                const newCentroidsList = [];
+                for (let c = 0; c < actualK; c++) {
+                    const clusterMemberIndices = [];
+                    assignments.forEach((assignedCluster, idx) => {
+                        if (assignedCluster === c) {
+                            clusterMemberIndices.push(idx);
+                        }
+                    });
+
+                    let newCentroidForThisCluster;
+                    if (clusterMemberIndices.length > 0) {
+                        const clusterPointsTensors = clusterMemberIndices.map(idx => allEmbeddingsData[idx].embedding);
+                        // Keep newCentroidForThisCluster outside tidy for potential modification (Brownian motion)
+                        newCentroidForThisCluster = tf.tidy(() => tf.mean(tf.concat(clusterPointsTensors), 0, true)); // [1, embDim]
+                    } else {
+                        log(`Warning: Cluster ${c+1} became empty. Re-using old centroid.`);
+                        newCentroidForThisCluster = tf.tidy(() => centroidsTensor.slice([c, 0], [1, embeddingDim]));
+                    }
+
+                    // Apply Brownian motion
+                    if (initialBrownianStrength > 0 && brownianDecayRate >= 0 && brownianDecayRate <=1 ) {
+                        const currentBrownianStrength = initialBrownianStrength * Math.pow(1 - brownianDecayRate, iteration);
+                        if (currentBrownianStrength > 1e-7) { // Apply only if strength is significant
+                             if (c === 0 && iteration % 5 === 0) { // Log strength occasionally for first cluster
+                                log(`  Iter ${iteration+1}, Cluster ${c+1}: Applying Brownian motion, current strength: ${currentBrownianStrength.toExponential(3)}`);
+                            }
+                            const brownianVector = tf.tidy(() =>
+                                tf.randomNormal(newCentroidForThisCluster.shape).mul(tf.scalar(currentBrownianStrength))
+                            );
+                            const perturbedCentroid = tf.tidy(() => newCentroidForThisCluster.add(brownianVector));
+                            tf.dispose(newCentroidForThisCluster); // Dispose the original mean/slice
+                            newCentroidForThisCluster = perturbedCentroid; // Replace with perturbed one
+                        }
+                    }
+                    newCentroidsList.push(newCentroidForThisCluster);
+                }
+                
+                tf.dispose(centroidsTensor); 
+                centroidsTensor = tf.concat(newCentroidsList); // This creates a new tensor for centroidsTensor
+                newCentroidsList.forEach(t => tf.dispose(t)); // Dispose individual tensors that were concatenated
+
+                iteration++;
+
+                updateClusterMemberDisplay(assignments, actualK);
+                updateCentroidPlot(centroidsTensor, randomProjectionMatrix, actualK);
+                await new Promise(r => setTimeout(r, 50)); // Yield for UI update
+            }
+            
+            allEmbeddingsTensor.dispose(); 
+            if (randomProjectionMatrix) randomProjectionMatrix.dispose();
+
+            log(`K-Means finished after ${iteration} iterations.`);
+            return { centroids: centroidsTensor, assignments }; 
+        }
+
+        function updateClusterMemberDisplay(assignments, k_actual) {
+            clustersDisplay.innerHTML = `<h3>Cluster Members (First ~${MAX_IMAGES_PER_CLUSTER_DISPLAY} of each)</h3>`;
+            for (let i = 0; i < k_actual; i++) {
+                const clusterDiv = document.createElement('div');
+                clusterDiv.className = 'cluster';
+                clusterDiv.style.borderColor = clusterColors[i] || '#ccc';
+                
+                const clusterTitle = document.createElement('h3');
+                clusterTitle.style.color = clusterColors[i] || '#333';
+                const membersInCluster = assignments.filter(a => a === i).length;
+                clusterTitle.textContent = `Cluster ${i + 1} (Members: ${membersInCluster})`;
+                clusterDiv.appendChild(clusterTitle);
+
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'cluster-images';
+                
+                let count = 0;
+                for (let j = 0; j < allEmbeddingsData.length; j++) {
+                    if (assignments[j] === i && count < MAX_IMAGES_PER_CLUSTER_DISPLAY) {
+                        const imgData = allEmbeddingsData[j].image;
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = DIGIT_SIZE;
+                        tempCanvas.height = DIGIT_SIZE;
+                        tempCanvas.getContext('2d').putImageData(imgData, 0, 0);
+
+                        const imgElement = document.createElement('img');
+                        imgElement.src = tempCanvas.toDataURL();
+                        imgElement.title = `ID: ${allEmbeddingsData[j].id}, Label: ${allEmbeddingsData[j].label}`;
+                        imageContainer.appendChild(imgElement);
+                        count++;
+                    }
+                }
+                if (count === 0) {
+                    imageContainer.innerHTML = '<p><i>Empty cluster</i></p>';
+                }
+                clusterDiv.appendChild(imageContainer);
+                clustersDisplay.appendChild(clusterDiv);
+            }
+        }
+        
+        function updateCentroidPlot(centroidsTensor, randomProjectionMatrix, k_actual) {
+            centroidCtx.clearRect(0, 0, centroidCanvas.width, centroidCanvas.height);
+            colorPaletteCentroids.innerHTML = '';
+
+            if (!centroidsTensor || centroidsTensor.shape[0] === 0) return;
+
+            const projectedCentroids = tf.tidy(() => {
+                if (randomProjectionMatrix) {
+                    // Ensure centroidsTensor is 2D for matMul
+                    const C = centroidsTensor.rank === 1 ? centroidsTensor.expandDims(0) : centroidsTensor;
+                    return C.matMul(randomProjectionMatrix); 
+                }
+                return centroidsTensor.clone(); // If already 2D and no projection, clone to avoid issues if original is disposed
+            });
+            
+            const coords = projectedCentroids.arraySync(); 
+            projectedCentroids.dispose();
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            coords.forEach(c => {
+                if (!c || c.length < 2) return; // Ensure valid 2D coordinate
+                minX = Math.min(minX, c[0]);
+                maxX = Math.max(maxX, c[0]);
+                minY = Math.min(minY, c[1]);
+                maxY = Math.max(maxY, c[1]);
+            });
+
+            // Handle cases where all points are collinear or coincident
+            const deltaX = maxX - minX;
+            const deltaY = maxY - minY;
+            const rangeX = deltaX < 1e-6 ? 1 : deltaX; // Avoid division by zero if all x are same
+            const rangeY = deltaY < 1e-6 ? 1 : deltaY; // Avoid division by zero if all y are same
+            const padding = 20;
+            const pointRadius = 5; 
+
+            for (let i = 0; i < k_actual; i++) {
+                if (!coords[i] || coords[i].length < 2) continue;
+                
+                let x = padding + ((coords[i][0] - minX) / rangeX) * (centroidCanvas.width - 2 * padding);
+                let y = padding + ((coords[i][1] - minY) / rangeY) * (centroidCanvas.height - 2 * padding);
+                
+                // If range is 1 (because delta was near zero), center the points
+                if (deltaX < 1e-6) x = centroidCanvas.width / 2;
+                if (deltaY < 1e-6) y = centroidCanvas.height / 2;
+
+                centroidCtx.beginPath();
+                centroidCtx.arc(x, y, pointRadius, 0, 2 * Math.PI);
+                centroidCtx.fillStyle = clusterColors[i] || 'gray';
+                centroidCtx.fill();
+                centroidCtx.strokeStyle = 'black';
+                centroidCtx.lineWidth = 1;
+                centroidCtx.stroke();
+
+                centroidCtx.fillStyle = 'black'; 
+                centroidCtx.font = '10px Arial';
+                centroidCtx.textAlign = 'center';
+                centroidCtx.textBaseline = 'middle';
+                const textX = x + pointRadius + 5; 
+                const textY = y;                   
+                centroidCtx.fillText((i + 1).toString(), textX, textY); 
+
+
+                const dot = document.createElement('span');
+                dot.className = 'color-dot';
+                dot.style.backgroundColor = clusterColors[i] || 'gray';
+                dot.title = `Cluster ${i+1}`;
+                colorPaletteCentroids.appendChild(dot);
+            }
+        }
+
+
+        async function main() {
+            startButton.disabled = true;
+            logArea.textContent = '';
+            clustersDisplay.innerHTML = '<h3>Cluster Members</h3><p><i>Initializing...</i></p>';
+            centroidCtx.clearRect(0, 0, centroidCanvas.width, centroidCanvas.height);
+            colorPaletteCentroids.innerHTML = '';
+
+            const numImgs = parseInt(numSamplesInput.value);
+            let k = parseInt(numClustersInput.value); 
+            const maxIter = parseInt(maxIterationsInput.value);
+            const initialBrownianStrength = parseFloat(initialBrownianStrengthInput.value);
+            const brownianDecayRate = parseFloat(brownianDecayRateInput.value);
+
+
+            if (numImgs < k) {
+                log(`Warning: Number of samples (${numImgs}) is less than K (${k}). Adjusting K to ${numImgs}.`);
+                k = numImgs; 
+                numClustersInput.value = k; 
+                 if (k < 2 && numImgs > 0) { 
+                    log(`Warning: K became ${k}. K-Means might not be meaningful. Forcing K=1 if numImgs=1, else K=2 if numImgs > 1 and K was < 2`);
+                    k = numImgs === 1 ? 1 : (numImgs > 1 ? Math.min(2, numImgs) : 1);
+                    numClustersInput.value = k;
+                }
+            }
+
+
+            clusterColors = generateColors(k);
+
+            try {
+                if (!stitchedTrainImg) {
+                    log('Loading stitched MNIST training image...');
+                    stitchedTrainImg = await loadImage(MNIST_TRAIN_STITCHED_URL);
+                    log('Stitched image loaded.');
+                }
+
+                if (!embeddingModel) {
+                    await loadModelAndCreateEmbeddingModel();
+                }
+                
+                // Regenerate embeddings if number of samples changes, or if they don't exist
+                let needsEmbeddingGeneration = false;
+                if (allEmbeddingsData.length === 0 && numImgs > 0) {
+                    needsEmbeddingGeneration = true;
+                } else if (allEmbeddingsData.length > 0 && allEmbeddingsData.length !== numImgs) {
+                    // This case implies user changed numSamples after initial run
+                    // For simplicity, we regenerate if numImgs requested is different from current cache.
+                    // A more complex cache could try to reuse a subset if numImgs is reduced.
+                    log(`Number of samples changed (${allEmbeddingsData.length} -> ${numImgs}). Regenerating embeddings.`);
+                    needsEmbeddingGeneration = true;
+                }
+
+
+                if (needsEmbeddingGeneration) {
+                     await generateEmbeddingsForUI(numImgs);
+                } else if (numImgs > 0) {
+                    log(`Using ${allEmbeddingsData.length} cached embeddings.`);
+                }
+                
+                if (allEmbeddingsData.length === 0 && numImgs > 0) throw new Error("Embedding generation failed or produced no embeddings.");
+                if (numImgs === 0) {
+                    log("No samples selected. Skipping K-Means.");
+                    startButton.disabled = false;
+                    return;
+                }
+
+
+                const { centroids: finalCentroids, assignments: finalAssignments } = await kMeans(k, maxIter, initialBrownianStrength, brownianDecayRate);
+
+                log('Clustering process complete.');
+                if (finalCentroids) finalCentroids.dispose();
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+                console.error(error);
+            } finally {
+                startButton.disabled = false;
+            }
+        }
+
+        startButton.addEventListener('click', main);
+
+        log('Ready. Configure parameters and click "Start Clustering".');
+        log(`MNIST Images: ${MNIST_TRAIN_STITCHED_URL}`);
+        log(`CNN Model: ${MODEL_JSON_URL}`);
+        if (typeof mnistTrainLabels === 'undefined' || typeof mnistTestLabels === 'undefined') {
+            log('WARNING: MNIST label files (mnist_train_labels.js, mnist_test_labels.js) not loaded. Labels will be unavailable.');
+        } else {
+            log('MNIST labels loaded.');
+        }
+        log(`Note: First run will take longer due to model and image loading.`);
+        log(`Make sure the model's embedding layer (e.g., 'dense_Dense1', 'flatten', or second-to-last) is correctly identified.`);
+
+    </script>
+</body>
+</html>

@@ -4,747 +4,607 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MNIST ViT Demo</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://zsc.github.io/widgets/mnist/mnist_train_labels.js"></script>
     <script src="https://zsc.github.io/widgets/mnist/mnist_test_labels.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { display: flex; flex-direction: row; gap: 20px; width: 95%; max-width: 1200px; }
-        .controls { flex: 1; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .results { flex: 2; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .controls label, .controls input, .controls button { display: block; margin-bottom: 10px; width: calc(100% - 22px); }
-        .controls input[type="number"] { padding: 8px; }
-        .controls button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        .controls button:disabled { background-color: #aaa; }
-        .chart-container { position: relative; height: 200px; width: 100%; margin-bottom: 20px; } /* Fixed height for charts */
-        #status { margin-top: 15px; font-style: italic; white-space: pre-wrap; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px;}
-        #visualization { margin-top: 20px; text-align: center; }
-        #testImageCanvas { border: 1px solid black; image-rendering: pixelated; width: 112px; height: 112px; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .config-panel, .training-panel, .test-panel { border: 1px solid #ccc; padding: 15px; border-radius: 5px; min-width: 300px; }
+        h3 { margin-top: 0; }
+        label { display: inline-block; width: 150px; margin-bottom: 5px;}
+        input[type="number"], input[type="text"] { width: 80px; margin-bottom: 10px; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:disabled { background-color: #ccc; }
+        #status { margin-top: 15px; font-style: italic; white-space: pre-line; }
+        #accuracyChartContainer { max-height: 300px; width: 100%; max-width: 600px; margin-top:20px;}
+        #testImageCanvas { border: 1px solid black; margin-top: 10px; }
     </style>
 </head>
 <body>
     <h1>MNIST Vision Transformer (ViT) Demo</h1>
 
     <div class="container">
-        <div class="controls">
-            <h2>Hyperparameters</h2>
-            <label for="numLayers">ViT Layers (Transformer Blocks): <span id="numLayersVal">2</span></label>
-            <input type="range" id="numLayers" min="1" max="6" value="2" oninput="document.getElementById('numLayersVal').textContent = this.value;">
-
-            <label for="embedDim">Embedding Dimension: <span id="embedDimVal">64</span></label>
-            <input type="range" id="embedDim" min="16" max="128" step="16" value="64" oninput="document.getElementById('embedDimVal').textContent = this.value;">
-            
-            <label for="numHeads">Number of Heads (MHA): <span id="numHeadsVal">4</span></label>
-            <input type="range" id="numHeads" min="1" max="8" value="4" oninput="document.getElementById('numHeadsVal').textContent = this.value;">
-
-            <label for="patchSize">Patch Size (e.g., 7 for 7x7): <span id="patchSizeVal">7</span></label>
-            <input type="range" id="patchSize" min="4" max="14" step="1" value="7" oninput="document.getElementById('patchSizeVal').textContent = this.value;">
-            
-            <label for="mlpDim">MLP Dimension (Transformer): <span id="mlpDimVal">128</span></label>
-            <input type="range" id="mlpDim" min="32" max="256" step="32" value="128" oninput="document.getElementById('mlpDimVal').textContent = this.value;">
-
-            <label for="learningRate">Learning Rate:</label>
-            <input type="number" id="learningRate" value="0.001" step="0.0001">
-
-            <label for="batchSize">Batch Size:</label>
-            <input type="number" id="batchSize" value="64" step="16">
-
+        <div class="config-panel">
+            <h3>Hyperparameters</h3>
+            <label for="numLayers">ViT Layers:</label>
+            <input type="number" id="numLayers" value="2"><br>
+            <label for="embeddingDim">Embedding Dim:</label>
+            <input type="number" id="embeddingDim" value="64"><br>
+            <label for="numHeads">Num Heads:</label>
+            <input type="number" id="numHeads" value="4"><br>
+            <label for="mlpDim">MLP Dim:</label>
+            <input type="number" id="mlpDim" value="128"><br>
+            <label for="patchSize">Patch Size (divides 28):</label>
+            <input type="number" id="patchSize" value="7"><br>
+            <label for="lr">Learning Rate:</label>
+            <input type="text" id="lr" value="0.001"><br>
+            <label for="numTrainImages">Train Images (max 60k):</label>
+            <input type="number" id="numTrainImages" value="6000"><br>
             <label for="epochs">Epochs:</label>
-            <input type="number" id="epochs" value="5" step="1">
-            
-            <label for="numTrainSamples">Number of Training Samples (max 60000):</label>
-            <input type="number" id="numTrainSamples" value="6000" step="1000">
-
-            <label for="numTestSamples">Number of Test Samples (max 10000):</label>
-            <input type="number" id="numTestSamples" value="1000" step="100">
-
-            <button id="trainButton">Start Training</button>
-            <button id="exportButton" disabled>Export Model Weights</button>
-            <button id="testRandomButton" disabled>Test Random Sample</button>
+            <input type="number" id="epochs" value="10"><br>
+            <label for="batchSize">Batch Size:</label>
+            <input type="number" id="batchSize" value="128"><br>
+            <button id="startTrainingBtn">Start Training</button>
         </div>
 
-        <div class="results">
-            <h2>Training Progress</h2>
-            <div class="chart-container">
-                <canvas id="trainAccChart"></canvas>
+        <div class="training-panel">
+            <h3>Training Progress</h3>
+            <div id="accuracyChartContainer">
+                <canvas id="accuracyChart"></canvas>
             </div>
-            <div class="chart-container">
-                <canvas id="testAccChart"></canvas>
-            </div>
-            <div id="status">Logs will appear here...</div>
-            <div id="visualization">
-                <h3>Test Sample Visualization</h3>
-                <canvas id="testImageCanvas" width="28" height="28"></canvas>
-                <p id="predictionText">Prediction: - | True Label: -</p>
+            <button id="exportWeightsBtn" disabled>Export Model Weights</button>
+        </div>
+
+        <div class="test-panel">
+            <h3>Test Model</h3>
+            <button id="testRandomBtn" disabled>Test Random Image</button>
+            <div>
+                <canvas id="testImageCanvas" width="56" height="56"></canvas>
+                <p id="testResult"></p>
             </div>
         </div>
     </div>
-
-    <!-- Hidden canvases for stitched images -->
-    <canvas id="stitchedTrainCanvas" style="display:none;"></canvas>
-    <canvas id="stitchedTestCanvas" style="display:none;"></canvas>
-    <canvas id="tempImageCanvas" width="28" height="28" style="display:none;"></canvas>
-
+    <div id="status">Status: Idle. Configure parameters and start training.</div>
 
     <script>
         // Global variables
         let model;
-        let trainAccChartInstance, testAccChartInstance;
-        let trainStitchedImage, testStitchedImage;
-        let stitchedTrainCtx, stitchedTestCtx, tempImageCtx;
-        
-        const IMG_SIZE = 28;
+        let trainImg, testImg;
+        let trainImageData, testImageData;
+        const trainLabels = typeof mnistTrainLabels !== 'undefined' ? mnistTrainLabels : [];
+        const testLabels = typeof mnistTestLabels !== 'undefined' ? mnistTestLabels : [];
+        let accuracyChart;
+        let currentHyperparams = {};
+
+        const IMG_WIDTH = 28;
+        const IMG_HEIGHT = 28;
         const NUM_CLASSES = 10;
 
-        const TRAIN_IMG_URL = 'https://zsc.github.io/widgets/mnist/mnist_train_stitched.png';
-        const TRAIN_IMG_WIDTH = 6860; // 245 images per row
-        const TRAIN_IMG_HEIGHT = 6860; // 245 rows
-        const TRAIN_IMGS_PER_ROW = 245;
-
-        const TEST_IMG_URL = 'https://zsc.github.io/widgets/mnist/mnist_test_stitched.png';
-        const TEST_IMG_WIDTH = 2800; // 100 images per row
-        const TEST_IMG_HEIGHT = 2800; // 100 rows
-        const TEST_IMGS_PER_ROW = 100;
-
-        // --- UI Elements ---
-        const ui = {
-            numLayers: document.getElementById('numLayers'),
-            embedDim: document.getElementById('embedDim'),
-            numHeads: document.getElementById('numHeads'),
-            patchSize: document.getElementById('patchSize'),
-            mlpDim: document.getElementById('mlpDim'),
-            learningRate: document.getElementById('learningRate'),
-            batchSize: document.getElementById('batchSize'),
-            epochs: document.getElementById('epochs'),
-            numTrainSamples: document.getElementById('numTrainSamples'),
-            numTestSamples: document.getElementById('numTestSamples'),
-            trainButton: document.getElementById('trainButton'),
-            exportButton: document.getElementById('exportButton'),
-            testRandomButton: document.getElementById('testRandomButton'),
-            status: document.getElementById('status'),
-            testImageCanvas: document.getElementById('testImageCanvas'),
-            predictionText: document.getElementById('predictionText'),
-            trainAccChart: document.getElementById('trainAccChart').getContext('2d'),
-            testAccChart: document.getElementById('testAccChart').getContext('2d'),
-        };
+        const statusEl = document.getElementById('status');
+        const startTrainingBtn = document.getElementById('startTrainingBtn');
+        const exportWeightsBtn = document.getElementById('exportWeightsBtn');
+        const testRandomBtn = document.getElementById('testRandomBtn');
 
         function log(message) {
             console.log(message);
-            ui.status.textContent = message + '\n' + ui.status.textContent;
-            if (ui.status.childNodes.length > 100) { // Limit log lines
-                ui.status.removeChild(ui.status.lastChild);
+            statusEl.textContent = message;
+        }
+
+        // --- Data Loading and Preprocessing ---
+        async function loadStitchedImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous"; // Needed for canvas operations on images from other domains
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = url; // img.src must be set after onload
+            });
+        }
+
+        function getImageDataFromStitched(stitchedImg) {
+            const canvas = document.createElement('canvas');
+            canvas.width = stitchedImg.width;
+            canvas.height = stitchedImg.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(stitchedImg, 0, 0);
+            return ctx.getImageData(0, 0, stitchedImg.width, stitchedImg.height);
+        }
+        
+        function extractImageTensor(sourceImageData, index, imagesPerRow) {
+            return tf.tidy(() => {
+                const H = IMG_HEIGHT;
+                const W = IMG_WIDTH;
+                const C = 1; // Grayscale
+
+                const row = Math.floor(index / imagesPerRow);
+                const col = index % imagesPerRow;
+                const sx = col * W;
+                const sy = row * H;
+
+                const pixels = new Float32Array(H * W * C);
+                for (let y = 0; y < H; y++) {
+                    for (let x = 0; x < W; x++) {
+                        const srcIdx = ((sy + y) * sourceImageData.width + (sx + x)) * 4; // RGBA
+                        pixels[y * W + x] = sourceImageData.data[srcIdx] / 255.0; // Use R channel, normalize
+                    }
+                }
+                return tf.tensor3d(pixels, [H, W, C]);
+            });
+        }
+
+        function* dataGenerator(imageData, labels, imagesPerRow, numSamples, batchSize, shuffle = true) {
+            const indices = tf.util.createShuffledIndices(numSamples);
+            for (let i = 0; i < numSamples; i += batchSize) {
+                const batchIndices = shuffle ? 
+                    Array.from(indices.slice(i, Math.min(i + batchSize, numSamples))) :
+                    Array.from({length: Math.min(batchSize, numSamples - i)}, (_, k) => i + k);
+
+                const imageTensors = [];
+                const labelTensors = [];
+
+                for (const index of batchIndices) {
+                    imageTensors.push(extractImageTensor(imageData, index, imagesPerRow));
+                    labelTensors.push(labels[index]);
+                }
+                
+                const batchImages = tf.stack(imageTensors);
+                const batchLabels = tf.oneHot(tf.tensor1d(labelTensors, 'int32'), NUM_CLASSES);
+                
+                yield { xs: batchImages, ys: batchLabels };
+
+                imageTensors.forEach(t => t.dispose()); // Clean up individual tensors
+                // batchImages and batchLabels will be disposed by the training loop's tf.tidy
             }
         }
 
-        // --- GELU Activation ---
-        function gelu(x) {
-            return tf.tidy(() => {
-                const cdf = tf.mul(0.5, tf.add(1, tf.erf(tf.div(x, Math.sqrt(2)))));
-                return tf.mul(x, cdf);
-            });
-        }
-        
-        // --- ViT Layers ---
+
+        // --- ViT Model Definition ---
         class MultiHeadAttention extends tf.layers.Layer {
             constructor(config) {
                 super(config);
-                this.embedDim = config.embedDim;
+                this.embeddingDim = config.embeddingDim;
                 this.numHeads = config.numHeads;
-                if (this.embedDim % this.numHeads !== 0) {
-                    throw new Error('Embedding dimension must be divisible by number of heads.');
+                if (this.embeddingDim % this.numHeads !== 0) {
+                    throw new Error('MultiHeadAttention: embeddingDim must be divisible by numHeads');
                 }
-                this.headDim = this.embedDim / this.numHeads;
-
-                // Use Dense layers for projections
-                this.wq_layer = tf.layers.dense({units: this.embedDim, useBias: false, name: 'wq_mha', kernelInitializer: 'glorotUniform'});
-                this.wk_layer = tf.layers.dense({units: this.embedDim, useBias: false, name: 'wk_mha', kernelInitializer: 'glorotUniform'});
-                this.wv_layer = tf.layers.dense({units: this.embedDim, useBias: false, name: 'wv_mha', kernelInitializer: 'glorotUniform'});
-                this.dense_out = tf.layers.dense({units: this.embedDim, name: 'dense_out_mha', kernelInitializer: 'glorotUniform'});
+                this.headDim = this.embeddingDim / this.numHeads;
             }
 
-            splitHeads(x, batchSize) {
-                // x shape: (batchSize, seqLen, embedDim)
-                x = tf.reshape(x, [batchSize, -1, this.numHeads, this.headDim]);
-                return tf.transpose(x, [0, 2, 1, 3]); // (batchSize, numHeads, seqLen, headDim)
+            build(inputShape) {
+                this.wq = this.addWeight('wq_kernel', [this.embeddingDim, this.embeddingDim], 'float32', tf.initializers.glorotUniform());
+                this.bq = this.addWeight('wq_bias', [this.embeddingDim], 'float32', tf.initializers.zeros());
+                this.wk = this.addWeight('wk_kernel', [this.embeddingDim, this.embeddingDim], 'float32', tf.initializers.glorotUniform());
+                this.bk = this.addWeight('wk_bias', [this.embeddingDim], 'float32', tf.initializers.zeros());
+                this.wv = this.addWeight('wv_kernel', [this.embeddingDim, this.embeddingDim], 'float32', tf.initializers.glorotUniform());
+                this.bv = this.addWeight('wv_bias', [this.embeddingDim], 'float32', tf.initializers.zeros());
+                this.wo = this.addWeight('wo_kernel', [this.embeddingDim, this.embeddingDim], 'float32', tf.initializers.glorotUniform());
+                this.bo = this.addWeight('wo_bias', [this.embeddingDim], 'float32', tf.initializers.zeros());
+                this.built = true;
             }
 
             call(inputs) {
                 return tf.tidy(() => {
-                    const inputTensor = Array.isArray(inputs) ? inputs[0] : inputs;
-                    const batchSize = inputTensor.shape[0];
-                    const seqLen = inputTensor.shape[1]; 
+                    const x = Array.isArray(inputs) ? inputs[0] : inputs;
+                    const batchSize = x.shape[0];
+                    const seqLen = x.shape[1];
 
-                    const q = this.wq_layer.apply(inputTensor); 
-                    const k = this.wk_layer.apply(inputTensor);
-                    const v = this.wv_layer.apply(inputTensor);
-                    
-                    const q_heads = this.splitHeads(q, batchSize); 
-                    const k_heads = this.splitHeads(k, batchSize);
-                    const v_heads = this.splitHeads(v, batchSize);
+                    let q = tf.matMul(x, this.wq).add(this.bq);
+                    let k = tf.matMul(x, this.wk).add(this.bk);
+                    let v = tf.matMul(x, this.wv).add(this.bv);
 
-                    const scaledAttentionLogits = tf.matMul(q_heads, k_heads, false, true); 
-                    const scaledAttention = tf.div(scaledAttentionLogits, tf.sqrt(tf.scalar(this.headDim, 'float32')));
-                    const attentionWeights = tf.softmax(scaledAttention, -1); 
+                    q = q.reshape([batchSize, seqLen, this.numHeads, this.headDim]).transpose([0, 2, 1, 3]);
+                    k = k.reshape([batchSize, seqLen, this.numHeads, this.headDim]).transpose([0, 2, 1, 3]);
+                    v = v.reshape([batchSize, seqLen, this.numHeads, this.headDim]).transpose([0, 2, 1, 3]);
+
+                    let scores = tf.matMul(q, k.transpose([0, 1, 3, 2]));
+                    scores = scores.div(tf.sqrt(tf.scalar(this.headDim)));
                     
-                    const scaledAttentionOutput = tf.matMul(attentionWeights, v_heads); 
+                    const attentionWeights = tf.softmax(scores, -1);
+                    let context = tf.matMul(attentionWeights, v);
+                    context = context.transpose([0, 2, 1, 3]).reshape([batchSize, seqLen, this.embeddingDim]);
                     
-                    const concatAttention = tf.transpose(scaledAttentionOutput, [0, 2, 1, 3]); 
-                    const reshapedAttention = tf.reshape(concatAttention, [batchSize, seqLen, this.embedDim]); 
-                    
-                    const output = this.dense_out.apply(reshapedAttention); 
-                    return output;
+                    return tf.matMul(context, this.wo).add(this.bo);
                 });
             }
-            static get className() { return 'MultiHeadAttention'; }
+            getClassName() { return 'MultiHeadAttention'; }
         }
         tf.serialization.registerClass(MultiHeadAttention);
 
-
-        class TransformerEncoderLayer extends tf.layers.Layer {
+        class VisionTransformer extends tf.layers.Layer {
             constructor(config) {
                 super(config);
-                this.embedDim = config.embedDim;
-                this.numHeads = config.numHeads;
-                this.mlpDim = config.mlpDim;
-                this.dropoutRate = config.dropoutRate || 0.1;
-
-                this.mha = new MultiHeadAttention({embedDim: this.embedDim, numHeads: this.numHeads});
-                this.norm1 = tf.layers.layerNormalization({epsilon: 1e-6});
-                this.norm2 = tf.layers.layerNormalization({epsilon: 1e-6});
-                this.dense1 = tf.layers.dense({units: this.mlpDim, activation: 'linear', kernelInitializer: 'glorotUniform'}); 
-                this.dense2 = tf.layers.dense({units: this.embedDim, kernelInitializer: 'glorotUniform'});
-                this.dropout1 = tf.layers.dropout({rate: this.dropoutRate});
-                this.dropout2 = tf.layers.dropout({rate: this.dropoutRate});
-
-            }
-
-            call(inputs, training) {
-                 return tf.tidy(() => {
-                    const inputTensor = Array.isArray(inputs) ? inputs[0] : inputs;
-                    const attnOutput = this.mha.apply(inputTensor, {training: training}); // Pass training flag
-                    const attnOutputDropped = this.dropout1.apply(attnOutput, {training: training});
-                    const out1 = this.norm1.apply(tf.add(inputTensor, attnOutputDropped));
-
-                    let mlpOutput = this.dense1.apply(out1);
-                    mlpOutput = gelu(mlpOutput); 
-                    mlpOutput = this.dense2.apply(mlpOutput);
-                    const mlpOutputDropped = this.dropout2.apply(mlpOutput, {training: training});
-                    const out2 = this.norm2.apply(tf.add(out1, mlpOutputDropped));
-                    return out2;
-                });
-            }
-            static get className() { return 'TransformerEncoderLayer'; }
-        }
-        tf.serialization.registerClass(TransformerEncoderLayer);
-
-        class ViT extends tf.layers.Layer {
-            constructor(config) {
-                super(config);
-                this.numLayers = config.numLayers;
-                this.embedDim = config.embedDim;
-                this.numHeads = config.numHeads;
-                this.mlpDim = config.mlpDim;
                 this.patchSize = config.patchSize;
-                this.numPatches = (IMG_SIZE / this.patchSize) * (IMG_SIZE / this.patchSize);
+                this.embeddingDim = config.embeddingDim;
+                this.numLayers = config.numLayers;
+                this.numHeads = config.numHeads;
+                this.mlpDim = config.mlpDim;
                 this.numClasses = config.numClasses;
-                this.dropoutRate = config.dropoutRate || 0.1;
+                this.imageSize = IMG_WIDTH; // MNIST specific
 
-                this.patchProjection = tf.layers.dense({units: this.embedDim, kernelInitializer: 'glorotUniform'});
+                if (this.imageSize % this.patchSize !== 0) {
+                    throw new Error('VisionTransformer: Image size must be divisible by patch size.');
+                }
+                this.numPatches = (this.imageSize / this.patchSize) * (this.imageSize / this.patchSize);
+                this.seqLength = this.numPatches + 1;
+            }
+
+            build(inputShape) { // inputShape [batch, H, W, C]
+                const C = inputShape[3];
+                this.patchProjectionKernel = this.addWeight('patch_projection_kernel', 
+                    [this.patchSize * this.patchSize * C, this.embeddingDim], 
+                    'float32', tf.initializers.glorotUniform());
+                this.patchProjectionBias = this.addWeight('patch_projection_bias', 
+                    [this.embeddingDim], 'float32', tf.initializers.zeros());
+
+                this.classToken = this.addWeight('class_token', 
+                    [1, 1, this.embeddingDim], 'float32', tf.initializers.zeros());
+
+                this.positionalEmbeddings = this.addWeight('positional_embeddings',
+                    [1, this.seqLength, this.embeddingDim], 'float32', tf.initializers.randomNormal({stddev: 0.02}));
                 
-                this.clsToken = this.addWeight(
-                    'clsToken', 
-                    [1, 1, this.embedDim], 
-                    'float32', 
-                    tf.initializers.randomNormal({stddev: 0.02})
-                );
-                this.positionalEmbedding = this.addWeight(
-                    'positionalEmbedding',
-                    [1, this.numPatches + 1, this.embedDim],
-                    'float32',
-                    tf.initializers.randomNormal({stddev: 0.02})
-                );
-
-                this.encoderLayers = [];
+                this.encoderBlocks = [];
                 for (let i = 0; i < this.numLayers; i++) {
-                    this.encoderLayers.push(new TransformerEncoderLayer({
-                        embedDim: this.embedDim, 
-                        numHeads: this.numHeads, 
-                        mlpDim: this.mlpDim,
-                        dropoutRate: this.dropoutRate
-                    }));
-                }
-                
-                this.norm = tf.layers.layerNormalization({epsilon: 1e-6});
-                this.head = tf.layers.dense({units: this.numClasses, activation: 'softmax', kernelInitializer: 'glorotUniform'});
-                this.dropoutEmbed = tf.layers.dropout({rate: this.dropoutRate}); // Added dropout for embeddings
-            }
-
-            extractPatches(images) { 
-                return tf.tidy(() => {
-                    const batchSize = images.shape[0];
-                    const inHeight = images.shape[1];
-                    const inWidth = images.shape[2];
-                    const channels = images.shape[3];
-                    
-                    const stride = this.patchSize; 
-
-                    const numPatchesH = Math.floor((inHeight - this.patchSize) / stride) + 1;
-                    const numPatchesW = Math.floor((inWidth - this.patchSize) / stride) + 1;
-                    
-                    const batchAllPatches = []; 
-                    for (let b = 0; b < batchSize; b++) {
-                        const singleImage = tf.slice(images, [b, 0, 0, 0], [1, inHeight, inWidth, channels]);
-                        const imagePatchesList = []; 
-                        
-                        for (let r = 0; r < numPatchesH; r++) { 
-                            for (let c = 0; c < numPatchesW; c++) { 
-                                const y_start = r * stride;
-                                const x_start = c * stride;
-                                
-                                const patch = tf.slice(singleImage,
-                                    [0, y_start, x_start, 0], 
-                                    [1, this.patchSize, this.patchSize, channels]); 
-                                
-                                const flattenedPatch = tf.reshape(patch, [this.patchSize * this.patchSize * channels]);
-                                imagePatchesList.push(flattenedPatch);
-                            }
-                        }
-                        const stackedPatchesForImage = tf.stack(imagePatchesList); 
-                        batchAllPatches.push(stackedPatchesForImage);
-                    }
-                    const finalPatches = tf.stack(batchAllPatches);
-                    return finalPatches;
-                });
-            }
-
-            call(inputs, training) {
-                return tf.tidy(() => {
-                    const images = Array.isArray(inputs) ? inputs[0] : inputs; 
-                    const batchSize = images.shape[0];
-
-                    let x = this.extractPatches(images); 
-                    x = this.patchProjection.apply(x); 
-
-                    const clsTokenValue = this.clsToken.read();
-                    const broadcastedClsToken = tf.tile(clsTokenValue, [batchSize, 1, 1]);
-                    
-                    x = tf.concat([broadcastedClsToken, x], 1); 
-                    x = tf.add(x, this.positionalEmbedding.read());
-                    x = this.dropoutEmbed.apply(x, {training: training}); // Apply dropout after pos embedding
-
-                    for (let i = 0; i < this.numLayers; i++) {
-                        x = this.encoderLayers[i].apply(x, {training: training});
-                    }
-
-                    x = this.norm.apply(x);
-                    const clsOutput = tf.slice(x, [0, 0, 0], [batchSize, 1, this.embedDim]); 
-                    const reshapedClsOutput = tf.reshape(clsOutput, [batchSize, this.embedDim]);
-                    
-                    return this.head.apply(reshapedClsOutput);
-                });
-            }
-
-            static get className() { return 'ViT'; }
-        }
-        tf.serialization.registerClass(ViT);
-
-
-        // --- Data Handling ---
-        async function loadImageToCanvas(imageUrl, canvasElement) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => {
-                    canvasElement.width = img.width;
-                    canvasElement.height = img.height;
-                    const ctx = canvasElement.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    log(`${imageUrl} loaded into canvas.`);
-                    resolve(ctx);
-                };
-                img.onerror = (err) => {
-                    log(`Error loading ${imageUrl}: ${err}`);
-                    reject(err);
-                };
-                img.src = imageUrl;
-            });
-        }
-
-        function getImageAndLabel(index, isTrain) {
-            return tf.tidy(() => {
-                const sourceCtx = isTrain ? stitchedTrainCtx : stitchedTestCtx;
-                const labels = isTrain ? mnistTrainLabels : mnistTestLabels;
-                const imgsPerRow = isTrain ? TRAIN_IMGS_PER_ROW : TEST_IMGS_PER_ROW;
-
-                const row = Math.floor(index / imgsPerRow);
-                const col = index % imgsPerRow;
-                const sx = col * IMG_SIZE;
-                const sy = row * IMG_SIZE;
-
-                tempImageCtx.clearRect(0, 0, IMG_SIZE, IMG_SIZE);
-                tempImageCtx.drawImage(sourceCtx.canvas, sx, sy, IMG_SIZE, IMG_SIZE, 0, 0, IMG_SIZE, IMG_SIZE);
-                
-                const imageData = tempImageCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
-                
-                let imgTensor = tf.browser.fromPixels(imageData, 1); 
-                imgTensor = imgTensor.toFloat().div(tf.scalar(255.0));
-
-                const label = labels[index];
-                const labelTensor = tf.oneHot(tf.tensor1d([label], 'int32'), NUM_CLASSES).toFloat();
-                
-                return { image: imgTensor, label: labelTensor.squeeze() }; 
-            });
-        }
-        
-        function* dataGenerator(numSamples, batchSize, isTrain) {
-            const totalAvailable = isTrain ? mnistTrainLabels.length : mnistTestLabels.length;
-            const effectiveNumSamples = Math.min(numSamples, totalAvailable);
-
-            const numBatches = Math.floor(effectiveNumSamples / batchSize);
-            const allIndices = tf.util.createShuffledIndices(totalAvailable);
-            const indicesToUse = allIndices.slice(0, effectiveNumSamples);
-
-
-            for (let i = 0; i < numBatches; i++) {
-                const batchIndices = indicesToUse.slice(i * batchSize, (i + 1) * batchSize);
-                if (batchIndices.length === 0) continue;
-
-                const imageBatch = [];
-                const labelBatch = [];
-                for (const index of batchIndices) {
-                    const {image, label} = getImageAndLabel(index, isTrain);
-                    imageBatch.push(image);
-                    labelBatch.push(label);
-                }
-                
-                const stackedImages = tf.stack(imageBatch); 
-                const stackedLabels = tf.stack(labelBatch); 
-                
-                yield { xs: stackedImages, ys: stackedLabels };
-
-                imageBatch.forEach(t => t.dispose());
-                labelBatch.forEach(t => t.dispose());
-            }
-        }
-
-
-        // --- Charting ---
-        function initCharts() {
-            const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { title: { display: true, text: 'Epoch' } },
-                    y: { 
-                        title: { display: true, text: 'Accuracy' },
-                        beginAtZero: true, 
-                        suggestedMax: 1.0,
-                        ticks: { callback: value => (value * 100).toFixed(0) + '%' }
-                    }
-                }
-            };
-            if (trainAccChartInstance) trainAccChartInstance.destroy();
-            trainAccChartInstance = new Chart(ui.trainAccChart, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Train Accuracy', data: [], borderColor: 'blue', fill: false }] },
-                options: commonOptions
-            });
-            if (testAccChartInstance) testAccChartInstance.destroy();
-            testAccChartInstance = new Chart(ui.testAccChart, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Test Accuracy', data: [], borderColor: 'green', fill: false }] },
-                options: commonOptions
-            });
-        }
-
-        function updateChart(chartInstance, epoch, value) {
-            chartInstance.data.labels.push(epoch);
-            chartInstance.data.datasets.forEach((dataset) => {
-                dataset.data.push(value);
-            });
-            chartInstance.update();
-        }
-
-        // --- Training Logic ---
-        async function trainModel() {
-            ui.trainButton.disabled = true;
-            ui.exportButton.disabled = true;
-            ui.testRandomButton.disabled = true;
-            log("Starting training...");
-            initCharts();
-
-            const hyperparams = {
-                numLayers: parseInt(ui.numLayers.value),
-                embedDim: parseInt(ui.embedDim.value),
-                numHeads: parseInt(ui.numHeads.value),
-                patchSizeVal: parseInt(ui.patchSize.value),
-                mlpDim: parseInt(ui.mlpDim.value),
-                learningRateVal: parseFloat(ui.learningRate.value),
-                batchSizeVal: parseInt(ui.batchSize.value),
-                epochsVal: parseInt(ui.epochs.value),
-                numTrainSamplesVal: Math.min(parseInt(ui.numTrainSamples.value), mnistTrainLabels.length),
-                numTestSamplesVal: Math.min(parseInt(ui.numTestSamples.value), mnistTestLabels.length),
-            };
-            
-            log(`Hyperparameters: ${JSON.stringify(hyperparams, null, 2)}`);
-
-            if (hyperparams.embedDim % hyperparams.numHeads !== 0) {
-                log("Error: Embedding Dimension must be divisible by Number of Heads.");
-                ui.trainButton.disabled = false;
-                return;
-            }
-            if (IMG_SIZE % hyperparams.patchSizeVal !== 0) {
-                log("Error: Image size (28) must be divisible by Patch Size.");
-                ui.trainButton.disabled = false;
-                return;
-            }
-
-            // Dispose previous model if exists
-            if (model && model.dispose) {
-                try {
-                    // model.dispose(); // Custom layers might not have a dispose method if not tf.LayersModel
-                    // Instead, we'll just reassign and let JS garbage collect the old one.
-                    // TF.js tensors within the old model should be managed by tf.tidy or disposed manually
-                    // if they were created outside of layers.
-                    log("Disposing old model structure (if any). Weights are managed by layers.");
-                } catch (e) {
-                    log("Error disposing previous model: " + e);
-                }
-            }
-            tf.disposeVariables(); // Dispose all registered tf.variable()s. Good for retraining.
-
-
-            model = new ViT({
-                numLayers: hyperparams.numLayers,
-                embedDim: hyperparams.embedDim,
-                numHeads: hyperparams.numHeads,
-                mlpDim: hyperparams.mlpDim,
-                patchSize: hyperparams.patchSizeVal,
-                numClasses: NUM_CLASSES,
-                dropoutRate: 0.1 
-            });
-            
-            const dummyInputShape = [1, IMG_SIZE, IMG_SIZE, 1]; 
-            const dummyInput = tf.zeros(dummyInputShape);
-            tf.tidy(() => model.apply(dummyInput, {training: false})); 
-            dummyInput.dispose();
-            log("Model constructed.");
-
-
-            const optimizer = tf.train.adam(hyperparams.learningRateVal);
-
-            for (let epoch = 1; epoch <= hyperparams.epochsVal; epoch++) {
-                log(`Epoch ${epoch}/${hyperparams.epochsVal}`);
-                let epochTrainLoss = 0;
-                let epochTrainAcc = 0;
-                let batchCount = 0;
-
-                const trainData = dataGenerator(hyperparams.numTrainSamplesVal, hyperparams.batchSizeVal, true);
-                
-                for (const batch of trainData) {
-                    if (!batch || !batch.xs || !batch.ys) {
-                        log("Skipping empty batch from generator.");
-                        continue;
-                    }
-                    const {xs, ys} = batch;
-                    
-                    const {loss, grads} = optimizer.computeGradients(() => {
-                        const predictions = model.apply(xs, {training: true});
-                        const currentLoss = tf.losses.softmaxCrossEntropy(ys, predictions).mean();
-                        return currentLoss;
+                    this.encoderBlocks.push({
+                        norm1: tf.layers.layerNormalization({epsilon: 1e-6, name: `encoder_norm1_${i}`}),
+                        mha: new MultiHeadAttention({embeddingDim: this.embeddingDim, numHeads: this.numHeads, name: `mha_${i}`}),
+                        norm2: tf.layers.layerNormalization({epsilon: 1e-6, name: `encoder_norm2_${i}`}),
+                        mlp_dense1: tf.layers.dense({units: this.mlpDim, activation: 'gelu', name: `mlp_dense1_${i}`}),
+                        mlp_dense2: tf.layers.dense({units: this.embeddingDim, name: `mlp_dense2_${i}`})
                     });
-                    
-                    optimizer.applyGradients(grads); // Grads is an object mapping var names to Tensors
-                    
-                    // Manually dispose individual gradient tensors if grads is an object
-                    if (typeof grads === 'object' && grads !== null) {
-                        for (const varName in grads) {
-                            if (grads[varName] instanceof tf.Tensor) {
-                                grads[varName].dispose();
-                            }
-                        }
-                    } else if (Array.isArray(grads)) { // if grads is an array of {name, tensor}
-                        grads.forEach(gradPair => gradPair.tensor.dispose());
-                    }
-
-
-                    const predictionsForAcc = tf.tidy(() => model.apply(xs, {training: false}));
-                    const accTensor = tf.metrics.categoricalAccuracy(ys, predictionsForAcc);
-                    const acc = accTensor.mean().arraySync();
-                    
-                    epochTrainLoss += loss.arraySync(); // loss is scalar, arraySync() is fine
-                    epochTrainAcc += acc;
-                    batchCount++;
-
-                    loss.dispose();
-                    // Grads are already disposed above
-                    xs.dispose();
-                    ys.dispose();
-                    predictionsForAcc.dispose();
-                    accTensor.dispose();
-
-
-                    if (batchCount % 10 === 0) {
-                        log(` Epoch ${epoch}, Batch ${batchCount}: Train Loss: ${(epochTrainLoss / batchCount).toFixed(4)}, Train Acc: ${(epochTrainAcc / batchCount).toFixed(4)}`);
-                    }
-                    await tf.nextFrame(); 
                 }
                 
-                if (batchCount > 0) {
-                    const avgTrainAcc = epochTrainAcc / batchCount;
-                    const avgTrainLoss = epochTrainLoss / batchCount;
-                    updateChart(trainAccChartInstance, epoch, avgTrainAcc);
-                    log(`Epoch ${epoch} - Train Loss: ${avgTrainLoss.toFixed(4)}, Train Accuracy: ${avgTrainAcc.toFixed(4)}`);
-                } else {
-                    log(`Epoch ${epoch} - No training data processed.`);
-                }
-
-
-                // Evaluation
-                let epochTestAcc = 0;
-                let testBatchCount = 0;
-                const testData = dataGenerator(hyperparams.numTestSamplesVal, hyperparams.batchSizeVal, false);
-                for (const batch of testData) {
-                     if (!batch || !batch.xs || !batch.ys) {
-                        log("Skipping empty test batch from generator.");
-                        continue;
-                    }
-                    const {xs, ys} = batch;
-                    const predictions = tf.tidy(() => model.apply(xs, {training: false}));
-                    const accTensor = tf.metrics.categoricalAccuracy(ys, predictions);
-                    const acc = accTensor.mean().arraySync();
-                    epochTestAcc += acc;
-                    testBatchCount++;
-
-                    xs.dispose();
-                    ys.dispose();
-                    predictions.dispose();
-                    accTensor.dispose();
-                    await tf.nextFrame(); 
-                }
-                if (testBatchCount > 0) {
-                    const avgTestAcc = epochTestAcc / testBatchCount;
-                    updateChart(testAccChartInstance, epoch, avgTestAcc);
-                    log(`Epoch ${epoch} - Test Accuracy: ${avgTestAcc.toFixed(4)}`);
-                } else {
-                     log(`Epoch ${epoch} - No test data processed.`);
-                }
+                this.headNorm = tf.layers.layerNormalization({epsilon: 1e-6, name: 'head_norm'});
+                this.headDense = tf.layers.dense({units: this.numClasses, name: 'head_dense'});
+                
+                super.build(inputShape);
             }
 
-            log("Training finished.");
-            ui.trainButton.disabled = false;
-            ui.exportButton.disabled = false;
-            ui.testRandomButton.disabled = false;
+            call(inputs) {
+                return tf.tidy(() => {
+                    const x = Array.isArray(inputs) ? inputs[0] : inputs;
+                    const batchSize = x.shape[0];
+
+                    const patches = tf.image.extractPatches({
+                        images: x,
+                        sizes: [1, this.patchSize, this.patchSize, 1],
+                        strides: [1, this.patchSize, this.patchSize, 1],
+                        rates: [1, 1, 1, 1],
+                        padding: 'VALID'
+                    }).reshape([batchSize, this.numPatches, -1]);
+
+                    let embeddings = tf.matMul(patches, this.patchProjectionKernel).add(this.patchProjectionBias);
+                    
+                    const classTokenBroadcast = tf.tile(this.classToken, [batchSize, 1, 1]);
+                    embeddings = tf.concat([classTokenBroadcast, embeddings], 1);
+                    embeddings = embeddings.add(this.positionalEmbeddings);
+
+                    let encoded = embeddings;
+                    for (let i = 0; i < this.numLayers; i++) {
+                        const block = this.encoderBlocks[i];
+                        const x1 = block.norm1.apply(encoded);
+                        const attentionOutput = block.mha.apply(x1);
+                        const x2 = tf.add(encoded, attentionOutput);
+                        
+                        const x3 = block.norm2.apply(x2);
+                        let mlpOutput = block.mlp_dense1.apply(x3);
+                        mlpOutput = block.mlp_dense2.apply(mlpOutput);
+                        encoded = tf.add(x2, mlpOutput);
+                    }
+                    
+                    const classTokenOutput = encoded.slice([0, 0, 0], [batchSize, 1, this.embeddingDim]).reshape([batchSize, this.embeddingDim]);
+                    const headOutputNorm = this.headNorm.apply(classTokenOutput);
+                    return this.headDense.apply(headOutputNorm);
+                });
+            }
+            getClassName() { return 'VisionTransformer'; }
+        }
+        tf.serialization.registerClass(VisionTransformer);
+
+        function createModel(params) {
+            currentHyperparams = {...params}; // Store for export
+            const vit = new VisionTransformer({
+                patchSize: params.patchSize,
+                embeddingDim: params.embeddingDim,
+                numLayers: params.numLayers,
+                numHeads: params.numHeads,
+                mlpDim: params.mlpDim,
+                numClasses: NUM_CLASSES
+            });
+
+            // To make it behave like a tf.Model for compile/fit, wrap it
+            const input = tf.input({shape: [IMG_HEIGHT, IMG_WIDTH, 1]});
+            const output = vit.apply(input);
+            return tf.model({inputs: input, outputs: output});
         }
 
-        // --- Model Export ---
-        function exportModelWeights() {
-            if (!model) {
-                log("Model not trained yet.");
+
+        // --- Training ---
+        async function trainModel(params) {
+            startTrainingBtn.disabled = true;
+            exportWeightsBtn.disabled = true;
+            testRandomBtn.disabled = true;
+            log('Initializing model...');
+
+            if (model) model.dispose(); // Dispose previous model
+            model = createModel(params);
+            
+            const optimizer = tf.train.adam(params.lr);
+            model.compile({
+                optimizer: optimizer,
+                loss: 'categoricalCrossentropy',
+                metrics: ['accuracy']
+            });
+            log('Model compiled. Starting training...');
+
+            const trainDataset = dataGenerator(trainImageData, trainLabels, 245, params.numTrainImages, params.batchSize);
+            const testDatasetForEval = () => dataGenerator(testImageData, testLabels, 100, testLabels.length, params.batchSize, false);
+            
+            const trainAccs = [];
+            const testAccs = [];
+            const epochLabels = [];
+
+            for (let epoch = 0; epoch < params.epochs; epoch++) {
+                log(`Epoch ${epoch + 1}/${params.epochs} starting...`);
+                let epochTrainSamples = 0;
+                let epochTrainCorrect = 0;
+                
+                let batchCount = 0;
+                for (const batch of dataGenerator(trainImageData, trainLabels, 245, params.numTrainImages, params.batchSize)) {
+                    const history = await model.trainOnBatch(batch.xs, batch.ys);
+                    const batchAcc = history.acc; // acc is usually a tensor
+                    const batchLoss = history.loss;
+
+                    // Accumulate accuracy manually from predictions for more robust calculation
+                    const preds = model.predict(batch.xs);
+                    const correct = preds.argMax(-1).equal(batch.ys.argMax(-1)).sum().dataSync()[0];
+                    preds.dispose();
+                    
+                    epochTrainCorrect += correct;
+                    epochTrainSamples += batch.xs.shape[0];
+                    
+                    batch.xs.dispose();
+                    batch.ys.dispose();
+                    
+                    if (batchCount % 10 === 0) { // Log progress every 10 batches
+                       log(`Epoch ${epoch + 1}, Batch ${batchCount}: loss = ${batchLoss.dataSync()[0].toFixed(4)}, acc = ${batchAcc.dataSync()[0].toFixed(4)} (batch specific)`);
+                    }
+                    batchCount++;
+                    await tf.nextFrame(); // Yield to UI
+                }
+                const trainEpochAcc = epochTrainCorrect / epochTrainSamples;
+                trainAccs.push(trainEpochAcc);
+
+                // Evaluate on test set
+                log(`Epoch ${epoch + 1} finished. Evaluating on test set...`);
+                let testSamples = 0;
+                let testCorrect = 0;
+                for (const batch of testDatasetForEval()) {
+                     const preds = model.predict(batch.xs);
+                     const correct = preds.argMax(-1).equal(batch.ys.argMax(-1)).sum().dataSync()[0];
+                     preds.dispose();
+                     testCorrect += correct;
+                     testSamples += batch.xs.shape[0];
+                     batch.xs.dispose();
+                     batch.ys.dispose();
+                }
+                const testEpochAcc = testCorrect / testSamples;
+                testAccs.push(testEpochAcc);
+                epochLabels.push(`Epoch ${epoch + 1}`);
+
+                updateChart(epochLabels, trainAccs, testAccs);
+                log(`Epoch ${epoch + 1}: Train Acc: ${trainEpochAcc.toFixed(4)}, Test Acc: ${testEpochAcc.toFixed(4)}`);
+                await tf.nextFrame();
+            }
+
+            log('Training finished.');
+            startTrainingBtn.disabled = false;
+            exportWeightsBtn.disabled = false;
+            testRandomBtn.disabled = false;
+        }
+
+        // --- UI and Chart ---
+        function initChart() {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            accuracyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Train Accuracy',
+                            borderColor: 'rgb(75, 192, 192)',
+                            data: [],
+                            fill: false,
+                        },
+                        {
+                            label: 'Test Accuracy',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: [],
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 1.0
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(labels, trainData, testData) {
+            accuracyChart.data.labels = labels;
+            accuracyChart.data.datasets[0].data = trainData;
+            accuracyChart.data.datasets[1].data = testData;
+            accuracyChart.update();
+        }
+
+        function getHyperparameters() {
+            return {
+                numLayers: parseInt(document.getElementById('numLayers').value),
+                embeddingDim: parseInt(document.getElementById('embeddingDim').value),
+                numHeads: parseInt(document.getElementById('numHeads').value),
+                mlpDim: parseInt(document.getElementById('mlpDim').value),
+                patchSize: parseInt(document.getElementById('patchSize').value),
+                lr: parseFloat(document.getElementById('lr').value),
+                numTrainImages: parseInt(document.getElementById('numTrainImages').value),
+                epochs: parseInt(document.getElementById('epochs').value),
+                batchSize: parseInt(document.getElementById('batchSize').value),
+            };
+        }
+
+        function validateHyperparameters(params) {
+            if (params.embeddingDim % params.numHeads !== 0) {
+                alert("Error: Embedding Dimension must be divisible by Number of Heads.");
+                return false;
+            }
+            if (IMG_WIDTH % params.patchSize !== 0) {
+                 alert("Error: Patch Size must be a divisor of 28 (e.g., 4, 7, 14).");
+                return false;
+            }
+            if (params.numTrainImages > trainLabels.length || params.numTrainImages <=0) {
+                alert(`Error: Number of training images must be between 1 and ${trainLabels.length}.`);
+                return false;
+            }
+            return true;
+        }
+
+        startTrainingBtn.addEventListener('click', async () => {
+            const params = getHyperparameters();
+            if (!validateHyperparameters(params)) return;
+            
+            if (!trainImageData || !testImageData) {
+                log('Please wait, data is still loading.');
                 return;
             }
-            log("Exporting model weights...");
-            const weights = model.getWeights().map(w => w.arraySync()); // tf.Layer.getWeights() is fine
+            // Reset chart for new training
+            accuracyChart.data.labels = [];
+            accuracyChart.data.datasets[0].data = [];
+            accuracyChart.data.datasets[1].data = [];
+            accuracyChart.update();
             
-            // Reconstruct config for ViT based on its properties for export
-            const modelInstanceConfig = {
-                numLayers: model.numLayers,
-                embedDim: model.embedDim,
-                numHeads: model.numHeads,
-                mlpDim: model.mlpDim,
-                patchSize: model.patchSize,
-                numClasses: model.numClasses,
-                dropoutRate: model.dropoutRate
+            await trainModel(params);
+        });
+
+        exportWeightsBtn.addEventListener('click', () => {
+            if (!model) {
+                log('No model trained yet.');
+                return;
+            }
+            const weights = model.getWeights().map(w => ({
+                name: w.name,
+                shape: w.shape,
+                values: w.arraySync() // Get as nested JS array
+            }));
+            
+            const modelData = {
+                hyperparameters: currentHyperparams, // Save the hyperparams used for this model
+                weights: weights
             };
 
-            const serialized = {
-                // For custom layers, we usually save config like this.
-                // className is used by tf.serialization.deserializeKerasObject
-                modelConfig: { className: model.getClassName(), config: modelInstanceConfig },
-                weights: weights // This is an array of weight tensors (as JS arrays)
-            };
-
-            const jsonString = JSON.stringify(serialized);
+            const jsonString = JSON.stringify(modelData);
             const blob = new Blob([jsonString], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'vit_mnist_model.json';
+            a.download = 'vit_mnist_weights.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            log("Model weights exported.");
-        }
-
-        // --- Test Random Sample ---
-        function testRandomSample() {
-            if (!model) {
-                log("Model not trained yet.");
+            log('Model weights exported.');
+        });
+        
+        testRandomBtn.addEventListener('click', () => {
+            if (!model || !testImageData) {
+                log('Model not trained or test data not loaded.');
                 return;
             }
-            const numTotalTestSamples = mnistTestLabels.length;
-            if (numTotalTestSamples === 0) {
-                log("No test labels loaded.");
-                return;
-            }
-            const randomIndex = Math.floor(Math.random() * numTotalTestSamples);
-            
-            log(`Testing on random sample index: ${randomIndex} from the full test set.`);
-
             tf.tidy(() => {
-                const {image, label} = getImageAndLabel(randomIndex, false); 
-                const imageBatched = image.expandDims(0); 
+                const randomIndex = Math.floor(Math.random() * testLabels.length);
+                const imageTensor = extractImageTensor(testImageData, randomIndex, 100); // 100 images per row for test set
+                const actualLabel = testLabels[randomIndex];
 
-                const displayCanvasCtx = ui.testImageCanvas.getContext('2d');
-                tf.browser.toPixels(image.mul(255).cast('int32'), ui.testImageCanvas) 
-                    .then(() => {
-                        const prediction = model.apply(imageBatched, {training: false}); 
-                        const predictedClass = prediction.argMax(-1).dataSync()[0];
-                        const trueClass = label.argMax(-1).dataSync()[0];
-                        
-                        ui.predictionText.textContent = `Prediction: ${predictedClass} | True Label: ${trueClass}`;
-                        log(`Random Test - Predicted: ${predictedClass}, True: ${trueClass}`);
-                    });
+                const inputTensor = imageTensor.expandDims(0); // Add batch dimension
+                const prediction = model.predict(inputTensor);
+                const predictedLabel = prediction.argMax(-1).dataSync()[0];
+                
+                // Display image on canvas
+                const testImageCanvas = document.getElementById('testImageCanvas');
+                const ctx = testImageCanvas.getContext('2d');
+                ctx.clearRect(0,0,testImageCanvas.width, testImageCanvas.height); // Clear previous
+                // Draw a 2x scaled image
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = IMG_WIDTH;
+                tempCanvas.height = IMG_HEIGHT;
+                const tempCtx = tempCanvas.getContext('2d');
+                tf.browser.toPixels(imageTensor, tempCanvas).then(() => {
+                     ctx.drawImage(tempCanvas, 0, 0, testImageCanvas.width, testImageCanvas.height);
+                });
+
+
+                document.getElementById('testResult').textContent = 
+                    `Random Test Image #${randomIndex}\nActual: ${actualLabel}, Predicted: ${predictedLabel} ${actualLabel === predictedLabel ? '✅' : '❌'}`;
+                
+                imageTensor.dispose();
+                inputTensor.dispose();
+                prediction.dispose();
             });
-        }
-
+        });
 
         // --- Initialization ---
-        window.onload = async () => {
-            log("Initializing demo...");
-            ui.trainButton.addEventListener('click', trainModel);
-            ui.exportButton.addEventListener('click', exportModelWeights);
-            ui.testRandomButton.addEventListener('click', testRandomSample);
-
-            stitchedTrainCtx = document.getElementById('stitchedTrainCanvas').getContext('2d');
-            stitchedTestCtx = document.getElementById('stitchedTestCanvas').getContext('2d');
-            tempImageCtx = document.getElementById('tempImageCanvas').getContext('2d');
-            
-            document.getElementById('numLayersVal').textContent = ui.numLayers.value;
-            document.getElementById('embedDimVal').textContent = ui.embedDim.value;
-            document.getElementById('numHeadsVal').textContent = ui.numHeads.value;
-            document.getElementById('patchSizeVal').textContent = ui.patchSize.value;
-            document.getElementById('mlpDimVal').textContent = ui.mlpDim.value;
-
-
-            initCharts();
-            log("Loading MNIST stitched images (may take a moment)...");
+        async function main() {
+            log('Setting up TensorFlow.js backend...');
             try {
-                await Promise.all([
-                    loadImageToCanvas(TRAIN_IMG_URL, document.getElementById('stitchedTrainCanvas')),
-                    loadImageToCanvas(TEST_IMG_URL, document.getElementById('stitchedTestCanvas'))
-                ]);
-                log("MNIST images loaded and ready.");
-                ui.trainButton.disabled = false; 
-            } catch (error) {
-                log("Error loading MNIST images. Demo might not work correctly.");
-                console.error("Image loading error:", error);
+                await tf.setBackend('webgl');
+                log('Using WebGL backend.');
+            } catch (e) {
+                log('WebGL not available or error during setup, using CPU backend.');
+                await tf.setBackend('cpu');
             }
-            log("Demo ready.");
-        };
+            tf.enableProdMode(); // For performance
+            log('TensorFlow.js setup complete. Backend: ' + tf.getBackend());
 
+            initChart();
+
+            log('Loading MNIST data (labels are preloaded)...');
+            try {
+                // Ensure labels are loaded
+                if (trainLabels.length === 0 || testLabels.length === 0) {
+                     log('Error: MNIST label data not found. Ensure mnist_train_labels.js and mnist_test_labels.js are loaded.');
+                     return;
+                }
+                log(`Train labels: ${trainLabels.length}, Test labels: ${testLabels.length}`);
+
+                const trainImgUrl = 'https://zsc.github.io/widgets/mnist/mnist_train_stitched.png';
+                const testImgUrl = 'https://zsc.github.io/widgets/mnist/mnist_test_stitched.png';
+
+                log('Loading training image...');
+                trainImg = await loadStitchedImage(trainImgUrl);
+                trainImageData = getImageDataFromStitched(trainImg);
+                log('Training image loaded and processed.');
+
+                log('Loading test image...');
+                testImg = await loadStitchedImage(testImgUrl);
+                testImageData = getImageDataFromStitched(testImg);
+                log('Test image loaded and processed. Ready to train.');
+                
+                startTrainingBtn.disabled = false; // Enable training button only after data is ready
+
+            } catch (error) {
+                log('Error loading MNIST image data: ' + error);
+                console.error(error);
+            }
+        }
+
+        main();
     </script>
 </body>
 </html>
