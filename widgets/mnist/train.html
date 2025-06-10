@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST CNN Trainer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Load label data -->
+    <script src="mnist_train_labels.js"></script>
+    <script src="mnist_test_labels.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; color: #333; }
+        .controls, .training-status, .results { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .controls label { display: inline-block; margin-right: 10px; margin-bottom: 5px; min-width: 150px; }
+        .controls input[type="number"], .controls input[type="text"], .controls select {
+            padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; width: 180px;
+        }
+        .controls input[type="text"] { width: 250px; } /* For comma separated values */
+        button {
+            background-color: #007bff; color: white; padding: 10px 15px; border: none;
+            border-radius: 4px; cursor: pointer; font-size: 16px; margin-right: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #status { margin-top: 10px; font-weight: bold; }
+        #accuracyChartContainer { max-height: 400px; margin-bottom: 20px; }
+        .test-visualization { display: flex; align-items: center; margin-top: 15px; }
+        .test-visualization canvas { border: 1px solid black; margin-right: 20px; }
+        .test-visualization p { font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MNIST CNN Trainer</h1>
+
+        <div class="controls">
+            <h2>Configuration</h2>
+            <div><label for="numConvLayers">Conv Layers (1-3):</label><select id="numConvLayers"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option></select></div>
+            <div><label for="convFilters">Filters (e.g., 8,16,32):</label><input type="text" id="convFilters" value="8,16,32"></div>
+            <div><label for="kernelSize">Kernel Size (e.g., 3):</label><input type="number" id="kernelSize" value="3"></div>
+            <div><label for="poolSize">Pool Size (e.g., 2):</label><input type="number" id="poolSize" value="2"></div>
+            <div><label for="denseUnits">Dense Units (e.g., 64):</label><input type="number" id="denseUnits" value="64"></div>
+            <div><label for="learningRate">Learning Rate:</label><input type="number" id="learningRate" value="0.001" step="0.0001"></div>
+            <div><label for="epochs">Epochs:</label><input type="number" id="epochs" value="5"></div>
+            <div><label for="batchSize">Batch Size:</label><input type="number" id="batchSize" value="128"></div>
+            <div><label for="trainDataSize">Train Data Subset (e.g., 6000):</label><input type="number" id="trainDataSize" value="6000"></div>
+            <div><label for="testDataSize">Test Data Subset (e.g., 1000):</label><input type="number" id="testDataSize" value="1000"></div>
+        </div>
+
+        <button id="startTrainBtn">Start Training</button>
+        <button id="exportModelBtn" disabled>Export Model</button>
+        <button id="testRandomBtn" disabled>Test Random Sample</button>
+
+        <div class="training-status">
+            <h2>Training Progress</h2>
+            <div id="status">Status: Idle</div>
+            <div id="epochStatus"></div>
+            <div id="accuracyChartContainer">
+                <canvas id="accuracyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="results">
+            <h2>Test Visualization</h2>
+            <div id="testResult" class="test-visualization">
+                <canvas id="testImageCanvas" width="56" height="56"></canvas> <!-- Scaled up 2x -->
+                <p id="predictionText">Load model and test a sample.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MNIST Stitched Image Info
+        const MNIST_IMAGE_SIZE = 28;
+        const TRAIN_IMAGES_PER_ROW = 245;
+        const TEST_IMAGES_PER_ROW = 100;
+        const NUM_TRAIN_SAMPLES = 60000;
+        const NUM_TEST_SAMPLES = 10000;
+        const NUM_CLASSES = 10;
+
+        // Global variables
+        let model;
+        let trainXs, trainYs, testXs, testYs;
+        let accuracyChart;
+        let trainDataLoaded = false;
+        let testDataLoaded = false;
+
+        const statusDiv = document.getElementById('status');
+        const epochStatusDiv = document.getElementById('epochStatus');
+        const startTrainBtn = document.getElementById('startTrainBtn');
+        const exportModelBtn = document.getElementById('exportModelBtn');
+        const testRandomBtn = document.getElementById('testRandomBtn');
+
+        // UI Elements
+        const numConvLayersInput = document.getElementById('numConvLayers');
+        const convFiltersInput = document.getElementById('convFilters');
+        const kernelSizeInput = document.getElementById('kernelSize');
+        const poolSizeInput = document.getElementById('poolSize');
+        const denseUnitsInput = document.getElementById('denseUnits');
+        const learningRateInput = document.getElementById('learningRate');
+        const epochsInput = document.getElementById('epochs');
+        const batchSizeInput = document.getElementById('batchSize');
+        const trainDataSizeInput = document.getElementById('trainDataSize');
+        const testDataSizeInput = document.getElementById('testDataSize');
+
+
+        async function loadImageData(imageUrl, numSamples, imagesPerRow) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous"; // Important for canvas if image is on different domain/port
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Get all pixel data from the stitched image
+                    const stitchedImageData = ctx.getImageData(0, 0, img.width, img.height).data;
+                    
+                    // Create a Float32Array to hold all image data (normalized)
+                    // Each image is 28x28 = 784 pixels. We only need the R channel (grayscale)
+                    const allImagesArray = new Float32Array(numSamples * MNIST_IMAGE_SIZE * MNIST_IMAGE_SIZE);
+                    
+                    let currentPixel = 0;
+                    for (let i = 0; i < numSamples; i++) {
+                        const row = Math.floor(i / imagesPerRow);
+                        const col = i % imagesPerRow;
+                        const startX = col * MNIST_IMAGE_SIZE;
+                        const startY = row * MNIST_IMAGE_SIZE;
+
+                        for (let y = 0; y < MNIST_IMAGE_SIZE; y++) {
+                            for (let x = 0; x < MNIST_IMAGE_SIZE; x++) {
+                                const pixelX = startX + x;
+                                const pixelY = startY + y;
+                                // Find the R value (assuming grayscale, R=G=B)
+                                const rIndex = (pixelY * img.width + pixelX) * 4;
+                                allImagesArray[currentPixel++] = stitchedImageData[rIndex] / 255.0;
+                            }
+                        }
+                    }
+                    resolve(tf.tensor4d(allImagesArray, [numSamples, MNIST_IMAGE_SIZE, MNIST_IMAGE_SIZE, 1]));
+                };
+                img.onerror = (err) => {
+                    statusDiv.textContent = `Error loading image ${imageUrl}: ${err}. Make sure it's accessible.`;
+                    console.error("Image load error:", err);
+                    reject(err);
+                };
+                img.src = imageUrl;
+            });
+        }
+
+        async function loadData() {
+            if (trainDataLoaded && testDataLoaded) return;
+
+            statusDiv.textContent = 'Loading MNIST data... This may take a moment.';
+            console.log("Loading data...");
+
+            try {
+                // Check if labels are loaded
+                if (typeof mnistTrainLabels === 'undefined' || typeof mnistTestLabels === 'undefined') {
+                    statusDiv.textContent = 'Error: Label data (mnist_train_labels.js or mnist_test_labels.js) not found. Make sure they are loaded.';
+                    throw new Error("Label data not found.");
+                }
+
+                const [trainImages, testImages] = await Promise.all([
+                    loadImageData('https://zsc.github.io/widgets/mnist/mnist_train_stitched.png', NUM_TRAIN_SAMPLES, TRAIN_IMAGES_PER_ROW),
+                    loadImageData('https://zsc.github.io/widgets/mnist/mnist_test_stitched.png', NUM_TEST_SAMPLES, TEST_IMAGES_PER_ROW)
+                ]);
+
+                const trainLabels = tf.tensor1d(mnistTrainLabels, 'int32');
+                const testLabels = tf.tensor1d(mnistTestLabels, 'int32');
+
+                trainXs = trainImages;
+                trainYs = tf.oneHot(trainLabels, NUM_CLASSES);
+                testXs = testImages;
+                testYs = tf.oneHot(testLabels, NUM_CLASSES);
+
+                trainLabels.dispose(); // Dispose original integer labels
+                testLabels.dispose();
+
+                trainDataLoaded = true;
+                testDataLoaded = true;
+                statusDiv.textContent = 'MNIST data loaded successfully.';
+                console.log("Data loaded.");
+                startTrainBtn.disabled = false;
+
+            } catch (error) {
+                statusDiv.textContent = `Error loading data: ${error.message}`;
+                console.error("Data loading failed:", error);
+                startTrainBtn.disabled = true; // Keep disabled if loading fails
+            }
+        }
+        
+        function createCnnModel() {
+            const numConv = parseInt(numConvLayersInput.value);
+            const filterStrings = convFiltersInput.value.split(',').map(s => s.trim());
+            const filters = filterStrings.map(f => parseInt(f)).filter(f => !isNaN(f));
+            const kernel = parseInt(kernelSizeInput.value);
+            const pool = parseInt(poolSizeInput.value);
+            const dense = parseInt(denseUnitsInput.value);
+            const lr = parseFloat(learningRateInput.value);
+
+            if (filters.length < numConv) {
+                alert(`Please provide at least ${numConv} filter sizes for ${numConv} convolutional layers.`);
+                return null;
+            }
+
+            const cnnModel = tf.sequential();
+            cnnModel.add(tf.layers.inputLayer({inputShape: [MNIST_IMAGE_SIZE, MNIST_IMAGE_SIZE, 1]}));
+
+            for (let i = 0; i < numConv; i++) {
+                cnnModel.add(tf.layers.conv2d({
+                    filters: filters[i],
+                    kernelSize: kernel,
+                    activation: 'relu',
+                    padding: 'same' // Keep dimensions same after conv before pooling
+                }));
+                cnnModel.add(tf.layers.maxPooling2d({poolSize: pool, strides: pool}));
+            }
+            
+            cnnModel.add(tf.layers.flatten());
+            cnnModel.add(tf.layers.dense({units: dense, activation: 'relu'}));
+            cnnModel.add(tf.layers.dense({units: NUM_CLASSES, activation: 'softmax'}));
+
+            cnnModel.compile({
+                optimizer: tf.train.adam(lr),
+                loss: 'categoricalCrossentropy',
+                metrics: ['accuracy'],
+            });
+            
+            console.log("Model Summary:");
+            cnnModel.summary();
+            return cnnModel;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            if (accuracyChart) {
+                accuracyChart.destroy(); // Destroy previous chart instance if exists
+            }
+            accuracyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // Epochs
+                    datasets: [
+                        {
+                            label: 'Train Accuracy',
+                            borderColor: 'rgb(75, 192, 192)',
+                            data: [],
+                            fill: false,
+                        },
+                        {
+                            label: 'Test Accuracy',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: [],
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Epoch' } },
+                        y: { title: { display: true, text: 'Accuracy' }, min: 0, max: 1 }
+                    }
+                }
+            });
+        }
+
+        function updateChart(epoch, trainAcc, valAcc) {
+            accuracyChart.data.labels.push(epoch);
+            accuracyChart.data.datasets[0].data.push(trainAcc);
+            accuracyChart.data.datasets[1].data.push(valAcc);
+            accuracyChart.update();
+        }
+
+        async function trainModel() {
+            if (!trainDataLoaded || !testDataLoaded) {
+                statusDiv.textContent = "Data not loaded. Please wait or check console for errors.";
+                return;
+            }
+
+            startTrainBtn.disabled = true;
+            exportModelBtn.disabled = true;
+            testRandomBtn.disabled = true;
+            statusDiv.textContent = "Starting training...";
+            epochStatusDiv.textContent = "";
+            
+            initChart(); // Initialize or reset chart
+
+            model = createCnnModel();
+            if (!model) {
+                statusDiv.textContent = "Failed to create model. Check configuration.";
+                startTrainBtn.disabled = false;
+                return;
+            }
+
+            const epochs = parseInt(epochsInput.value);
+            const batch = parseInt(batchSizeInput.value);
+            const trainDataLimit = parseInt(trainDataSizeInput.value);
+            const testDataLimit = parseInt(testDataSizeInput.value);
+
+            // Slice data if needed
+            const currentTrainXs = trainXs.slice([0,0,0,0], [trainDataLimit, MNIST_IMAGE_SIZE, MNIST_IMAGE_SIZE, 1]);
+            const currentTrainYs = trainYs.slice([0,0], [trainDataLimit, NUM_CLASSES]);
+            const currentTestXs = testXs.slice([0,0,0,0], [testDataLimit, MNIST_IMAGE_SIZE, MNIST_IMAGE_SIZE, 1]);
+            const currentTestYs = testYs.slice([0,0], [testDataLimit, NUM_CLASSES]);
+
+
+            statusDiv.textContent = `Training on ${trainDataLimit} samples, validating on ${testDataLimit} samples...`;
+
+            await model.fit(currentTrainXs, currentTrainYs, {
+                batchSize: batch,
+                epochs: epochs,
+                validationData: [currentTestXs, currentTestYs],
+                callbacks: {
+                    onEpochEnd: async (epoch, logs) => {
+                        const epochStr = `Epoch ${epoch + 1}/${epochs} - Loss: ${logs.loss.toFixed(4)}, Acc: ${logs.acc.toFixed(4)}, Val Loss: ${logs.val_loss.toFixed(4)}, Val Acc: ${logs.val_acc.toFixed(4)}`;
+                        epochStatusDiv.innerHTML += epochStr + "<br>";
+                        console.log(epochStr);
+                        updateChart(epoch + 1, logs.acc, logs.val_acc);
+                        await tf.nextFrame(); // Allow UI to update
+                    },
+                    onTrainEnd: () => {
+                        statusDiv.textContent = "Training complete!";
+                        startTrainBtn.disabled = false;
+                        exportModelBtn.disabled = false;
+                        testRandomBtn.disabled = false;
+                        console.log("Training finished.");
+
+                        // Dispose sliced tensors after training is done
+                        currentTrainXs.dispose();
+                        currentTrainYs.dispose();
+                        currentTestXs.dispose();
+                        currentTestYs.dispose();
+                        console.log("Subset tensors disposed.");
+                    }
+                }
+            });
+        }
+
+        function exportTfModel() {
+            if (!model) {
+                alert("No model trained yet!");
+                return;
+            }
+            model.save('downloads://mnist-cnn-model');
+            statusDiv.textContent = "Model export initiated.";
+        }
+
+        function drawImageOnCanvas(imageDataTensor, canvasElement) {
+            // imageDataTensor is expected to be [1, 28, 28, 1] or [28, 28, 1]
+            const imageTensor = imageDataTensor.squeeze().mul(255).cast('int32'); // Squeeze removes batch dim if present, scale to 0-255
+            const [height, width] = imageTensor.shape;
+            const canvas = canvasElement;
+            const ctx = canvas.getContext('2d');
+            const scaledWidth = canvas.width;
+            const scaledHeight = canvas.height;
+            const scaleX = scaledWidth / width;
+            const scaleY = scaledHeight / height;
+
+            const data = imageTensor.dataSync(); // Get data synchronously
+            
+            ctx.clearRect(0, 0, scaledWidth, scaledHeight); // Clear previous image
+            let i = 0;
+            for (let r = 0; r < height; r++) {
+                for (let c = 0; c < width; c++) {
+                    const pixelVal = data[i++];
+                    ctx.fillStyle = `rgb(${pixelVal},${pixelVal},${pixelVal})`;
+                    ctx.fillRect(c * scaleX, r * scaleY, scaleX, scaleY);
+                }
+            }
+            imageTensor.dispose();
+        }
+
+
+        async function testRandomSample() {
+            if (!model || !testDataLoaded) {
+                alert("Model not trained or test data not loaded!");
+                return;
+            }
+
+            const testDataLimit = parseInt(testDataSizeInput.value) < NUM_TEST_SAMPLES ? parseInt(testDataSizeInput.value) : NUM_TEST_SAMPLES;
+            const randomIndex = Math.floor(Math.random() * testDataLimit);
+            
+            // Get a single image and its label
+            // Note: testXs and mnistTestLabels are the full datasets.
+            // We need to select from the potentially limited set used for validation,
+            // or just ensure we pick from the full test set and its corresponding label.
+            // For simplicity, let's use the full test set.
+            const sampleImageTensor = testXs.slice([randomIndex, 0, 0, 0], [1, MNIST_IMAGE_SIZE, MNIST_IMAGE_SIZE, 1]);
+            const trueLabel = mnistTestLabels[randomIndex]; // From original non-one-hot labels
+
+            const prediction = model.predict(sampleImageTensor);
+            const predictedLabel = prediction.argMax(1).dataSync()[0];
+
+            // Display the image
+            const testImageCanvas = document.getElementById('testImageCanvas');
+            drawImageOnCanvas(sampleImageTensor, testImageCanvas);
+            
+            document.getElementById('predictionText').textContent = `Predicted: ${predictedLabel}, True: ${trueLabel}`;
+            
+            sampleImageTensor.dispose();
+            prediction.dispose();
+        }
+
+        // Event Listeners
+        startTrainBtn.addEventListener('click', trainModel);
+        exportModelBtn.addEventListener('click', exportTfModel);
+        testRandomBtn.addEventListener('click', testRandomSample);
+
+        // Initial setup
+        window.onload = async () => {
+            statusDiv.textContent = "Initializing...";
+            startTrainBtn.disabled = true; // Disable until data is loaded
+            exportModelBtn.disabled = true;
+            testRandomBtn.disabled = true;
+            initChart(); // Initialize chart structure on load
+            await loadData(); // Automatically start loading data
+        };
+
+    </script>
+</body>
+</html>
