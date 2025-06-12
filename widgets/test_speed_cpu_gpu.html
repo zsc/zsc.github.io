@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TF.js 矩阵乘法 GPU vs CPU 加速比</title>
+    <!-- 引入 TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            white-space: pre-wrap; /* Preserve formatting for newlines */
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .warning {
+            color: #dc3545;
+        }
+        .info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TF.js 矩阵乘法: GPU vs CPU</h1>
+
+        <div>
+            <label for="matrixSize">矩阵大小 (N x N): </label>
+            <input type="number" id="matrixSize" value="512" min="16">
+        </div>
+        <div>
+            <label for="iterations">迭代次数 (用于平均): </label>
+            <input type="number" id="iterations" value="50" min="1">
+        </div>
+
+        <button id="runButton">开始计算</button>
+
+        <div id="results">点击 "开始计算" 来查看结果。</div>
+    </div>
+
+    <script>
+        const runButton = document.getElementById('runButton');
+        const resultsDiv = document.getElementById('results');
+        const matrixSizeInput = document.getElementById('matrixSize');
+        const iterationsInput = document.getElementById('iterations');
+
+        // 异步函数执行矩阵乘法并计时
+        async function benchmarkMatMul(backendName, size, numIterations) {
+            resultsDiv.innerHTML += `\n[${backendName}] 正在设置后端并准备...`;
+            await tf.setBackend(backendName);
+            await tf.ready(); // 确保后端已准备就绪
+            resultsDiv.innerHTML += `\n[${backendName}] 当前后端: ${tf.getBackend()}`;
+
+            let totalTime = 0;
+            const matA = tf.randomNormal([size, size]);
+            const matB = tf.randomNormal([size, size]);
+
+            // 预热：第一次运行通常较慢，尤其是在GPU上（着色器编译等）
+            resultsDiv.innerHTML += `\n[${backendName}] 正在进行预热...`;
+            let res_warmup = tf.matMul(matA, matB);
+            await res_warmup.data(); // 等待计算完成并将数据取回 (确保GPU完成)
+            res_warmup.dispose();
+            resultsDiv.innerHTML += `\n[${backendName}] 预热完成。`;
+
+            resultsDiv.innerHTML += `\n[${backendName}] 开始 ${numIterations} 次迭代计算...`;
+            for (let i = 0; i < numIterations; i++) {
+                const startTime = performance.now();
+                // tf.tidy 用于自动清理本函数作用域内创建的中间张量
+                const result = tf.tidy(() => {
+                    // 如果matA和matB在循环内重新创建，也应放在tidy内或手动dispose
+                    return tf.matMul(matA, matB);
+                });
+                // 对于GPU，关键是等待数据实际可用，这能确保操作已完成
+                await result.data();
+                const endTime = performance.now();
+                totalTime += (endTime - startTime);
+                result.dispose(); // 清理结果张量
+                if ((i + 1) % 10 === 0 || i === numIterations -1) {
+                     resultsDiv.innerHTML += `\n[${backendName}] ...已完成 ${i+1}/${numIterations} 次迭代`;
+                }
+            }
+
+            matA.dispose(); // 清理输入张量
+            matB.dispose();
+
+            const averageTime = totalTime / numIterations;
+            resultsDiv.innerHTML += `\n[${backendName}] ${numIterations} 次迭代总耗时: ${totalTime.toFixed(3)} ms`;
+            resultsDiv.innerHTML += `\n[${backendName}] 平均每次耗时: ${averageTime.toFixed(3)} ms`;
+            return averageTime;
+        }
+
+        runButton.addEventListener('click', async () => {
+            runButton.disabled = true;
+            resultsDiv.innerHTML = "正在初始化和检查环境...\n";
+
+            const N = parseInt(matrixSizeInput.value);
+            const ITERS = parseInt(iterationsInput.value);
+
+            if (isNaN(N) || N <= 0 || isNaN(ITERS) || ITERS <= 0) {
+                resultsDiv.innerHTML = '<span class="warning">请输入有效的矩阵大小和迭代次数!</span>';
+                runButton.disabled = false;
+                return;
+            }
+
+            resultsDiv.innerHTML += `\nTF.js 版本: ${tf.version.tfjs}`;
+            resultsDiv.innerHTML += `\n可用后端: ${Object.keys(tf.engine().registryFactory).join(', ')}`;
+
+            let gpuTime = -1;
+            let cpuTime = -1;
+
+            try {
+                // 1. GPU (WebGL) 计算
+                resultsDiv.innerHTML += "\n\n--- 开始 GPU (WebGL) 计算 ---";
+                if (tf.engine().registryFactory['webgl']) {
+                    gpuTime = await benchmarkMatMul('webgl', N, ITERS);
+                } else {
+                    resultsDiv.innerHTML += '\n<span class="warning">WebGL 后端不可用, 跳过 GPU 测试。</span>';
+                }
+
+                // 2. CPU 计算
+                resultsDiv.innerHTML += "\n\n--- 开始 CPU 计算 ---";
+                if (tf.engine().registryFactory['cpu']) {
+                    cpuTime = await benchmarkMatMul('cpu', N, ITERS);
+                } else {
+                     resultsDiv.innerHTML += '\n<span class="warning">CPU 后端不可用 (异常情况), 跳过 CPU 测试。</span>';
+                }
+
+
+                // 3. 计算并显示结果
+                resultsDiv.innerHTML += "\n\n--- 结果总结 ---";
+                resultsDiv.innerHTML += `\n矩阵大小: ${N}x${N}`;
+                resultsDiv.innerHTML += `\n迭代次数 (每次测试): ${ITERS}`;
+
+                if (gpuTime !== -1) {
+                    resultsDiv.innerHTML += `\nGPU 平均耗时: <span class="highlight">${gpuTime.toFixed(3)} ms</span>`;
+                } else {
+                    resultsDiv.innerHTML += `\nGPU 平均耗时: N/A (WebGL不可用或测试跳过)`;
+                }
+                if (cpuTime !== -1) {
+                    resultsDiv.innerHTML += `\nCPU 平均耗时: <span class="highlight">${cpuTime.toFixed(3)} ms</span>`;
+                } else {
+                    resultsDiv.innerHTML += `\nCPU 平均耗时: N/A (测试跳过)`;
+                }
+
+
+                if (gpuTime !== -1 && cpuTime !== -1 && gpuTime > 0) {
+                    const speedupRatio = cpuTime / gpuTime;
+                    resultsDiv.innerHTML += `\n\n加速比 (CPU耗时 / GPU耗时): <span class="highlight">${speedupRatio.toFixed(2)}x</span>`;
+                    if (speedupRatio < 1) {
+                        resultsDiv.innerHTML += `\n<span class="info">(提示: 对于小矩阵或特定硬件/浏览器组合，GPU 由于数据传输和启动开销可能比 CPU 慢。如果WebGL使用软件渲染(如SwiftShader)，也会很慢。)</span>`;
+                    }
+                } else if (gpuTime === -1 && cpuTime !== -1) {
+                     resultsDiv.innerHTML += `\n\n无法计算加速比，因为 GPU 测试未成功运行。`;
+                } else if (gpuTime !== -1 && cpuTime === -1) {
+                     resultsDiv.innerHTML += `\n\n无法计算加速比，因为 CPU 测试未成功运行。`;
+                } else {
+                    resultsDiv.innerHTML += `\n\n无法计算加速比，GPU 和 CPU 测试均未成功运行。`;
+                }
+
+
+            } catch (error) {
+                resultsDiv.innerHTML += `\n<span class="warning">发生错误: ${error.message}</span>`;
+                console.error("Benchmark Error:", error);
+            } finally {
+                resultsDiv.innerHTML += "\n\n测试完成。";
+                // 将后端重置回一个默认状态，例如 CPU，以避免页面其他 TF.js 操作（如果有）受影响
+                try {
+                    await tf.setBackend('cpu');
+                    await tf.ready();
+                    resultsDiv.innerHTML += `\n\n(已将后端重置回 CPU: ${tf.getBackend()})`;
+                } catch (resetError) {
+                    resultsDiv.innerHTML += `\n<span class="warning">(重置后端失败: ${resetError.message})</span>`;
+                }
+                runButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
