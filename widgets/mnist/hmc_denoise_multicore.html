@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST HMC Denoising (Patch-based, Multi-core) Demo</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .canvas-container { border: 1px solid #ccc; padding: 10px; background-color: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); text-align: center;}
+        canvas { border: 1px solid black; image-rendering: pixelated; /* Sharp pixels */ margin-bottom: 5px; }
+        .psnr-display { font-size: 0.9em; color: #555; }
+        .controls { margin-bottom: 20px; padding: 15px; background-color: #e9e9e9; border-radius: 5px; }
+        .controls div { margin-bottom: 8px; }
+        .controls label { display: inline-block; margin-right: 5px; min-width: 150px; }
+        .controls input[type="number"], .controls input[type="text"] { width: 80px; margin-right: 15px; padding: 5px; }
+        #logArea { width: 100%; height: 150px; margin-top: 20px; font-family: monospace; font-size: 0.9em; border: 1px solid #ccc; padding: 5px; box-sizing: border-box; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        h1, h2, h3 { color: #333; text-align: center;}
+    </style>
+</head>
+<body>
+    <h1>MNIST Denoising: Patch-based HMC + Histogram Matching (Multi-core)</h1>
+
+    <div class="controls">
+        <h3>Hyperparameters:</h3>
+        <div>
+            <label for="noiseStdDev">Noise Std Dev (0-255):</label>
+            <input type="number" id="noiseStdDev" value="50" step="5">
+        </div>
+        <div>
+            <label for="patchSize">Patch Size (e.g., 7, 14):</label>
+            <input type="number" id="patchSize" value="14" step="1">
+            <small>(Must divide 28)</small>
+        </div>
+        <div>
+            <label for="lambdaL">λ_L (Likelihood Weight):</label>
+            <input type="text" id="lambdaL" value="0.002">
+        </div>
+        <div>
+            <label for="beta">β (Prior Smoothness):</label>
+            <input type="text" id="beta" value="0.1">
+        </div>
+        <div>
+            <label for="epsilon">ε (HMC Step Size):</label>
+            <input type="text" id="epsilon" value="0.05">
+        </div>
+        <div>
+            <label for="L_steps">L (Leapfrog Steps):</label>
+            <input type="number" id="L_steps" value="10" step="1">
+        </div>
+        <div>
+            <label for="N_iter">Iterations (per patch):</label>
+            <input type="number" id="N_iter" value="100" step="50">
+        </div>
+        <div>
+            <label for="N_burnin">Burn-in (per patch):</label>
+            <input type="number" id="N_burnin" value="20" step="10">
+        </div>
+        <div>
+            <label for="updateFreq">Worker Log Freq (iters/patch):</label>
+            <input type="number" id="updateFreq" value="20" step="1">
+        </div>
+         <div>
+            <label for="numWorkers">Number of Workers:</label>
+            <input type="number" id="numWorkers" value="4" step="1">
+            <small>(Max: <span id="maxCores">N/A</span>)</small>
+        </div>
+        <button id="startButton">Load New Image & Start Denoising</button>
+    </div>
+
+    <div class="container">
+        <div class="canvas-container">
+            <h3>Original Digit</h3>
+            <canvas id="originalCanvas" width="140" height="140"></canvas>
+            <div class="psnr-display" id="psnrOriginal">PSNR: N/A</div>
+        </div>
+        <div class="canvas-container">
+            <h3>Noisy Digit</h3>
+            <canvas id="noisyCanvas" width="140" height="140"></canvas>
+            <div class="psnr-display" id="psnrNoisy">PSNR: ...</div>
+        </div>
+        <div class="canvas-container">
+            <h3>HMC Denoised (Patches)</h3>
+            <canvas id="denoisingCanvas" width="140" height="140"></canvas>
+            <div class="psnr-display" id="psnrDenoised">PSNR: ...</div>
+        </div>
+        <div class="canvas-container">
+            <h3>Histogram Matched</h3>
+            <canvas id="histMatchedCanvas" width="140" height="140"></canvas>
+            <div class="psnr-display" id="psnrHistMatched">PSNR: ...</div>
+        </div>
+    </div>
+
+    <h3>Execution Log:</h3>
+    <textarea id="logArea" readonly></textarea>
+
+    <!--
+    =============================================================================
+    HMC WORKER SCRIPT (hmc_worker.js)
+    Save the content below this line (until the next ==== line) as hmc_worker.js
+    in the same directory as this HTML file.
+    =============================================================================
+
+    // --- HMC Core (operates on a patch) ---
+    function potentialEnergyPatch(X_patch, Y_noisy_patch, lambda_L, beta, patchSize) {
+        let E_likelihood = 0;
+        for (let i = 0; i < X_patch.length; i++) {
+            E_likelihood += (X_patch[i] - Y_noisy_patch[i]) ** 2;
+        }
+        E_likelihood *= lambda_L;
+
+        let E_prior = 0;
+        for (let y = 0; y < patchSize; y++) {
+            for (let x = 0; x < patchSize; x++) {
+                const idx = y * patchSize + x;
+                if (x < patchSize - 1) { // Right neighbor
+                    E_prior += (X_patch[idx] - X_patch[idx + 1]) ** 2;
+                }
+                if (y < patchSize - 1) { // Down neighbor
+                    E_prior += (X_patch[idx] - X_patch[idx + patchSize]) ** 2;
+                }
+            }
+        }
+        E_prior *= beta;
+        return E_likelihood + E_prior;
+    }
+
+    function gradientPotentialEnergyPatch(X_patch, Y_noisy_patch, lambda_L, beta, patchSize) {
+        const grad = new Float32Array(X_patch.length);
+        for (let i = 0; i < X_patch.length; i++) {
+            grad[i] = 2 * lambda_L * (X_patch[i] - Y_noisy_patch[i]);
+            let prior_grad_term = 0;
+            const x_coord = i % patchSize;
+            const y_coord = Math.floor(i / patchSize);
+
+            if (x_coord > 0) prior_grad_term += 2 * beta * (X_patch[i] - X_patch[i - 1]);
+            if (x_coord < patchSize - 1) prior_grad_term += 2 * beta * (X_patch[i] - X_patch[i + 1]);
+            if (y_coord > 0) prior_grad_term += 2 * beta * (X_patch[i] - X_patch[i - patchSize]);
+            if (y_coord < patchSize - 1) prior_grad_term += 2 * beta * (X_patch[i] - X_patch[i + patchSize]);
+            
+            grad[i] += prior_grad_term;
+        }
+        return grad;
+    }
+
+    function kineticEnergy(p_patch) {
+        let K = 0;
+        for (let i = 0; i < p_patch.length; i++) K += p_patch[i] ** 2;
+        return K / 2.0;
+    }
+
+    self.onmessage = function(event) {
+        const {
+            patchTask, // { patchId, startX, startY, noisyPatchData }
+            params,    // { patchSize, lambda_L, beta, epsilon, L_steps, N_iter_per_patch, N_burnin_per_patch, updateFreq }
+        } = event.data;
+
+        const { patchId, startX, startY, noisyPatchData } = patchTask;
+        const { patchSize, lambda_L, beta, epsilon, L_steps, N_iter_per_patch, N_burnin_per_patch, updateFreq } = params;
+
+        // --- HMC logic for a single patch ---
+        let X_current_patch = noisyPatchData; // Directly use the passed Float32Array
+        let p_current_patch = new Float32Array(patchSize * patchSize);
+        const samples_patch = [];
+        let accepted_count_patch = 0;
+
+        for (let iter = 0; iter < N_iter_per_patch; iter++) {
+            for (let i = 0; i < p_current_patch.length; i++) {
+                let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random();
+                p_current_patch[i] = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+            }
+
+            let X_prop_patch = Float32Array.from(X_current_patch);
+            let p_prop_patch = Float32Array.from(p_current_patch);
+
+            const U_current = potentialEnergyPatch(X_current_patch, noisyPatchData, lambda_L, beta, patchSize);
+            const K_current = kineticEnergy(p_current_patch);
+            const H_current = U_current + K_current;
+
+            let grad_X_patch = gradientPotentialEnergyPatch(X_prop_patch, noisyPatchData, lambda_L, beta, patchSize);
+            for (let i = 0; i < p_prop_patch.length; i++) p_prop_patch[i] -= (epsilon / 2) * grad_X_patch[i];
+
+            for (let l = 0; l < L_steps; l++) {
+                for (let i = 0; i < X_prop_patch.length; i++) X_prop_patch[i] += epsilon * p_prop_patch[i];
+                // Only compute gradient if not the last leapfrog step for X position update
+                if (l < L_steps - 1) { 
+                    grad_X_patch = gradientPotentialEnergyPatch(X_prop_patch, noisyPatchData, lambda_L, beta, patchSize);
+                    for (let i = 0; i < p_prop_patch.length; i++) p_prop_patch[i] -= epsilon * grad_X_patch[i];
+                }
+            }
+            // Final half-step for momentum
+            grad_X_patch = gradientPotentialEnergyPatch(X_prop_patch, noisyPatchData, lambda_L, beta, patchSize);
+            for (let i = 0; i < p_prop_patch.length; i++) p_prop_patch[i] -= (epsilon / 2) * grad_X_patch[i];
+            
+            // It's generally better to clamp X_prop_patch before calculating U_prop, 
+            // as U is defined over valid pixel ranges.
+            for(let i=0; i < X_prop_patch.length; i++) {
+                X_prop_patch[i] = Math.max(0, Math.min(255, X_prop_patch[i]));
+            }
+
+            const U_prop = potentialEnergyPatch(X_prop_patch, noisyPatchData, lambda_L, beta, patchSize);
+            const K_prop = kineticEnergy(p_prop_patch);
+            const H_prop = U_prop + K_prop;
+            const acceptance_prob = Math.min(1, Math.exp(H_current - H_prop));
+
+            if (Math.random() < acceptance_prob) {
+                X_current_patch.set(X_prop_patch); // Efficiently copy
+                accepted_count_patch++;
+            }
+
+            if (iter >= N_burnin_per_patch) {
+                samples_patch.push(Float32Array.from(X_current_patch));
+            }
+
+            if ((iter + 1) % updateFreq === 0 || iter === N_iter_per_patch - 1) {
+                self.postMessage({
+                    type: 'log',
+                    patchId: patchId,
+                    message: `  Worker (Patch ${patchId}): iter ${iter+1}/${N_iter_per_patch}, Acc.Rate: ${(accepted_count_patch/(iter+1)*100).toFixed(1)}%`
+                });
+            }
+        }
+
+        let X_final_avg_patch = new Float32Array(patchSize * patchSize);
+        if (samples_patch.length > 0) {
+            for (const sample of samples_patch) {
+                for (let i = 0; i < X_final_avg_patch.length; i++) X_final_avg_patch[i] += sample[i];
+            }
+            for (let i = 0; i < X_final_avg_patch.length; i++) X_final_avg_patch[i] /= samples_patch.length;
+        } else if (N_iter_per_patch > 0) {
+            X_final_avg_patch.set(X_current_patch); // Use last state
+            self.postMessage({ type: 'log', patchId: patchId, message: `  Worker (Patch ${patchId}) warning: No samples collected. Using last state.`});
+        } else { // N_iter is 0
+            X_final_avg_patch.set(noisyPatchData);
+        }
+
+        self.postMessage({
+            type: 'result',
+            patchId: patchId,
+            startX: startX,
+            startY: startY,
+            denoisedPatchData: X_final_avg_patch // This is a Float32Array
+        }, [X_final_avg_patch.buffer]); // Transfer the buffer
+    };
+    =============================================================================
+    END OF HMC WORKER SCRIPT (hmc_worker.js)
+    =============================================================================
+    -->
+
+    <script>
+        const MNIST_IMAGE_URL = 'https://zsc.github.io/widgets/mnist/mnist_train_stitched.png';
+        const MNIST_IMG_WIDTH = 6860;
+        const MNIST_IMG_HEIGHT = 6860;
+        const DIGIT_WIDTH = 28;
+        const DIGIT_HEIGHT = 28;
+        const IMAGES_PER_ROW = MNIST_IMG_WIDTH / DIGIT_WIDTH;
+        const TOTAL_IMAGES = 60000;
+
+        const originalCanvas = document.getElementById('originalCanvas');
+        const noisyCanvas = document.getElementById('noisyCanvas');
+        const denoisingCanvas = document.getElementById('denoisingCanvas');
+        const histMatchedCanvas = document.getElementById('histMatchedCanvas');
+
+        const ctxOriginal = originalCanvas.getContext('2d');
+        const ctxNoisy = noisyCanvas.getContext('2d');
+        const ctxDenoising = denoisingCanvas.getContext('2d');
+        const ctxHistMatched = histMatchedCanvas.getContext('2d');
+
+        const logArea = document.getElementById('logArea');
+        const startButton = document.getElementById('startButton');
+        const numWorkersInput = document.getElementById('numWorkers');
+        document.getElementById('maxCores').textContent = navigator.hardwareConcurrency || 'N/A';
+        if (navigator.hardwareConcurrency) {
+            numWorkersInput.value = navigator.hardwareConcurrency;
+        }
+
+
+        const psnrOriginalDisplay = document.getElementById('psnrOriginal');
+        const psnrNoisyDisplay = document.getElementById('psnrNoisy');
+        const psnrDenoisedDisplay = document.getElementById('psnrDenoised');
+        const psnrHistMatchedDisplay = document.getElementById('psnrHistMatched');
+
+        let stitchedMnistImageData = null;
+        let currentOriginalDigit = null; 
+        let currentNoisyDigitFull = null; 
+        let X_denoised_full = null; // Will hold the full denoised image from patches
+
+        // --- Worker Management ---
+        let workers = [];
+        let patchesQueue = [];
+        let totalPatchesToProcess = 0;
+        let patchesProcessedCounter = 0;
+        let activeWorkerCount = 0;
+        let allPatchesPromiseResolve = null;
+        let currentJobPatchSize = 0; // To pass to worker message handler
+
+        function appendLog(message) {
+            logArea.value += message + '\n';
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        function clearLog() { logArea.value = ''; }
+
+        async function loadStitchedMNIST() {
+            appendLog('Loading stitched MNIST image...');
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    appendLog('MNIST image loaded.');
+                    const canvas = document.createElement('canvas');
+                    canvas.width = MNIST_IMG_WIDTH;
+                    canvas.height = MNIST_IMG_HEIGHT;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    stitchedMnistImageData = ctx.getImageData(0, 0, MNIST_IMG_WIDTH, MNIST_IMG_HEIGHT);
+                    appendLog(`Stitched image data: ${stitchedMnistImageData.width}x${stitchedMnistImageData.height}`);
+                    resolve();
+                };
+                img.onerror = (err) => { appendLog('Error loading MNIST image: ' + err); reject(err); };
+                img.src = MNIST_IMAGE_URL;
+            });
+        }
+
+        function extractDigit(index) {
+            if (!stitchedMnistImageData) { appendLog('Error: Stitched MNIST data not loaded.'); return null; }
+            if (index < 0 || index >= TOTAL_IMAGES) { appendLog(`Error: Index ${index} out of bounds.`); return null; }
+            const digitRow = Math.floor(index / IMAGES_PER_ROW);
+            const digitCol = index % IMAGES_PER_ROW;
+            const startX = digitCol * DIGIT_WIDTH;
+            const startY = digitRow * DIGIT_HEIGHT;
+            const digitPixels = new Uint8ClampedArray(DIGIT_WIDTH * DIGIT_HEIGHT);
+            for (let y = 0; y < DIGIT_HEIGHT; y++) {
+                for (let x = 0; x < DIGIT_WIDTH; x++) {
+                    const sourceIdx = ((startY + y) * MNIST_IMG_WIDTH + (startX + x)) * 4;
+                    digitPixels[y * DIGIT_WIDTH + x] = stitchedMnistImageData.data[sourceIdx];
+                }
+            }
+            return digitPixels;
+        }
+        
+        function drawDigit(ctx, digitData, canvasWidth, canvasHeight, sourceWidth, sourceHeight, scaleFactor) {
+            if (!digitData) return;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.imageSmoothingEnabled = false;
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = sourceWidth;
+            tempCanvas.height = sourceHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            const imgData = tempCtx.createImageData(sourceWidth, sourceHeight);
+
+            for (let i = 0; i < sourceWidth * sourceHeight; i++) {
+                const val = Math.max(0, Math.min(255, Math.round(digitData[i])));
+                imgData.data[i * 4] = val;
+                imgData.data[i * 4 + 1] = val;
+                imgData.data[i * 4 + 2] = val;
+                imgData.data[i * 4 + 3] = 255;
+            }
+            tempCtx.putImageData(imgData, 0, 0);
+            ctx.drawImage(tempCanvas, 0, 0, sourceWidth * scaleFactor, sourceHeight * scaleFactor);
+        }
+
+        function addGaussianNoise(digitData, stdDev) {
+            const noisyData = new Float32Array(digitData.length);
+            for (let i = 0; i < digitData.length; i++) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random(); 
+                while(v === 0) v = Math.random();
+                let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+                noisyData[i] = digitData[i] + num * stdDev;
+            }
+            return noisyData;
+        }
+        
+        function clampDataToUint8(dataArray) {
+            const clamped = new Uint8ClampedArray(dataArray.length);
+            for(let i=0; i<dataArray.length; i++) {
+                clamped[i] = Math.max(0, Math.min(255, Math.round(dataArray[i])));
+            }
+            return clamped;
+        }
+
+        function extractPatchData(fullImageData, fullWidth, startX, startY, patchSize) {
+            const patch = new Float32Array(patchSize * patchSize);
+            for (let py = 0; py < patchSize; py++) {
+                for (let px = 0; px < patchSize; px++) {
+                    patch[py * patchSize + px] = fullImageData[(startY + py) * fullWidth + (startX + px)];
+                }
+            }
+            return patch;
+        }
+
+        function insertPatchData(fullImageDataToUpdate, fullWidth, patchData, startX, startY, patchSize) {
+            for (let py = 0; py < patchSize; py++) {
+                for (let px = 0; px < patchSize; px++) {
+                    fullImageDataToUpdate[(startY + py) * fullWidth + (startX + px)] = patchData[py * patchSize + px];
+                }
+            }
+        }
+        
+        function calculatePSNR(img1, img2, maxVal = 255) { /* ... same ... */ 
+            if (img1.length !== img2.length) throw new Error("Images must have the same dimensions for PSNR.");
+            let mse = 0;
+            for (let i = 0; i < img1.length; i++) {
+                mse += (img1[i] - img2[i]) ** 2;
+            }
+            mse /= img1.length;
+            if (mse === 0) return Infinity; 
+            return 20 * Math.log10(maxVal) - 10 * Math.log10(mse);
+        }
+        function calculateHistogram(imageDataArray) { /* ... same ... */ 
+            const hist = new Array(256).fill(0);
+            for (let i = 0; i < imageDataArray.length; i++) {
+                const val = Math.max(0, Math.min(255, Math.round(imageDataArray[i])));
+                hist[val]++;
+            }
+            return hist;
+        }
+        function calculateCDF(histogram) { /* ... same ... */ 
+            const cdf = new Array(256).fill(0);
+            cdf[0] = histogram[0];
+            for (let i = 1; i < 256; i++) {
+                cdf[i] = cdf[i - 1] + histogram[i];
+            }
+            const totalPixels = cdf[255];
+            if (totalPixels === 0) return cdf; // Avoid division by zero for empty images
+            for (let i = 0; i < 256; i++) {
+                cdf[i] /= totalPixels; 
+            }
+            return cdf;
+        }
+        function histogramMatch(sourceImageArray, refCdf) { /* ... same ... */ 
+            const sourceHist = calculateHistogram(sourceImageArray);
+            const sourceCdf = calculateCDF(sourceHist);
+            const matchedImage = new Float32Array(sourceImageArray.length);
+            const lut = new Array(256).fill(0);
+
+            for (let srcVal = 0; srcVal < 256; srcVal++) {
+                let j = 255;
+                do {
+                    lut[srcVal] = j;
+                    j--;
+                } while (j >= 0 && sourceCdf[srcVal] <= refCdf[j]);
+            }
+
+            for (let i = 0; i < sourceImageArray.length; i++) {
+                const originalPixelVal = Math.max(0, Math.min(255, Math.round(sourceImageArray[i])));
+                matchedImage[i] = lut[originalPixelVal];
+            }
+            return matchedImage;
+        }
+
+        function initializeWorkers(num_workers_to_init) {
+            terminateWorkers(); // Terminate existing workers first
+            workers = [];
+            let workerPath = 'hmc_worker.js'; // Ensure this path is correct
+            appendLog(`Initializing ${num_workers_to_init} workers...`);
+            for (let i = 0; i < num_workers_to_init; i++) {
+                try {
+                    const worker = new Worker(workerPath);
+                    worker.onmessage = handleWorkerMessage;
+                    worker.onerror = (error) => {
+                        appendLog(`Worker ${i} error: ${error.message} (filename: ${error.filename}, lineno: ${error.lineno})`);
+                        activeWorkerCount--; // Worker died
+                        checkAllPatchesDone();
+                    };
+                    workers.push(worker);
+                } catch (e) {
+                    appendLog(`Failed to create worker ${i}: ${e}. Check worker script path and content.`);
+                    // If even one worker fails, it might be better to stop or fallback
+                }
+            }
+            if (workers.length !== num_workers_to_init && num_workers_to_init > 0) {
+                 appendLog(`Warning: Only ${workers.length}/${num_workers_to_init} workers initialized.`);
+                 if (workers.length === 0) return false; // Critical failure
+            }
+            appendLog(`${workers.length} workers ready.`);
+            return true;
+        }
+
+        function terminateWorkers() {
+            workers.forEach(worker => worker.terminate());
+            workers = [];
+            activeWorkerCount = 0; // Reset active count
+            appendLog("Previous workers terminated.");
+        }
+
+        function handleWorkerMessage(event) {
+            const { type, patchId, startX, startY, denoisedPatchData, message } = event.data;
+            const worker = event.target; // The worker that sent the message
+
+            if (type === 'result') {
+                insertPatchData(X_denoised_full, DIGIT_WIDTH, denoisedPatchData, startX, startY, currentJobPatchSize);
+                patchesProcessedCounter++;
+                
+                // Update UI incrementally - can be slow if many patches
+                if (patchesProcessedCounter % Math.max(1, Math.floor(totalPatchesToProcess/10)) === 0 || patchesProcessedCounter === totalPatchesToProcess) {
+                     drawDigit(ctxDenoising, clampDataToUint8(X_denoised_full), denoisingCanvas.width, denoisingCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+                }
+                appendLog(`Main: Patch ${patchId} (${startX},${startY}) processed. (${patchesProcessedCounter}/${totalPatchesToProcess})`);
+
+                // Assign next task if available
+                if (patchesQueue.length > 0) {
+                    const nextTask = patchesQueue.shift();
+                    worker.postMessage(nextTask, [nextTask.patchTask.noisyPatchData.buffer]); // Transfer buffer
+                } else {
+                    activeWorkerCount--; // This worker becomes idle
+                }
+                checkAllPatchesDone();
+
+            } else if (type === 'log') {
+                appendLog(message); // Log messages from worker
+            }
+        }
+        
+        function checkAllPatchesDone() {
+            if (patchesProcessedCounter === totalPatchesToProcess && activeWorkerCount === 0) {
+                if (allPatchesPromiseResolve) {
+                    allPatchesPromiseResolve();
+                    allPatchesPromiseResolve = null; // Reset for next run
+                }
+            }
+        }
+
+        async function runHMC() {
+            startButton.disabled = true;
+            clearLog();
+            appendLog("Starting HMC denoising (patch-based, multi-core)...");
+
+            const num_workers_selected = parseInt(numWorkersInput.value);
+            if (!initializeWorkers(num_workers_selected)) {
+                 appendLog("Worker initialization failed. Cannot proceed.");
+                 startButton.disabled = false;
+                 return;
+            }
+            if (workers.length === 0 && num_workers_selected > 0) {
+                appendLog("No workers available, but multi-core processing requested. Aborting.");
+                startButton.disabled = false;
+                return;
+            }
+
+
+            const noiseStdDev = parseFloat(document.getElementById('noiseStdDev').value);
+            currentJobPatchSize = parseInt(document.getElementById('patchSize').value); // Store for use in handleWorkerMessage
+            
+            if (DIGIT_WIDTH % currentJobPatchSize !== 0 || DIGIT_HEIGHT % currentJobPatchSize !== 0) {
+                appendLog(`Error: Patch size ${currentJobPatchSize} must evenly divide digit dimensions (28x28).`);
+                startButton.disabled = false; return;
+            }
+            const lambda_L = parseFloat(document.getElementById('lambdaL').value);
+            const beta = parseFloat(document.getElementById('beta').value);
+            const epsilon = parseFloat(document.getElementById('epsilon').value);
+            const L_steps = parseInt(document.getElementById('L_steps').value);
+            const N_iter_per_patch = parseInt(document.getElementById('N_iter').value);
+            const N_burnin_per_patch = parseInt(document.getElementById('N_burnin').value);
+            const updateFreq = parseInt(document.getElementById('updateFreq').value);
+            
+            appendLog(`Parameters: noiseStdDev=${noiseStdDev}, patchSize=${currentJobPatchSize}, λ_L=${lambda_L}, β=${beta}, ε=${epsilon}, L=${L_steps}, N_iter/patch=${N_iter_per_patch}, N_burnin/patch=${N_burnin_per_patch}`);
+            appendLog(`Using ${workers.length} worker threads.`);
+
+            const randomIndex = Math.floor(Math.random() * TOTAL_IMAGES);
+            currentOriginalDigit = extractDigit(randomIndex);
+            if (!currentOriginalDigit) { startButton.disabled = false; return; }
+            
+            currentNoisyDigitFull = addGaussianNoise(currentOriginalDigit, noiseStdDev);
+            const currentNoisyDigitFull_clamped = clampDataToUint8(currentNoisyDigitFull);
+
+            drawDigit(ctxOriginal, currentOriginalDigit, originalCanvas.width, originalCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+            drawDigit(ctxNoisy, currentNoisyDigitFull_clamped, noisyCanvas.width, noisyCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+            
+            const psnrNoisyVal = calculatePSNR(currentOriginalDigit, currentNoisyDigitFull_clamped);
+            psnrNoisyDisplay.textContent = `PSNR: ${psnrNoisyVal.toFixed(2)} dB`;
+            psnrDenoisedDisplay.textContent = `PSNR: ...`;
+            psnrHistMatchedDisplay.textContent = `PSNR: ...`;
+
+            X_denoised_full = new Float32Array(DIGIT_WIDTH * DIGIT_HEIGHT); // Reset for current run
+            drawDigit(ctxDenoising, currentNoisyDigitFull_clamped, denoisingCanvas.width, denoisingCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5); // Initial display
+            drawDigit(ctxHistMatched, new Uint8ClampedArray(DIGIT_WIDTH * DIGIT_HEIGHT).fill(128), histMatchedCanvas.width, histMatchedCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+
+            const numPatchesX = DIGIT_WIDTH / currentJobPatchSize;
+            const numPatchesY = DIGIT_HEIGHT / currentJobPatchSize;
+            totalPatchesToProcess = numPatchesX * numPatchesY;
+            patchesProcessedCounter = 0;
+            activeWorkerCount = 0; // Reset for current run
+            patchesQueue = []; // Reset queue
+
+            let patchIdCounter = 0;
+            for (let patchY = 0; patchY < numPatchesY; patchY++) {
+                for (let patchX = 0; patchX < numPatchesX; patchX++) {
+                    const startX = patchX * currentJobPatchSize;
+                    const startY = patchY * currentJobPatchSize;
+                    const Y_noisy_patch = extractPatchData(currentNoisyDigitFull, DIGIT_WIDTH, startX, startY, currentJobPatchSize);
+
+                    const task = {
+                        patchTask: {
+                            patchId: patchIdCounter++,
+                            startX: startX,
+                            startY: startY,
+                            noisyPatchData: Y_noisy_patch 
+                        },
+                        params: { patchSize: currentJobPatchSize, lambda_L, beta, epsilon, L_steps, N_iter_per_patch, N_burnin_per_patch, updateFreq },
+                    };
+                    patchesQueue.push(task);
+                }
+            }
+            appendLog(`Created ${totalPatchesToProcess} patch tasks.`);
+
+            if (totalPatchesToProcess === 0 && allPatchesPromiseResolve) { // No patches to process
+                allPatchesPromiseResolve(); // Resolve immediately if promise exists
+            } else if (totalPatchesToProcess > 0) {
+                const processingPromise = new Promise(resolve => {
+                    allPatchesPromiseResolve = resolve;
+                });
+
+                // Start initial tasks on workers
+                for (let i = 0; i < workers.length && patchesQueue.length > 0; i++) {
+                    const task = patchesQueue.shift();
+                    workers[i].postMessage(task, [task.patchTask.noisyPatchData.buffer]); // Transfer buffer
+                    activeWorkerCount++;
+                }
+                await processingPromise; // Wait for all patches to be processed
+            }
+
+
+            appendLog("All patches processed by HMC workers.");
+            // Workers are kept alive for potential next run, terminate them if you want to free resources immediately
+            // terminateWorkers(); // Optional: or do it at the start of next run
+
+            // Final draw of fully denoised image
+            drawDigit(ctxDenoising, clampDataToUint8(X_denoised_full), denoisingCanvas.width, denoisingCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+            const psnrDenoised = calculatePSNR(currentOriginalDigit, clampDataToUint8(X_denoised_full));
+            psnrDenoisedDisplay.textContent = `PSNR: ${psnrDenoised.toFixed(2)} dB`;
+
+            appendLog("Applying histogram matching...");
+            const originalHist = calculateHistogram(currentOriginalDigit);
+            const originalCdf = calculateCDF(originalHist);
+            const X_hist_matched = histogramMatch(X_denoised_full, originalCdf);
+            const X_hist_matched_clamped = clampDataToUint8(X_hist_matched);
+
+            drawDigit(ctxHistMatched, X_hist_matched_clamped, histMatchedCanvas.width, histMatchedCanvas.height, DIGIT_WIDTH, DIGIT_HEIGHT, 5);
+            const psnrHistMatched = calculatePSNR(currentOriginalDigit, X_hist_matched_clamped);
+            psnrHistMatchedDisplay.textContent = `PSNR: ${psnrHistMatched.toFixed(2)} dB`;
+            appendLog("Histogram matching complete.");
+            
+            appendLog(`Denoising finished.`);
+            startButton.disabled = false;
+        }
+
+        window.onload = async () => {
+            clearLog();
+            try {
+                await loadStitchedMNIST();
+                appendLog("Ready. Adjust parameters and click 'Load New Image & Start Denoising'.");
+                startButton.onclick = runHMC;
+            } catch (error) {
+                appendLog("Failed to initialize: " + error);
+                startButton.disabled = true;
+            }
+        };
+    </script>
+</body>
+</html>
