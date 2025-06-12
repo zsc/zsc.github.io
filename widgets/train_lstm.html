@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>LSTM Autoregressive Demo with BPE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="cmath_dev.js"></script> <!-- Load your data file -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; font-family: sans-serif; }
+        .log-area { width: 100%; height: 200px; border: 1px solid #ccc; overflow-y: scroll; white-space: pre-wrap; margin-top: 10px; font-family: monospace; font-size: 0.9em; }
+        .config-section label { margin-right: 10px; }
+        .config-section input[type="number"] { width: 80px; }
+        h5 { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LSTM Autoregressive Demo with BPE</h1>
+
+        <div class="config-section card card-body bg-light mb-3">
+            <h5>Hyperparameters</h5>
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label for="learningRate">Learning Rate:</label>
+                    <input type="number" class="form-control" id="learningRate" value="0.005" step="0.001">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="epochs">Epochs:</label>
+                    <input type="number" class="form-control" id="epochs" value="20" step="1">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="batchSize">Batch Size:</label>
+                    <input type="number" class="form-control" id="batchSize" value="8" step="1">
+                </div>
+                 <div class="form-group col-md-3">
+                    <label for="maxSamples">Max Samples (0=all):</label>
+                    <input type="number" class="form-control" id="maxSamples" value="100" step="1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label for="embeddingDim">Embedding Dim:</label>
+                    <input type="number" class="form-control" id="embeddingDim" value="64" step="1">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="lstmUnits">LSTM Units:</label>
+                    <input type="number" class="form-control" id="lstmUnits" value="128" step="1">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="maxSeqLen">Max Seq Length:</label>
+                    <input type="number" class="form-control" id="maxSeqLen" value="100" step="1">
+                </div>
+                 <div class="form-group col-md-3">
+                    <label for="bpeVocabSize">BPE Vocab Size:</label>
+                    <input type="number" class="form-control" id="bpeVocabSize" value="512" step="1"> <!-- 8192 is too slow for demo -->
+                </div>
+            </div>
+        </div>
+
+        <button id="trainButton" class="btn btn-primary">Load Data & Train Model</button>
+        
+        <h5>Execution Log</h5>
+        <div id="logArea" class="log-area"></div>
+
+        <div class="test-section card card-body bg-light mt-3">
+            <h5>Test Model Completion</h5>
+            <div class="form-group">
+                <label for="testInput">Input Prompt:</label>
+                <input type="text" class="form-control" id="testInput" placeholder="e.g., 小明有5个苹果，吃了2个">
+            </div>
+            <button id="generateButton" class="btn btn-success" disabled>Generate Completion</button>
+            <div class="form-group mt-2">
+                <label for="testOutput">Generated Output:</label>
+                <textarea id="testOutput" class="form-control" rows="3" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const logArea = document.getElementById('logArea');
+    const trainButton = document.getElementById('trainButton');
+    const generateButton = document.getElementById('generateButton');
+    const testInput = document.getElementById('testInput');
+    const testOutput = document.getElementById('testOutput');
+
+    let model;
+    let bpeVocab = {}; // token -> id
+    let bpeRevVocab = {}; // id -> token
+    let bpeMerges = {}; // For actual BPE tokenization (not fully used in this simplified version)
+    let maxSeqLen;
+
+    const PAD_TOKEN = '<PAD>';
+    const SOS_TOKEN = '<SOS>';
+    const EOS_TOKEN = '<EOS>';
+    const UNK_TOKEN = '<UNK>';
+    const SEP_TOKEN = '<SEP>'; // Separator between input and golden
+    const SPECIAL_TOKENS = [PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, UNK_TOKEN, SEP_TOKEN];
+
+    function log(message) {
+        console.log(message);
+        logArea.innerHTML += message + '\n';
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+    
+    async function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // --- BPE Tokenizer ---
+    // This is a simplified BPE. A full BPE is much more complex and optimized.
+    // This version will be VERY SLOW for large vocab sizes or large datasets.
+    async function trainBPE(texts, targetVocabSize) {
+        log(`Starting BPE training. Target vocab size: ${targetVocabSize}. This might take a while...`);
+        let currentVocabSet = new Set();
+        SPECIAL_TOKENS.forEach(t => currentVocabSet.add(t));
+
+        texts.forEach(text => {
+            for (const char of text) {
+                currentVocabSet.add(char);
+            }
+        });
+
+        let currentVocabList = Array.from(currentVocabSet);
+        bpeMerges = {}; // Not used for tokenization in this simple version, but part of BPE logic
+
+        // Represent texts as lists of current known tokens (initially characters)
+        let tokenizedTexts = texts.map(text => Array.from(text));
+
+        const numMerges = targetVocabSize - currentVocabList.length;
+        log(`Initial character vocab size: ${currentVocabList.length}. Need ${Math.max(0, numMerges)} merges.`);
+
+        for (let i = 0; i < numMerges; i++) {
+            if (currentVocabList.length >= targetVocabSize) break;
+
+            const pairCounts = {};
+            for (const tokens of tokenizedTexts) {
+                for (let j = 0; j < tokens.length - 1; j++) {
+                    const pairKey = tokens[j] + '|||' + tokens[j+1]; // Use a unique separator
+                    pairCounts[pairKey] = (pairCounts[pairKey] || 0) + 1;
+                }
+            }
+
+            if (Object.keys(pairCounts).length === 0) {
+                log("No more pairs to merge.");
+                break;
+            }
+
+            let bestPairKey = '';
+            let maxFreq = -1;
+            for (const pairKey in pairCounts) {
+                if (pairCounts[pairKey] > maxFreq) {
+                    maxFreq = pairCounts[pairKey];
+                    bestPairKey = pairKey;
+                }
+            }
+             if (!bestPairKey) {
+                log("Could not find a best pair to merge.");
+                break;
+            }
+
+            const pairParts = bestPairKey.split('|||');
+            const newToken = pairParts[0] + pairParts[1];
+
+            if (currentVocabSet.has(newToken)) { // Already merged or was a char
+                // This logic is tricky. If 'a','b' -> 'ab', and 'ab','c' -> 'abc',
+                // and then later 'b','c' -> 'bc', 'a','bc' -> 'abc'.
+                // To avoid issues, we can just remove the bestPairKey from pairCounts and continue
+                // This is a simplification; real BPE handles this more gracefully.
+                delete pairCounts[bestPairKey];
+                i--; // Redo this merge iteration
+                if (Object.keys(pairCounts).length === 0) break;
+                continue;
+            }
+
+            currentVocabSet.add(newToken);
+            currentVocabList.push(newToken);
+            // bpeMerges[bestPairKey.replace('|||', ',')] = newToken; // For a more standard BPE tokenizer
+
+            // Update tokenizedTexts (VERY SLOW PART)
+            const newTokTexts = [];
+            for (const tokens of tokenizedTexts) {
+                let newTokensSingleText = [];
+                let k = 0;
+                while (k < tokens.length) {
+                    if (k < tokens.length - 1 && tokens[k] === pairParts[0] && tokens[k+1] === pairParts[1]) {
+                        newTokensSingleText.push(newToken);
+                        k += 2;
+                    } else {
+                        newTokensSingleText.push(tokens[k]);
+                        k += 1;
+                    }
+                }
+                newTokTexts.push(newTokensSingleText);
+            }
+            tokenizedTexts = newTokTexts;
+            
+            if (i % 10 === 0 || i === numMerges - 1) { // Log progress less frequently
+                log(`BPE Merge ${i + 1}/${numMerges}: Merged "${pairParts[0]}" + "${pairParts[1]}" -> "${newToken}" (freq ${maxFreq}). Vocab size: ${currentVocabList.length}`);
+                await sleep(0); // Yield to browser
+            }
+        }
+        
+        // Final vocabulary maps
+        bpeVocab = {};
+        bpeRevVocab = {};
+        
+        // Prioritize longer tokens for greedy tokenization. Special tokens first.
+        currentVocabList.sort((a, b) => b.length - a.length); 
+        
+        let id = 0;
+        SPECIAL_TOKENS.forEach(token => {
+            bpeVocab[token] = id;
+            bpeRevVocab[id] = token;
+            id++;
+        });
+        currentVocabList.forEach(token => {
+            if (!bpeVocab.hasOwnProperty(token)) {
+                bpeVocab[token] = id;
+                bpeRevVocab[id] = token;
+                id++;
+            }
+        });
+        
+        log(`BPE training finished. Final vocab size: ${Object.keys(bpeVocab).length}`);
+        if (Object.keys(bpeVocab).length > targetVocabSize) {
+            log(`Warning: Actual vocab size (${Object.keys(bpeVocab).length}) > target (${targetVocabSize}) due to initial chars and special tokens.`);
+        }
+    }
+
+    function tokenize(text) {
+        const tokenIds = [bpeVocab[SOS_TOKEN]];
+        let remainingText = text;
+        const sortedVocabKeys = Object.keys(bpeVocab)
+            .filter(t => !SPECIAL_TOKENS.includes(t)) // Don't match special tokens literally in text
+            .sort((a, b) => b.length - a.length); // Longest first
+
+        while (remainingText.length > 0) {
+            let foundMatch = false;
+            for (const token of sortedVocabKeys) {
+                if (remainingText.startsWith(token)) {
+                    tokenIds.push(bpeVocab[token]);
+                    remainingText = remainingText.substring(token.length);
+                    foundMatch = true;
+                    break;
+                }
+            }
+            if (!foundMatch) {
+                tokenIds.push(bpeVocab[UNK_TOKEN]);
+                remainingText = remainingText.substring(1); // Skip one char
+            }
+        }
+        tokenIds.push(bpeVocab[EOS_TOKEN]);
+        return tokenIds;
+    }
+
+    function detokenize(tokenIds) {
+        return tokenIds
+            .map(id => bpeRevVocab[id])
+            .filter(token => token !== SOS_TOKEN && token !== EOS_TOKEN && token !== PAD_TOKEN)
+            .join('');
+    }
+
+    // --- Data Preparation ---
+    function prepareTrainingData(problemDataSubset) {
+        log("Preparing training data...");
+        maxSeqLen = parseInt(document.getElementById('maxSeqLen').value);
+        const sequences = [];
+
+        for (const item of problemDataSubset) {
+            const inputText = item.input;
+            const goldenText = item.golden;
+            const fullText = `${inputText} ${SEP_TOKEN} ${goldenText}`;
+            let tokenIds = tokenize(fullText);
+
+            if (tokenIds.length > maxSeqLen) {
+                tokenIds = tokenIds.slice(0, maxSeqLen -1); // Truncate
+                tokenIds.push(bpeVocab[EOS_TOKEN]); // Ensure EOS if truncated near end
+            }
+            sequences.push(tokenIds);
+        }
+
+        // Prepare X and Y for autoregressive training
+        // X: sequence[:-1], Y: sequence[1:]
+        // All sequences padded to maxSeqLen
+        const X = [];
+        const Y = [];
+
+        for (const seq of sequences) {
+            const x_seq = seq.slice(0, -1);
+            const y_seq = seq.slice(1);
+
+            const padded_x = [...x_seq, ...Array(maxSeqLen - x_seq.length).fill(bpeVocab[PAD_TOKEN])].slice(0, maxSeqLen);
+            const padded_y = [...y_seq, ...Array(maxSeqLen - y_seq.length).fill(bpeVocab[PAD_TOKEN])].slice(0, maxSeqLen);
+            
+            X.push(padded_x);
+            Y.push(padded_y);
+        }
+        log(`Prepared ${X.length} sequences for training.`);
+        return { X, Y };
+    }
+
+
+    // --- LSTM Model (TensorFlow.js) ---
+    function createLSTMModel() {
+        log("Creating LSTM model...");
+        const vocabSize = Object.keys(bpeVocab).length;
+        const embeddingDim = parseInt(document.getElementById('embeddingDim').value);
+        const lstmUnits = parseInt(document.getElementById('lstmUnits').value);
+        maxSeqLen = parseInt(document.getElementById('maxSeqLen').value);
+
+
+        model = tf.sequential();
+        model.add(tf.layers.embedding({
+            inputDim: vocabSize,
+            outputDim: embeddingDim,
+            inputLength: maxSeqLen 
+        }));
+        model.add(tf.layers.lstm({
+            units: lstmUnits,
+            returnSequences: true // Important for seq-to-seq char/token level prediction
+        }));
+        model.add(tf.layers.dense({
+            units: vocabSize,
+            activation: 'softmax'
+        }));
+
+        const learningRate = parseFloat(document.getElementById('learningRate').value);
+        model.compile({
+            optimizer: tf.train.adam(learningRate),
+            loss: 'sparseCategoricalCrossentropy', // Use this if Y contains token IDs
+            metrics: ['accuracy']
+        });
+        model.summary(null, null, log);
+        log("Model created successfully.");
+    }
+
+    async function trainModel(X_train, Y_train) {
+        const epochs = parseInt(document.getElementById('epochs').value);
+        const batchSize = parseInt(document.getElementById('batchSize').value);
+
+        log(`Starting training for ${epochs} epochs, batch size ${batchSize}...`);
+
+        const xs = tf.tensor2d(X_train, [X_train.length, maxSeqLen], 'int32');
+        let ys_tensor = tf.tensor2d(Y_train, [Y_train.length, maxSeqLen], 'int32');
+        // For sparseCategoricalCrossentropy, ys should be [batch_size, seq_length, 1] or [batch_size, seq_length]
+        // and contain class indices. 
+        // The error "expected dense_Dense1 to have 3 dimension(s). but got array with shape [100,100]"
+        // indicates that TF.js expects y_true (the target) to be 3D, like [batch_size, seq_length, 1].
+        ys_tensor = ys_tensor.reshape([Y_train.length, maxSeqLen, 1]).cast('float32'); // Cast to float32
+
+        await model.fit(xs, ys_tensor, { // Use ys_tensor here
+            epochs: epochs,
+            batchSize: batchSize,
+            callbacks: {
+                onEpochEnd: async (epoch, logs) => {
+                    log(`Epoch ${epoch + 1}/${epochs} - loss: ${logs.loss.toFixed(4)}, acc: ${logs.acc.toFixed(4)}`);
+                    await tf.nextFrame(); // Yield to UI
+                }
+            }
+        });
+
+        tf.dispose([xs, ys_tensor]); // Dispose the correct tensor
+        
+        log("Training complete!");
+    }
+
+    // --- Inference ---
+    async function generateCompletion() {
+        if (!model) {
+            log("Model not trained yet.");
+            testOutput.value = "Model not trained.";
+            return;
+        }
+        generateButton.disabled = true;
+        testOutput.value = "Generating...";
+
+        const inputText = testInput.value.trim() + ` ${SEP_TOKEN} `; // Add separator to prompt for golden part
+        let tokenIds = tokenize(inputText); 
+        tokenIds.pop(); // Remove EOS from tokenized prompt, we'll generate it. SOS is already there.
+
+        const maxGeneratedLength = parseInt(document.getElementById('maxSeqLen').value) - tokenIds.length; // Max length of entire sequence
+        let generatedSequence = [...tokenIds];
+        
+        log(`Input prompt tokens: ${detokenize(tokenIds)} (IDs: ${tokenIds.join(',')})`);
+
+        for (let i = 0; i < maxGeneratedLength; i++) {
+            const currentSequencePadded = [...generatedSequence, ...Array(maxSeqLen - generatedSequence.length).fill(bpeVocab[PAD_TOKEN])].slice(0, maxSeqLen);
+            const inputTensor = tf.tensor2d([currentSequencePadded], [1, maxSeqLen], 'int32');
+            
+            const predictionTensor = model.predict(inputTensor);
+            // Get prediction for the last token in the actual sequence (not padding)
+            const lastTokenIdxInSeq = generatedSequence.length - 1; 
+            const nextTokenProbabilities = await predictionTensor.slice([0, lastTokenIdxInSeq, 0], [1, 1, Object.keys(bpeVocab).length]).squeeze().array();
+            
+            const nextTokenId = tf.argMax(nextTokenProbabilities).dataSync()[0];
+
+            tf.dispose([inputTensor, predictionTensor]);
+
+            if (nextTokenId === bpeVocab[EOS_TOKEN]) {
+                generatedSequence.push(nextTokenId);
+                break;
+            }
+            generatedSequence.push(nextTokenId);
+            if (generatedSequence.length >= maxSeqLen) break;
+        }
+        
+        const fullGeneratedText = detokenize(generatedSequence);
+        log(`Full generated sequence: ${fullGeneratedText}`);
+        
+        // Extract only the part after SEP_TOKEN
+        const parts = fullGeneratedText.split(SEP_TOKEN);
+        const completion = parts.length > 1 ? parts[1].trim() : "[No completion after SEP]";
+
+        testOutput.value = completion;
+        generateButton.disabled = false;
+    }
+
+
+    // --- Main Orchestration ---
+    trainButton.addEventListener('click', async () => {
+        trainButton.disabled = true;
+        generateButton.disabled = true;
+        logArea.innerHTML = ""; // Clear log
+
+        try {
+            if (!problemData || problemData.length === 0) {
+                log("Error: problemData is not loaded or is empty. Check cmath_dev.js.");
+                return;
+            }
+            log(`Loaded ${problemData.length} problems from cmath_dev.js`);
+
+            let numSamples = parseInt(document.getElementById('maxSamples').value);
+            if (numSamples <= 0 || numSamples > problemData.length) {
+                numSamples = problemData.length;
+            }
+            const dataForBPE = problemData.slice(0, numSamples).map(item => `${item.input} ${SEP_TOKEN} ${item.golden}`);
+            
+            const targetBPEVocabSize = parseInt(document.getElementById('bpeVocabSize').value);
+            await trainBPE(dataForBPE, targetBPEVocabSize);
+
+            if (Object.keys(bpeVocab).length === SPECIAL_TOKENS.length) { // Only special tokens, BPE failed or no data
+                 log("BPE training resulted in a very small vocabulary. Check data or BPE parameters.");
+                 if (dataForBPE.length > 0 && dataForBPE[0].length > 0) { // If there was data, force some char vocab
+                    log("Falling back to basic character vocabulary due to BPE issue.");
+                    let charId = SPECIAL_TOKENS.length;
+                    const allChars = new Set(dataForBPE.join('').split(''));
+                    allChars.forEach(char => {
+                        if (!bpeVocab.hasOwnProperty(char)) {
+                            bpeVocab[char] = charId;
+                            bpeRevVocab[charId] = char;
+                            charId++;
+                        }
+                    });
+                    log(`Fallback char vocab size: ${Object.keys(bpeVocab).length}`);
+                 } else {
+                    log("No data to build even a character vocabulary.");
+                    return;
+                 }
+            }
+
+
+            const { X, Y } = prepareTrainingData(problemData.slice(0, numSamples));
+            
+            if (X.length === 0) {
+                log("No training data prepared. Aborting.");
+                return;
+            }
+
+            createLSTMModel();
+            await trainModel(X, Y);
+
+            generateButton.disabled = false;
+            log("Demo ready. You can test completions.");
+
+        } catch (error) {
+            log(`An error occurred: ${error.message}\n${error.stack}`);
+        } finally {
+            trainButton.disabled = false;
+        }
+    });
+
+    generateButton.addEventListener('click', generateCompletion);
+
+    // Initial message
+    log("Demo initialized. Configure hyperparameters and click 'Load Data & Train Model'.");
+    log("Note: BPE training can be very slow, especially with large vocab size or many samples. Use 'Max Samples' and smaller 'BPE Vocab Size' for quicker demos.");
+    log(`Using TF.js backend: ${tf.getBackend()}`);
+
+</script>
+</body>
+</html>
