@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MNIST U-Net Diffusion Demo (Fixed)</title>
+    <title>MNIST U-Net Diffusion Demo (Pause/Resume)</title>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
         .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1, h2 { color: #333; }
         label { display: inline-block; width: 180px; margin-bottom: 5px; }
         input[type="number"], input[type="text"] { width: 80px; padding: 5px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; margin-bottom: 5px; }
         button:hover { background-color: #0056b3; }
         button:disabled { background-color: #ccc; }
         #log { width: 100%; height: 200px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; background-color: #e9e9e9; white-space: pre-wrap; margin-top: 15px; }
@@ -22,24 +22,23 @@
 </head>
 <body>
     <div class="container">
-        <h1>MNIST Diffusion Denoising Demo (U-Net Fixed)</h1>
+        <h1>MNIST Diffusion Denoising Demo (U-Net Pause/Resume)</h1>
 
         <h2>Hyperparameters</h2>
         <div><label for="numTrainImages">Number of Images (max 60k):</label><input type="number" id="numTrainImages" value="100"></div>
-        <div><label for="epochs">Epochs:</label><input type="number" id="epochs" value="1"></div>
-        <div><label for="learningRate">Learning Rate:</label><input type="text" id="learningRate" value="0.00005"></div> <!-- Lowered LR -->
-        <div><label for="timestepsT">Diffusion Timesteps (T):</label><input type="number" id="timestepsT" value="20"></div> <!-- Reduced T -->
+        <div><label for="epochs">Epochs:</label><input type="number" id="epochs" value="3"></div> <!-- Slightly more epochs to see pause benefit -->
+        <div><label for="learningRate">Learning Rate:</label><input type="text" id="learningRate" value="0.00005"></div>
+        <div><label for="timestepsT">Diffusion Timesteps (T):</label><input type="number" id="timestepsT" value="20"></div>
         <div><label for="betaStart">Beta Start:</label><input type="text" id="betaStart" value="0.0001"></div>
         <div><label for="betaEnd">Beta End:</label><input type="text" id="betaEnd" value="0.02"></div>
-        <!-- U-Net size is now fixed in code for this test -->
 
         <button id="trainButton">Start Training</button>
-        <button id="pauseButton" disabled>Pause Training</button>
+        <button id="pauseResumeButton" disabled>Pause Training</button>
         <button id="generateButton" disabled>Generate Sample from Noise</button>
         <button id="testDenoiseButton" disabled>Test Denoising Random Image</button>
 
         <h2>Log</h2>
-        <div id="log">Welcome! U-Net version. Model size: baseFilters=2, timeEmbedDim=4. LR lowered.<br>Image data will be fetched automatically.</div>
+        <div id="log">Welcome! U-Net version with Pause/Resume. Model size: baseFilters=2, timeEmbedDim=4.<br>Image data will be fetched automatically.</div>
 
         <h2>Visualizations</h2>
         <div class="canvases">
@@ -59,15 +58,27 @@
 
         const logElement = document.getElementById('log');
         const trainButton = document.getElementById('trainButton');
+        const pauseResumeButton = document.getElementById('pauseResumeButton');
         const generateButton = document.getElementById('generateButton');
-        const pauseButton = document.getElementById('pauseButton');
         const testDenoiseButton = document.getElementById('testDenoiseButton');
 
         let mnistData = [];
         let model = null;
         let diffusionParams = {};
-        let validLossCount = 0; // To track non-NaN losses
-        let isPaused = false;
+        
+        // --- Training State ---
+        let isTrainingActive = false;
+        let isTrainingPaused = false;
+        let currentEpoch = 0;
+        let currentImageIndex = 0;
+        let totalEpochsGoal = 0;
+        let totalImagesPerEpoch = 0;
+        let learningRateVal = 0.00005; // Store parsed LR
+
+        let resolvePause = null; // Used to unblock the training loop when resuming
+
+        let validLossCount = 0;
+        let totalLossSinceStart = 0; // Accumulates loss across all valid steps since training started/restarted
 
         function log(message) {
             logElement.innerHTML += message + '<br>';
@@ -76,7 +87,7 @@
         }
 
         // --- MNIST Data Handling (Identical) ---
-        async function loadAndParseMNIST(numImagesToLoad) {
+        async function loadAndParseMNIST(numImagesToLoad) { /* ... (Identical to previous fixed version) ... */ 
             log('Loading MNIST stitched image...');
             const stitchedImg = new Image();
             stitchedImg.crossOrigin = "anonymous";
@@ -121,14 +132,13 @@
             });
         }
 
-        function drawToCanvas(canvasId, flatImageData, width = IMAGE_SIZE, height = IMAGE_SIZE, scaleFactor = 4) {
-            // ... (Identical to previous U-Net version)
+        function drawToCanvas(canvasId, flatImageData, width = IMAGE_SIZE, height = IMAGE_SIZE, scaleFactor = 4) { /* ... (Identical) ... */ 
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             canvas.width = width * scaleFactor;
             canvas.height = height * scaleFactor;
             ctx.clearRect(0,0,canvas.width, canvas.height);
-            if (flatImageData.length === width * height) {
+            if (flatImageData && flatImageData.length === width * height) {
                 const imgData = ctx.createImageData(width, height);
                 for (let i = 0; i < flatImageData.length; i++) {
                     const val = Math.round((flatImageData[i] + 1.0) / 2.0 * 255.0);
@@ -146,7 +156,7 @@
             }
         }
         
-        // --- Math & NN Helpers ---
+        // --- Math & NN Helpers (Tensor, Activations, Layers - Identical to previous fixed version) ---
         function generateGaussianNoise(size) { /* ... (Identical) ... */ 
             const noise = new Float32Array(size);
             for (let i = 0; i < size; i += 2) {
@@ -160,55 +170,31 @@
             }
             return noise;
         }
-
-        // --- Tensor Class (FIXED get/set for N-Dimensions) ---
-        class Tensor {
+        class Tensor { /* ... (Identical to previous fixed version) ... */ 
             constructor(shape, data) {
                 this.shape = shape;
                 const size = shape.reduce((a, b) => a * b, 1);
                 this.data = data instanceof Float32Array ? data : new Float32Array(size);
-                if (data && !(data instanceof Float32Array) && data.length === size) { // If plain array is passed
+                if (data && !(data instanceof Float32Array) && data.length === size) { 
                     this.data.set(data);
                 } else if (data && data.length !== size) {
                      throw new Error(`Data length ${data.length} does not match shape size ${size}`);
                 }
             }
-
-            _getIndex(indices) { // indices is an array e.g. [d0, d1, d2, ...]
+            _getIndex(indices) { 
                 if (indices.length !== this.shape.length) {
                     throw new Error(`Dimension mismatch for indices: expected ${this.shape.length}, got ${indices.length}. Shape: ${this.shape}, Indices: ${indices}`);
                 }
                 let flatIndex = 0;
-                // C-style (row-major) indexing
-                // flat_idx = i0*S0 + i1*S1 + ... + iN-1*SN-1 (where Si is stride for dim i)
-                // S(k) = product(shape[j] for j from k+1 to N-1)
-                // flat_idx = idx[N-1] + shape[N-1]*(idx[N-2] + shape[N-2]*(...))
-                // Or equivalently:
-                // flat_idx = 0
-                // for k = 0 to N-1:
-                //   flat_idx = flat_idx * shape[k] + indices[k]  -> NO, this is not how strides work for C-order.
-                // It should be:
-                // flat_idx = indices[0]
-                // for k = 1 to N-1:
-                //   flat_idx = flat_idx * shape[k] + indices[k]
-
-                // Correct C-style (row-major) generic N-D to 1D mapping:
-                // flat_idx = 0;
-                // for (k=0; k < N; ++k) {
-                //    int S_k = 1; for (j=k+1; j < N; ++j) S_k *= shape[j];
-                //    flat_idx += indices[k] * S_k;
-                // }
-                // This is what the explicit sums below implement for 1D-4D.
-
-                if (this.shape.length === 1) { // Shape [D0], Index [i0]
+                if (this.shape.length === 1) { 
                     flatIndex = indices[0];
-                } else if (this.shape.length === 2) { // Shape [D0, D1], Index [i0, i1]
+                } else if (this.shape.length === 2) { 
                     flatIndex = indices[0] * this.shape[1] + indices[1];
-                } else if (this.shape.length === 3) { // Shape [D0, D1, D2], Index [i0, i1, i2]
+                } else if (this.shape.length === 3) { 
                     flatIndex = indices[0] * this.shape[1] * this.shape[2] + 
                                 indices[1] * this.shape[2] + 
                                 indices[2];
-                } else if (this.shape.length === 4) { // Shape [D0, D1, D2, D3], Index [i0, i1, i2, i3]
+                } else if (this.shape.length === 4) { 
                     flatIndex = indices[0] * this.shape[1] * this.shape[2] * this.shape[3] +
                                 indices[1] * this.shape[2] * this.shape[3] +
                                 indices[2] * this.shape[3] +
@@ -221,9 +207,8 @@
                 }
                 return flatIndex;
             }
-
             get(indicesOrSingle) {
-                if (!Array.isArray(indicesOrSingle)) { // single index for flat data access OR 1D tensor
+                if (!Array.isArray(indicesOrSingle)) { 
                     if (this.shape.length === 1 && (indicesOrSingle < 0 || indicesOrSingle >= this.shape[0])) {
                          throw new Error(`Index ${indicesOrSingle} out of bounds for 1D Tensor of size ${this.shape[0]}`);
                     }
@@ -232,12 +217,10 @@
                     }
                     return this.data[indicesOrSingle];
                 }
-                // indicesOrSingle is an array of indices
                 return this.data[this._getIndex(indicesOrSingle)];
             }
-
             set(indicesOrSingle, value) {
-                if (!Array.isArray(indicesOrSingle)) { // single index for flat data access OR 1D tensor
+                if (!Array.isArray(indicesOrSingle)) { 
                     if (this.shape.length === 1 && (indicesOrSingle < 0 || indicesOrSingle >= this.shape[0])) {
                          throw new Error(`Index ${indicesOrSingle} out of bounds for 1D Tensor of size ${this.shape[0]}`);
                     }
@@ -247,17 +230,12 @@
                     this.data[indicesOrSingle] = value;
                     return;
                 }
-                // indicesOrSingle is an array of indices
                 this.data[this._getIndex(indicesOrSingle)] = value;
             }
-
             clone() { return new Tensor([...this.shape], new Float32Array(this.data)); }
             fill(value) { this.data.fill(value); return this; }
-            
-            // These getCHW/setCHW are specific for 3D and correct
             getCHW(c,h,w) { return this.data[c * this.shape[1]*this.shape[2] + h * this.shape[2] + w]; }
             setCHW(c,h,w,val) { this.data[c * this.shape[1]*this.shape[2] + h * this.shape[2] + w] = val; }
-            
             static fromFlat(flatData, H, W, C=1) {
                 const tensor = new Tensor([C,H,W]);
                 if (C === 1 && flatData.length === H*W) {
@@ -270,16 +248,14 @@
                 return tensor;
             }
             toFlat() {
-                if (this.shape[0] > 1 && this.shape.length === 3) { // Multiple channels, return first one for viz
+                if (this.shape[0] > 1 && this.shape.length === 3) { 
                     const firstChannelSize = this.shape[1] * this.shape[2];
                     return this.data.slice(0, firstChannelSize);
                 }
-                return this.data; // Assumes C=1 or already flat (e.g. 1D tensor)
+                return this.data; 
             }
         }
-        
-        // --- Activation Layers (Identical) ---
-        class ReLULayer { /* ... */ 
+        class ReLULayer { /* ... (Identical) ... */ 
             forward(inputTensor) {
                 this.inputTensor = inputTensor;
                 const outputTensor = inputTensor.clone();
@@ -296,7 +272,7 @@
                 return dInputTensor;
             }
         }
-        class TanhLayer { /* ... */
+        class TanhLayer { /* ... (Identical) ... */
             forward(inputTensor) {
                 this.outputTensor = inputTensor.clone(); 
                 for (let i = 0; i < this.outputTensor.data.length; i++) {
@@ -313,9 +289,7 @@
                 return dInputTensor;
             }
         }
-
-        // --- Dense Layer (Uses fixed Tensor get/set) ---
-        class DenseLayer {
+        class DenseLayer { /* ... (Identical) ... */
             constructor(inputSize, outputSize) {
                 this.inputSize = inputSize;
                 this.outputSize = outputSize;
@@ -326,37 +300,35 @@
                 this.biases = new Tensor([outputSize]).fill(0);
             }
             forward(inputTensor1D) {
-                this.inputTensor1D = inputTensor1D; // Shape [inputSize]
+                this.inputTensor1D = inputTensor1D; 
                 const outputTensor1D = new Tensor([this.outputSize]);
                 for (let o = 0; o < this.outputSize; o++) {
-                    let sum = this.biases.get(o); // 1D access
+                    let sum = this.biases.get(o); 
                     for (let i = 0; i < this.inputSize; i++) {
-                        sum += inputTensor1D.get(i) * this.weights.get([o, i]); // 2D access
+                        sum += inputTensor1D.get(i) * this.weights.get([o, i]); 
                     }
-                    outputTensor1D.set(o, sum); // 1D access
+                    outputTensor1D.set(o, sum); 
                 }
                 return outputTensor1D;
             }
             backward(dOutputTensor1D, learningRate) {
                 const dInputTensor1D = new Tensor([this.inputSize]).fill(0);
-                // No dWeights/dBiases explicitly created, update in place
                 for (let o = 0; o < this.outputSize; o++) {
                     const error_grad = dOutputTensor1D.get(o);
                     for (let i = 0; i < this.inputSize; i++) {
                         const weight_grad = error_grad * this.inputTensor1D.get(i);
-                        this.weights.set([o,i], this.weights.get([o,i]) - learningRate * weight_grad);
+                        const current_weight = this.weights.get([o,i]); // Get before update for dInput calc
+                        this.weights.set([o,i], current_weight - learningRate * weight_grad);
                         
                         const current_dInput = dInputTensor1D.get(i);
-                        dInputTensor1D.set(i, current_dInput + error_grad * this.weights.get([o,i]));
+                        dInputTensor1D.set(i, current_dInput + error_grad * current_weight); // Use weight before update
                     }
                     this.biases.set(o, this.biases.get(o) - learningRate * error_grad);
                 }
                 return dInputTensor1D;
             }
         }
-
-        // --- Convolutional Layer (Uses fixed Tensor get/set) ---
-        class Conv2DLayer {
+        class Conv2DLayer { /* ... (Identical) ... */
             constructor(inChannels, outChannels, kernelSize = 3, padding = 1, stride = 1) {
                 this.inChannels = inChannels;
                 this.outChannels = outChannels;
@@ -366,26 +338,25 @@
 
                 const fanIn = inChannels * kernelSize * kernelSize;
                 const fanOut = outChannels * kernelSize * kernelSize;
-                const std = Math.sqrt(2.0 / (fanIn + fanOut || 1)); // || 1 to prevent div by zero if fanIn+fanOut is 0
+                const std = Math.sqrt(2.0 / (fanIn + fanOut || 1)); 
 
                 const flatWeights = new Float32Array(outChannels * inChannels * kernelSize * kernelSize).map(
                     () => (Math.random() - 0.5) * 2 * std
                 );
-                this.weights = new Tensor([outChannels, inChannels, kernelSize, kernelSize], flatWeights); // 4D
-                this.biases = new Tensor([outChannels]).fill(0); // 1D
+                this.weights = new Tensor([outChannels, inChannels, kernelSize, kernelSize], flatWeights); 
+                this.biases = new Tensor([outChannels]).fill(0); 
             }
-
-            forward(inputTensor) { // inputTensor [C_in, H, W] (3D)
+            forward(inputTensor) { 
                 this.inputTensor = inputTensor;
                 const [C_in, H_in, W_in] = inputTensor.shape;
                 const H_out = Math.floor((H_in - this.kernelSize + 2 * this.padding) / this.stride) + 1;
                 const W_out = Math.floor((W_in - this.kernelSize + 2 * this.padding) / this.stride) + 1;
-                const outputTensor = new Tensor([this.outChannels, H_out, W_out]).fill(0); // 3D
+                const outputTensor = new Tensor([this.outChannels, H_out, W_out]).fill(0); 
 
                 for (let c_out = 0; c_out < this.outChannels; c_out++) {
                     for (let y_out = 0; y_out < H_out; y_out++) {
                         for (let x_out = 0; x_out < W_out; x_out++) {
-                            let sum = this.biases.get(c_out); // 1D access
+                            let sum = this.biases.get(c_out); 
                             const y_start = y_out * this.stride - this.padding;
                             const x_start = x_out * this.stride - this.padding;
 
@@ -395,25 +366,23 @@
                                         const y_in = y_start + ky;
                                         const x_in = x_start + kx;
                                         if (y_in >= 0 && y_in < H_in && x_in >= 0 && x_in < W_in) {
-                                            sum += inputTensor.getCHW(c_in, y_in, x_in) *  // 3D access helper
-                                                   this.weights.get([c_out, c_in, ky, kx]); // 4D access
+                                            sum += inputTensor.getCHW(c_in, y_in, x_in) *  
+                                                   this.weights.get([c_out, c_in, ky, kx]); 
                                         }
                                     }
                                 }
                             }
-                            outputTensor.setCHW(c_out, y_out, x_out, sum); // 3D access helper
+                            outputTensor.setCHW(c_out, y_out, x_out, sum); 
                         }
                     }
                 }
                 return outputTensor;
             }
-
             backward(dOutputTensor, learningRate) {
                 const [C_in, H_in, W_in] = this.inputTensor.shape;
                 const [C_out, H_out, W_out] = dOutputTensor.shape;
                 
                 const dInputTensor = new Tensor(this.inputTensor.shape).fill(0);
-                // No dWeights/dBiases tensor explicitly, update in-place
 
                 for (let c_out = 0; c_out < C_out; c_out++) {
                     let sum_grad_bias = 0;
@@ -439,12 +408,12 @@
                                         const x_in = x_start + kx;
 
                                         if (y_in >= 0 && y_in < H_in && x_in >= 0 && x_in < W_in) {
+                                            const current_weight_val = this.weights.get([c_out, c_in, ky, kx]); // Get before update
                                             const weight_grad = grad_out * this.inputTensor.getCHW(c_in, y_in, x_in);
-                                            const current_weight = this.weights.get([c_out, c_in, ky, kx]);
-                                            this.weights.set([c_out, c_in, ky, kx], current_weight - learningRate * weight_grad);
+                                            this.weights.set([c_out, c_in, ky, kx], current_weight_val - learningRate * weight_grad);
                                             
                                             const current_dInput = dInputTensor.getCHW(c_in, y_in, x_in);
-                                            dInputTensor.setCHW(c_in, y_in, x_in, current_dInput + grad_out * this.weights.get([c_out, c_in, ky, kx]));
+                                            dInputTensor.setCHW(c_in, y_in, x_in, current_dInput + grad_out * current_weight_val); // Use weight before update
                                         }
                                     }
                                 }
@@ -455,14 +424,12 @@
                 return dInputTensor; 
             }
         }
-        
-        // --- Other U-Net Layers (MaxPool, Upsample, Concat, TimeBroadcastAdd - Identical) ---
-        class MaxPool2DLayer { /* ... (Identical to previous U-Net version) ... */ 
+        class MaxPool2DLayer { /* ... (Identical) ... */ 
             constructor(kernelSize = 2, stride = 2) {
                 this.kernelSize = kernelSize;
                 this.stride = stride;
             }
-            forward(inputTensor) { // input [C, H, W]
+            forward(inputTensor) { 
                 this.inputTensor = inputTensor;
                 const [C, H_in, W_in] = inputTensor.shape;
                 const H_out = Math.floor((H_in - this.kernelSize) / this.stride) + 1;
@@ -496,7 +463,7 @@
                 }
                 return outputTensor;
             }
-            backward(dOutputTensor) { // dOutput [C, H_out, W_out]
+            backward(dOutputTensor) { 
                 const [C, H_out, W_out] = dOutputTensor.shape;
                 const dInputTensor = new Tensor(this.inputTensor.shape).fill(0);
                 for (let c = 0; c < C; c++) {
@@ -506,7 +473,7 @@
                             const outIdxBase = (c * H_out * W_out + y * W_out + x) * 2;
                             const maxY_in = this.maxIndices[outIdxBase];
                             const maxX_in = this.maxIndices[outIdxBase+1];
-                             if (maxY_in !== -1 && maxX_in !== -1) { // Check if max was found
+                             if (maxY_in !== -1 && maxX_in !== -1) { 
                                 const current_dInput = dInputTensor.getCHW(c, maxY_in, maxX_in);
                                 dInputTensor.setCHW(c, maxY_in, maxX_in, current_dInput + grad_val);
                             }
@@ -518,7 +485,7 @@
         }
         class UpsampleNearestLayer { /* ... (Identical) ... */ 
             constructor(scaleFactor = 2) { this.scaleFactor = scaleFactor; }
-            forward(inputTensor) { // input [C, H, W]
+            forward(inputTensor) { 
                 this.inputShape = inputTensor.shape;
                 const [C, H_in, W_in] = inputTensor.shape;
                 const H_out = H_in * this.scaleFactor;
@@ -535,7 +502,7 @@
                 }
                 return outputTensor;
             }
-            backward(dOutputTensor) { // dOutput [C, H_out, W_out]
+            backward(dOutputTensor) { 
                 const [C, H_in, W_in] = this.inputShape;
                 const dInputTensor = new Tensor(this.inputShape).fill(0);
                 for (let c = 0; c < C; c++) {
@@ -614,9 +581,7 @@
                 return [dInput_spatial, dTime_features_1D];
             }
         }
-
-        // --- U-Net Model (Identical structure, uses fixed layers) ---
-        class UNet { /* ... (Identical to previous U-Net version) ... */ 
+        class UNet { /* ... (Identical structure, relies on fixed layers) ... */ 
             constructor(imageSize = 28, baseFilters = 8, timeEmbedDim = 16) {
                 this.imageSize = imageSize;
                 this.baseFilters = baseFilters; 
@@ -654,7 +619,6 @@
                 this.out_conv = new Conv2DLayer(F[0], 1); 
                 this.out_tanh = new TanhLayer();
             }
-
             predict(imageTensor, t_norm_scalar) { 
                 let t_feat = new Tensor([1], new Float32Array([t_norm_scalar]));
                 t_feat = this.time_mlp1.forward(t_feat);
@@ -689,12 +653,9 @@
                 h = this.out_conv.forward(h);                   
                 const predicted_noise_tensor = this.out_tanh.forward(h); 
                 
-                // Check for NaNs in prediction
                 for(let k=0; k<predicted_noise_tensor.data.length; ++k) {
                     if (isNaN(predicted_noise_tensor.data[k])) {
                         log(`NaN found in prediction at index ${k}! t_norm: ${t_norm_scalar.toFixed(4)}`);
-                        // To aid debugging, you could log inputs/weights of the last few layers here
-                        // For now, just return a NaN tensor to make it clear.
                         const nanTensor = new Tensor(predicted_noise_tensor.shape);
                         nanTensor.data.fill(NaN);
                         return nanTensor;
@@ -702,14 +663,11 @@
                 }
                 return predicted_noise_tensor;
             }
-
             trainStep(imageTensor, t_norm_scalar, targetNoiseTensor, learningRate) {
                 const predictedNoiseTensor = this.predict(imageTensor, t_norm_scalar);
-
-                // Check if prediction itself is NaN
-                if (isNaN(predictedNoiseTensor.data[0])) { // Check first element as a proxy
+                if (isNaN(predictedNoiseTensor.data[0])) { 
                     log("Prediction was NaN, skipping train step.");
-                    return NaN; // Return NaN loss
+                    return NaN; 
                 }
 
                 const dErrorTensor = new Tensor(predictedNoiseTensor.shape);
@@ -722,42 +680,32 @@
                 loss /= predictedNoiseTensor.data.length;
                 if (isNaN(loss)) { log("Loss became NaN after calculation!"); return NaN; }
 
-
                 let grad = this.out_tanh.backward(dErrorTensor);
                 grad = this.out_conv.backward(grad, learningRate);
-                
                 grad = this.dec_relu2.backward(grad);
                 grad = this.dec_conv2.backward(grad, learningRate);
                 let [dGrad_up2, dGrad_skip1] = this.dec_concat2.backward(grad); 
-
-                grad = this.dec_upsample2.backward(dGrad_up2); // grad here is for output of dec_conv1
+                grad = this.dec_upsample2.backward(dGrad_up2); 
                 grad = this.dec_relu1.backward(grad);
                 grad = this.dec_conv1.backward(grad, learningRate);
                 let [dGrad_up1, dGrad_skip2] = this.dec_concat1.backward(grad);
-
-                grad = this.dec_upsample1.backward(dGrad_up1); // grad for output of bottleneck_relu
+                grad = this.dec_upsample1.backward(dGrad_up1); 
                 grad = this.bottleneck_relu.backward(grad);
                 grad = this.bottleneck_conv.backward(grad, learningRate);
-                
-                grad = this.pool2.backward(grad); // grad for output of enc_relu2 (skip2)
-                for(let i=0; i<grad.data.length; ++i) grad.data[i] += dGrad_skip2.data[i]; // Add skip connection grad
+                grad = this.pool2.backward(grad); 
+                for(let i=0; i<grad.data.length; ++i) grad.data[i] += dGrad_skip2.data[i]; 
                 grad = this.enc_relu2.backward(grad); 
                 grad = this.enc_conv2.backward(grad, learningRate);
-
-                grad = this.pool1.backward(grad); // grad for output of enc_relu1 (skip1)
+                grad = this.pool1.backward(grad); 
                 grad = this.enc_relu1.backward(grad);
                 grad = this.enc_conv1.backward(grad, learningRate);
-                
-                for(let i=0; i<grad.data.length; ++i) grad.data[i] += dGrad_skip1.data[i]; // Add skip connection grad
-                grad = this.enc_relu_in.backward(grad); // grad for output of time_add
+                for(let i=0; i<grad.data.length; ++i) grad.data[i] += dGrad_skip1.data[i]; 
+                grad = this.enc_relu_in.backward(grad); 
                 let [dGrad_spatial, dGrad_time_vec] = this.time_add.backward(grad); 
-                
                 grad = this.enc_conv_in.backward(dGrad_spatial, learningRate); 
-
                 let dTime = this.time_mlp2.backward(dGrad_time_vec, learningRate);
                 dTime = this.time_relu1.backward(dTime);
                 this.time_mlp1.backward(dTime, learningRate); 
-
                 return loss;
             }
         }
@@ -789,7 +737,7 @@
             }
             return { xt_flat, noise_flat };
         }
-        function denoiseSingleStep(xt_tensor, t_idx, predicted_noise_tensor, dp) { /* ... (Identical) ... */
+        function denoiseSingleStep(xt_tensor, t_idx, predicted_noise_tensor, dp) { /* ... (Identical, with NaN safety and epsilon) ... */
             const alpha_t = dp.alphas[t_idx];
             const beta_t = dp.betas[t_idx];
             const sqrt_alpha_t = Math.sqrt(alpha_t);
@@ -800,9 +748,9 @@
 
             for (let i = 0; i < xt_tensor.data.length; i++) {
                 const pred_noise_val = predicted_noise_tensor.data[i];
-                if(isNaN(pred_noise_val)) { // Safety for generation if model still produces NaN sometimes
+                if(isNaN(pred_noise_val)) { 
                     log(`NaN in predicted noise during denoiseSingleStep at t=${t_idx}`);
-                    x_prev_tensor.data.fill(0); // Or some other fallback
+                    x_prev_tensor.data.fill(0); 
                     return x_prev_tensor;
                 }
                 const term1_numerator = xt_tensor.data[i] - (beta_t / (sqrt_one_minus_alpha_cumprod_t + 1e-8)) * pred_noise_val;
@@ -817,13 +765,13 @@
             }
             return x_prev_tensor;
         }
-        function reconstructX0(xt_tensor, t_idx, predicted_noise_tensor, dp) { /* ... (Identical) ... */
+        function reconstructX0(xt_tensor, t_idx, predicted_noise_tensor, dp) { /* ... (Identical, with NaN safety and epsilon) ... */
             const sqrt_alpha_cumprod_t = dp.sqrt_alphas_cumprod[t_idx];
             const sqrt_one_minus_alpha_cumprod_t = dp.sqrt_one_minus_alphas_cumprod[t_idx];
             const x0_reconstructed_tensor = xt_tensor.clone();
             for (let i = 0; i < xt_tensor.data.length; i++) {
                  const pred_noise_val = predicted_noise_tensor.data[i];
-                 if(isNaN(pred_noise_val)) { // Safety
+                 if(isNaN(pred_noise_val)) { 
                     x0_reconstructed_tensor.data.fill(0);
                     return x0_reconstructed_tensor;
                  }
@@ -832,114 +780,202 @@
             return x0_reconstructed_tensor;
         }
 
-        // --- Training & Generation ---
-        async function trainModel() {
-            trainButton.disabled = true;
-            pauseButton.disabled = false; pauseButton.textContent = "Pause Training";
-            generateButton.disabled = true; testDenoiseButton.disabled = true;
-            validLossCount = 0;
-            isPaused = false;
+        // --- Training & Generation (Modified for Pause/Resume) ---
+        function updateButtonStates() {
+            if (isTrainingActive) {
+                trainButton.textContent = 'Restart Training'; // Or 'Stop Training' if you want full stop
+                trainButton.disabled = false; // Allow restart even if paused
+                pauseResumeButton.disabled = false;
+                pauseResumeButton.textContent = isTrainingPaused ? 'Resume Training' : 'Pause Training';
+                generateButton.disabled = !isTrainingPaused; // Enable only if paused
+                testDenoiseButton.disabled = !isTrainingPaused; // Enable only if paused
+            } else { // Not active (before start or after completion/full stop)
+                trainButton.textContent = 'Start Training';
+                trainButton.disabled = false;
+                pauseResumeButton.disabled = true;
+                pauseResumeButton.textContent = 'Pause Training';
+                generateButton.disabled = (model === null); // Enable if model exists
+                testDenoiseButton.disabled = (model === null || mnistData.length === 0); // Enable if model and data exist
+            }
+        }
+        
+        async function trainingLoop() {
+            isTrainingActive = true;
+            updateButtonStates();
 
-            const numTrainImages = parseInt(document.getElementById('numTrainImages').value);
-            const epochs = parseInt(document.getElementById('epochs').value);
-            const learningRate = parseFloat(document.getElementById('learningRate').value);
-            const T = parseInt(document.getElementById('timestepsT').value);
-            const betaStart = parseFloat(document.getElementById('betaStart').value); // Will be read from UI
-            const betaEnd = parseFloat(document.getElementById('betaEnd').value);   // Will be read from UI
+            const T_diffusion = diffusionParams.T; // Use precomputed T
 
-            await loadAndParseMNIST(numTrainImages);
-            if (mnistData.length === 0) { log("MNIST data not loaded."); trainButton.disabled = false; return; }
-            
-            diffusionParams = precomputeDiffusionSchedule(T, betaStart, betaEnd);
-            // Smaller U-Net: baseFilters=2, timeEmbedDim=4
-            model = new UNet(IMAGE_SIZE, 4, 4); 
+            log(`Starting/Resuming U-Net training (model: BF=2, TE=4) from Epoch ${currentEpoch + 1}, Image ${currentImageIndex + 1}...`);
+            log(`LR=${learningRateVal.toExponential(1)}, Diffusion_T=${T_diffusion}`);
 
-            log(`Starting U-Net training (model: BF=2, TE=4) for ${epochs} epochs on ${mnistData.length} images...`);
-            log(`LR=${learningRate.toExponential(1)}, T=${T}, Beta=${betaStart.toExponential(1)}-${betaEnd.toExponential(1)}`);
+            let epochLoss = 0;
+            let epochValidStepCount = 0;
 
-            for (let epoch = 0; epoch < epochs; epoch++) {
-                let totalLoss = 0;
-                let currentValidLossCount = 0;
-                const startTime = Date.now();
-                for (let i = 0; i < mnistData.length; i++) {
-                    // Pause check
-                    while (isPaused) {
-                        if (pauseButton.textContent !== "Resume Training") {
-                             pauseButton.textContent = "Resume Training";
+            for (; currentEpoch < totalEpochsGoal; currentEpoch++) {
+                epochLoss = 0; // Reset for current epoch if resuming mid-epoch
+                epochValidStepCount = 0;
+                const startTimeEpoch = Date.now();
+
+                for (; currentImageIndex < totalImagesPerEpoch; currentImageIndex++) {
+                    if (isTrainingPaused) {
+                        log(`Training paused at Epoch ${currentEpoch + 1}, Image ${currentImageIndex + 1}.`);
+                        updateButtonStates();
+                        await new Promise(resolve => { resolvePause = resolve; }); // Wait here
+                        if (!isTrainingActive) { // If training was stopped/restarted while paused
+                             log("Training was stopped/restarted while paused. Exiting loop.");
+                             return; 
                         }
-                        log("Training paused. Click 'Resume Training' to continue.");
-                        await new Promise(resolve => setTimeout(resolve, 500)); // Check every 0.5s
+                        log(`Resuming training from Epoch ${currentEpoch + 1}, Image ${currentImageIndex + 1}...`);
+                        updateButtonStates();
                     }
-                    if (pauseButton.textContent !== "Pause Training") pauseButton.textContent = "Pause Training";
+                    if (!isTrainingActive) return; // For full stop/restart
 
-                    const x0_flat = mnistData[i]; 
+                    const x0_flat = mnistData[currentImageIndex]; 
                     const x0_tensor = Tensor.fromFlat(x0_flat, IMAGE_SIZE, IMAGE_SIZE, 1); 
                     
-                    const t_idx = Math.floor(Math.random() * T); 
-                    const t_norm = (t_idx + 1) / T; 
+                    const t_idx = Math.floor(Math.random() * T_diffusion); 
+                    const t_norm = (t_idx + 1) / T_diffusion; 
 
                     const { xt_flat, noise_flat: true_noise_flat } = forwardProcess(x0_flat, t_idx, diffusionParams);
                     const xt_tensor = Tensor.fromFlat(xt_flat, IMAGE_SIZE, IMAGE_SIZE, 1);
                     const true_noise_tensor = Tensor.fromFlat(true_noise_flat, IMAGE_SIZE, IMAGE_SIZE, 1);
                     
-                    const loss = model.trainStep(xt_tensor, t_norm, true_noise_tensor, learningRate);
+                    const loss = model.trainStep(xt_tensor, t_norm, true_noise_tensor, learningRateVal);
                     
                     if (!isNaN(loss)) {
-                        totalLoss += loss;
-                        currentValidLossCount++;
-                        validLossCount++; // Global count for overall average
+                        epochLoss += loss;
+                        totalLossSinceStart += loss;
+                        epochValidStepCount++;
+                        validLossCount++;
                     }
 
-                    if ((i + 1) % Math.max(1, Math.floor(mnistData.length / 5)) === 0 || i === mnistData.length -1 || i === 0) {
-                        const avgLossStr = currentValidLossCount > 0 ? (totalLoss / currentValidLossCount).toFixed(5) : "NaN (all NaN)";
-                        log(`Epoch ${epoch+1}/${epochs}, Img ${i+1}/${mnistData.length}, Loss: ${isNaN(loss) ? "NaN" : loss.toFixed(5)}, Avg Epoch Loss: ${avgLossStr}`);
+                    if ((currentImageIndex + 1) % Math.max(1, Math.floor(totalImagesPerEpoch / 5)) === 0 || currentImageIndex === totalImagesPerEpoch -1 || currentImageIndex === 0) {
+                        const avgEpochLossStr = epochValidStepCount > 0 ? (epochLoss / epochValidStepCount).toFixed(5) : "NaN";
+                        const avgTotalLossStr = validLossCount > 0 ? (totalLossSinceStart / validLossCount).toFixed(5) : "NaN";
+                        log(`Epoch ${currentEpoch+1}/${totalEpochsGoal}, Img ${currentImageIndex+1}/${totalImagesPerEpoch}, Loss: ${isNaN(loss) ? "NaN" : loss.toFixed(5)}, AvgEpochL: ${avgEpochLossStr}, AvgTotalL: ${avgTotalLossStr}`);
                         
-                        drawToCanvas('originalCanvas', x0_tensor.toFlat());
-                        drawToCanvas('noisyCanvas', xt_tensor.toFlat());
-                        const predicted_noise_tensor_viz = model.predict(xt_tensor, t_norm);
-                        if (!isNaN(predicted_noise_tensor_viz.data[0])) {
-                           drawToCanvas('predictedNoiseCanvas', predicted_noise_tensor_viz.toFlat());
-                           const reconstructed_x0_viz = reconstructX0(xt_tensor, t_idx, predicted_noise_tensor_viz, diffusionParams);
-                           drawToCanvas('denoisedStepCanvas', reconstructed_x0_viz.toFlat());
-                        } else {
-                           log("Visualization skipped due to NaN prediction.");
+                        if (!isTrainingPaused) { // Don't draw if we are about to pause
+                            drawToCanvas('originalCanvas', x0_tensor.toFlat());
+                            drawToCanvas('noisyCanvas', xt_tensor.toFlat());
+                            const predicted_noise_tensor_viz = model.predict(xt_tensor, t_norm);
+                            if (!isNaN(predicted_noise_tensor_viz.data[0])) {
+                               drawToCanvas('predictedNoiseCanvas', predicted_noise_tensor_viz.toFlat());
+                               const reconstructed_x0_viz = reconstructX0(xt_tensor, t_idx, predicted_noise_tensor_viz, diffusionParams);
+                               drawToCanvas('denoisedStepCanvas', reconstructed_x0_viz.toFlat());
+                            } else {
+                               log("Visualization skipped due to NaN prediction.");
+                            }
                         }
-                        await new Promise(resolve => setTimeout(resolve, 10)); 
+                        await new Promise(resolve => setTimeout(resolve, 5)); // Shorter yield
                     }
-                }
-                const epochTime = (Date.now() - startTime) / 1000;
-                const finalEpochAvgLossStr = currentValidLossCount > 0 ? (totalLoss / currentValidLossCount).toFixed(5) : "NaN (all NaN)";
-                log(`Epoch ${epoch+1} finished. Avg Epoch Loss: ${finalEpochAvgLossStr}. Valid steps: ${currentValidLossCount}/${mnistData.length}. Time: ${epochTime.toFixed(2)}s`);
-            }
-            const overallAvgLossStr = validLossCount > 0 ? "See epoch averages" : "NaN (all NaN)"; // TotalLoss was reset per epoch
-            log(`Training complete! Overall valid steps: ${validLossCount}/${epochs*mnistData.length}`);
-            trainButton.disabled = false;
-            pauseButton.disabled = true; pauseButton.textContent = "Pause Training";
-            generateButton.disabled = false; testDenoiseButton.disabled = false;
+                } // End image loop
+                const epochTime = (Date.now() - startTimeEpoch) / 1000;
+                const finalEpochAvgLossStr = epochValidStepCount > 0 ? (epochLoss / epochValidStepCount).toFixed(5) : "NaN";
+                log(`Epoch ${currentEpoch+1} finished. Avg Epoch Loss: ${finalEpochAvgLossStr}. Valid steps: ${epochValidStepCount}/${totalImagesPerEpoch}. Time: ${epochTime.toFixed(2)}s`);
+                currentImageIndex = 0; // Reset for next epoch
+            } // End epoch loop
+
+            log(`Training complete! Total valid steps: ${validLossCount}/${totalEpochsGoal*totalImagesPerEpoch}`);
+            isTrainingActive = false;
+            isTrainingPaused = false; // Ensure pause is off
+            currentEpoch = 0; // Reset for next "Start Training"
+            currentImageIndex = 0;
+            updateButtonStates();
         }
+
+        async function startOrRestartTraining() {
+            if (isTrainingActive && !isTrainingPaused) { // If running, treat as restart
+                log("Restarting training...");
+                isTrainingActive = false; // Signal current loop to stop
+                if (resolvePause) resolvePause(); // Unblock if it was paused then restart clicked
+                await new Promise(r => setTimeout(r, 50)); // Give it a moment to exit
+            } else if (isTrainingPaused) {
+                 log("Restarting training from paused state...");
+                 isTrainingActive = false;
+                 isTrainingPaused = false;
+                 if (resolvePause) resolvePause();
+                 await new Promise(r => setTimeout(r, 50));
+            }
+
+
+            // Initialize / Reset state for a new training run
+            isTrainingActive = true;
+            isTrainingPaused = false;
+            currentEpoch = 0;
+            currentImageIndex = 0;
+            validLossCount = 0;
+            totalLossSinceStart = 0;
+
+            const numTrainImagesUI = parseInt(document.getElementById('numTrainImages').value);
+            totalEpochsGoal = parseInt(document.getElementById('epochs').value);
+            learningRateVal = parseFloat(document.getElementById('learningRate').value); // Store parsed LR
+            const T_diffusion_ui = parseInt(document.getElementById('timestepsT').value);
+            const betaStart = parseFloat(document.getElementById('betaStart').value);
+            const betaEnd = parseFloat(document.getElementById('betaEnd').value);
+
+            // Load data if not already loaded or if numImages changed (simplified: always reload for now)
+            // A more complex check could compare numTrainImagesUI with mnistData.length
+            await loadAndParseMNIST(numTrainImagesUI);
+            if (mnistData.length === 0) { 
+                log("MNIST data not loaded. Cannot start training."); 
+                isTrainingActive = false;
+                updateButtonStates();
+                return; 
+            }
+            totalImagesPerEpoch = mnistData.length;
+            
+            // Re-initialize model and diffusion params if it's a true restart or first time
+            // Or if key params changed. For simplicity, re-init model if not existing.
+            if (!model) { // Or if params changed significantly
+                diffusionParams = precomputeDiffusionSchedule(T_diffusion_ui, betaStart, betaEnd);
+                model = new UNet(IMAGE_SIZE, 2, 4); // Small U-Net
+            } else { // If model exists, ensure diffusionParams are current
+                 diffusionParams = precomputeDiffusionSchedule(T_diffusion_ui, betaStart, betaEnd);
+            }
+
+
+            trainingLoop(); // Start the async loop
+        }
+
+        function togglePauseResume() {
+            if (!isTrainingActive) return;
+
+            isTrainingPaused = !isTrainingPaused;
+            if (!isTrainingPaused && resolvePause) { // Resuming
+                resolvePause();
+                resolvePause = null; // Consume it
+            }
+            updateButtonStates();
+            if(isTrainingPaused) log("Training Paused. Inference buttons enabled.");
+            else log("Training Resumed.");
+        }
+
 
         async function generateSample() { /* ... (Identical, ensure clamping and NaN checks) ... */
             if (!model || !diffusionParams.T) { log("Model not trained."); return; }
-            generateButton.disabled = true; log("Generating sample from pure noise (U-Net)...");
+            if (isTrainingActive && !isTrainingPaused) { log("Pause training before generating."); return; }
+
+            generateButton.disabled = true; testDenoiseButton.disabled = true; // Disable during generation
+            log("Generating sample from pure noise (U-Net)...");
 
             let xt_flat = generateGaussianNoise(IMAGE_SIZE * IMAGE_SIZE);
             let xt_tensor = Tensor.fromFlat(xt_flat, IMAGE_SIZE, IMAGE_SIZE, 1);
             drawToCanvas('generatedCanvas', xt_tensor.toFlat());
 
-            const Tval = diffusionParams.T; // Use a local variable for T
+            const Tval = diffusionParams.T; 
             for (let t_idx = Tval - 1; t_idx >= 0; t_idx--) {
                 const t_norm = (t_idx + 1) / Tval;
                 const predicted_noise_tensor = model.predict(xt_tensor, t_norm);
 
                 if(isNaN(predicted_noise_tensor.data[0])) {
                     log(`NaN prediction during generation at t=${t_idx}. Stopping.`);
-                    drawToCanvas('generatedCanvas', xt_tensor.toFlat()); // Show last good state or noise
-                    generateButton.disabled = false;
+                    drawToCanvas('generatedCanvas', xt_tensor.toFlat()); 
+                    updateButtonStates(); // Re-enable buttons based on current training state
                     return;
                 }
 
                 xt_tensor = denoiseSingleStep(xt_tensor, t_idx, predicted_noise_tensor, diffusionParams);
-                for(let i=0; i < xt_tensor.data.length; i++) { // Clamp
+                for(let i=0; i < xt_tensor.data.length; i++) { 
                      xt_tensor.data[i] = Math.max(-1, Math.min(1, xt_tensor.data[i]));
                 }
 
@@ -951,12 +987,15 @@
             }
             log("Sample generation finished.");
             drawToCanvas('generatedCanvas', xt_tensor.toFlat());
-            generateButton.disabled = false;
+            updateButtonStates();
         }
         
-        async function testDenoisingRandomImage() { /* ... (Identical, ensure clamping and NaN checks) ... */
+        async function testDenoisingRandomImage() { /* ... (Identical, ensure clamping and NaN checks and button updates) ... */
             if (!model || !diffusionParams.T || mnistData.length === 0) { log("Model/data not ready."); return; }
-            testDenoiseButton.disabled = true; log("Testing U-Net denoising on a random MNIST image...");
+            if (isTrainingActive && !isTrainingPaused) { log("Pause training before testing."); return; }
+
+            generateButton.disabled = true; testDenoiseButton.disabled = true; // Disable during test
+            log("Testing U-Net denoising on a random MNIST image...");
 
             const x0_flat = mnistData[Math.floor(Math.random() * mnistData.length)];
             const x0_tensor = Tensor.fromFlat(x0_flat, IMAGE_SIZE, IMAGE_SIZE, 1);
@@ -973,7 +1012,7 @@
             const predicted_noise_test = model.predict(xt_test_tensor, t_norm_test);
              if(isNaN(predicted_noise_test.data[0])) {
                 log("NaN prediction during test denoise. Aborting full reverse.");
-                testDenoiseButton.disabled = false; return;
+                updateButtonStates(); return;
             }
             drawToCanvas('predictedNoiseCanvas', predicted_noise_test.toFlat());
 
@@ -1003,20 +1042,17 @@
             }
             log("Full reverse process from noised image finished.");
             drawToCanvas('generatedCanvas', current_x_tensor.toFlat());
-            testDenoiseButton.disabled = false;
+            updateButtonStates();
         }
 
         // --- Event Listeners & Init ---
-        trainButton.addEventListener('click', trainModel);
+        trainButton.addEventListener('click', startOrRestartTraining);
+        pauseResumeButton.addEventListener('click', togglePauseResume);
         generateButton.addEventListener('click', generateSample);
-        pauseButton.addEventListener('click', () => {
-            isPaused = !isPaused;
-            pauseButton.textContent = isPaused ? "Resume Training" : "Pause Training";
-        });
         testDenoiseButton.addEventListener('click', testDenoisingRandomImage);
 
-        log("U-Net Demo ready. Model very small (BF=2, TE=4), LR very low. Default T=20.");
-        log("Expect training to be slow, but hopefully more stable now.");
+        log("U-Net Demo with Pause/Resume ready.");
+        updateButtonStates(); // Initial button states
 
     </script>
 </body>
