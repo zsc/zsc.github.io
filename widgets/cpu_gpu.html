@@ -89,7 +89,6 @@
 
         <div id="results">点击 "开始计算" 来查看结果。</div>
     </div>
-
     <script>
         const runButton = document.getElementById('runButton');
         const resultsDiv = document.getElementById('results');
@@ -104,31 +103,47 @@
             resultsDiv.innerHTML += `\n[${backendName}] 当前后端: ${tf.getBackend()}`;
 
             let totalTime = 0;
+            // 对于非常大的矩阵，我们应该在每次迭代中创建它们，以确保它们在tidy中被清理
+            // 或者确保在循环外创建的张量有足够的内存。
+            // 为了简单起见和减少内存峰值，我们可以在循环外创建，但要注意潜在的内存压力。
+            // 如果内存是主要问题，可以考虑在循环内创建和销毁，但这会影响纯计算时间的测量。
+            // 当前的实现是在循环外创建，依赖于numIterations不大到导致累积内存问题。
             const matA = tf.randomNormal([size, size]);
             const matB = tf.randomNormal([size, size]);
 
             // 预热：第一次运行通常较慢，尤其是在GPU上（着色器编译等）
             resultsDiv.innerHTML += `\n[${backendName}] 正在进行预热...`;
-            let res_warmup = tf.matMul(matA, matB);
-            await res_warmup.data(); // 等待计算完成并将数据取回 (确保GPU完成)
-            res_warmup.dispose();
+            // 预热时使用 tf.tidy
+            tf.tidy(() => {
+                const res_warmup = tf.matMul(matA, matB);
+                // 同步预热：在预热阶段，我们通常需要确保GPU操作完成。
+                // dataSync() 会阻塞直到数据可用，对于预热更直接。
+                // 或者对于异步预热，仍用 await res_warmup.data()
+                res_warmup.dataSync(); // 或者 await res_warmup.data();
+            });
             resultsDiv.innerHTML += `\n[${backendName}] 预热完成。`;
 
             resultsDiv.innerHTML += `\n[${backendName}] 开始 ${numIterations} 次迭代计算...`;
             for (let i = 0; i < numIterations; i++) {
+                // PATCH: 在每次迭代（或每几次迭代）之前给浏览器一个喘息的机会
+                // 这有助于防止UI冻结，尤其是在处理非常大的张量和长时间操作时。
+                await tf.nextFrame(); // 或者 await new Promise(r => setTimeout(r, 0));
+
                 const startTime = performance.now();
-                // tf.tidy 用于自动清理本函数作用域内创建的中间张量
-                const result = tf.tidy(() => {
-                    // 如果matA和matB在循环内重新创建，也应放在tidy内或手动dispose
+                const result = tf.tidy(() => { // result 本身会从 tidy 中返回，不会被立即清理
                     return tf.matMul(matA, matB);
                 });
+
                 // 对于GPU，关键是等待数据实际可用，这能确保操作已完成
-                await result.data();
+                await result.data(); // 或者 result.array()
                 const endTime = performance.now();
                 totalTime += (endTime - startTime);
-                result.dispose(); // 清理结果张量
-                if ((i + 1) % 10 === 0 || i === numIterations -1) {
-                     resultsDiv.innerHTML += `\n[${backendName}] ...已完成 ${i+1}/${numIterations} 次迭代`;
+                result.dispose(); // 清理当次迭代的结果张量
+
+                if ((i + 1) % 5 === 0 || i === numIterations - 1 || numIterations < 5) { // 更新频率降低一些
+                     resultsDiv.innerHTML += `\n[${backendName}] ...已完成 ${i+1}/${numIterations} 次迭代 (当前耗时: ${(endTime - startTime).toFixed(3)} ms)`;
+                     // 强制UI更新 (在某些浏览器和情况下可能需要)
+                     await new Promise(resolve => setTimeout(resolve, 0));
                 }
             }
 
@@ -144,6 +159,8 @@
         runButton.addEventListener('click', async () => {
             runButton.disabled = true;
             resultsDiv.innerHTML = "正在初始化和检查环境...\n";
+            resultsDiv.innerHTML += `\n<span class="warning">注意: 大矩阵计算可能非常耗时并可能导致浏览器短暂无响应。请耐心等待。</span>\n`;
+
 
             const N = parseInt(matrixSizeInput.value);
             const ITERS = parseInt(iterationsInput.value);
@@ -153,6 +170,10 @@
                 runButton.disabled = false;
                 return;
             }
+             if (N > 2048 && ITERS > 20) { // 对于非常大的矩阵，建议减少迭代次数
+                resultsDiv.innerHTML += `\n<span class="info">提示: 矩阵大小 ${N} 较大, 建议减少迭代次数以获得更快的反馈并减少浏览器压力。</span>\n`;
+            }
+
 
             resultsDiv.innerHTML += `\nTF.js 版本: ${tf.version.tfjs}`;
             resultsDiv.innerHTML += `\n可用后端: ${Object.keys(tf.engine().registryFactory).join(', ')}`;
@@ -164,15 +185,35 @@
                 // 1. GPU (WebGL) 计算
                 resultsDiv.innerHTML += "\n\n--- 开始 GPU (WebGL) 计算 ---";
                 if (tf.engine().registryFactory['webgl']) {
-                    gpuTime = await benchmarkMatMul('webgl', N, ITERS);
+                    try {
+                        gpuTime = await benchmarkMatMul('webgl', N, ITERS);
+                    } catch (e) {
+                        resultsDiv.innerHTML += `\n<span class="warning">[WebGL] 计算中发生错误: ${e.message}</span>`;
+                        console.error("[WebGL] Benchmark Error:", e);
+                        if (e.message.toLowerCase().includes("memory") || e.message.toLowerCase().includes("context lost")) {
+                             resultsDiv.innerHTML += `\n<span class="warning">[WebGL] 可能是GPU内存不足或WebGL上下文丢失。尝试减小矩阵大小或迭代次数。</span>`;
+                        }
+                        gpuTime = -Infinity; // 特殊值表示错误
+                    }
                 } else {
                     resultsDiv.innerHTML += '\n<span class="warning">WebGL 后端不可用, 跳过 GPU 测试。</span>';
                 }
 
                 // 2. CPU 计算
+                // 在GPU测试后，最好也给浏览器一个喘息的机会
+                resultsDiv.innerHTML += "\n\n--- 强制UI更新并稍作停顿 ---";
+                await tf.nextFrame();
+                await new Promise(r => setTimeout(r, 100)); // 短暂延迟
+
                 resultsDiv.innerHTML += "\n\n--- 开始 CPU 计算 ---";
                 if (tf.engine().registryFactory['cpu']) {
-                    cpuTime = await benchmarkMatMul('cpu', N, ITERS);
+                     try {
+                        cpuTime = await benchmarkMatMul('cpu', N, ITERS);
+                    } catch (e) {
+                        resultsDiv.innerHTML += `\n<span class="warning">[CPU] 计算中发生错误: ${e.message}</span>`;
+                        console.error("[CPU] Benchmark Error:", e);
+                        cpuTime = -Infinity; // 特殊值表示错误
+                    }
                 } else {
                      resultsDiv.innerHTML += '\n<span class="warning">CPU 后端不可用 (异常情况), 跳过 CPU 测试。</span>';
                 }
@@ -183,19 +224,24 @@
                 resultsDiv.innerHTML += `\n矩阵大小: ${N}x${N}`;
                 resultsDiv.innerHTML += `\n迭代次数 (每次测试): ${ITERS}`;
 
-                if (gpuTime !== -1) {
+                if (gpuTime === -Infinity) {
+                    resultsDiv.innerHTML += `\nGPU 平均耗时: <span class="warning">测试失败</span>`;
+                } else if (gpuTime !== -1) {
                     resultsDiv.innerHTML += `\nGPU 平均耗时: <span class="highlight">${gpuTime.toFixed(3)} ms</span>`;
                 } else {
                     resultsDiv.innerHTML += `\nGPU 平均耗时: N/A (WebGL不可用或测试跳过)`;
                 }
-                if (cpuTime !== -1) {
+
+                if (cpuTime === -Infinity) {
+                    resultsDiv.innerHTML += `\nCPU 平均耗时: <span class="warning">测试失败</span>`;
+                } else if (cpuTime !== -1) {
                     resultsDiv.innerHTML += `\nCPU 平均耗时: <span class="highlight">${cpuTime.toFixed(3)} ms</span>`;
                 } else {
                     resultsDiv.innerHTML += `\nCPU 平均耗时: N/A (测试跳过)`;
                 }
 
 
-                if (gpuTime !== -1 && cpuTime !== -1 && gpuTime > 0) {
+                if (gpuTime > 0 && cpuTime > 0) { //确保都是正数有效值
                     const speedupRatio = cpuTime / gpuTime;
                     resultsDiv.innerHTML += `\n\n加速比 (CPU耗时 / GPU耗时): <span class="highlight">${speedupRatio.toFixed(2)}x</span>`;
                     if (speedupRatio < 1) {
@@ -206,20 +252,22 @@
                 } else if (gpuTime !== -1 && cpuTime === -1) {
                      resultsDiv.innerHTML += `\n\n无法计算加速比，因为 CPU 测试未成功运行。`;
                 } else {
-                    resultsDiv.innerHTML += `\n\n无法计算加速比，GPU 和 CPU 测试均未成功运行。`;
+                    resultsDiv.innerHTML += `\n\n无法计算加速比，一个或两个测试未成功运行或未执行。`;
                 }
 
 
-            } catch (error) {
-                resultsDiv.innerHTML += `\n<span class="warning">发生错误: ${error.message}</span>`;
-                console.error("Benchmark Error:", error);
+            } catch (error) { // 捕获 benchmarkMatMul 之外的顶层错误
+                resultsDiv.innerHTML += `\n<span class="warning">发生顶层错误: ${error.message}</span>`;
+                console.error("Top Level Benchmark Error:", error);
             } finally {
                 resultsDiv.innerHTML += "\n\n测试完成。";
                 // 将后端重置回一个默认状态，例如 CPU，以避免页面其他 TF.js 操作（如果有）受影响
                 try {
-                    await tf.setBackend('cpu');
-                    await tf.ready();
-                    resultsDiv.innerHTML += `\n\n(已将后端重置回 CPU: ${tf.getBackend()})`;
+                    if (tf.getBackend() !== 'cpu') { // 只有在不是CPU时才尝试切换
+                        await tf.setBackend('cpu');
+                        await tf.ready();
+                        resultsDiv.innerHTML += `\n\n(已将后端重置回 CPU: ${tf.getBackend()})`;
+                    }
                 } catch (resetError) {
                     resultsDiv.innerHTML += `\n<span class="warning">(重置后端失败: ${resetError.message})</span>`;
                 }
