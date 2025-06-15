@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>随机矩阵分析 (TF.js - Jacobian SVD)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; display: flex; gap: 20px; }
+        .controls, .results-container { width: 45%; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .controls div, .results-container div { margin-bottom: 10px; }
+        label { display: inline-block; width: 100px; }
+        input[type="number"] { width: 60px; }
+        button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        h2, h3 { margin-top: 0; }
+        pre { background-color: #f0f0f0; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; max-height: 150px; overflow-y: auto;}
+        #logArea { width: 100%; height: 200px; margin-top: 10px; font-family: monospace; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h2>参数配置</h2>
+    <div>
+        <label for="rows">行数 (m):</label>
+        <input type="number" id="rows" value="4">
+    </div>
+    <div>
+        <label for="cols">列数 (n):</label>
+        <input type="number" id="cols" value="3">
+    </div>
+    <div>
+        <label for="epsilon">秩容差:</label>
+        <input type="number" id="epsilon" value="1e-7" step="1e-8" style="width:100px;">
+    </div>
+    <div>
+        <label for="jacobiIter">Jacobi迭代:</label>
+        <input type="number" id="jacobiIter" value="50">
+    </div>
+    <div>
+        <label for="jacobiTol">Jacobi容差:</label>
+        <input type="number" id="jacobiTol" value="1e-10" step="1e-11" style="width:100px;">
+    </div>
+    <button onclick="runAnalysis()">生成与计算</button>
+    <h3>日志输出:</h3>
+    <textarea id="logArea" readonly></textarea>
+</div>
+
+<div class="results-container">
+    <h2>计算结果</h2>
+    <div id="results">
+        <p>请配置参数并点击“生成与计算”。</p>
+    </div>
+    <h3>原始矩阵 M (部分):</h3>
+    <pre id="matrixM_display"></pre>
+    <h3>U (部分):</h3>
+    <pre id="matrixU_display"></pre>
+    <h3>S (奇异值向量):</h3>
+    <pre id="vectorS_display"></pre>
+    <h3>V (部分):</h3>
+    <pre id="matrixV_display"></pre>
+    <h3>UV<sup>T</sup> (部分):</h3>
+    <pre id="matrixUVT_display"></pre>
+    <h3>行正规化矩阵 (部分):</h3>
+    <pre id="matrixNormM_display"></pre>
+</div>
+
+<script>
+    const logArea = document.getElementById('logArea');
+    const resultsDiv = document.getElementById('results');
+    const matrixMDisplay = document.getElementById('matrixM_display');
+    const matrixUDisplay = document.getElementById('matrixU_display');
+    const vectorSDisplay = document.getElementById('vectorS_display');
+    const matrixVDisplay = document.getElementById('matrixV_display');
+    const matrixUVTDisplay = document.getElementById('matrixUVT_display');
+    const matrixNormMDisplay = document.getElementById('matrixNormM_display');
+
+    function log(message) {
+        console.log(message);
+        logArea.value += message + '\n';
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function clearLogAndResults() {
+        logArea.value = '';
+        resultsDiv.innerHTML = '<p>请配置参数并点击“生成与计算”。</p>';
+        matrixMDisplay.textContent = '';
+        matrixUDisplay.textContent = '';
+        vectorSDisplay.textContent = '';
+        matrixVDisplay.textContent = '';
+        matrixUVTDisplay.textContent = '';
+        matrixNormMDisplay.textContent = '';
+    }
+
+    async function printTensor(tensor, name, preElement, maxRows = 5, maxCols = 5) {
+        if (!tensor) {
+            preElement.textContent = `${name} 未计算`;
+            return;
+        }
+        if (tensor.isDisposed) {
+            preElement.textContent = `${name} 已被释放 (disposed)`;
+            log(`警告: 尝试打印已释放的张量 ${name}`);
+            return;
+        }
+        let arr;
+        try {
+            arr = await tensor.array();
+        } catch (e) {
+            preElement.textContent = `${name} 转换数组失败: ${e.message}`;
+            log(`Error converting ${name} to array: ${e.message}`);
+            return;
+        }
+
+        let content = `${name} (形状: [${tensor.shape.join(', ')}]):\n`;
+        if (tensor.rank === 0) { // Scalar
+            content += arr.toFixed(4);
+        } else if (tensor.rank === 1) { // Vector
+            const N = tensor.shape[0];
+            for (let i = 0; i < Math.min(N, maxRows); i++) {
+                content += arr[i].toFixed(4) + '\n';
+            }
+            if (N > maxRows) content += '...\n';
+        } else if (tensor.rank === 2) { // Matrix
+            const R = tensor.shape[0];
+            const C = tensor.shape[1];
+            for (let i = 0; i < Math.min(R, maxRows); i++) {
+                for (let j = 0; j < Math.min(C, maxCols); j++) {
+                    content += arr[i][j].toFixed(4) + '\t';
+                }
+                if (C > maxCols) content += '...';
+                content += '\n';
+            }
+            if (R > maxRows) content += '...\n';
+        } else {
+            content += '高维张量预览未实现\n';
+        }
+        preElement.textContent = content;
+    }
+
+    /**
+     * Jacobi Eigenvalue Algorithm for a symmetric matrix A.
+     * Returns { eigenvalues, eigenvectors, D_final }
+     * The returned tensors are live and NOT managed by an outer tidy of this function.
+     * Caller is responsible for disposing them or ensuring they are passed to another tidy.
+     */
+    async function jacobiEigen(A_input, maxIterations, tolerance) {
+        // A_input is assumed to be live. This function will return new live tensors.
+        // Inner tidy manages temporaries specific to Jacobi.
+        const result = tf.tidy(() => {
+            const n = A_input.shape[0];
+            if (A_input.shape[1] !== n) {
+                throw new Error("Jacobi method requires a square matrix.");
+            }
+
+            let V = tf.eye(n);
+            let D = A_input.clone(); // Clone A_input so we don't modify it if it's used elsewhere
+
+            for (let iter = 0; iter < maxIterations; iter++) {
+                let p = -1, q = -1;
+                let maxOffDiag = 0;
+                const D_arr = D.arraySync(); // Sync for finding max
+
+                for (let i = 0; i < n; i++) {
+                    for (let j = i + 1; j < n; j++) {
+                        if (Math.abs(D_arr[i][j]) > maxOffDiag) {
+                            maxOffDiag = Math.abs(D_arr[i][j]);
+                            p = i;
+                            q = j;
+                        }
+                    }
+                }
+
+                if (maxOffDiag < tolerance) {
+                    log(`Jacobi: 收敛于迭代 ${iter+1} 次, 最大非对角元素 ${maxOffDiag.toExponential(3)} < ${tolerance.toExponential(3)}`);
+                    break;
+                }
+                if (iter === maxIterations - 1) {
+                    log(`Jacobi: 达到最大迭代次数 ${maxIterations}, 最大非对角元素 ${maxOffDiag.toExponential(3)}`);
+                }
+
+                const D_pp = D_arr[p][p];
+                const D_qq = D_arr[q][q];
+                const D_pq = D_arr[p][q];
+
+                let t, c, s;
+                if (Math.abs(D_pq) < tolerance * 1e-5) {
+                    c = 1.0; s = 0.0;
+                } else {
+                    const tau = (D_qq - D_pp) / (2 * D_pq);
+                    if (tau === 0) {
+                        t = 1.0;
+                    } else if (Math.abs(tau) > 1e10) {
+                        t = 1 / (2 * tau);
+                    } else {
+                        t = Math.sign(tau) / (Math.abs(tau) + Math.sqrt(tau * tau + 1));
+                    }
+                    c = 1 / Math.sqrt(1 + t * t);
+                    s = t * c;
+                }
+               
+                const J_data = tf.eye(n).bufferSync();
+                J_data.set(c, p, p); J_data.set(c, q, q);
+                J_data.set(s, p, q); J_data.set(-s, q, p);
+                const J = J_data.toTensor(); // J is temp
+
+                // Efficient update of D
+                const D_old_arr = D.arraySync();
+                const D_new_arr_buffer = tf.buffer([n, n]);
+                for(let r=0; r<n; r++) for(let col=0; col<n; col++) D_new_arr_buffer.set(D_old_arr[r][col], r, col);
+
+                for (let k = 0; k < n; k++) {
+                    if (k !== p && k !== q) {
+                        const D_pk_old = D_old_arr[p][k];
+                        const D_qk_old = D_old_arr[q][k];
+                        D_new_arr_buffer.set(c * D_pk_old - s * D_qk_old, p, k);
+                        D_new_arr_buffer.set(c * D_pk_old - s * D_qk_old, k, p);
+                        D_new_arr_buffer.set(s * D_pk_old + c * D_qk_old, q, k);
+                        D_new_arr_buffer.set(s * D_pk_old + c * D_qk_old, k, q);
+                    }
+                }
+                D_new_arr_buffer.set(c*c*D_pp + s*s*D_qq - 2*c*s*D_pq, p, p);
+                D_new_arr_buffer.set(s*s*D_pp + c*c*D_qq + 2*c*s*D_pq, q, q);
+                D_new_arr_buffer.set(0, p, q);
+                D_new_arr_buffer.set(0, q, p);
+                
+                const D_prev = D;
+                D = D_new_arr_buffer.toTensor(); // D is updated
+                tf.dispose(D_prev); // Dispose old D
+
+                const V_prev = V;
+                V = tf.matMul(V, J); // V is updated
+                tf.dispose(V_prev); // Dispose old V
+                tf.dispose(J); // Dispose J
+            }
+            // NEW: Extract diagonal elements manually
+            const n_dim = D.shape[0];
+            const D_arr = D.arraySync(); // Get the array data
+            const diagValues = [];
+            for (let i = 0; i < n_dim; i++) {
+                diagValues.push(D_arr[i][i]);
+            }
+            const eigenvalues = tf.tensor1d(diagValues); // Create a 1D tensor from the extracted values
+            // D and V are the final matrices from iteration, eigenvalues is derived from D.
+            // These will be returned from tidy, so they stay.
+            return { eigenvalues, eigenvectors: V, D_final: D };
+        });
+        // result.eigenvalues, result.eigenvectors, result.D_final are now live tensors
+        return result;
+    }
+
+    /**
+     * Singular Value Decomposition M_input = U S V^T using Jacobi iteration.
+     * Returns { U, S_vector, V } which are live tensors.
+     */
+    async function svdJacobi(M_input, jacobiMaxIter, jacobiTol, rankTol) {
+        const m = M_input.shape[0];
+        const n = M_input.shape[1];
+        const k_limit = Math.min(m, n);
+
+        let compute_U_from_V = true; // True if we compute M^T M
+        let ATA; // This will hold M^T M or M M^T
+
+        if (m < n) { // Fat matrix: M M^T is smaller
+            ATA = tf.tidy(() => tf.matMul(M_input, M_input, false, true)); // M M^T
+            compute_U_from_V = false;
+            log("SVD: m < n, 使用 M M^T");
+        } else { // Tall or square matrix: M^T M is smaller or same size
+            ATA = tf.tidy(() => tf.matMul(M_input, M_input, true, false)); // M^T M
+            log("SVD: m >= n, 使用 M^T M");
+        }
+        
+        log(`SVD: 对称矩阵 A (形状 ${ATA.shape.join(',')}) 进行Jacobi特征分解...`);
+        // jacobiEigen is async and returns live tensors {eigenvalues, eigenvectors, D_final}
+        const eigenResult = await jacobiEigen(ATA, jacobiMaxIter, jacobiTol);
+        // eigenResult.eigenvalues, .eigenvectors, .D_final are now live. ATA is also still live.
+
+        // Now, construct SVD parts using eigenResult. This part is synchronous.
+        const svdParts = tf.tidy(() => {
+            const eigenvalues_sq_unsorted = eigenResult.eigenvalues;
+            const P_unsorted = eigenResult.eigenvectors;
+
+            const eigenvalues_sq_positive = tf.relu(eigenvalues_sq_unsorted);
+            const { values: s_sq_sorted, indices } = tf.topk(eigenvalues_sq_positive, eigenvalues_sq_positive.size);
+            const P_sorted = P_unsorted.gather(indices, 1);
+
+            let S_vector_full = tf.sqrt(s_sq_sorted);
+            const S_vector = S_vector_full.slice([0], [k_limit]);
+            
+            let U_final, V_final;
+
+            // P_sorted contains eigenvectors. If ATA was M^TM, P_sorted is V. If MM^T, P_sorted is U.
+            // The dimension of P_sorted columns is ATA.shape[0] (i.e. n if M^TM, m if MM^T)
+            // We need to pick k_limit columns for U/V.
+            const dim_eigenvectors = P_sorted.shape[0]; // num rows in P_sorted
+            const P_sliced = P_sorted.slice([0, 0], [dim_eigenvectors, k_limit]);
+
+
+            if (compute_U_from_V) { // P_sliced are columns of V
+                const V_unnorm = P_sliced;
+                V_final = V_unnorm.div(V_unnorm.norm(2, 0, true).add(tf.scalar(1e-12)));
+
+                const s_inv_vals = S_vector.arraySync().map(s_val => s_val > rankTol ? 1 / s_val : 0);
+                const S_inv_diag_matrix = tf.diag(tf.tensor(s_inv_vals)); // temp
+                
+                const U_unnorm = tf.matMul(M_input, tf.matMul(V_final, S_inv_diag_matrix));
+                U_final = U_unnorm.div(U_unnorm.norm(2, 0, true).add(tf.scalar(1e-12)));
+            } else { // P_sliced are columns of U
+                const U_unnorm = P_sliced;
+                U_final = U_unnorm.div(U_unnorm.norm(2, 0, true).add(tf.scalar(1e-12)));
+                
+                const s_inv_vals = S_vector.arraySync().map(s_val => s_val > rankTol ? 1 / s_val : 0);
+                const S_inv_diag_matrix = tf.diag(tf.tensor(s_inv_vals)); // temp
+                
+                const V_unnorm = tf.matMul(M_input.transpose(), tf.matMul(U_final, S_inv_diag_matrix));
+                V_final = V_unnorm.div(V_unnorm.norm(2, 0, true).add(tf.scalar(1e-12)));
+            }
+            // U_final, S_vector.clone(), V_final are returned from tidy, so they stay.
+            // All other tensors created in this tidy (eigenvalues_sq_unsorted, P_unsorted, etc. *if they were cloned/recreated from eigenResult*)
+            // or new ones like eigenvalues_sq_positive, s_sq_sorted, P_sorted, S_vector_full, S_inv_diag_matrix, U_unnorm, V_unnorm
+            // will be disposed.
+            return { U: U_final, S_vector: S_vector.clone(), V: V_final };
+        });
+
+        // Dispose tensors created before the svdParts tidy or returned by jacobiEigen
+        tf.dispose([ATA, eigenResult.eigenvalues, eigenResult.eigenvectors, eigenResult.D_final]);
+
+        return svdParts; // svdParts.U, .S_vector, .V are live
+    }
+
+
+    async function calculateRank(S_vector_input, tolerance) {
+        if (!S_vector_input || S_vector_input.isDisposed) return 0;
+        const s_vals = await S_vector_input.array();
+        return s_vals.filter(s => Math.abs(s) > tolerance).length;
+    }
+
+    async function runAnalysis() {
+        clearLogAndResults();
+        log("开始分析...");
+
+        const m_val = parseInt(document.getElementById('rows').value);
+        const n_val = parseInt(document.getElementById('cols').value);
+        const epsilonRank_val = parseFloat(document.getElementById('epsilon').value);
+        const jacobiIter_val = parseInt(document.getElementById('jacobiIter').value);
+        const jacobiTol_val = parseFloat(document.getElementById('jacobiTol').value);
+
+        if (isNaN(m_val) || isNaN(n_val) || m_val <= 0 || n_val <= 0) {
+            log("错误: 行数和列数必须是正整数。");
+            resultsDiv.innerHTML = "<p>错误: 行数和列数必须是正整数。</p>";
+            return;
+        }
+        resultsDiv.innerHTML = "<p>正在计算，请稍候...</p>";
+
+        // Tensors that need to be managed across async calls or multiple computation steps
+        let M, U, S_vector, V, UVT, S_UVT, normalized_M, S_norm_M_tensor;
+        let M_reconstructed_final, diff_norm_final; // For reconstruction check
+
+        // JS values for display
+        let rank_M_js, rank_S_matrix_js, norm_S_1_val_js, rank_UVT_js, rank_normalized_M_js;
+        let S_vector_js_array_str;
+
+        try {
+            M = tf.randomNormal([m_val, n_val]);
+            log(`生成 ${m_val}x${n_val} 随机矩阵 M...`);
+            await printTensor(M, "M", matrixMDisplay);
+
+            log("计算 M 的 SVD (M = USV^T) 使用 Jacobi 迭代...");
+            const svdResultM = await svdJacobi(M, jacobiIter_val, jacobiTol_val, epsilonRank_val);
+            U = svdResultM.U;
+            S_vector = svdResultM.S_vector;
+            V = svdResultM.V;
+            
+            await printTensor(U, "U", matrixUDisplay);
+            await printTensor(S_vector, "S (奇异值)", vectorSDisplay);
+            await printTensor(V, "V", matrixVDisplay);
+            S_vector_js_array_str = (await S_vector.array()).map(x=>x.toFixed(4)).join(', ');
+
+
+            rank_M_js = await calculateRank(S_vector, epsilonRank_val);
+            log(`rank(M) = ${rank_M_js}`);
+            rank_S_matrix_js = rank_M_js; // Rank of diagonal S matrix is count of non-zero singular values
+            log(`rank(S_matrix) = ${rank_S_matrix_js}`);
+
+            const norm_S_1_tensor = tf.tidy(() => tf.sum(S_vector));
+            norm_S_1_val_js = (await norm_S_1_tensor.array()).toFixed(4);
+            tf.dispose(norm_S_1_tensor);
+            log(`|S|_1 (核范数) = ${norm_S_1_val_js}`);
+
+            log("计算 Procrustean 近似 UV^T...");
+            UVT = tf.tidy(() => tf.matMul(U, V, false, true));
+            await printTensor(UVT, "UV^T", matrixUVTDisplay);
+            
+            const svdResultUVT = await svdJacobi(UVT, jacobiIter_val, jacobiTol_val, epsilonRank_val);
+            S_UVT = svdResultUVT.S_vector; // Keep S_UVT for rank calculation
+            rank_UVT_js = await calculateRank(S_UVT, epsilonRank_val);
+            log(`rank(UV^T) = ${rank_UVT_js}`);
+
+            log("计算行正规化矩阵 D^(-1/2) M...");
+            normalized_M = tf.tidy(() => {
+                const MMT = tf.matMul(M, M, false, true);
+                const diag_MMT_vals = tf.diag(MMT);
+                const inv_sqrt_diag_vals_arr = diag_MMT_vals.arraySync().map(val => {
+                    if (Math.abs(val) < epsilonRank_val * epsilonRank_val) return 0;
+                    return Math.pow(val, -0.5);
+                });
+                const inv_sqrt_diag_vals = tf.tensor(inv_sqrt_diag_vals_arr);
+                const D_inv_sqrt_matrix = tf.diag(inv_sqrt_diag_vals);
+                return tf.matMul(D_inv_sqrt_matrix, M);
+            });
+            await printTensor(normalized_M, "行正规化 M", matrixNormMDisplay);
+
+            const svdResultNormM = await svdJacobi(normalized_M, jacobiIter_val, jacobiTol_val, epsilonRank_val);
+            S_norm_M_tensor = svdResultNormM.S_vector;
+            rank_normalized_M_js = await calculateRank(S_norm_M_tensor, epsilonRank_val);
+            log(`rank(行正规化 M) = ${rank_normalized_M_js}`);
+
+            // Test reconstruction
+            const reconResults = tf.tidy(() => {
+                const S_diag = tf.diag(S_vector);
+                const M_rec = tf.matMul(U, tf.matMul(S_diag, V, false, true));
+		// Calculate Frobenius norm: sqrt(sum(square(elements)))
+                const diff_matrix = M.sub(M_rec);
+                const fro_norm_diff = tf.sqrt(tf.sum(tf.square(diff_matrix)));
+                
+                const fro_norm_M = tf.sqrt(tf.sum(tf.square(M)));
+
+                // Avoid division by zero if M is a zero matrix
+                const diff_norm = fro_norm_M.arraySync() > 1e-12 ? 
+                                           fro_norm_diff.div(fro_norm_M) : 
+                                           fro_norm_diff; // if ||M|| is 0, show absolute error
+                return { M_reconstructed: M_rec, diff_norm_val: diff_norm }; // M_reconstructed and diff_norm_val are new tensors
+            });
+            M_reconstructed_final = reconResults.M_reconstructed;
+            diff_norm_final = reconResults.diff_norm_val;
+            log(`SVD 重构误差 (Frobenius范数): ||M - USV^T|| / ||M|| = ${(await diff_norm_final.array()).toExponential(3)}`);
+            
+            // Display results
+            let htmlResults = `
+                <h3>矩阵 M 相关</h3>
+                <table>
+                    <tr><th>指标</th><th>值</th></tr>
+                    <tr><td>rank(M)</td><td>${rank_M_js}</td></tr>
+                    <tr><td>S (奇异值向量)</td><td>${S_vector_js_array_str}</td></tr>
+                    <tr><td>rank(S 矩阵)</td><td>${rank_S_matrix_js}</td></tr>
+                    <tr><td>|S|_1 (核范数)</td><td>${norm_S_1_val_js}</td></tr>
+                </table>
+                <h3>Procrustean 近似 UV<sup>T</sup></h3>
+                <table>
+                    <tr><th>指标</th><th>值</th></tr>
+                    <tr><td>rank(UV<sup>T</sup>)</td><td>${rank_UVT_js}</td></tr>
+                </table>
+                 <h3>行正规化矩阵 diag(MM<sup>T</sup>)<sup>-1/2</sup> M</h3>
+                <table>
+                    <tr><th>指标</th><th>值</th></tr>
+                    <tr><td>rank(行正规化 M)</td><td>${rank_normalized_M_js}</td></tr>
+                </table>
+            `;
+            resultsDiv.innerHTML = htmlResults;
+            log("分析完成。");
+
+        } catch (error) {
+            log(`错误: ${error.message}\n${error.stack}`);
+            console.error(error);
+            resultsDiv.innerHTML = `<p>计算中发生错误: ${error.message}</p>`;
+        } finally {
+            // Dispose all top-level tensors that were explicitly managed
+            const tensorsToDispose = [
+                M, U, S_vector, V, UVT, S_UVT, normalized_M, S_norm_M_tensor,
+                M_reconstructed_final, diff_norm_final
+            ];
+            tensorsToDispose.forEach(t => {
+                if (t && !t.isDisposed) {
+                    tf.dispose(t);
+                }
+            });
+            log("张量清理完毕 (如果已创建)。");
+        }
+    }
+</script>
+
+</body>
+</html>
