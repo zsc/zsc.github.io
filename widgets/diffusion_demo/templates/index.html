@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Changed title to reflect 28x28 -->
-    <title>Diffusion Model Training Demo (MNIST 28x28)</title>
+    <title>DiT Diffusion Model Demo (MNIST 28x28)</title> <!-- MODIFIED TITLE -->
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
         .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -24,19 +23,18 @@
             overflow-y: scroll; background-color: #e9e9e9; white-space: pre-wrap;
             font-family: monospace; font-size: 0.9em;
         }
-        /* Styles for multiple sample images */
         #sampleImageContainer { 
             margin-top: 20px; 
-            display: flex; /* Use flexbox to arrange images */
-            flex-wrap: wrap; /* Allow images to wrap to next line */
-            gap: 10px; /* Space between images */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .sample-image-item { /* Style for individual image */
+        .sample-image-item {
             border: 1px solid #ddd; 
-            max-width: 100px; /* Adjust size as needed for 28x28, can be larger */
-            max-height: 100px;
-            image-rendering: pixelated; /* Keep pixels sharp */
-            background-color: #f0f0f0; /* Placeholder bg */
+            width: 56px; /* Slightly larger for 28x28 to be visible */
+            height: 56px;
+            image-rendering: pixelated;
+            background-color: #f0f0f0;
         }
         .status { margin-top: 10px; font-weight: bold; }
         .error { color: red; }
@@ -47,42 +45,54 @@
 </head>
 <body>
     <div class="container">
-        <!-- Changed title -->
-        <h1>Diffusion Model Training (MNIST 28x28)</h1>
+        <h1>DiT Diffusion Model Training (MNIST 28x28)</h1> <!-- MODIFIED TITLE -->
 
         <div class="hyperparam-grid">
             <div class="hyperparam-item">
                 <label for="learning_rate">Learning Rate:</label>
-                <input type="number" id="learning_rate" value="0.0001" step="0.00001"> <!-- Adjusted default LR -->
+                <input type="number" id="learning_rate" value="0.0001" step="0.00001">
             </div>
             <div class="hyperparam-item">
                 <label for="epochs">Epochs:</label>
-                <input type="number" id="epochs" value="20" min="1"> <!-- Increased default epochs for 28x28 -->
+                <input type="number" id="epochs" value="20" min="1">
             </div>
             <div class="hyperparam-item">
                 <label for="batch_size">Batch Size:</label>
-                <input type="number" id="batch_size" value="64" min="1"> <!-- May need to reduce for GPU memory with 28x28 -->
+                <input type="number" id="batch_size" value="32" min="1"> <!-- Potentially smaller for DiT -->
             </div>
             <div class="hyperparam-item">
                 <label for="timesteps">Diffusion Timesteps (T):</label>
                 <input type="number" id="timesteps" value="200" min="10">
             </div>
+            <!-- DiT Specific Parameters -->
             <div class="hyperparam-item">
-                <label for="unet_n_channels">U-Net Base Channels (n_channels):</label>
-                <input type="number" id="unet_n_channels" value="32" min="8">
+                <label for="patch_size">Patch Size (e.g., 4 for 28x28):</label>
+                <input type="number" id="patch_size" value="4" min="1">
             </div>
             <div class="hyperparam-item">
-                <label for="unet_ch_mults">U-Net Channel Multipliers (e.g., 1,2,2):</label>
-                <input type="text" id="unet_ch_mults" value="1,2,2"> <!-- Default good for 28x28 (28->14->7) -->
+                <label for="hidden_size">DiT Hidden Size (Embedding Dim):</label>
+                <input type="number" id="hidden_size" value="192" min="32" step="16"> <!-- Smaller default -->
+            </div>
+            <div class="hyperparam-item">
+                <label for="depth">DiT Depth (Num Blocks):</label>
+                <input type="number" id="depth" value="6" min="1"> <!-- Smaller default -->
+            </div>
+            <div class="hyperparam-item">
+                <label for="num_heads">DiT Num Heads:</label>
+                <input type="number" id="num_heads" value="3" min="1"> <!-- Corresponds to hidden_size 192/3=64 per head -->
             </div>
              <div class="hyperparam-item">
-                <label for="limit_dataset_size">Limit Dataset Size (for faster demo):</label>
-                <input type="number" id="limit_dataset_size" value="10000" min="100"> <!-- Increased for better 28x28 training -->
+                <label for="time_emb_dim">Time Embedding Dim (often = Hidden Size):</label>
+                <input type="number" id="time_emb_dim" value="192" min="32" step="16"> <!-- Tie to hidden_size -->
+            </div>
+            <div class="hyperparam-item">
+                <label for="limit_dataset_size">Limit Dataset Size:</label>
+                <input type="number" id="limit_dataset_size" value="10000" min="100">
             </div>
         </div>
 
-        <button id="startTrainingBtn">Start Training</button>
-        <button id="generateSampleBtn" disabled>Generate 5 Samples</button> <!-- Updated button text -->
+        <button id="startTrainingBtn">Start DiT Training</button> <!-- MODIFIED BUTTON TEXT -->
+        <button id="generateSampleBtn" disabled>Generate 5 Samples</button>
         
         <div id="statusMessage" class="status"></div>
 
@@ -90,22 +100,29 @@
         <div id="logs"></div>
 
         <h2>Generated Samples:</h2>
-        <!-- Container for multiple images -->
-        <div id="sampleImageContainer">
-            <!-- Images will be added here by JavaScript -->
-        </div>
-        <p id="noSampleText">No samples generated yet. Train a model first.</p>
+        <div id="sampleImageContainer"></div>
+        <p id="noSampleText">No samples generated yet. Train a DiT model first.</p> <!-- MODIFIED TEXT -->
     </div>
 
     <script>
         const startTrainingBtn = document.getElementById('startTrainingBtn');
         const generateSampleBtn = document.getElementById('generateSampleBtn');
         const logsDiv = document.getElementById('logs');
-        // Get the container for sample images, not a single image element
         const sampleImageContainer = document.getElementById('sampleImageContainer'); 
         const noSampleText = document.getElementById('noSampleText');
         const statusMessageDiv = document.getElementById('statusMessage');
         let logInterval;
+
+        // Function to update time_emb_dim based on hidden_size
+        function updateTimeEmbDim() {
+            const hiddenSizeVal = document.getElementById('hidden_size').value;
+            document.getElementById('time_emb_dim').value = hiddenSizeVal;
+        }
+        // Add event listener to hidden_size input
+        document.getElementById('hidden_size').addEventListener('input', updateTimeEmbDim);
+        // Initial call to set it
+        updateTimeEmbDim();
+
 
         function displayStatus(message, isError = false) {
             statusMessageDiv.textContent = message;
@@ -131,21 +148,25 @@
         }
 
         startTrainingBtn.addEventListener('click', async () => {
+            // Collect DiT hyperparameters
             const hyperparams = {
                 learning_rate: parseFloat(document.getElementById('learning_rate').value),
                 epochs: parseInt(document.getElementById('epochs').value),
                 batch_size: parseInt(document.getElementById('batch_size').value),
                 timesteps: parseInt(document.getElementById('timesteps').value),
-                unet_n_channels: parseInt(document.getElementById('unet_n_channels').value),
-                unet_ch_mults: document.getElementById('unet_ch_mults').value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)),
+                patch_size: parseInt(document.getElementById('patch_size').value),
+                hidden_size: parseInt(document.getElementById('hidden_size').value),
+                depth: parseInt(document.getElementById('depth').value),
+                num_heads: parseInt(document.getElementById('num_heads').value),
+                time_emb_dim: parseInt(document.getElementById('time_emb_dim').value),
                 limit_dataset_size: parseInt(document.getElementById('limit_dataset_size').value)
             };
 
             startTrainingBtn.disabled = true;
             generateSampleBtn.disabled = true;
-            sampleImageContainer.innerHTML = ''; // Clear previous images
-            noSampleText.style.display = 'block'; // Show "no sample" text
-            displayStatus('Starting training...', false);
+            sampleImageContainer.innerHTML = ''; 
+            noSampleText.style.display = 'block'; 
+            displayStatus('Starting DiT training...', false); // MODIFIED
             logsDiv.innerHTML = '';
 
             try {
@@ -156,51 +177,54 @@
                 });
                 const data = await response.json();
                 if (response.ok && data.status === 'success') {
-                    displayStatus('Training started. Check logs.', false);
+                    displayStatus('DiT Training started. Check logs.', false); // MODIFIED
                     logInterval = setInterval(async () => {
                         await fetchLogs();
-                        if (logsDiv.textContent.includes("Training finished.") || logsDiv.textContent.includes("Training aborted.")) {
+                        const logText = logsDiv.textContent;
+                        if (logText.includes("Training finished.") || logText.includes("Training aborted.") || logText.includes("Error:")) {
                             clearInterval(logInterval);
                             startTrainingBtn.disabled = false;
                             generateSampleBtn.disabled = false;
-                            displayStatus(logsDiv.textContent.includes("Training finished.") ? 'Training finished.' : 'Training aborted/failed.', false);
+                            let finalMessage = 'Training finished.';
+                            if (logText.includes("Training aborted.")) finalMessage = 'Training aborted.';
+                            if (logText.includes("Error:")) finalMessage = 'Training failed. Check logs.';
+                            displayStatus(finalMessage, logText.includes("Error:") || logText.includes("aborted."));
                         }
                     }, 2000);
                 } else {
-                    displayStatus('Error starting training: ' + (data.message || 'Unknown error'), true);
+                    displayStatus('Error starting DiT training: ' + (data.message || 'Unknown error'), true); // MODIFIED
                     startTrainingBtn.disabled = false;
                 }
             } catch (error) {
-                displayStatus('Network error starting training: ' + error.message, true);
+                displayStatus('Network error starting DiT training: ' + error.message, true); // MODIFIED
                 startTrainingBtn.disabled = false;
             }
         });
 
         generateSampleBtn.addEventListener('click', async () => {
             generateSampleBtn.disabled = true;
-            displayStatus('Generating samples...', false);
-            sampleImageContainer.innerHTML = ''; // Clear previous images
+            displayStatus('Generating samples with DiT...', false); // MODIFIED
+            sampleImageContainer.innerHTML = ''; 
             noSampleText.style.display = 'block';
 
             try {
                 const response = await fetch('/generate_sample');
                 const data = await response.json();
-                // Expect 'image_data_list'
                 if (response.ok && data.status === 'success' && data.image_data_list) {
                     data.image_data_list.forEach(imgDataBase64 => {
                         const imgElement = document.createElement('img');
                         imgElement.src = 'data:image/png;base64,' + imgDataBase64;
-                        imgElement.alt = 'Generated Sample';
-                        imgElement.classList.add('sample-image-item'); // Add class for styling
+                        imgElement.alt = 'Generated DiT Sample'; // MODIFIED
+                        imgElement.classList.add('sample-image-item'); 
                         sampleImageContainer.appendChild(imgElement);
                     });
-                    noSampleText.style.display = 'none'; // Hide "no sample" text
-                    displayStatus(`${data.image_data_list.length} samples generated.`, false);
+                    noSampleText.style.display = 'none'; 
+                    displayStatus(`${data.image_data_list.length} DiT samples generated.`, false); // MODIFIED
                 } else {
-                    displayStatus('Error generating samples: ' + (data.message || 'Unknown error'), true);
+                    displayStatus('Error generating DiT samples: ' + (data.message || 'Unknown error'), true); // MODIFIED
                 }
             } catch (error) {
-                displayStatus('Network error generating samples: ' + error.message, true);
+                displayStatus('Network error generating DiT samples: ' + error.message, true); // MODIFIED
             } finally {
                 generateSampleBtn.disabled = false;
             }
