@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+import torch.nn as nn # Added for BCEWithLogitsLoss
 from torchvision.utils import make_grid, save_image
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -9,7 +10,7 @@ import time
 from tqdm import tqdm # Ensure tqdm is imported globally
 
 from data_loader import get_dataloader, IMAGE_SIZE
-from models.vae import VAE, VQVAE # To load trained VAE/VQVAE
+from models.vae import VAE, VQVAE, Discriminator # To load trained VAE/VQVAE and Discriminator
 from models.dit import DiT
 
 # Ensure checkpoints and tensorboard run directories exist
@@ -39,7 +40,7 @@ def get_ddpm_params(schedule_name, timesteps, device):
 
     return {
         "betas": betas.to(device),
-        "alphas_cumprod": alphas_cumprod.to(device),
+        "alphas_cumprod": alphas_cumprod.to(device), # Will be used for x0 prediction
         "sqrt_alphas_cumprod": sqrt_alphas_cumprod.to(device),
         "sqrt_one_minus_alphas_cumprod": sqrt_one_minus_alphas_cumprod.to(device),
         "posterior_variance": posterior_variance.to(device)
@@ -59,10 +60,11 @@ def q_sample(x_start, t, ddpm_params, noise=None):
 def p_sample(model_dit, x_t, t_tensor, t_idx, ddpm_params):
     betas_t = ddpm_params["betas"][t_idx, None, None, None]
     sqrt_one_minus_alphas_cumprod_t = ddpm_params["sqrt_one_minus_alphas_cumprod"][t_idx, None, None, None]
-    sqrt_recip_alphas_t = torch.sqrt(1.0 / (1.0 - betas_t))
+    sqrt_recip_alphas_t = torch.sqrt(1.0 / (1.0 - betas_t)) # Corresponds to 1/sqrt(alpha_t)
     
     predicted_noise = model_dit(x_t, t_tensor)
     
+    # Equation 11 from DDPM paper:
     model_mean = sqrt_recip_alphas_t * (x_t - betas_t * predicted_noise / sqrt_one_minus_alphas_cumprod_t)
     
     if t_idx == 0:
@@ -75,27 +77,26 @@ def p_sample(model_dit, x_t, t_tensor, t_idx, ddpm_params):
 @torch.no_grad()
 def p_sample_loop(model_dit, shape, timesteps, ddpm_params, device, 
                   vae_decoder=None, vae_latent_is_flat=False, autocast_setting_for_vae=False):
-    img = torch.randn(shape, device=device)
-    imgs = []
+    img = torch.randn(shape, device=device) # Start with random noise in latent space
+    # imgs_intermediate = [] # To store intermediate latents if needed
 
-    for i in tqdm(reversed(range(0, timesteps)), desc="DiT Sampling loop", total=timesteps):
+    for i in tqdm(reversed(range(0, timesteps)), desc="DiT Sampling loop", total=timesteps, leave=False):
         t_tensor = torch.full((shape[0],), i, device=device, dtype=torch.long)
         img = p_sample(model_dit, img, t_tensor, i, ddpm_params)
-        if i % (timesteps//10) == 0 or i < 10 :
-            imgs.append(img.cpu())
+        # if i % (timesteps//10) == 0 or i < 10 :
+        #     imgs_intermediate.append(img.cpu())
     
+    # img is now the predicted x_0 latent
     if vae_decoder:
+        final_latents = img
         with torch.no_grad():
-            # If VAE decoder expects a flat latent vector (standard VAE), reshape it.
-            # VQVAE decoder typically expects spatial latents (B, embedding_dim, H', W').
             if vae_latent_is_flat:
-                img = img.view(img.size(0), -1) # Flatten to (B, num_features)
+                final_latents = final_latents.view(final_latents.size(0), -1)
             
-            # Autocast for VAE decoder if its parameters suggest it (e.g., trained with bfloat16)
             with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_setting_for_vae):
-                img = vae_decoder(img) # img is the final x_0 latent, now becomes decoded image
+                img = vae_decoder(final_latents) # Decode to pixel space
     
-    return img, imgs
+    return img, None # Second return can be intermediate images/latents if needed
 
 
 def train_dit_model(config):
@@ -107,13 +108,11 @@ def train_dit_model(config):
         print(f"VAE model path {vae_model_path} not found. Please train VAE first.")
         return None
 
-    is_vqvae = "VQVAE" in vae_model_path 
+    is_vqvae = "VQVAE" in vae_model_path.upper() # Check VQVAE in path name (case-insensitive)
     
-    # Load VAE state dict with weights_only=True for security if PyTorch version supports it well.
-    # For now, following the original trace, keeping weights_only=False (default).
     try:
-        vae_state_dict = torch.load(vae_model_path, map_location=device) # Original
-    except AttributeError: # Fallback for older torch or specific pickle issues
+        vae_state_dict = torch.load(vae_model_path, map_location=device)
+    except AttributeError: 
         vae_state_dict = torch.load(vae_model_path, map_location=device, weights_only=True)
 
 
@@ -122,67 +121,88 @@ def train_dit_model(config):
     vae_flat_latent_dim = config.get('vae_flat_latent_dim', None)
 
     if is_vqvae:
-        vq_embedding_dim = config.get('vq_embedding_dim_for_dit', 64)
-        vq_num_embeddings = config.get('vq_num_embeddings_for_dit', 128)
+        vq_embedding_dim = config.get('vq_embedding_dim_for_dit', 64) # This should match the loaded VQVAE
+        vq_num_embeddings = config.get('vq_num_embeddings_for_dit', 128) # This too
         
-        # Infer spatial dim for VQVAE
-        # Note: Ensure VQVAE's hidden_dims_enc match the trained model for correct shape inference.
-        # This part requires the VQVAE architecture to be consistent.
+        # Instantiate to infer shape AND to load weights
+        # Ensure VQVAE's hidden_dims_enc/dec match the trained model for correct shape inference & loading.
+        # These should be part of the config that trained the VQVAE.
+        vq_hidden_dims_enc = config.get('vq_hidden_dims_enc', [128, vq_embedding_dim])
+        vq_hidden_dims_dec = config.get('vq_hidden_dims_dec', [vq_embedding_dim // 2]) # Example, match actual VQVAE
+
         temp_vqvae_for_shape = VQVAE(input_channels=3, embedding_dim=vq_embedding_dim, 
                                      num_embeddings=vq_num_embeddings,
-                                     hidden_dims_enc=config.get('vq_hidden_dims_enc', [128, vq_embedding_dim]),
-                                     hidden_dims_dec=config.get('vq_hidden_dims_dec', [vq_embedding_dim, 128]) # Ensure these match
-                                     ).to(device) # Needs to be on device for dummy pass
+                                     hidden_dims_enc=vq_hidden_dims_enc,
+                                     hidden_dims_dec=vq_hidden_dims_dec, # Ensure these match
+                                     image_size=IMAGE_SIZE 
+                                     ).to(device)
         dummy_vq_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE).to(device)
-        with torch.no_grad(): # Ensure no grads for dummy pass
-            z_e_dummy = temp_vqvae_for_shape.encoder(dummy_vq_input)
-        _, _, vae_latent_spatial_dim, _ = z_e_dummy.shape
+        with torch.no_grad():
+            z_e_dummy = temp_vqvae_for_shape.encoder(dummy_vq_input) # encoded before quantization
+        _, current_vq_channels, vae_latent_spatial_dim, _ = z_e_dummy.shape
+        # For VQVAE, the channels fed to DiT are usually the embedding_dim after quantization.
+        # If DiT works on pre-quantized latents z_e, then channels are z_e.shape[1].
+        # If DiT works on post-quantized latents z_q, then channels are embedding_dim.
+        # The provided code uses autoencoder.encode which returns z_q for VQVAE.
+        vae_latent_channels = vq_embedding_dim 
         del temp_vqvae_for_shape, z_e_dummy, dummy_vq_input
-        print(f"Inferred VQVAE latent spatial dim: {vae_latent_spatial_dim} (for H' and W')")
-
-        vae_latent_channels = vq_embedding_dim # For VQVAE, latent channels are embedding_dim
+        print(f"Inferred VQVAE latent spatial dim: {vae_latent_spatial_dim} (for H' and W'). Latent channels (embedding_dim): {vae_latent_channels}")
 
         autoencoder = VQVAE(input_channels=3, embedding_dim=vq_embedding_dim, 
                             num_embeddings=vq_num_embeddings,
-                            commitment_cost=config.get('vq_commitment_cost_for_dit', 0.25),
-                            hidden_dims_enc=config.get('vq_hidden_dims_enc', [128, vq_embedding_dim]),
-                            hidden_dims_dec=config.get('vq_hidden_dims_dec', [vq_embedding_dim, 128])
+                            commitment_cost=config.get('vq_commitment_cost_for_dit', 0.25), # Param for VQVAE init
+                            hidden_dims_enc=vq_hidden_dims_enc, # Must match loaded model
+                            hidden_dims_dec=vq_hidden_dims_dec, # Must match loaded model
+                            image_size=IMAGE_SIZE
                            ).to(device)
         autoencoder.load_state_dict(vae_state_dict)
         print(f"Loaded VQVAE model from {vae_model_path}")
     else: # Standard VAE
-        if vae_flat_latent_dim is None:
+        if vae_flat_latent_dim is None: # Infer if not provided
             if 'encoder.fc_mu.bias' in vae_state_dict:
                 vae_flat_latent_dim = vae_state_dict['encoder.fc_mu.bias'].shape[0]
-            elif 'encoder.fc_mu.weight' in vae_state_dict:
-                 vae_flat_latent_dim = vae_state_dict['encoder.fc_mu.weight'].shape[0]
+            elif 'decoder.decoder_input_fc.weight' in vae_state_dict: # (out_features, latent_dim)
+                vae_flat_latent_dim = vae_state_dict['decoder.decoder_input_fc.weight'].shape[1]
             else:
-                # Try inferring from decoder_input_fc.weight if fc_mu is not present (e.g. different VAE structure)
-                # This depends on VAE architecture details. For the VAE in models/vae.py:
-                # decoder.decoder_input_fc.weight has shape (output_features, latent_dim)
-                if 'decoder.decoder_input_fc.weight' in vae_state_dict:
-                    vae_flat_latent_dim = vae_state_dict['decoder.decoder_input_fc.weight'].shape[1]
-                else:
-                    raise ValueError("Cannot infer vae_flat_latent_dim from VAE state_dict. Please provide it in config.")
+                raise ValueError("Cannot infer vae_flat_latent_dim from VAE state_dict. Please provide it in config.")
             print(f"Inferred VAE flat latent_dim: {vae_flat_latent_dim}")
         
-        # Ensure VAE class init matches the loaded state_dict structure (latent_dim, image_size, hidden_dims etc.)
-        autoencoder = VAE(input_channels=3, latent_dim=vae_flat_latent_dim).to(device)
+        autoencoder = VAE(input_channels=3, latent_dim=vae_flat_latent_dim, image_size=IMAGE_SIZE).to(device)
         autoencoder.load_state_dict(vae_state_dict)
         print(f"Loaded VAE model from {vae_model_path}")
 
-        if config.get('vae_latent_is_flat', True):
+        if config.get('vae_latent_is_flat', True): # DiT expects spatial latents
             total_elements = vae_latent_channels * vae_latent_spatial_dim * vae_latent_spatial_dim
             if vae_flat_latent_dim != total_elements:
                 raise ValueError(f"Product of vae_latent_channels ({vae_latent_channels}), "
-                                 f"vae_latent_spatial_dim^2 ({vae_latent_spatial_dim}^2) "
-                                 f"which is {total_elements} does not match vae_flat_latent_dim ({vae_flat_latent_dim}). "
-                                 "Adjust config for reshaping.")
+                                 f"vae_latent_spatial_dim^2 ({vae_latent_spatial_dim}^2) = {total_elements} "
+                                 f"does not match vae_flat_latent_dim ({vae_flat_latent_dim}). Adjust config.")
             print(f"DiT will operate on latents reshaped from {vae_flat_latent_dim} to "
                   f"({vae_latent_channels}, {vae_latent_spatial_dim}, {vae_latent_spatial_dim})")
 
-    autoencoder.eval()
+    autoencoder.eval() # VAE is fixed
     
+    # --- GAN Discriminator Setup (if used) ---
+    discriminator = None
+    adversarial_loss_fn = None
+    if config.get('use_gan_for_dit', False):
+        disc_path = config.get('vae_discriminator_path')
+        if not disc_path:
+            raise ValueError("vae_discriminator_path must be provided if use_gan_for_dit is True.")
+        if not os.path.exists(disc_path):
+            raise FileNotFoundError(f"Discriminator model path {disc_path} not found.")
+        
+        discriminator = Discriminator(input_channels=3, image_size=IMAGE_SIZE).to(device)
+        try:
+            disc_state_dict = torch.load(disc_path, map_location=device)
+        except AttributeError:
+            disc_state_dict = torch.load(disc_path, map_location=device, weights_only=True)
+        discriminator.load_state_dict(disc_state_dict)
+        discriminator.eval() # Discriminator is fixed
+        adversarial_loss_fn = nn.BCEWithLogitsLoss()
+        print(f"Loaded VAE's Discriminator from {disc_path} for DiT GAN loss.")
+
+    # --- DiT Model ---
     dit_model = DiT(
         latent_shape=(vae_latent_channels, vae_latent_spatial_dim, vae_latent_spatial_dim),
         patch_size=config['dit_patch_size'],
@@ -194,45 +214,65 @@ def train_dit_model(config):
     
     optimizer = optim.AdamW(dit_model.parameters(), lr=config['lr'])
 
-    run_name = f"DiT_VAE_lsd{vae_latent_spatial_dim}_lc{vae_latent_channels}_ps{config['dit_patch_size']}_hs{config['dit_hidden_size']}_d{config['dit_depth']}_lr{config['lr']}_bs{config['batch_size']}_epochs{config['epochs']}"
-    if is_vqvae:
-        run_name = run_name.replace("VAE", "VQVAE")
+    run_name_parts = [
+        "DiT",
+        "VQVAE" if is_vqvae else "VAE",
+        f"lsd{vae_latent_spatial_dim}", f"lc{vae_latent_channels}",
+        f"ps{config['dit_patch_size']}", f"hs{config['dit_hidden_size']}",
+        f"d{config['dit_depth']}", f"lr{config['lr']}",
+        f"bs{config['batch_size']}", f"epochs{config['epochs']}"
+    ]
+    if config.get('use_gan_for_dit', False):
+        run_name_parts.append("GAN")
+        run_name_parts.append(f"ganW{config.get('gan_loss_weight_dit', 0.01)}")
+    run_name = "_".join(run_name_parts)
+    
     writer = SummaryWriter(log_dir=os.path.join("runs", "dit", run_name))
 
     timesteps = config['ddpm_timesteps']
     ddpm_params = get_ddpm_params(config['ddpm_schedule'], timesteps, device)
     dataloader = get_dataloader(batch_size=config['batch_size'], data_limit=config.get('data_limit'))
 
-    use_bfloat16 = config.get('use_bfloat16', False) and device.type == 'cuda' and torch.cuda.is_bf16_supported()
-    if use_bfloat16:
-        print("Using bfloat16 for DiT training.")
-    scaler = torch.cuda.amp.GradScaler(enabled=use_bfloat16) # Initialize scaler, enabled flag controls it.
+    use_bfloat16_dit = config.get('use_bfloat16', False) and device.type == 'cuda' and torch.cuda.is_bf16_supported()
+    if use_bfloat16_dit:
+        print("Using bfloat16 for DiT model training.")
+    scaler = torch.cuda.amp.GradScaler(enabled=use_bfloat16_dit)
 
-    print("Starting DiT training...")
+    # Determine autocast for fixed VAE/Discriminator based on their parameters
+    autocast_for_fixed_models = False
+    if autoencoder is not None:
+        try:
+            if next(iter(autoencoder.parameters())).dtype == torch.bfloat16:
+                autocast_for_fixed_models = True
+                print("INFO: VAE parameters appear to be bfloat16. Enabling autocast for its usage.")
+        except StopIteration: pass
+    if discriminator is not None and not autocast_for_fixed_models: # If VAE not bf16, check D
+         try:
+            if next(iter(discriminator.parameters())).dtype == torch.bfloat16:
+                autocast_for_fixed_models = True # If D is bf16, then fixed models need autocast
+                print("INFO: Discriminator parameters appear to be bfloat16. Enabling autocast for its usage.")
+         except StopIteration: pass
+
+
+    print(f"Starting DiT training ({run_name})...")
     global_step = 0
     for epoch in range(config['epochs']):
         dit_model.train()
-        epoch_loss = 0
+        epoch_total_loss = 0
+        epoch_mse_loss = 0
+        epoch_gan_loss_g = 0
         start_time = time.time()
 
         for batch_idx, real_images in enumerate(dataloader):
             real_images = real_images.to(device)
-            optimizer.zero_grad(set_to_none=True) # More memory efficient
+            optimizer.zero_grad(set_to_none=True)
 
-            # Determine VAE autocast setting for encoding
-            autocast_vae_encode = False
-            if autoencoder is not None: # Should always be true here
-                try:
-                    if next(autoencoder.parameters()).dtype == torch.bfloat16:
-                        autocast_vae_encode = True
-                except StopIteration: # Should not happen if autoencoder is loaded
-                    pass
-
-            with torch.no_grad():
-                with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_vae_encode):
+            with torch.no_grad(): # VAE encoding is fixed
+                with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_for_fixed_models):
                     if is_vqvae:
-                        clean_latents, _ = autoencoder.encode(real_images)
-                    else:
+                        # VQVAE.encode returns z_q (quantized), vq_loss, perplexity, encodings
+                        clean_latents, _, _, _ = autoencoder.encode(real_images) 
+                    else: # Standard VAE
                         mu, logvar = autoencoder.encode(real_images)
                         clean_latents = autoencoder.reparameterize(mu, logvar)
                         if config.get('vae_latent_is_flat', True):
@@ -245,64 +285,116 @@ def train_dit_model(config):
             noise = torch.randn_like(clean_latents)
             noisy_latents = q_sample(clean_latents, t, ddpm_params, noise=noise)
             
-            with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=use_bfloat16):
-                predicted_noise = dit_model(noisy_latents, t)
-                loss = F.mse_loss(predicted_noise, noise)
+            # --- DiT forward and loss calculation ---
+            current_total_loss = None
+            current_mse_loss = None
+            current_gan_loss_g = torch.tensor(0.0, device=device) # Default for logging
 
-            if use_bfloat16: # If using bfloat16 (or fp16), GradScaler is recommended
-                scaler.scale(loss).backward()
+            with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=use_bfloat16_dit):
+                predicted_noise = dit_model(noisy_latents, t)
+                loss_mse = F.mse_loss(predicted_noise, noise)
+                current_mse_loss = loss_mse
+                current_total_loss = loss_mse
+
+                if discriminator is not None and adversarial_loss_fn is not None and config.get('use_gan_for_dit', False):
+                    # Predict x0 based on DiT's noise prediction
+                    # x0_pred = (x_t - sqrt(1-alpha_bar_t) * eps_theta) / sqrt(alpha_bar_t)
+                    sqrt_alphas_cumprod_t = ddpm_params["alphas_cumprod"][t].sqrt()[:, None, None, None]
+                    sqrt_one_minus_alphas_cumprod_t = ddpm_params["sqrt_one_minus_alphas_cumprod"][t, None, None, None]
+                    
+                    # Avoid division by zero if sqrt_alphas_cumprod_t can be zero (e.g. at t near T for some schedules)
+                    # For linear schedule, alphas_cumprod[T-1] is small but non-zero.
+                    pred_x0_latents = (noisy_latents - sqrt_one_minus_alphas_cumprod_t * predicted_noise) / (sqrt_alphas_cumprod_t + 1e-8) # Add epsilon
+
+                    # Prepare latents for VAE decoder
+                    pred_x0_latents_for_decode = pred_x0_latents
+                    if not is_vqvae and config.get('vae_latent_is_flat', True):
+                        pred_x0_latents_for_decode = pred_x0_latents.view(pred_x0_latents.size(0), -1)
+                    
+                    reconstructed_images_from_dit = None
+                    with torch.no_grad(): # VAE decoder is fixed
+                        with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_for_fixed_models):
+                             reconstructed_images_from_dit = autoencoder.decode(pred_x0_latents_for_decode)
+                    
+                    # Discriminator forward pass (fixed D, but gradients flow for DiT)
+                    disc_output_on_g_fake = None
+                    with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_for_fixed_models):
+                         disc_output_on_g_fake = discriminator(reconstructed_images_from_dit)
+                    
+                    loss_g_adv = adversarial_loss_fn(disc_output_on_g_fake, torch.ones_like(disc_output_on_g_fake).to(device))
+                    current_gan_loss_g = loss_g_adv
+                    current_total_loss = current_total_loss + config.get('gan_loss_weight_dit', 0.01) * loss_g_adv
+            
+            # --- Backward and Optimize ---
+            if use_bfloat16_dit:
+                scaler.scale(current_total_loss).backward()
                 scaler.step(optimizer)
                 scaler.update()
-            else: # Standard full-precision training
-                loss.backward()
+            else:
+                current_total_loss.backward()
                 optimizer.step()
 
-            epoch_loss += loss.item() * real_images.size(0)
+            epoch_total_loss += current_total_loss.item() * real_images.size(0)
+            epoch_mse_loss += current_mse_loss.item() * real_images.size(0)
+            if config.get('use_gan_for_dit', False):
+                 epoch_gan_loss_g += current_gan_loss_g.item() * real_images.size(0)
+            
             global_step += 1
 
             if batch_idx % config.get('log_interval', 100) == 0:
-                print(f"Epoch {epoch+1}/{config['epochs']}, Batch {batch_idx}/{len(dataloader)}, Loss: {loss.item():.4f}")
-                writer.add_scalar('DiT/batch_loss', loss.item(), global_step)
+                log_msg = (f"Epoch {epoch+1}/{config['epochs']}, Batch {batch_idx}/{len(dataloader)}, "
+                           f"Total Loss: {current_total_loss.item():.4f}, MSE Loss: {current_mse_loss.item():.4f}")
+                writer.add_scalar('DiT/batch_total_loss', current_total_loss.item(), global_step)
+                writer.add_scalar('DiT/batch_mse_loss', current_mse_loss.item(), global_step)
+                if config.get('use_gan_for_dit', False):
+                    log_msg += f", G_Adv_Loss: {current_gan_loss_g.item():.4f}"
+                    writer.add_scalar('DiT/batch_g_adv_loss', current_gan_loss_g.item(), global_step)
+                print(log_msg)
         
         epoch_time = time.time() - start_time
-        avg_epoch_loss = epoch_loss / len(dataloader.dataset) # Adjusted for data_limit if used
-        writer.add_scalar('DiT/epoch_loss', avg_epoch_loss, epoch + 1)
-        print(f"Epoch {epoch+1} finished. Avg Loss: {avg_epoch_loss:.4f}, Time: {epoch_time:.2f}s")
+        num_samples_epoch = len(dataloader.dataset) # Assumes dataloader.dataset reflects data_limit
+
+        avg_epoch_total_loss = epoch_total_loss / num_samples_epoch
+        avg_epoch_mse_loss = epoch_mse_loss / num_samples_epoch
+        
+        writer.add_scalar('DiT/epoch_total_loss', avg_epoch_total_loss, epoch + 1)
+        writer.add_scalar('DiT/epoch_mse_loss', avg_epoch_mse_loss, epoch + 1)
+        
+        summary_msg = (f"Epoch {epoch+1} finished. Avg Total Loss: {avg_epoch_total_loss:.4f}, "
+                       f"Avg MSE Loss: {avg_epoch_mse_loss:.4f}")
+        
+        if config.get('use_gan_for_dit', False):
+            avg_epoch_gan_loss_g = epoch_gan_loss_g / num_samples_epoch
+            writer.add_scalar('DiT/epoch_g_adv_loss', avg_epoch_gan_loss_g, epoch + 1)
+            summary_msg += f", Avg G_Adv Loss: {avg_epoch_gan_loss_g:.4f}"
+            
+        summary_msg += f", Time: {epoch_time:.2f}s"
+        print(summary_msg)
 
         if (epoch + 1) % config.get('sample_interval', 10) == 0:
             dit_model.eval()
             with torch.no_grad():
-                num_samples_to_gen = 5
+                num_samples_to_gen = config.get('num_samples_gen', 8)
                 latent_sample_shape = (num_samples_to_gen, vae_latent_channels, 
                                        vae_latent_spatial_dim, vae_latent_spatial_dim)
                 
                 vae_decoder_fn = autoencoder.decode
-                
-                # Determine VAE autocast setting for decoding during sampling
-                autocast_setting_for_vae_sampling = False
-                if autoencoder is not None:
-                    try:
-                        if next(autoencoder.parameters()).dtype == torch.bfloat16:
-                            autocast_setting_for_vae_sampling = True
-                    except StopIteration:
-                        pass
-                
-                # Determine if VAE latents are flat for p_sample_loop logic
                 current_vae_is_flat_for_sampling = (not is_vqvae) and config.get('vae_latent_is_flat', True)
 
-                with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=use_bfloat16): # For DiT model
+                # DiT model sampling loop with its own autocast
+                with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=use_bfloat16_dit):
                     generated_images_final, _ = p_sample_loop(
                         dit_model, latent_sample_shape, timesteps, 
                         ddpm_params, device, 
                         vae_decoder=vae_decoder_fn,
                         vae_latent_is_flat=current_vae_is_flat_for_sampling,
-                        autocast_setting_for_vae=autocast_setting_for_vae_sampling
+                        autocast_setting_for_vae=autocast_for_fixed_models # Use inferred for VAE
                     )
                 
-                generated_images = (generated_images_final.clamp(-1, 1) + 1) / 2
-                grid = make_grid(generated_images)
+                generated_images_display = (generated_images_final.clamp(-1, 1) + 1) / 2 # Normalize to [0,1]
+                grid = make_grid(generated_images_display.cpu())
                 writer.add_image('DiT/generated_samples', grid, epoch + 1)
-                save_image(grid, f"results/dit_samples/{run_name}_epoch_{epoch+1}.png") # Use run_name for unique sample filenames
+                save_image(grid, f"results/dit_samples/{run_name}_epoch_{epoch+1}.png")
             dit_model.train()
 
     model_save_path = os.path.join("checkpoints", f"{run_name}_final.pth")
@@ -312,62 +404,97 @@ def train_dit_model(config):
     return model_save_path
 
 if __name__ == "__main__":
-    # from tqdm import tqdm # Already imported globally
     print("Testing DiT training script...")
     
-    vae_flat_latent_dim_for_test = 64
+    # --- VAE (and Discriminator) Setup for DiT Test ---
+    # These parameters should match a VAE previously trained or trained now
+    # For this test, DiT will use a VAE that was trained with GAN.
+    vae_flat_latent_dim_for_test = 64  # Example: 16 * 2 * 2 = 64
     vae_latent_channels_for_test = 16 
-    vae_latent_spatial_dim_for_test = 2
+    vae_latent_spatial_dim_for_test = 2 # So latent is 16x2x2
     
-    dummy_vae_config = {
-        'lr': 1e-5, 'batch_size': 4, 'epochs': 1, 'latent_dim': vae_flat_latent_dim_for_test,
-        'log_interval': 1, 'sample_interval': 1, 'data_limit': 16, 'use_bfloat16': False, 'use_vq': False,
-        'image_size': IMAGE_SIZE # Ensure VAE is trained with consistent image_size
+    # Config for training a VAE+GAN model (if it doesn't exist)
+    # This VAE will serve as the autoencoder for DiT.
+    # Its discriminator will be used for DiT's GAN loss.
+    dummy_vae_gan_config = {
+        'lr': 1e-4, 'batch_size': 4, 'epochs': 1, # Minimal epochs for test
+        'latent_dim': vae_flat_latent_dim_for_test,
+        'log_interval': 1, 'sample_interval': 1, 'data_limit': 16, # Minimal data
+        'use_bfloat16': False, 'use_vq': False,
+        'kld_beta': 1.0,
+        'use_gan': True, # CRITICAL: Ensure VAE is trained with GAN
+        'gan_loss_weight': 0.01,
+        'lr_d': 1e-4, # Discriminator LR for VAE training
+        # 'image_size': IMAGE_SIZE # Implicitly uses global IMAGE_SIZE from data_loader
     }
-    dummy_vae_run_name = f"VAE_img{IMAGE_SIZE}_lr{dummy_vae_config['lr']}_bs{dummy_vae_config['batch_size']}_epochs{dummy_vae_config['epochs']}_ld{dummy_vae_config['latent_dim']}"
-    test_vae_model_path = os.path.join("checkpoints", f"{dummy_vae_run_name}_final.pth")
 
-    if not os.path.exists(test_vae_model_path):
-        print(f"Dummy VAE model not found at {test_vae_model_path}. Training a minimal one for DiT test...")
-        # Ensure train_vae_model is available and uses IMAGE_SIZE correctly.
-        # This assumes train_vae.py is in training/ and train_vae_model accepts image_size.
-        # For simplicity, if train_vae is complex, this step might need manual running or a simpler VAE creation.
+    # Construct VAE+GAN model run name based on train_vae.py logic
+    # model_type_full_vae = "VAE_GAN"
+    vae_run_name_parts = [
+        "VAE_GAN", # model_type_full
+        f"lr{dummy_vae_gan_config['lr']}",
+        f"bs{dummy_vae_gan_config['batch_size']}",
+        f"epochs{dummy_vae_gan_config['epochs']}",
+        f"ld{dummy_vae_gan_config['latent_dim']}",
+        f"ganW{dummy_vae_gan_config.get('gan_loss_weight', 1.0)}",
+        f"lrD{dummy_vae_gan_config.get('lr_d', dummy_vae_gan_config['lr'])}"
+    ]
+    dummy_vae_gan_run_name = "_".join(vae_run_name_parts)
+
+    test_vae_generator_path = os.path.join("checkpoints", f"{dummy_vae_gan_run_name}_generator_final.pth")
+    test_vae_discriminator_path = os.path.join("checkpoints", f"{dummy_vae_gan_run_name}_discriminator_final.pth")
+
+    if not os.path.exists(test_vae_generator_path) or not os.path.exists(test_vae_discriminator_path):
+        print(f"Dummy VAE+GAN generator or discriminator not found. Training for DiT test...")
         try:
-            from training.train_vae import train_vae_model
-            train_vae_model(dummy_vae_config) # Pass full config
-            print("Dummy VAE trained.")
+            from training.train_vae import train_vae_model # Assumes train_vae.py is in training/
+            # This will create both generator and discriminator .pth files
+            train_vae_model(dummy_vae_gan_config) 
+            print("Dummy VAE+GAN training completed.")
         except ImportError:
-            print("Could not import train_vae_model. Please ensure a VAE model exists or train one manually.")
-            print(f"Expected VAE at: {test_vae_model_path}")
-            # Exit or skip DiT training if VAE is essential and not found/trainable
+            print("Could not import train_vae_model from training.train_vae.")
+            print(f"Please ensure VAE generator at: {test_vae_generator_path}")
+            print(f"And VAE discriminator at: {test_vae_discriminator_path} exist, or run VAE+GAN training.")
             exit(1) 
         except Exception as e:
-            print(f"Error training dummy VAE: {e}")
+            print(f"Error training dummy VAE+GAN: {e}")
             exit(1)
-            
     else:
-        print(f"Using existing dummy VAE model: {test_vae_model_path}")
+        print(f"Using existing VAE generator: {test_vae_generator_path}")
+        print(f"Using existing VAE discriminator: {test_vae_discriminator_path}")
 
-    test_config_dit = {
-        'vae_model_path': test_vae_model_path,
-        'vae_flat_latent_dim': vae_flat_latent_dim_for_test,
-        'vae_latent_is_flat': True,
-        'vae_latent_channels': vae_latent_channels_for_test,
-        'vae_latent_spatial_dim': vae_latent_spatial_dim_for_test,   
+    # --- DiT Test Configuration (using the VAE+GAN above) ---
+    test_config_dit_gan = {
+        'vae_model_path': test_vae_generator_path,
+        'vae_flat_latent_dim': vae_flat_latent_dim_for_test, # For standard VAE, to reshape
+        'vae_latent_is_flat': True, # Standard VAE output is flat
+        'vae_latent_channels': vae_latent_channels_for_test, # Target C for DiT
+        'vae_latent_spatial_dim': vae_latent_spatial_dim_for_test, # Target H, W for DiT   
         
         'lr': 1e-4, 'batch_size': 4, 'epochs': 1, 'data_limit': 16,
-        'ddpm_timesteps': 50, 'ddpm_schedule': 'linear',
+        'ddpm_timesteps': 20, # Reduced for faster test
+        'ddpm_schedule': 'linear',
         
-        'dit_patch_size': 1, 'dit_hidden_size': 64, 'dit_depth': 1, 'dit_num_heads': 2,
+        'dit_patch_size': 1, # Latent spatial dim is 2x2, patch size 1 means 4 patches
+        'dit_hidden_size': 32, # Small for test
+        'dit_depth': 1,        # Small for test
+        'dit_num_heads': 2,    # Small for test
         
         'log_interval': 1, 'sample_interval': 1, 'use_bfloat16': False,
+        'num_samples_gen': 2, # Generate fewer samples for test
+
+        'use_gan_for_dit': True, # Enable GAN loss for DiT
+        'vae_discriminator_path': test_vae_discriminator_path,
+        'gan_loss_weight_dit': 0.01, # Weight for DiT's GAN loss component
     }
     
-    print("\n--- Training DiT (test) ---")
-    dit_model_path = train_dit_model(test_config_dit)
+    print("\n--- Training DiT with GAN loss (test) ---")
+    dit_model_path = train_dit_model(test_config_dit_gan)
     if dit_model_path:
-        print(f"DiT test training completed. Model saved to {dit_model_path}")
+        print(f"DiT (with GAN loss) test training completed. Model saved to {dit_model_path}")
     else:
-        print("DiT test training failed or was skipped.")
+        print("DiT (with GAN loss) test training failed or was skipped.")
 
     print("\nDiT training script tests finished.")
+    print("Check 'runs/dit/' for TensorBoard logs and 'checkpoints/' for models.")
+    print("Check 'results/dit_samples/' for image samples.")
