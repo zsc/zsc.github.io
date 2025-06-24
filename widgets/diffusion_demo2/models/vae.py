@@ -256,7 +256,7 @@ class Discriminator(nn.Module):
     def __init__(self, input_channels=3, hidden_dims=None, image_size=48):
         super().__init__()
         if hidden_dims is None:
-            hidden_dims = [64, 128, 256, 512] 
+            hidden_dims = [4, 8, 16, 32] #[64, 128, 256, 512] 
 
         modules = []
         in_c = input_channels

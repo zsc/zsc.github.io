@@ -11,12 +11,12 @@
         .section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
         .section:last-child { border-bottom: none; }
         label { display: inline-block; width: 180px; margin-bottom: 5px; vertical-align: top;}
-        input[type="number"], input[type="text"], select { 
+        input[type="number"], input[type="text"], select {
             padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; width: 200px;
         }
         input[type="checkbox"] { margin-right: 5px; vertical-align: middle;}
-        button { 
-            background-color: #007bff; color: white; padding: 10px 15px; border: none; 
+        button {
+            background-color: #007bff; color: white; padding: 10px 15px; border: none;
             border-radius: 4px; cursor: pointer; font-size: 16px; margin-top:10px;
         }
         button:hover { background-color: #0056b3; }
@@ -25,14 +25,14 @@
         .info { font-size: 0.9em; color: #666; margin-bottom: 10px; }
         .config-group { margin-bottom: 15px; }
         .flex-container { display: flex; flex-wrap: wrap; gap: 20px;}
-        .flex-item { flex: 1; min-width: 400px; } /* Increased min-width */
+        .flex-item { flex: 1; min-width: 350px; } /* Increased min-width */
         .indented { margin-left: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Diffusion Model Training Demo</h1>
-        <p class="info">Default VAE Latent for DiT: Example: Channels=16, Spatial=4x4. Adjust if VAE structure is different. DiT Patch Size must divide VAE Latent Spatial Dim.</p>
+        <p class="info">Default VAE Latent for DiT: Channels=16, Spatial=4x4 (example). Adjust if VAE changes. DiT Patch Size must divide VAE Latent Spatial Dim.</p>
         <p class="info">Start TensorBoard in your terminal: <code>tensorboard --logdir=./runs</code> (from project root directory)</p>
 
         <div class="flex-container">
@@ -42,7 +42,7 @@
                 <form id="vaeTrainForm">
                     <div class="config-group">
                         <label for="vae_lr">Learning Rate:</label>
-                        <input type="number" id="vae_lr" name="lr" value="0.0002" step="0.00001" title="Generator/Main VAE LR"><br>
+                        <input type="number" id="vae_lr" name="lr" value="0.0002" step="0.00001"><br>
                         <label for="vae_batch_size">Batch Size:</label>
                         <input type="number" id="vae_batch_size" name="batch_size" value="128"><br>
                         <label for="vae_epochs">Epochs:</label>
@@ -60,7 +60,7 @@
                         <label for="vae_kld_beta">KLD Beta (VAE):</label>
                         <input type="number" id="vae_kld_beta" name="kld_beta" value="1.0" step="0.1"><br>
                     </div>
-                    
+
                     <div class="config-group">
                         <h3>VQ-VAE Specific:</h3>
                         <input type="checkbox" id="vae_use_vq" name="use_vq">
@@ -75,20 +75,20 @@
                             <label for="vq_beta">VQ Loss Beta:</label>
                             <input type="number" id="vq_beta" name="vq_beta" value="1.0" step="0.1"><br>
                             <label for="vq_hidden_dims_enc_str">VQ Enc Hidden (CSV):</label>
-                            <input type="text" id="vq_hidden_dims_enc_str" name="vq_hidden_dims_enc_str" placeholder="e.g., 128,64" title="Comma-separated integers for encoder hidden layer dimensions before embedding dim."><br>
+                            <input type="text" id="vq_hidden_dims_enc_str" name="vq_hidden_dims_enc_str" placeholder="e.g., 128,64"><br>
                             <label for="vq_hidden_dims_dec_str">VQ Dec Hidden (CSV):</label>
-                            <input type="text" id="vq_hidden_dims_dec_str" name="vq_hidden_dims_dec_str" placeholder="e.g., 64" title="Comma-separated integers for decoder hidden layer dimensions after embedding dim."><br>
+                            <input type="text" id="vq_hidden_dims_dec_str" name="vq_hidden_dims_dec_str" placeholder="e.g., 64,128"><br>
                         </div>
                     </div>
 
                     <div class="config-group">
-                        <h3>VAE GAN Loss (Optional):</h3>
+                        <h3>GAN Loss (Optional for VAE):</h3>
                         <input type="checkbox" id="vae_use_gan" name="use_gan">
-                        <label for="vae_use_gan" style="width:auto;">Use GAN Loss for VAE</label><br>
-                        <div id="gan_params_vae" class="indented" style="display:none;">
-                            <label for="vae_gan_loss_weight">VAE GAN Loss Wt:</label>
+                        <label for="vae_use_gan" style="width:auto;">Use GAN Loss</label><br>
+                        <div id="vae_gan_params" class="indented" style="display:none;">
+                            <label for="vae_gan_loss_weight">GAN Loss Weight:</label>
                             <input type="number" id="vae_gan_loss_weight" name="gan_loss_weight" value="0.1" step="0.01"><br>
-                            <label for="vae_lr_d">VAE Disc. LR:</label>
+                            <label for="vae_lr_d">Discriminator LR:</label>
                             <input type="number" id="vae_lr_d" name="lr_d" value="0.0002" step="0.00001"><br>
                         </div>
                     </div>
@@ -96,8 +96,7 @@
                     <button type="button" onclick="startVAETraining()">Start VAE Training</button>
                 </form>
                 <div id="vaeStatus" class="status">VAE Status: Idle</div>
-                <p class="info" style="margin-top:10px;">After VAE training, check console for model path(s). Copy to DiT/Generation forms below.</p>
-                <!-- <input type="text" id="vae_model_path_display" placeholder="Trained VAE model path (from console)" readonly style="width: 100%; margin-top:10px;"> -->
+                <input type="text" id="vae_model_path_display" placeholder="Trained VAE model path (from console)" readonly style="width: 100%; margin-top:10px;">
             </div>
 
             <!-- DiT Training Section -->
@@ -105,34 +104,27 @@
                 <h2>Stage 2: DiT Training</h2>
                 <form id="ditTrainForm">
                     <div class="config-group">
-                        <label for="dit_vae_model_path">VAE Model Path (Gen.):</label>
-                        <input type="text" id="dit_vae_model_path" name="vae_model_path" placeholder="Path to VAE generator .pth" required><br>
-                        
+                        <label for="dit_vae_model_path">VAE Model Path:</label>
+                        <input type="text" id="dit_vae_model_path" name="vae_model_path" placeholder="Path from VAE training" required><br>
+
                         <p class="info">Configure VAE latent characteristics for DiT input (must match VAE's output structure or your reshaping plan):</p>
-                        <label for="dit_vae_latent_is_flat">Std VAE Out is Flat?</label>
-                        <input type="checkbox" id="dit_vae_latent_is_flat" name="vae_latent_is_flat" checked onchange="toggleFlatLatentInfo()"> <span style="font-size:0.8em">(If standard VAE outputs flat vector that needs reshape)</span><br>
+                        <label for="dit_vae_latent_is_flat">VAE Output is Flat?</label>
+                        <input type="checkbox" id="dit_vae_latent_is_flat" name="vae_latent_is_flat" checked onchange="toggleFlatLatentInfo()"> <span style="font-size:0.8em">(If standard VAE outputs flat vector)</span><br>
                         <div id="flat_latent_info" class="indented">
-                             <label for="dit_vae_flat_latent_dim">Std VAE Flat Latent Dim:</label>
+                             <label for="dit_vae_flat_latent_dim">VAE Flat Latent Dim:</label>
                              <input type="number" id="dit_vae_flat_latent_dim" name="vae_flat_latent_dim" value="256"><br>
                         </div>
-                        <label for="dit_vae_latent_channels">Target DiT In Channels:</label>
-                        <input type="number" id="dit_vae_latent_channels" name="vae_latent_channels" value="16" title="For VQVAE, this is embedding_dim. For std VAE, after reshape."><br>
-                        <label for="dit_vae_latent_spatial_dim">Target DiT In Spatial:</label>
-                        <input type="number" id="dit_vae_latent_spatial_dim" name="vae_latent_spatial_dim" value="4" title="e.g., 4 for 4x4 latent space for DiT"><br>
-                        
-                        <p class="info" style="margin-top:10px;">If VAE was VQVAE, these VQ params are for DiT's understanding (should match loaded VQVAE):</p>
+                        <label for="dit_vae_latent_channels">Target DiT Input Channels:</label>
+                        <input type="number" id="dit_vae_latent_channels" name="vae_latent_channels" value="16"><br>
+                        <label for="dit_vae_latent_spatial_dim">Target DiT Input Spatial:</label>
+                        <input type="number" id="dit_vae_latent_spatial_dim" name="vae_latent_spatial_dim" value="4"> <span style="font-size:0.8em">(e.g., 4 for 4x4)</span><br>
+
+                        <p class="info" style="margin-top:10px;">If VAE was VQVAE, these VQ params are for DiT's understanding (should match VAE):</p>
                         <label for="dit_vq_embedding_dim">VQ Emb Dim (if VQVAE):</label>
                         <input type="number" id="dit_vq_embedding_dim" name="vq_embedding_dim_for_dit" value="64"><br>
-                        <label for="dit_vq_num_embeddings">VQ Num Embs (if VQVAE):</label> <!-- This is for VQVAE construction if needed, not directly by DiT itself but by VAE wrapper logic -->
-                        <input type="number" id="dit_vq_num_embeddings" name="vq_num_embeddings_for_dit" value="512"><br>
-                         <label for="dit_vq_hidden_dims_enc">VQ Enc Hidden (for VAE loader):</label>
-                        <input type="text" id="dit_vq_hidden_dims_enc" name="vq_hidden_dims_enc" placeholder="e.g. 128,64"><br>
-                        <label for="dit_vq_hidden_dims_dec">VQ Dec Hidden (for VAE loader):</label>
-                        <input type="text" id="dit_vq_hidden_dims_dec" name="vq_hidden_dims_dec" placeholder="e.g. 64"><br>
-
 
                         <hr style="margin: 10px 0;">
-                        <label for="dit_lr">DiT Learning Rate:</label>
+                        <label for="dit_lr">Learning Rate:</label>
                         <input type="number" id="dit_lr" name="lr" value="0.0001" step="0.00001"><br>
                         <label for="dit_batch_size">Batch Size:</label>
                         <input type="number" id="dit_batch_size" name="batch_size" value="64"><br>
@@ -159,25 +151,24 @@
                         <input type="checkbox" id="dit_use_bfloat16" name="use_bfloat16" checked>
                         <label for="dit_use_bfloat16" style="width:auto;">Use bfloat16</label>
                     </div>
-
-                    <!-- GAN Loss for DiT -->
                     <div class="config-group">
-                        <h3>DiT GAN Loss (Optional):</h3>
-                        <input type="checkbox" id="dit_use_gan_for_dit" name="use_gan_for_dit">
-                        <label for="dit_use_gan_for_dit" style="width:auto;">Use GAN Loss for DiT</label><br>
-                        <div id="gan_params_dit" class="indented" style="display:none;">
-                            <label for="dit_vae_discriminator_path">VAE Disc. Path:</label>
-                            <input type="text" id="dit_vae_discriminator_path" name="vae_discriminator_path" placeholder="Path to VAE's discriminator .pth"><br>
-                            <label for="dit_gan_loss_weight_dit">DiT GAN Loss Wt:</label>
-                            <input type="number" id="dit_gan_loss_weight_dit" name="gan_loss_weight_dit" value="0.01" step="0.0000001"><br>
+                        <h3>GAN Loss (Optional for DiT):</h3>
+                        <p class="info">Enables adversarial loss for DiT, using VAE's decoder and (VAE's) discriminator.</p>
+                        <input type="checkbox" id="dit_use_gan" name="use_gan" onchange="toggleDitGanParams()">
+                        <label for="dit_use_gan" style="width:auto;">Use GAN Loss in DiT</label><br>
+                        <div id="dit_gan_params" class="indented" style="display:none;">
+                            <label for="dit_discriminator_model_path">Discriminator Model Path:</label>
+                            <input type="text" id="dit_discriminator_model_path" name="discriminator_model_path" placeholder="Path to VAE's discriminator .pth"><br>
+                            <label for="dit_gan_loss_weight">DiT GAN Loss Weight:</label>
+                            <input type="number" id="dit_gan_loss_weight" name="gan_loss_weight" value="0.01" step="0.001"><br>
+                            <label for="dit_lr_d">DiT Discriminator LR:</label>
+                            <input type="number" id="dit_lr_d" name="lr_d" value="0.0001" step="0.00001"><br>
                         </div>
                     </div>
-
                     <button type="button" onclick="startDiTTraining()">Start DiT Training</button>
                 </form>
                 <div id="ditStatus" class="status">DiT Status: Idle</div>
-                 <p class="info" style="margin-top:10px;">After DiT training, check console for model path. Copy to Generation form below.</p>
-                <!-- <input type="text" id="dit_model_path_display" placeholder="Trained DiT model path (from console)" readonly style="width: 100%; margin-top:10px;"> -->
+                <input type="text" id="dit_model_path_display" placeholder="Trained DiT model path (from console)" readonly style="width: 100%; margin-top:10px;">
             </div>
         </div>
 
@@ -185,22 +176,18 @@
         <div class="section">
             <h2>Generate Samples (after DiT training)</h2>
             <form id="generateForm">
-                <label for="gen_vae_model_path">VAE Model Path (Gen.):</label>
-                <input type="text" id="gen_vae_model_path" name="vae_model_path" placeholder="Path to VAE generator .pth" required><br>
-                
+                <label for="gen_vae_model_path">VAE Model Path:</label>
+                <input type="text" id="gen_vae_model_path" name="vae_model_path" placeholder="Path from VAE training" required><br>
+
                 <label for="gen_dit_model_path">DiT Model Path:</label>
-                <input type="text" id="gen_dit_model_path" name="dit_model_path" placeholder="Path to DiT model .pth" required><br>
+                <input type="text" id="gen_dit_model_path" name="dit_model_path" placeholder="Path from DiT training" required><br>
 
-                <p class="info">VAE/DiT Latent/VQ params for generation (must match how models were trained/configured for loading):</p>
-                <label for="gen_vae_image_size">Image Size (used for VAE):</label>
-                <input type="number" id="gen_vae_image_size" name="generation_image_size" value="48" title="Image size VAE was trained on. Default 48."><br>
-
-                <label for="gen_vae_flat_latent_dim">Std VAE Flat Latent Dim:</label>
-                <input type="number" id="gen_vae_flat_latent_dim" name="vae_flat_latent_dim" value="256" title="If VAE is standard type."><br>
+                <p class="info">VAE/DiT Latent/VQ params for generation (must match how models were trained/configured):</p>
+                <!-- These VAE params are fallbacks if not in VAE model's cached config -->
+                <label for="gen_vae_flat_latent_dim">VAE Flat Latent Dim (if std VAE):</label>
+                <input type="number" id="gen_vae_flat_latent_dim" name="vae_flat_latent_dim" value="256"><br>
                 <label for="gen_vq_embedding_dim">VQ Emb Dim (if VQVAE):</label>
-                <input type="number" id="gen_vq_embedding_dim" name="vq_embedding_dim" value="64" title="If VAE is VQVAE type."><br>
-                <label for="gen_vq_num_embeddings">VQ Num Embs (if VQVAE):</label>
-                <input type="number" id="gen_vq_num_embeddings" name="vq_num_embeddings" value="512" title="If VAE is VQVAE type."><br>
+                <input type="number" id="gen_vq_embedding_dim" name="vq_embedding_dim_for_dit" value="64"><br>
 
 
                 <p class="info">DiT Input Configuration (must match DiT training):</p>
@@ -218,14 +205,14 @@
                 <input type="number" id="gen_dit_depth" name="dit_depth" value="6"><br>
                 <label for="gen_dit_num_heads">DiT Num Heads:</label>
                 <input type="number" id="gen_dit_num_heads" name="dit_num_heads" value="6"><br>
-                
+
                 <p class="info">Sampling Parameters:</p>
                 <label for="gen_ddpm_timesteps">DDPM Timesteps:</label>
                 <input type="number" id="gen_ddpm_timesteps" name="ddpm_timesteps" value="1000"><br>
                 <label for="gen_num_samples">Number of Samples:</label>
                 <input type="number" id="gen_num_samples" name="num_samples" value="5"><br>
                 <input type="checkbox" id="gen_use_bfloat16" name="use_bfloat16" checked>
-                <label for="gen_use_bfloat16" style="width:auto;">Use bfloat16 (if available)</label><br>
+                <label for="gen_use_bfloat16" style="width:auto;">Use bfloat16</label><br>
 
                 <button type="button" onclick="generateSamples()">Generate Samples</button>
             </form>
@@ -235,41 +222,47 @@
     </div>
 
     <script>
-        // VAE form elements
         const vaeVQCheckbox = document.getElementById('vae_use_vq');
         const vqParamsDiv = document.getElementById('vq_params');
         const vaeGANCheckbox = document.getElementById('vae_use_gan');
-        const ganParamsVaeDiv = document.getElementById('gan_params_vae'); // Renamed for clarity
+        const vaeGanParamsDiv = document.getElementById('vae_gan_params'); // Corrected ID reference
 
-        // DiT form elements
+        const ditVaePathInput = document.getElementById('dit_vae_model_path');
+        const genVaePathInput = document.getElementById('gen_vae_model_path');
+        const genDitPathInput = document.getElementById('gen_dit_model_path');
+        const vaeModelPathDisplay = document.getElementById('vae_model_path_display');
+        const ditModelPathDisplay = document.getElementById('dit_model_path_display');
+
         const ditVaeLatentFlatCheckbox = document.getElementById('dit_vae_latent_is_flat');
         const flatLatentInfoDiv = document.getElementById('flat_latent_info');
-        const ditUseGanCheckbox = document.getElementById('dit_use_gan_for_dit'); // New for DiT GAN
-        const ganParamsDitDiv = document.getElementById('gan_params_dit');     // New for DiT GAN
 
-        // Event Listeners
+        const ditGANCheckbox = document.getElementById('dit_use_gan'); // New checkbox for DiT GAN
+        const ditGanParamsDiv = document.getElementById('dit_gan_params'); // New div for DiT GAN params
+
+
         vaeVQCheckbox.addEventListener('change', function() {
             vqParamsDiv.style.display = this.checked ? 'block' : 'none';
         });
         vaeGANCheckbox.addEventListener('change', function() {
-            ganParamsVaeDiv.style.display = this.checked ? 'block' : 'none';
+            vaeGanParamsDiv.style.display = this.checked ? 'block' : 'none'; // Corrected variable name
         });
-        
+
         ditVaeLatentFlatCheckbox.addEventListener('change', toggleFlatLatentInfo);
-        
-        ditUseGanCheckbox.addEventListener('change', function() { // New listener for DiT GAN
-            ganParamsDitDiv.style.display = this.checked ? 'block' : 'none';
-        });
+        ditGANCheckbox.addEventListener('change', toggleDitGanParams); // Listener for new DiT GAN checkbox
 
         function toggleFlatLatentInfo() {
             flatLatentInfoDiv.style.display = ditVaeLatentFlatCheckbox.checked ? 'block' : 'none';
         }
-        
+
+        function toggleDitGanParams() {
+            ditGanParamsDiv.style.display = ditGANCheckbox.checked ? 'block' : 'none';
+        }
+
         // Initialize visibility based on checkbox state on page load
         vqParamsDiv.style.display = vaeVQCheckbox.checked ? 'block' : 'none';
-        ganParamsVaeDiv.style.display = vaeGANCheckbox.checked ? 'block' : 'none';
+        vaeGanParamsDiv.style.display = vaeGANCheckbox.checked ? 'block' : 'none'; // Corrected variable name
         toggleFlatLatentInfo();
-        ganParamsDitDiv.style.display = ditUseGanCheckbox.checked ? 'block' : 'none'; // Init DiT GAN params visibility
+        toggleDitGanParams(); // Initialize DiT GAN params visibility
 
 
         async function startVAETraining() {
@@ -282,9 +275,19 @@
                 else if (element.type === 'checkbox') data[key] = element.checked;
                 else data[key] = value;
             });
-            
-            // Note: vq_hidden_dims_enc/dec are already parsed as arrays by server if string version sent
-            // No client-side parsing to array needed here if server handles string->array
+
+            // Handle comma-separated strings for hidden dims
+            if (data.use_vq) {
+                if (data.vq_hidden_dims_enc_str) {
+                    data.vq_hidden_dims_enc = data.vq_hidden_dims_enc_str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                } else { data.vq_hidden_dims_enc = []; }
+                if (data.vq_hidden_dims_dec_str) {
+                    data.vq_hidden_dims_dec = data.vq_hidden_dims_dec_str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                } else { data.vq_hidden_dims_dec = []; }
+            }
+            delete data.vq_hidden_dims_enc_str;
+            delete data.vq_hidden_dims_dec_str;
+
 
             document.getElementById('vaeStatus').textContent = 'VAE Training Started... Check console and TensorBoard.';
             try {
@@ -303,7 +306,7 @@
 
         async function startDiTTraining() {
             const form = document.getElementById('ditTrainForm');
-            if (!form.reportValidity()) return; 
+            if (!form.reportValidity()) return;
 
             const formData = new FormData(form);
             const data = {};
@@ -314,14 +317,14 @@
                 else data[key] = value;
             });
 
-            // Parse VQ hidden dims for DiT form if provided (used by VAE loader in train_dit)
-            if (data.vq_hidden_dims_enc) { // Assuming name="vq_hidden_dims_enc"
-                data.vq_hidden_dims_enc = data.vq_hidden_dims_enc.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-            } else { data.vq_hidden_dims_enc = []; }
-            if (data.vq_hidden_dims_dec) { // Assuming name="vq_hidden_dims_dec"
-                data.vq_hidden_dims_dec = data.vq_hidden_dims_dec.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-            } else { data.vq_hidden_dims_dec = []; }
-            
+            // If DiT GAN is not used, remove related params to avoid sending them if empty
+            if (!data.use_gan) {
+                delete data.discriminator_model_path;
+                delete data.gan_loss_weight; // This 'gan_loss_weight' is for DiT
+                delete data.lr_d; // This 'lr_d' is for DiT's discriminator
+            }
+
+
             document.getElementById('ditStatus').textContent = 'DiT Training Started... Check console and TensorBoard.';
             try {
                 const response = await fetch('/start-training-dit', {
@@ -351,7 +354,7 @@
             });
 
             document.getElementById('generateStatus').textContent = 'Generating samples...';
-            document.getElementById('generatedImages').innerHTML = ''; 
+            document.getElementById('generatedImages').innerHTML = '';
             try {
                 const response = await fetch('/generate-samples', {
                     method: 'POST',
@@ -368,13 +371,11 @@
                         imageContainer.appendChild(img);
                     });
                 } else {
-                    document.getElementById('generateStatus').textContent = `Error: ${result.error || "Unknown error"}. Check console for details.`;
-                    console.error("Generation API Error Response:", result);
-
+                    document.getElementById('generateStatus').textContent = `Error: ${result.error || "Unknown error"}`;
                 }
             } catch (error) {
                 document.getElementById('generateStatus').textContent = 'Error generating samples: ' + error;
-                console.error("Generation Fetch/Network Error:", error);
+                console.error("Generation Error:", error);
             }
         }
     </script>
