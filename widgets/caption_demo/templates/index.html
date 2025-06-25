@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Captioning Demo</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #333; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff; color: white; padding: 10px 15px; border: none;
+            border-radius: 4px; cursor: pointer; margin-top: 15px; font-size: 16px;
+        }
+        button:hover { background-color: #0056b3; }
+        .status, .results { margin-top: 20px; padding: 10px; border: 1px solid #eee; border-radius: 4px; background-color: #e9ecef; }
+        .log-area { white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto; background: #222; color: #eee; padding: 10px; border-radius: 4px;}
+        .section { margin-bottom: 30px; padding-bottom:20px; border-bottom: 1px solid #ccc; }
+        img#preview, img#test_image_display { max-width: 200px; max-height: 200px; margin-top:10px; border:1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Captioning Model Training Demo</h1>
+
+        <div class="section">
+            <h2>Phase 1: BPE Tokenizer Training</h2>
+            <label for="bpe_vocab_size">BPE Vocabulary Size:</label>
+            <input type="number" id="bpe_vocab_size" value="{{ default_training_config.bpe_vocab_size }}">
+            <button onclick="trainBPE()">Train BPE Tokenizer</button>
+            <div id="bpe_status" class="status">BPE training status will appear here.</div>
+        </div>
+
+        <div class="section">
+            <h2>Phase 2: Model Training</h2>
+            <form id="train_model_form">
+                <label for="model_type">Model Type:</label>
+                <select id="model_type" name="model_type">
+                    <option value="clstm" selected>ConvLSTM</option>
+                    <option value="vit">ViT Encoder-Decoder</option>
+                    <option value="mllm">MLLM (GPT-2 based)</option>
+                </select>
+
+                <label for="lr">Learning Rate:</label>
+                <input type="text" id="lr" name="lr" value="{{ default_training_config.lr }}">
+
+                <label for="epochs">Epochs:</label>
+                <input type="number" id="epochs" name="epochs" value="{{ default_training_config.epochs }}">
+
+                <label for="batch_size">Batch Size:</label>
+                <input type="number" id="batch_size" name="batch_size" value="{{ default_training_config.batch_size }}">
+                
+                <label for="max_caption_len">Max Caption Length:</label>
+                <input type="number" id="max_caption_len" name="max_caption_len" value="{{ default_training_config.max_caption_len }}">
+
+                <label for="bfloat16">Use BFloat16 (if available):</label>
+                <select id="bfloat16" name="bfloat16">
+                    <option value="true" {% if default_training_config.bfloat16 %}selected{% endif %}>Yes</option>
+                    <option value="false" {% if not default_training_config.bfloat16 %}selected{% endif %}>No</option>
+                </select>
+                <button type="button" onclick="trainModel()">Train Model</button>
+            </form>
+            <p>TensorBoard logs will be saved in <code>runs/</code>. Run <code>tensorboard --logdir runs</code> in your terminal and open <a href="http://localhost:6006/" target="_blank">http://localhost:6006/</a>.</p>
+            <div class="status">
+                <h3>Training Status:</h3>
+                <div id="model_train_status_log" class="log-area">Model training status will appear here.</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Phase 3: Inference</h2>
+            <label for="inference_model_type">Select Model Type for Inference:</label>
+            <select id="inference_model_type">
+                <option value="clstm" selected>ConvLSTM</option>
+                <option value="vit">ViT Encoder-Decoder</option>
+                <option value="mllm">MLLM (GPT-2 based)</option>
+            </select>
+            <button onclick="loadInferenceModel()">Load Model for Inference</button>
+            <div id="load_model_status" class="status">Load model status will appear here.</div>
+
+            <h3>Test with Random Test Set Image</h3>
+            <label for="test_image_index">Test Image Index (0 - 2999 for 10% test set, e.g., 0-29999 total):</label>
+            <input type="number" id="test_image_index" value="0" min="0" max="29999">
+            <button onclick="predictTestImage()">Predict from Test Set</button>
+            
+            <h3>Test with Uploaded Image</h3>
+            <label for="image_upload">Upload Image:</label>
+            <input type="file" id="image_upload" accept="image/*" onchange="previewImage(event)">
+            <img id="preview" src="#" alt="Image preview" style="display:none;"/>
+            <button onclick="predictUploadedImage()">Predict from Uploaded Image</button>
+
+            <div id="prediction_results" class="results" style="display:none;">
+                <h3>Prediction:</h3>
+                <img id="test_image_display" src="#" alt="Test image" style="display:none;"/>
+                <p id="generated_caption"></p>
+                <div id="prediction_error_log" class="log-area" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bpeStatusDiv = document.getElementById('bpe_status');
+        const modelTrainStatusLogDiv = document.getElementById('model_train_status_log');
+        const loadModelStatusDiv = document.getElementById('load_model_status');
+        const predictionResultsDiv = document.getElementById('prediction_results');
+        const generatedCaptionP = document.getElementById('generated_caption');
+        const testImageDisplay = document.getElementById('test_image_display');
+        const predictionErrorLogDiv = document.getElementById('prediction_error_log');
+        
+        let trainingStatusInterval;
+
+        async function trainBPE() {
+            bpeStatusDiv.textContent = 'Starting BPE training...';
+            const vocabSize = document.getElementById('bpe_vocab_size').value;
+            try {
+                const response = await fetch('/train_bpe', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ bpe_vocab_size: parseInt(vocabSize) })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    bpeStatusDiv.textContent = `Success: ${data.message}`;
+                } else {
+                    bpeStatusDiv.textContent = `Error: ${data.message} ${data.traceback ? '\nTraceback:\n' + data.traceback : ''}`;
+                }
+            } catch (error) {
+                bpeStatusDiv.textContent = `Fetch Error: ${error}`;
+            }
+        }
+
+        async function trainModel() {
+            modelTrainStatusLogDiv.textContent = 'Initiating model training...';
+            const formData = new FormData(document.getElementById('train_model_form'));
+            const params = {};
+            for (let [key, value] of formData.entries()) {
+                 if (key === 'bfloat16') params[key] = value === 'true';
+                 else if (key === 'lr') params[key] = parseFloat(value);
+                 else params[key] = isNaN(Number(value)) ? value : Number(value);
+            }
+            
+            try {
+                const response = await fetch('/train_model', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(params)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    modelTrainStatusLogDiv.textContent = `Request Sent: ${data.message}\nStarting to poll status...`;
+                    if (trainingStatusInterval) clearInterval(trainingStatusInterval);
+                    trainingStatusInterval = setInterval(fetchTrainingStatus, 2000); // Poll every 2 seconds
+                } else {
+                    modelTrainStatusLogDiv.textContent = `Error starting training: ${data.message} ${data.traceback ? '\nTraceback:\n' + data.traceback : ''}`;
+                }
+            } catch (error) {
+                modelTrainStatusLogDiv.textContent = `Fetch Error for starting training: ${error}`;
+            }
+        }
+
+        async function fetchTrainingStatus() {
+            try {
+                const response = await fetch('/training_status');
+                const data = await response.json();
+                modelTrainStatusLogDiv.textContent = data.log || 'No status yet.';
+                if (!data.running) {
+                    if (trainingStatusInterval) clearInterval(trainingStatusInterval);
+                    modelTrainStatusLogDiv.textContent += "\nTraining process finished or not running.";
+                }
+            } catch (error) {
+                modelTrainStatusLogDiv.textContent += `\nError fetching status: ${error}`;
+                if (trainingStatusInterval) clearInterval(trainingStatusInterval);
+            }
+        }
+
+        async function loadInferenceModel() {
+            loadModelStatusDiv.textContent = 'Loading model for inference...';
+            const modelType = document.getElementById('inference_model_type').value;
+            try {
+                const response = await fetch('/load_inference_model', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ model_type: modelType })
+                });
+                const data = await response.json();
+                 if (response.ok) {
+                    loadModelStatusDiv.textContent = `Success: ${data.message}`;
+                } else {
+                    loadModelStatusDiv.textContent = `Error: ${data.message} ${data.traceback ? '\nTraceback:\n' + data.traceback : ''}`;
+                }
+            } catch (error) {
+                 loadModelStatusDiv.textContent = `Fetch Error: ${error}`;
+            }
+        }
+        
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const preview = document.getElementById('preview');
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        async function predictUploadedImage() {
+            const fileInput = document.getElementById('image_upload');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select an image file first.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append('image_file', fileInput.files[0]);
+            await makePrediction(formData);
+        }
+
+        async function predictTestImage() {
+            const index = document.getElementById('test_image_index').value;
+            if (index === "" || isNaN(parseInt(index))) {
+                alert("Please enter a valid test image index.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append('test_image_index', parseInt(index));
+            await makePrediction(formData);
+        }
+
+        async function makePrediction(formData) {
+            predictionResultsDiv.style.display = 'block';
+            generatedCaptionP.textContent = 'Generating...';
+            testImageDisplay.style.display = 'none';
+            predictionErrorLogDiv.style.display = 'none';
+            predictionErrorLogDiv.textContent = '';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData // FormData sets Content-Type automatically
+                });
+                const data = await response.json();
+                if (response.ok && data.status === 'success') {
+                    generatedCaptionP.textContent = data.caption;
+                    if (data.image_data_url) {
+                        testImageDisplay.src = data.image_data_url;
+                        testImageDisplay.style.display = 'block';
+                    }
+                } else {
+                    generatedCaptionP.textContent = `Error: ${data.caption || data.message}`;
+                    if (data.traceback) {
+                        predictionErrorLogDiv.textContent = data.traceback;
+                        predictionErrorLogDiv.style.display = 'block';
+                    }
+                     if (data.image_data_url) { // Show image even if error in caption
+                        testImageDisplay.src = data.image_data_url;
+                        testImageDisplay.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                generatedCaptionP.textContent = `Fetch Error: ${error}`;
+                predictionErrorLogDiv.textContent = `Fetch Error: ${error}`;
+                predictionErrorLogDiv.style.display = 'block';
+            }
+        }
+        
+        // Initial status check in case server restarted with training running (not robust)
+        // fetchTrainingStatus();
+
+    </script>
+</body>
+</html>
