@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Trainer</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 20px; background-color: #faf8ef; color: #776e65; }
+        .tabs-nav { margin-bottom: 15px; border-bottom: 2px solid #bbada0; padding-bottom: 5px;}
+        .tabs-nav button { background-color: #eee4da; color: #776e65; border: 1px solid #cdc1b4; padding: 10px 15px; cursor: pointer; font-size: 16px; margin: 0 2px; border-bottom: none; border-radius: 5px 5px 0 0;}
+        .tabs-nav button.active-tab { background-color: #bbada0; color: #f9f6f2; border-color: #bbada0; }
+        
+        .tab-content { 
+            display: none; 
+            width: 100%; 
+            max-width: 600px; 
+            padding:15px; 
+            box-sizing: border-box; 
+            background-color: #fff; 
+            border: 1px solid #dedede; 
+            border-top: none; 
+            border-radius: 0 0 5px 5px; 
+            margin-top: -2px; 
+        }
+        .tab-content.active-tab-content { 
+            display: block; 
+        }
+
+        h1 { color: #776e65; }
+        .game-container { background-color: #bbada0; border-radius: 6px; padding: 10px; display: inline-block; margin: 10px auto; }
+        .grid-row { display: flex; }
+        .grid-cell {
+            width: 100px; height: 100px; margin: 5px;
+            background-color: #cdc1b4; border-radius: 3px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 40px; font-weight: bold; color: #776e65;
+            box-shadow: 0px 2px 0px 0px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out;
+        }
+        .controls, .status { margin-top: 15px; margin-bottom: 10px; text-align: center; }
+        .ai-agent-controls { display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;}
+
+        .hyperparam-form { display: grid; grid-template-columns: auto 1fr; gap: 10px 15px; align-items: center; margin-bottom: 20px; }
+        .hyperparam-form label { text-align: right; font-weight: bold; }
+        .hyperparam-form input[type="number"], .hyperparam-form input[type="text"] {
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;
+        }
+        .training-controls { margin-top: 15px; margin-bottom: 10px; text-align: center; }
+
+
+        button { padding: 10px 15px; margin: 5px; font-size: 16px; cursor: pointer; border-radius: 4px; border: 1px solid #8f7a66; background-color: #8f7a66; color: white; }
+        button:hover:not(:disabled) { background-color: #7c6854; }
+        button:disabled { background-color: #cccccc; color: #666; cursor: not-allowed; border-color: #bbb;}
+        button.active { background-color: #f65e3b; border-color: #f65e3b;}
+        select {padding: 8px; font-size: 16px; border-radius: 4px; margin-left: 5px;}
+
+        #score-board { font-size: 24px; color: #776e65; }
+        #game-over-message { font-size: 20px; color: #f65e3b; font-weight: bold; }
+        #training-status-message, #training-log-info { margin-top: 10px; font-style: italic; color: #555;}
+        .info-box { background-color: #eee4da; padding: 10px; border-radius: 4px; margin-top:10px; }
+
+        .tile-0 { background-color: #cdc1b4; } 
+        .tile-2 { background-color: #eee4da; color: #776e65; } .tile-4 { background-color: #ede0c8; color: #776e65; }
+        .tile-8 { background-color: #f2b179; color: #f9f6f2; } .tile-16 { background-color: #f59563; color: #f9f6f2; }
+        .tile-32 { background-color: #f67c5f; color: #f9f6f2; } .tile-64 { background-color: #f65e3b; color: #f9f6f2; }
+        .tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 35px; }
+        .tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 35px; }
+        .tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 35px; }
+        .tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 28px; }
+        .tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 28px; }
+        .tile-other { background-color: #3c3a32; color: #f9f6f2; font-size: 25px; } 
+    </style>
+</head>
+<body>
+    <h1>2048 Trainer</h1>
+
+    <div class="tabs-nav">
+        <button id="game-tab-button" class="active-tab" onclick="showTab('game-content', this)">Game</button>
+        <button id="training-tab-button" onclick="showTab('training-content', this)">Training</button>
+    </div>
+
+    <div id="game-content" class="tab-content active-tab-content">
+        <div class="status">
+            <div id="score-board">Score: 0</div>
+            <div id="current-player-display">Current Player: Human</div>
+            <div id="active-ai-agent-display">AI Agent: Dummy</div>
+            <div id="game-over-message" style="display:none;">GAME OVER!</div>
+        </div>
+
+        <div class="game-container" id="game-board"></div>
+
+        <div class="controls">
+            <button id="undo-button">Undo</button>
+            <button id="reset-button">Reset Game</button>
+        </div>
+        <div class="controls ai-agent-controls" id="ai-agent-selector-group">
+            <label for="select-ai-agent">AI Agent:</label>
+            <select id="select-ai-agent">
+                <option value="dummy">Dummy AI</option>
+                <option value="dqn" id="dqn-agent-option" disabled>DQN AI (Not Loaded)</option>
+            </select>
+            <label for="select-dqn-model" style="margin-left: 10px;">Model:</label>
+            <select id="select-dqn-model" disabled>
+                <option value="">Latest (Auto-detect)</option>
+            </select>
+        </div>
+        <div class="controls">
+            <button id="human-player-button" class="active">Human Play</button>
+            <button id="ai-player-button">AI Play Continuously</button>
+            <button id="ai-step-button" disabled>AI Step</button>
+        </div>
+    </div>
+
+    <div id="training-content" class="tab-content">
+        <h2>DQN Model Training</h2>
+        <form id="hyperparams-form" class="hyperparam-form">
+            <label for="hp-num_episodes">Num Episodes:</label>
+            <input type="number" id="hp-num_episodes" name="num_episodes" value="10000">
+            
+            <label for="hp-lr">Learning Rate (lr):</label>
+            <input type="text" id="hp-lr" name="lr" value="0.00025">
+
+            <label for="hp-hidden_size">Hidden Size:</label>
+            <input type="number" id="hp-hidden_size" name="hidden_size" value="256">
+            
+            <label for="hp-gamma">Gamma (Discount):</label>
+            <input type="text" id="hp-gamma" name="gamma" value="0.99">
+
+            <label for="hp-eps_start">Epsilon Start:</label>
+            <input type="text" id="hp-eps_start" name="eps_start" value="1.0">
+
+            <label for="hp-eps_end">Epsilon End:</label>
+            <input type="text" id="hp-eps_end" name="eps_end" value="0.01">
+
+            <label for="hp-eps_decay">Epsilon Decay Frames:</label>
+            <input type="number" id="hp-eps_decay" name="eps_decay" value="100000">
+
+            <label for="hp-batch_size">Batch Size (Env):</label> <!-- Changed label for clarity, maps to env_batch_size -->
+            <input type="number" id="hp-env_batch_size" name="env_batch_size" value="128"> <!-- Mapped to env_batch_size -->
+
+            <label for="hp-learn_batch_size">Learn Batch Size:</label> <!-- New field -->
+            <input type="number" id="hp-learn_batch_size" name="learn_batch_size" value="128">
+
+            <label for="hp-buffer_size">Replay Buffer Size:</label>
+            <input type="number" id="hp-buffer_size" name="buffer_size" value="30000">
+
+            <label for="hp-target_update">Target Update Freq (steps):</label>
+            <input type="number" id="hp-target_update" name="target_update" value="1000">
+
+            <label for="hp-learn_start">Learn Start Frames:</label>
+            <input type="number" id="hp-learn_start" name="learn_start" value="10000">
+        </form>
+
+        <div class="training-controls">
+            <button id="start-training-button">Start Training</button>
+            <button id="stop-training-button" disabled>Stop Training</button>
+            <button id="check-training-status-button">Check Status</button>
+        </div>
+        <div id="training-status-message" class="info-box">Status: Idle.</div>
+        <div id="training-log-info" class="info-box">
+            <p>Training logs (loss, rewards, etc.) are saved by TensorBoard.</p>
+            <p>To view, run in your project's <code>2048_demo</code> directory: <br><code>tensorboard --logdir=runs</code></p>
+            <p>Trained models are saved in the <code>models</code> directory within subfolders named by timestamp and hyperparameters.</p>
+        </div>
+    </div>
+
+    <script>
+        const gameBoardElement = document.getElementById('game-board');
+        const scoreBoardElement = document.getElementById('score-board');
+        const gameOverMessageElement = document.getElementById('game-over-message');
+        const currentPlayerDisplayElement = document.getElementById('current-player-display');
+        const activeAiAgentDisplayElement = document.getElementById('active-ai-agent-display');
+        
+        const humanPlayerButton = document.getElementById('human-player-button');
+        const aiPlayerButton = document.getElementById('ai-player-button');
+        const aiStepButton = document.getElementById('ai-step-button');
+        const undoButton = document.getElementById('undo-button');
+        const resetButton = document.getElementById('reset-button');
+
+        const selectAiAgentElement = document.getElementById('select-ai-agent');
+        const dqnAgentOptionElement = document.getElementById('dqn-agent-option');
+        const selectDqnModelElement = document.getElementById('select-dqn-model');
+        
+        const hyperparamsForm = document.getElementById('hyperparams-form');
+        const startTrainingButton = document.getElementById('start-training-button');
+        const stopTrainingButton = document.getElementById('stop-training-button');
+        const checkTrainingStatusButton = document.getElementById('check-training-status-button');
+        const trainingStatusMessageElement = document.getElementById('training-status-message');
+        
+        let boardSize = 4;
+        let currentPlayer = "human";
+        let currentActiveAiAgent = "dummy"; 
+        let isAiPlayingContinuously = false;
+        const AI_PLAY_DELAY = 150; 
+        let availableDqnModels = [];
+
+        function showTab(tabId, clickedButton) {
+            document.querySelectorAll('.tab-content').forEach(tc => {
+                tc.classList.remove('active-tab-content');
+                tc.style.display = 'none'; 
+            });
+            document.querySelectorAll('.tabs-nav button').forEach(b => b.classList.remove('active-tab'));
+            
+            const tabToShow = document.getElementById(tabId);
+            tabToShow.classList.add('active-tab-content');
+            tabToShow.style.display = 'block'; 
+
+            if(clickedButton) clickedButton.classList.add('active-tab');
+        }
+
+        async function fetchApi(endpoint, method = 'GET', body = null) { 
+            const options = { method, headers: { 'Content-Type': 'application/json' },};
+            if (body) options.body = JSON.stringify(body);
+            try {
+                const response = await fetch(endpoint, options);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: response.statusText }));
+                    console.error(`API Error: ${response.status} ${response.statusText}`, errorData);
+                    alert(`Error fetching ${endpoint}: ${errorData.error || response.statusText}`);
+                    return null;
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch API error:', error);
+                alert('Network error or server unavailable.');
+                return null;
+            }
+        }
+
+        function getTileClass(value) {
+            if (value === 0) return 'tile-0'; 
+            if (value > 2048) return 'tile-other';
+            return `tile-${value}`;
+        }
+
+        async function fetchAndPopulateDqnModels() {
+            const modelsData = await fetchApi('/api/models/list_dqn');
+            selectDqnModelElement.innerHTML = '<option value="">Latest (Auto-detect)</option>';
+            availableDqnModels = [];
+
+            if (modelsData && Array.isArray(modelsData)) {
+                availableDqnModels = modelsData;
+                modelsData.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.path; 
+                    option.textContent = model.name; 
+                    selectDqnModelElement.appendChild(option);
+                });
+            }
+        }
+
+        function renderBoard(gameStateData) {
+            if (!gameStateData) return;
+            const { board, score, game_over, current_player, 
+                    active_ai_agent_type, dqn_model_available, loaded_dqn_model_path } = gameStateData;
+
+            gameBoardElement.innerHTML = '';
+            boardSize = board.length;
+
+            board.forEach(rowData => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grid-row';
+                rowData.forEach(cellValue => {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'grid-cell ' + getTileClass(cellValue);
+                    cellDiv.textContent = cellValue > 0 ? cellValue : '';
+                    rowDiv.appendChild(cellDiv);
+                });
+                gameBoardElement.appendChild(rowDiv);
+            });
+
+            scoreBoardElement.textContent = `Score: ${score}`;
+            gameOverMessageElement.style.display = game_over ? 'block' : 'none';
+            
+            currentPlayer = current_player; 
+            currentPlayerDisplayElement.textContent = `Current Player: ${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}`;
+
+            currentActiveAiAgent = active_ai_agent_type;
+            selectAiAgentElement.value = currentActiveAiAgent;
+
+            if (active_ai_agent_type === 'dqn' && dqn_model_available) {
+                let displayName = "DQN";
+                if (loaded_dqn_model_path) {
+                    const loadedModelInfo = availableDqnModels.find(m => m.path === loaded_dqn_model_path);
+                    displayName = `DQN (${loadedModelInfo ? loadedModelInfo.name : loaded_dqn_model_path})`;
+                    selectDqnModelElement.value = loaded_dqn_model_path;
+                } else { // A DQN model is loaded, but path is unknown (e.g. "Latest" was chosen and backend resolved it)
+                    displayName = `DQN (Model Loaded)`;
+                    selectDqnModelElement.value = ""; // Default to "Latest" in dropdown
+                }
+                activeAiAgentDisplayElement.textContent = `AI Agent: ${displayName}`;
+                selectDqnModelElement.disabled = false;
+            } else if (active_ai_agent_type === 'dummy') {
+                activeAiAgentDisplayElement.textContent = `AI Agent: Dummy`;
+                selectDqnModelElement.disabled = true;
+                selectDqnModelElement.value = ""; 
+            } else { // DQN might be selected as agent type, but no model is actually available/loaded
+                activeAiAgentDisplayElement.textContent = `AI Agent: ${active_ai_agent_type === 'dqn' ? 'DQN (Unavailable)' : 'Unknown'}`;
+                selectDqnModelElement.disabled = true;
+                selectDqnModelElement.value = "";
+            }
+            
+            // This dqn_model_available refers to if the dqn_ai_player object holds a model on backend
+            dqnAgentOptionElement.disabled = !dqn_model_available;
+            dqnAgentOptionElement.textContent = dqn_model_available ? "DQN AI" : "DQN AI (Not Loaded)";
+            
+            updatePlayerButtonsAndControls(game_over);
+        }
+        
+        function updatePlayerButtonsAndControls(isGameOver) {
+            const controlsDisabled = isGameOver || isAiPlayingContinuously;
+
+            humanPlayerButton.disabled = controlsDisabled || currentPlayer === 'human';
+            aiPlayerButton.disabled = controlsDisabled || currentPlayer === 'ai';
+            aiStepButton.disabled = controlsDisabled || currentPlayer !== 'ai';
+            
+            selectAiAgentElement.disabled = isAiPlayingContinuously && currentPlayer === 'ai';
+            // selectDqnModelElement disable state is handled in renderBoard based on more context
+
+            if (currentPlayer === "human") {
+                humanPlayerButton.classList.add('active');
+                aiPlayerButton.classList.remove('active');
+            } else { 
+                aiPlayerButton.classList.add('active');
+                humanPlayerButton.classList.remove('active');
+            }
+            undoButton.disabled = isAiPlayingContinuously; // Or isGameOver
+            resetButton.disabled = isAiPlayingContinuously; // Or isGameOver
+        }
+
+        async function fetchGameState() {
+            const data = await fetchApi('/api/game_state');
+            if (data) renderBoard(data);
+        }
+
+        async function handleHumanMove(direction) {
+            if (currentPlayer !== "human" || isAiPlayingContinuously) return;
+            const data = await fetchApi('/api/move', 'POST', { direction });
+            if (data) renderBoard(data);
+        }
+        
+        async function switchToHumanPlayer() {
+            if (isAiPlayingContinuously) isAiPlayingContinuously = false;
+            const data = await fetchApi('/api/toggle_player', 'POST', { player: 'human' });
+            // Always refresh game state to reflect changes and player button states
+            await fetchGameState(); 
+        }
+
+        async function switchToAiPlayerAndPlayContinuously() {
+            if (isAiPlayingContinuously) return;
+            const toggleData = await fetchApi('/api/toggle_player', 'POST', { player: 'ai' });
+            if (!(toggleData && toggleData.status === 'ok' && toggleData.current_player === 'ai')) {
+                await fetchGameState(); return; 
+            }
+            
+            currentPlayer = 'ai'; 
+            isAiPlayingContinuously = true;
+            // Fetch game state to update UI before starting loop
+            let gameState = await fetchApi('/api/game_state'); 
+            if(gameState) renderBoard(gameState); // This also updates button states via updatePlayerButtonsAndControls
+
+            while (isAiPlayingContinuously && gameState && !gameState.game_over) {
+                const moveData = await fetchApi('/api/ai_move', 'POST');
+                if (!isAiPlayingContinuously) break; 
+                if (moveData) {
+                    renderBoard(moveData);
+                    gameState = moveData; 
+                    if (moveData.game_over || !moveData.ai_moved) isAiPlayingContinuously = false;
+                } else {
+                    isAiPlayingContinuously = false; // API error or invalid response
+                }
+                if (!isAiPlayingContinuously || (gameState && gameState.game_over)) break;
+                await new Promise(resolve => setTimeout(resolve, AI_PLAY_DELAY));
+            }
+            isAiPlayingContinuously = false; 
+            await fetchGameState(); // Refresh final state and button states
+        }
+        
+        async function handleAiStep() {
+            if (currentPlayer !== "ai" || isAiPlayingContinuously) return;
+            const data = await fetchApi('/api/ai_move', 'POST');
+            if (data) renderBoard(data);
+        }
+
+        async function handleUndo() {
+            if (isAiPlayingContinuously) isAiPlayingContinuously = false;
+            await fetchApi('/api/undo', 'POST'); // The response might have new game state
+            await fetchGameState();
+        }
+        
+        async function handleReset() {
+            if (isAiPlayingContinuously) isAiPlayingContinuously = false;
+            await fetchApi('/api/reset', 'POST');
+            await fetchGameState();
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (currentPlayer !== "human" || isAiPlayingContinuously || 
+                document.getElementById('training-content').classList.contains('active-tab-content')) return; 
+            let moved = false;
+            switch (event.key) {
+                case 'ArrowUp': handleHumanMove('up'); moved = true; break;
+                case 'ArrowDown': handleHumanMove('down'); moved = true; break;
+                case 'ArrowLeft': handleHumanMove('left'); moved = true; break;
+                case 'ArrowRight': handleHumanMove('right'); moved = true; break;
+            }
+            if (moved) event.preventDefault(); 
+        });
+
+        undoButton.addEventListener('click', handleUndo);
+        resetButton.addEventListener('click', handleReset);
+        humanPlayerButton.addEventListener('click', switchToHumanPlayer);
+        aiPlayerButton.addEventListener('click', switchToAiPlayerAndPlayContinuously);
+        aiStepButton.addEventListener('click', handleAiStep);
+
+        selectAiAgentElement.addEventListener('change', async (event) => {
+            if (isAiPlayingContinuously && currentPlayer === 'ai') {
+                selectAiAgentElement.value = currentActiveAiAgent; // Revert selection if AI is playing
+                return;
+            }
+            const selectedAgentType = event.target.value;
+            let modelFileToSend = null;
+
+            if (selectedAgentType === 'dqn') {
+                // If user selects "DQN", and specific model dropdown has a selection (not "Latest"), use it.
+                if (selectDqnModelElement.value !== "") {
+                    modelFileToSend = selectDqnModelElement.value;
+                }
+            }
+            
+            const payload = { agent_type: selectedAgentType };
+            if (modelFileToSend) {
+                payload.model_file = modelFileToSend;
+            }
+            
+            // This API call's response should contain the updated game state fields
+            const data = await fetchApi('/api/set_ai_agent', 'POST', payload);
+            if (data) {
+                // The response from set_ai_agent now contains game state like fields.
+                // Re-populate models first in case a new model became available or status changed
+                await fetchAndPopulateDqnModels();
+                // Then render using the response from set_ai_agent or fresh game state
+                // It's safer to always fetch fresh game state after an action.
+                await fetchGameState();
+            } else { // If API call failed, still refresh to be sure
+                 await fetchAndPopulateDqnModels();
+                 await fetchGameState();
+            }
+        });
+
+        selectDqnModelElement.addEventListener('change', async (event) => {
+            if (selectAiAgentElement.value !== 'dqn' || isAiPlayingContinuously) {
+                // Only trigger load if DQN is the selected agent type and AI not playing continuously
+                return;
+            }
+            const selectedModelFile = event.target.value; // Empty string for "Latest"
+            
+            const payload = { agent_type: 'dqn' };
+            if (selectedModelFile) { // If not an empty string (i.e., not "Latest")
+                payload.model_file = selectedModelFile;
+            }
+            
+            const data = await fetchApi('/api/set_ai_agent', 'POST', payload);
+             if (data) {
+                await fetchAndPopulateDqnModels(); // Repopulate and reselect
+                await fetchGameState(); // Use fresh state
+            } else {
+                 await fetchAndPopulateDqnModels();
+                 await fetchGameState();
+            }
+        });
+
+
+        async function updateTrainingControlsDisplay(statusData) {
+            if (!statusData) {
+                trainingStatusMessageElement.textContent = "Error fetching training status.";
+                startTrainingButton.disabled = false;
+                stopTrainingButton.disabled = true;
+                return;
+            }
+            let message = `Status: ${statusData.status}`;
+            if (statusData.pid) message += ` (PID: ${statusData.pid})`;
+            if (statusData.return_code !== undefined) message += ` (Exit Code: ${statusData.return_code})`;
+            if (statusData.message) message += ` - ${statusData.message}`; // Backend message often includes loaded model
+            trainingStatusMessageElement.textContent = message;
+            
+            const isTrainingRunning = statusData.status === 'running';
+            startTrainingButton.disabled = isTrainingRunning;
+            stopTrainingButton.disabled = !isTrainingRunning;
+            Array.from(hyperparamsForm.elements).forEach(el => el.disabled = isTrainingRunning);
+
+            // After training finishes/stops or on idle check, refresh model list and game state
+            if (statusData.status === 'finished' || statusData.status === 'idle' || statusData.status === 'ok') { // 'ok' from stop
+                await fetchAndPopulateDqnModels(); 
+                await fetchGameState(); 
+            } else if (statusData.dqn_model_available !== undefined) { 
+                // This part ensures dqn-agent-option in main selector is updated even if game state isn't fully refreshed by above
+                // This might be partially redundant with fetchGameState -> renderBoard but ensures this specific part is updated
+                dqnAgentOptionElement.disabled = !statusData.dqn_model_available;
+                dqnAgentOptionElement.textContent = statusData.dqn_model_available ? "DQN AI" : "DQN AI (Not Loaded)";
+                if (selectAiAgentElement.value === 'dqn') {
+                    selectDqnModelElement.disabled = !statusData.dqn_model_available;
+                    if (statusData.loaded_dqn_model_path) {
+                        selectDqnModelElement.value = statusData.loaded_dqn_model_path;
+                    } else if (statusData.dqn_model_available) { // Model available, but no specific path (e.g. "Latest")
+                        selectDqnModelElement.value = "";
+                    }
+                }
+            }
+        }
+
+        async function checkTrainingStatus() {
+            const data = await fetchApi('/api/training/status');
+            if(data) updateTrainingControlsDisplay(data);
+        }
+
+        startTrainingButton.addEventListener('click', async () => {
+            const formData = new FormData(hyperparamsForm);
+            const hyperparameters = {};
+            for (const [key, value] of formData.entries()) {
+                const numValue = parseFloat(value);
+                // Correctly get original input name for env_batch_size if needed
+                let inputName = key;
+                if (key === "env_batch_size" && document.getElementById('hp-batch_size')) { //backward compat if ID was hp-batch_size
+                     // This is slightly complex. The form has name="env_batch_size" now.
+                     // The Python script expects --env_batch_size, --learn_batch_size etc.
+                     // The hyperparams object keys should match the form names.
+                }
+                hyperparameters[inputName] = isNaN(numValue) || value.trim() === "" ? value : numValue;
+            }
+             // Correct "Batch Size" to "env_batch_size" if old ID "hp-batch_size" was used for "env_batch_size"
+            if (hyperparameters.hasOwnProperty('batch_size') && !hyperparameters.hasOwnProperty('env_batch_size')) {
+                hyperparameters['env_batch_size'] = hyperparameters['batch_size'];
+                delete hyperparameters['batch_size'];
+            }
+
+            const data = await fetchApi('/api/training/start', 'POST', { hyperparameters });
+            if (data) { 
+                alert(data.message || data.error || "Request sent."); 
+                await checkTrainingStatus(); 
+            }
+        });
+
+        stopTrainingButton.addEventListener('click', async () => {
+            const data = await fetchApi('/api/training/stop', 'POST');
+             if (data) {
+                alert(data.message || data.error || "Request sent.");
+                // updateTrainingControlsDisplay will be called by checkTrainingStatus after this
+                await checkTrainingStatus(); 
+            }
+        });
+        checkTrainingStatusButton.addEventListener('click', checkTrainingStatus);
+
+        (async () => {
+            showTab('game-content', document.getElementById('game-tab-button'));
+            await fetchAndPopulateDqnModels(); 
+            await fetchGameState(); 
+            await checkTrainingStatus(); 
+        })();
+    </script>
+</body>
+</html>
