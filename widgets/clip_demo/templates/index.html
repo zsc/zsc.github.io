@@ -1,0 +1,488 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CLIP Multi-Attribute Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 20px; }
+        .nav-tabs { margin-bottom: 20px; }
+        #log-container {
+            height: 400px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        #results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .result-item { text-align: center; }
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Increased minmax for more space */
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">CelebA 多属性 CLIP 模型 Demo</h1>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train-panel" type="button" role="tab">训练</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test-panel" type="button" role="tab">测试</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- 训练 Tab -->
+            <div class="tab-pane fade show active" id="train-panel" role="tabpanel">
+                <h4>训练控制</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form id="train-form">
+                            <div class="mb-3">
+                                <label for="epochs" class="form-label">Epochs</label>
+                                <input type="number" class="form-control" id="epochs" value="10">
+                            </div>
+                            <div class="mb-3">
+                                <label for="batch_size" class="form-label">Batch Size</label>
+                                <input type="number" class="form-control" id="batch_size" value="128">
+                            </div>
+                            <div class="mb-3">
+                                <label for="lr" class="form-label">Learning Rate</label>
+                                <input type="text" class="form-control" id="lr" value="1e-4">
+                            </div>
+                            <div class="mb-3">
+                                <label for="save_every" class="form-label">Save Every (epochs)</label>
+                                <input type="number" class="form-control" id="save_every" value="1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="resume_from" class="form-label">Continue from Checkpoint (optional)</label>
+                                <select class="form-select" id="resume_from">
+                                    <option value="">Start new training</option>
+                                </select>
+                            </div>
+                            <button type="button" id="start-train-btn" class="btn btn-primary">开始训练</button>
+                            <button type="button" id="stop-train-btn" class="btn btn-danger" disabled>停止训练</button>
+                            <span id="train-status" class="ms-3"></span>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>训练日志</h5>
+                        <div id="log-container"></div>
+                        <a href="http://localhost:6006/" target="_blank" class="btn btn-info btn-sm mt-2">打开 TensorBoard</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 测试 Tab -->
+            <div class="tab-pane fade" id="test-panel" role="tabpanel">
+                <h4>图像检索</h4>
+                <div class="mb-3">
+                    <label for="checkpoint_select" class="form-label">选择模型 Checkpoint</label>
+                    <select class="form-select" id="checkpoint_select"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">选择属性</label>
+                    <div class="attribute-grid border p-3 rounded">
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="5_o_Clock_Shadow" id="attr_0">
+                            <label class="form-check-label" for="attr_0">5_o_Clock_Shadow (胡茬)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Arched_Eyebrows" id="attr_1">
+                            <label class="form-check-label" for="attr_1">Arched_Eyebrows (拱形眉)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Attractive" id="attr_2">
+                            <label class="form-check-label" for="attr_2">Attractive (有魅力)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Bags_Under_Eyes" id="attr_3">
+                            <label class="form-check-label" for="attr_3">Bags_Under_Eyes (眼袋)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Bald" id="attr_4">
+                            <label class="form-check-label" for="attr_4">Bald (秃头)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Bangs" id="attr_5">
+                            <label class="form-check-label" for="attr_5">Bangs (刘海)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Big_Lips" id="attr_6">
+                            <label class="form-check-label" for="attr_6">Big_Lips (大嘴唇)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Big_Nose" id="attr_7">
+                            <label class="form-check-label" for="attr_7">Big_Nose (大鼻子)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Black_Hair" id="attr_8">
+                            <label class="form-check-label" for="attr_8">Black_Hair (黑发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Blond_Hair" id="attr_9">
+                            <label class="form-check-label" for="attr_9">Blond_Hair (金发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Blurry" id="attr_10">
+                            <label class="form-check-label" for="attr_10">Blurry (模糊)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Brown_Hair" id="attr_11">
+                            <label class="form-check-label" for="attr_11">Brown_Hair (棕发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Bushy_Eyebrows" id="attr_12">
+                            <label class="form-check-label" for="attr_12">Bushy_Eyebrows (浓眉)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Chubby" id="attr_13">
+                            <label class="form-check-label" for="attr_13">Chubby (胖乎乎)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Double_Chin" id="attr_14">
+                            <label class="form-check-label" for="attr_14">Double_Chin (双下巴)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Eyeglasses" id="attr_15">
+                            <label class="form-check-label" for="attr_15">Eyeglasses (戴眼镜)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Goatee" id="attr_16">
+                            <label class="form-check-label" for="attr_16">Goatee (山羊胡)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Gray_Hair" id="attr_17">
+                            <label class="form-check-label" for="attr_17">Gray_Hair (灰发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Heavy_Makeup" id="attr_18">
+                            <label class="form-check-label" for="attr_18">Heavy_Makeup (浓妆)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="High_Cheekbones" id="attr_19">
+                            <label class="form-check-label" for="attr_19">High_Cheekbones (高颧骨)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Male" id="attr_20">
+                            <label class="form-check-label" for="attr_20">Male (男性)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Mouth_Slightly_Open" id="attr_21">
+                            <label class="form-check-label" for="attr_21">Mouth_Slightly_Open (微张着嘴)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Mustache" id="attr_22">
+                            <label class="form-check-label" for="attr_22">Mustache (小胡子)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Narrow_Eyes" id="attr_23">
+                            <label class="form-check-label" for="attr_23">Narrow_Eyes (眯眯眼)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="No_Beard" id="attr_24">
+                            <label class="form-check-label" for="attr_24">No_Beard (没有胡子)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Oval_Face" id="attr_25">
+                            <label class="form-check-label" for="attr_25">Oval_Face (椭圆脸)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Pale_Skin" id="attr_26">
+                            <label class="form-check-label" for="attr_26">Pale_Skin (皮肤苍白)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Pointy_Nose" id="attr_27">
+                            <label class="form-check-label" for="attr_27">Pointy_Nose (尖鼻子)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Receding_Hairline" id="attr_28">
+                            <label class="form-check-label" for="attr_28">Receding_Hairline (发际线后移)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Rosy_Cheeks" id="attr_29">
+                            <label class="form-check-label" for="attr_29">Rosy_Cheeks (红润脸颊)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Sideburns" id="attr_30">
+                            <label class="form-check-label" for="attr_30">Sideburns (鬓角)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Smiling" id="attr_31">
+                            <label class="form-check-label" for="attr_31">Smiling (微笑)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Straight_Hair" id="attr_32">
+                            <label class="form-check-label" for="attr_32">Straight_Hair (直发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wavy_Hair" id="attr_33">
+                            <label class="form-check-label" for="attr_33">Wavy_Hair (波浪卷发)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wearing_Earrings" id="attr_34">
+                            <label class="form-check-label" for="attr_34">Wearing_Earrings (戴耳环)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wearing_Hat" id="attr_35">
+                            <label class="form-check-label" for="attr_35">Wearing_Hat (戴帽子)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wearing_Lipstick" id="attr_36">
+                            <label class="form-check-label" for="attr_36">Wearing_Lipstick (涂口红)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wearing_Necklace" id="attr_37">
+                            <label class="form-check-label" for="attr_37">Wearing_Necklace (戴项链)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Wearing_Necktie" id="attr_38">
+                            <label class="form-check-label" for="attr_38">Wearing_Necktie (戴领带)</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="Young" id="attr_39">
+                            <label class="form-check-label" for="attr_39">Young (年轻)</label>
+                        </div>
+                        
+                    </div>
+                </div>
+                <button id="find-images-btn" class="btn btn-success">查找图像</button>
+                <div id="test-spinner" class="spinner-border text-primary ms-3 d-none" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <hr>
+                <h5>结果</h5>
+                <div id="results-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startBtn = document.getElementById('start-train-btn');
+        const stopBtn = document.getElementById('stop-train-btn');
+        const trainStatus = document.getElementById('train-status');
+        const logContainer = document.getElementById('log-container');
+        const findImagesBtn = document.getElementById('find-images-btn');
+        const resultsGrid = document.getElementById('results-grid');
+        const testSpinner = document.getElementById('test-spinner');
+        const resumeSelect = document.getElementById('resume_from');
+        const checkpointSelect = document.getElementById('checkpoint_select');
+
+        let logInterval;
+
+        async function fetchCheckpoints() {
+            const response = await fetch('/get_checkpoints');
+            const checkpoints = await response.json();
+            
+            // Clear existing options
+            resumeSelect.innerHTML = '<option value="">Start new training</option>';
+            checkpointSelect.innerHTML = '';
+            
+            if (checkpoints.length === 0) {
+                checkpointSelect.innerHTML = '<option value="">No checkpoints found</option>';
+            } else {
+                checkpoints.forEach(path => {
+                    const option = new Option(path, path);
+                    const option2 = option.cloneNode(true);
+                    resumeSelect.appendChild(option);
+                    checkpointSelect.appendChild(option2);
+                });
+            }
+        }
+
+        async function updateTrainStatus() {
+            try {
+                const response = await fetch('/train_status');
+                const data = await response.json();
+                if (data.status === 'running') {
+                    trainStatus.textContent = '状态: 正在运行';
+                    trainStatus.className = 'ms-3 text-primary';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    if (!logInterval) {
+                        logInterval = setInterval(updateLog, 2000);
+                    }
+                } else {
+                    trainStatus.textContent = '状态: 已停止';
+                    trainStatus.className = 'ms-3 text-muted';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    if (logInterval) {
+                        clearInterval(logInterval);
+                        logInterval = null;
+                        updateLog(); // final log update
+                        fetchCheckpoints(); // Refresh checkpoints after training stops
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching train status:', error);
+                trainStatus.textContent = '状态: 未知 (连接错误)';
+                trainStatus.className = 'ms-3 text-danger';
+            }
+        }
+
+        async function updateLog() {
+            try {
+                const response = await fetch('/train_log');
+                const logText = await response.text();
+                logContainer.textContent = logText;
+                logContainer.scrollTop = logContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error fetching log:', error);
+            }
+        }
+
+        startBtn.addEventListener('click', async () => {
+            const config = {
+                epochs: document.getElementById('epochs').value,
+                batch_size: document.getElementById('batch_size').value,
+                lr: document.getElementById('lr').value,
+                save_every: document.getElementById('save_every').value,
+                resume_from: document.getElementById('resume_from').value,
+            };
+
+            logContainer.textContent = 'Starting training...';
+
+            const response = await fetch('/start_train', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config),
+            });
+            const data = await response.json();
+            if (data.status === 'ok') {
+                updateTrainStatus();
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        });
+
+        stopBtn.addEventListener('click', async () => {
+            const response = await fetch('/stop_train', { method: 'POST' });
+            const data = await response.json();
+            alert(data.message);
+            updateTrainStatus();
+        });
+
+        findImagesBtn.addEventListener('click', async () => {
+            const checkpoint = checkpointSelect.value;
+            if (!checkpoint) {
+                alert('Please select a checkpoint.');
+                return;
+            }
+
+            const selectedAttrs = Array.from(document.querySelectorAll('.attribute-grid input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            if (selectedAttrs.length === 0) {
+                alert('Please select at least one attribute.');
+                return;
+            }
+
+            resultsGrid.innerHTML = '';
+            testSpinner.classList.remove('d-none');
+            findImagesBtn.disabled = true;
+
+            try {
+                const response = await fetch('/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        checkpoint: checkpoint,
+                        attributes: selectedAttrs,
+                    }),
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Unknown server error');
+                }
+
+                const results = await response.json();
+                results.forEach(item => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result-item';
+                    resultDiv.innerHTML = `
+                        <img src="${item.image}" alt="Result Image">
+                        <p>Score: ${item.score}</p>
+                    `;
+                    resultsGrid.appendChild(resultDiv);
+                });
+
+            } catch (error) {
+                alert(`Error finding images: ${error.message}`);
+                console.error(error);
+            } finally {
+                testSpinner.classList.add('d-none');
+                findImagesBtn.disabled = false;
+            }
+        });
+
+        // Initial setup
+        fetchCheckpoints();
+        updateTrainStatus();
+        setInterval(updateTrainStatus, 5000); // Poll status every 5s
+    });
+    </script>
+</body>
+</html>
