@@ -3,172 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiT Diffusion Model Demo (MNIST 28x28)</title> <!-- MODIFIED TITLE -->
+    <title>Conditional Diffusion Model Training</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; }
-        label { display: block; margin-top: 10px; font-weight: bold;}
-        input[type="number"], input[type="text"], select {
-            width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;
-        }
-        button {
-            background-color: #007bff; color: white; padding: 10px 15px; border: none;
-            border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #343a40; display: flex; min-height: 100vh; }
+        .sidebar { width: 450px; background-color: #fff; padding: 20px; border-right: 1px solid #dee2e6; display: flex; flex-direction: column; overflow-y: auto; }
+        .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
+        h1, h2, h3 { color: #212529; border-bottom: 1px solid #e9ecef; padding-bottom: 10px; margin-top: 20px; }
+        h1 { margin-top: 0; }
+        .control-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #495057;}
+        input, select { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 4px; background-color: #fff; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; font-size: 16px; width: 100%; transition: background-color 0.2s; }
         button:hover { background-color: #0056b3; }
-        button:disabled { background-color: #aaa; cursor: not-allowed; }
-        #logs {
-            margin-top: 20px; padding: 10px; border: 1px solid #ddd; height: 300px;
-            overflow-y: scroll; background-color: #e9e9e9; white-space: pre-wrap;
-            font-family: monospace; font-size: 0.9em;
-        }
-        #sampleImageContainer { 
-            margin-top: 20px; 
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .sample-image-item {
-            border: 1px solid #ddd; 
-            width: 56px; /* Slightly larger for 28x28 to be visible */
-            height: 56px;
-            image-rendering: pixelated;
-            background-color: #f0f0f0;
-        }
-        .status { margin-top: 10px; font-weight: bold; }
-        .error { color: red; }
-        .success { color: green; }
-        .hyperparam-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .hyperparam-item { display: flex; flex-direction: column; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .hyperparam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .status { margin-top: 15px; font-weight: bold; padding: 10px; border-radius: 4px; }
+        .error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        #logs-container { flex-grow: 1; display: flex; flex-direction: column; min-height: 0;}
+        #logs { flex-grow: 1; overflow-y: scroll; background-color: #212529; color: #f8f9fa; padding: 15px; border-radius: 4px; white-space: pre-wrap; font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
+        #generation-area { display: flex; flex-direction: column; }
+        #sampleImageContainer { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; margin-top: 15px; }
+        .sample-image-item { width: 100%; height: auto; border: 2px solid #dee2e6; border-radius: 4px; background-color: #e9ecef; image-rendering: pixelated; }
+        .attr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6;}
+        .attr-item { display: flex; align-items: center; font-size: 0.9em; }
+        .attr-item input { width: auto; margin-right: 8px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>DiT Diffusion Model Training (MNIST 28x28)</h1> <!-- MODIFIED TITLE -->
+    <div class="sidebar">
+        <h1>Diffusion Training</h1>
+        
+        <!-- Training Section -->
+        <div class="control-group">
+            <h3>1. Train a New Model</h3>
+            <label for="training_mode" style="margin-top: 5px;">Training Mode</label>
+            <select id="training_mode">
+                <option value="conditional" selected>Conditional (L2 + Advanced)</option>
+                <option value="unconditional">Unconditional (L2 + Advanced)</option>
+            </select>
+            
+            <h4 style="margin-bottom:10px; margin-top:20px;">Basic Parameters</h4>
+            <div class="hyperparam-grid">
+                <div><label for="learning_rate">Learning Rate</label><input type="number" id="learning_rate" value="0.0001" step="0.00001"></div>
+                <div><label for="epochs">Epochs</label><input type="number" id="epochs" value="25" min="1"></div>
+                <div><label for="batch_size">Batch Size</label><input type="number" id="batch_size" value="64" min="1"></div>
+                <div><label for="limit_dataset_size">Limit Dataset Size</label><input type="number" id="limit_dataset_size" value="210000"></div>
+                <div><label for="ema_decay">EMA Decay</label><input type="number" id="ema_decay" value="0.999" step="0.001"></div>
+                <div><label for="save_every_epochs">Save Every (Epochs)</label><input type="number" id="save_every_epochs" value="1" min="1"></div>
+            </div>
 
-        <div class="hyperparam-grid">
-            <div class="hyperparam-item">
-                <label for="learning_rate">Learning Rate:</label>
-                <input type="number" id="learning_rate" value="0.0001" step="0.00001">
+            <!-- <<< MODIFIED: Section is now universal, but some controls inside are conditional >>> -->
+            <div id="advanced_params">
+                 <h4 style="margin-bottom:10px; margin-top:20px;">Advanced Loss & Scheduler</h4>
+                 <label for="lr_scheduler_type">LR Scheduler</label>
+                 <select id="lr_scheduler_type">
+                    <option value="none">None</option>
+                    <option value="cosine" selected>Cosine Decay</option>
+                    <option value="linear">Linear Decay</option>
+                 </select>
+
+                 <div class="hyperparam-grid" style="margin-top:15px;">
+                    <!-- <<< MODIFIED: This specific control is now conditionally visible >>> -->
+                    <div id="cfg_dropout_control">
+                        <label for="cond_drop_prob">CFG Dropout %</label>
+                        <input type="number" id="cond_drop_prob" value="0.1" step="0.05" min="0" max="1">
+                    </div>
+                    <div><label for="start_gan_epoch">Start GAN (Epoch)</label><input type="number" id="start_gan_epoch" value="1" min="0"></div>
+                    <div><label for="gan_loss_weight">GAN Loss Weight</label><input type="number" id="gan_loss_weight" value="0.01" step="0.001" min="0"></div>
+                    <div><label for="start_perception_epoch">Start Percept. (Ep.)</label><input type="number" id="start_perception_epoch" value="1" min="0"></div>
+                    <div><label for="perception_loss_weight">Percept. Weight</label><input type="number" id="perception_loss_weight" value="0.01" step="0.01" min="0"></div>
+                </div>
             </div>
-            <div class="hyperparam-item">
-                <label for="epochs">Epochs:</label>
-                <input type="number" id="epochs" value="20" min="1">
-            </div>
-            <div class="hyperparam-item">
-                <label for="batch_size">Batch Size:</label>
-                <input type="number" id="batch_size" value="32" min="1"> <!-- Potentially smaller for DiT -->
-            </div>
-            <div class="hyperparam-item">
-                <label for="timesteps">Diffusion Timesteps (T):</label>
-                <input type="number" id="timesteps" value="200" min="10">
-            </div>
-            <!-- DiT Specific Parameters -->
-            <div class="hyperparam-item">
-                <label for="patch_size">Patch Size (e.g., 4 for 28x28):</label>
-                <input type="number" id="patch_size" value="4" min="1">
-            </div>
-            <div class="hyperparam-item">
-                <label for="hidden_size">DiT Hidden Size (Embedding Dim):</label>
-                <input type="number" id="hidden_size" value="192" min="32" step="16"> <!-- Smaller default -->
-            </div>
-            <div class="hyperparam-item">
-                <label for="depth">DiT Depth (Num Blocks):</label>
-                <input type="number" id="depth" value="6" min="1"> <!-- Smaller default -->
-            </div>
-            <div class="hyperparam-item">
-                <label for="num_heads">DiT Num Heads:</label>
-                <input type="number" id="num_heads" value="3" min="1"> <!-- Corresponds to hidden_size 192/3=64 per head -->
-            </div>
-             <div class="hyperparam-item">
-                <label for="time_emb_dim">Time Embedding Dim (often = Hidden Size):</label>
-                <input type="number" id="time_emb_dim" value="192" min="32" step="16"> <!-- Tie to hidden_size -->
-            </div>
-            <div class="hyperparam-item">
-                <label for="limit_dataset_size">Limit Dataset Size:</label>
-                <input type="number" id="limit_dataset_size" value="10000" min="100">
-            </div>
+
+            <button id="startTrainingBtn">Start Training</button>
         </div>
 
-        <button id="startTrainingBtn">Start DiT Training</button> <!-- MODIFIED BUTTON TEXT -->
-        <button id="generateSampleBtn" disabled>Generate 5 Samples</button>
-        
-        <div id="statusMessage" class="status"></div>
+        <!-- Generation Section -->
+        <div class="control-group">
+            <h3>2. Generate Images</h3>
+            <label for="checkpoint_selector">Load Trained Model</label>
+            <div style="display:flex; gap: 5px;">
+                <select id="checkpoint_selector" style="flex-grow:1;"></select>
+                <button id="loadCheckpointBtn" style="width:auto; margin-top:5px; padding: 8px 12px;">Load</button>
+            </div>
+            
+            <div id="generation_controls" style="display:none;">
+                <label for="guidance_scale" style="margin-top:15px;">CFG Guidance Scale</label>
+                <input type="number" id="guidance_scale" value="8.0" step="0.5">
+                <label for="attr_grid" style="margin-top:15px;">Select Attributes</label>
+                <div id="attr_grid" class="attr-grid"></div>
+                <button id="generateSampleBtn">Generate 4 Samples</button>
+            </div>
+        </div>
+        <div id="statusMessage" class="status" style="display:none;"></div>
+    </div>
 
-        <h2>Training Logs:</h2>
-        <div id="logs"></div>
-
-        <h2>Generated Samples:</h2>
-        <div id="sampleImageContainer"></div>
-        <p id="noSampleText">No samples generated yet. Train a DiT model first.</p> <!-- MODIFIED TEXT -->
+    <div class="main-content">
+        <div id="logs-container">
+            <h2>Console Logs</h2>
+            <div id="logs"></div>
+        </div>
+        <div id="generation-area">
+            <h2>Generated Samples</h2>
+            <div id="sampleImageContainer"></div>
+            <p id="noSampleText">No samples generated yet. Load a model and select attributes.</p>
+        </div>
     </div>
 
     <script>
+        // DOM Elements
         const startTrainingBtn = document.getElementById('startTrainingBtn');
         const generateSampleBtn = document.getElementById('generateSampleBtn');
+        const loadCheckpointBtn = document.getElementById('loadCheckpointBtn');
+        const checkpointSelector = document.getElementById('checkpoint_selector');
         const logsDiv = document.getElementById('logs');
-        const sampleImageContainer = document.getElementById('sampleImageContainer'); 
+        const sampleImageContainer = document.getElementById('sampleImageContainer');
         const noSampleText = document.getElementById('noSampleText');
         const statusMessageDiv = document.getElementById('statusMessage');
+        const trainingModeSelect = document.getElementById('training_mode');
+        // <<< MODIFIED: Get new specific control for CFG >>>
+        const cfgDropoutControl = document.getElementById('cfg_dropout_control');
+        const generationControls = document.getElementById('generation_controls');
+        const attrGrid = document.getElementById('attr_grid');
+        
         let logInterval;
+        let isTraining = false;
 
-        // Function to update time_emb_dim based on hidden_size
-        function updateTimeEmbDim() {
-            const hiddenSizeVal = document.getElementById('hidden_size').value;
-            document.getElementById('time_emb_dim').value = hiddenSizeVal;
-        }
-        // Add event listener to hidden_size input
-        document.getElementById('hidden_size').addEventListener('input', updateTimeEmbDim);
-        // Initial call to set it
-        updateTimeEmbDim();
-
+        const celeba_attributes = [ { key: '5_o_Clock_Shadow', name_cn: '胡渣' }, { key: 'Arched_Eyebrows', name_cn: '柳叶眉' }, { key: 'Attractive', name_cn: '有魅力' }, { key: 'Bags_Under_Eyes', name_cn: '眼袋' }, { key: 'Bald', name_cn: '秃头' }, { key: 'Bangs', name_cn: '刘海' }, { key: 'Big_Lips', name_cn: '厚嘴唇' }, { key: 'Big_Nose', name_cn: '大鼻子' }, { key: 'Black_Hair', name_cn: '黑发' }, { key: 'Blond_Hair', name_cn: '金发' }, { key: 'Blurry', name_cn: '模糊' }, { key: 'Brown_Hair', name_cn: '棕发' }, { key: 'Bushy_Eyebrows', name_cn: '浓眉' }, { key: 'Chubby', name_cn: '胖' }, { key: 'Double_Chin', name_cn: '双下巴' }, { key: 'Eyeglasses', name_cn: '眼镜' }, { key: 'Goatee', name_cn: '山羊胡' }, { key: 'Gray_Hair', name_cn: '灰发' }, { key: 'Heavy_Makeup', name_cn: '浓妆' }, { key: 'High_Cheekbones', name_cn: '高颧骨' }, { key: 'Male', name_cn: '男性' }, { key: 'Mouth_Slightly_Open', name_cn: '嘴微张' }, { key: 'Mustache', name_cn: '小胡子' }, { key: 'Narrow_Eyes', name_cn: '眯眯眼' }, { key: 'No_Beard', name_cn: '无胡须' }, { key: 'Oval_Face', name_cn: '鹅蛋脸' }, { key: 'Pale_Skin', name_cn: '白皮肤' }, { key: 'Pointy_Nose', name_cn: '尖鼻子' }, { key: 'Receding_Hairline', name_cn: '发际线后退' }, { key: 'Rosy_Cheeks', name_cn: '红润脸颊' }, { key: 'Sideburns', name_cn: '鬓角' }, { key: 'Smiling', name_cn: '微笑' }, { key: 'Straight_Hair', name_cn: '直发' }, { key: 'Wavy_Hair', name_cn: '卷发' }, { key: 'Wearing_Earrings', name_cn: '戴耳环' }, { key: 'Wearing_Hat', name_cn: '戴帽子' }, { key: 'Wearing_Lipstick', name_cn: '涂口红' }, { key: 'Wearing_Necklace', name_cn: '戴项链' }, { key: 'Wearing_Necktie', name_cn: '戴领带' }, { key: 'Young', name_cn: '年轻' } ];
 
         function displayStatus(message, isError = false) {
             statusMessageDiv.textContent = message;
             statusMessageDiv.className = 'status ' + (isError ? 'error' : 'success');
-        }
-
-        function appendLog(message) {
-            logsDiv.innerHTML += message + '\n';
-            logsDiv.scrollTop = logsDiv.scrollHeight;
+            statusMessageDiv.style.display = 'block';
         }
 
         async function fetchLogs() {
             try {
                 const response = await fetch('/get_logs');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 logsDiv.innerHTML = ''; 
-                data.logs.forEach(log => appendLog(log));
+                data.logs.forEach(log => {
+                    logsDiv.innerHTML += log + '\n';
+                });
+                logsDiv.scrollTop = logsDiv.scrollHeight;
             } catch (error) {
                 console.error('Error fetching logs:', error);
-                appendLog('Error fetching logs: ' + error.message);
             }
         }
+        
+        async function fetchCheckpoints() {
+            try {
+                const response = await fetch('/get_checkpoints');
+                const data = await response.json();
+                if(data.status === 'success'){
+                    checkpointSelector.innerHTML = '<option value="">-- Select a model --</option>';
+                    data.checkpoints.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        checkpointSelector.appendChild(option);
+                    });
+                }
+            } catch(e){ console.error("Could not fetch checkpoints", e); }
+        }
+
+        function setUIBusy(busy) {
+            startTrainingBtn.disabled = busy;
+            // loadCheckpointBtn can still be used
+            // generateSampleBtn can also be used
+        }
+
+        // <<< MODIFIED: Event listener only hides the CFG control >>>
+        trainingModeSelect.addEventListener('change', () => {
+            cfgDropoutControl.style.display = trainingModeSelect.value === 'conditional' ? 'block' : 'none';
+        });
 
         startTrainingBtn.addEventListener('click', async () => {
-            // Collect DiT hyperparameters
+            // <<< MODIFIED: Collect advanced hyperparams for all modes >>>
             const hyperparams = {
+                // Basic
                 learning_rate: parseFloat(document.getElementById('learning_rate').value),
                 epochs: parseInt(document.getElementById('epochs').value),
                 batch_size: parseInt(document.getElementById('batch_size').value),
-                timesteps: parseInt(document.getElementById('timesteps').value),
-                patch_size: parseInt(document.getElementById('patch_size').value),
-                hidden_size: parseInt(document.getElementById('hidden_size').value),
-                depth: parseInt(document.getElementById('depth').value),
-                num_heads: parseInt(document.getElementById('num_heads').value),
-                time_emb_dim: parseInt(document.getElementById('time_emb_dim').value),
-                limit_dataset_size: parseInt(document.getElementById('limit_dataset_size').value)
+                limit_dataset_size: parseInt(document.getElementById('limit_dataset_size').value),
+                training_mode: trainingModeSelect.value,
+                ema_decay: parseFloat(document.getElementById('ema_decay').value),
+                save_every_epochs: parseInt(document.getElementById('save_every_epochs').value),
+                
+                // Advanced (now universal)
+                lr_scheduler_type: document.getElementById('lr_scheduler_type').value,
+                start_gan_epoch: parseInt(document.getElementById('start_gan_epoch').value),
+                gan_loss_weight: parseFloat(document.getElementById('gan_loss_weight').value),
+                start_perception_epoch: parseInt(document.getElementById('start_perception_epoch').value),
+                perception_loss_weight: parseFloat(document.getElementById('perception_loss_weight').value),
+                
+                // Conditional-specific
+                cond_drop_prob: 0,
+                
+                // Hardcoded values that could be inputs
+                timesteps: 1000, unet_n_channels: 64, unet_ch_mults_str: "1,2,4",
+                img_size: 64, dataset_path: 'celeba_cache_64x64.npz',
+                n_classes: 40, class_emb_dim: 128
             };
-
-            startTrainingBtn.disabled = true;
-            generateSampleBtn.disabled = true;
-            sampleImageContainer.innerHTML = ''; 
-            noSampleText.style.display = 'block'; 
-            displayStatus('Starting DiT training...', false); // MODIFIED
+            
+            if(hyperparams.training_mode === 'conditional') {
+                hyperparams.cond_drop_prob = parseFloat(document.getElementById('cond_drop_prob').value);
+            }
+            
+            setUIBusy(true);
+            isTraining = true;
+            displayStatus('Starting training...', false);
             logsDiv.innerHTML = '';
-
+            
             try {
                 const response = await fetch('/start_training', {
                     method: 'POST',
@@ -176,61 +223,123 @@
                     body: JSON.stringify(hyperparams)
                 });
                 const data = await response.json();
-                if (response.ok && data.status === 'success') {
-                    displayStatus('DiT Training started. Check logs.', false); // MODIFIED
+                if (response.ok) {
+                    displayStatus('Training started. See logs for progress.', false);
                     logInterval = setInterval(async () => {
                         await fetchLogs();
-                        const logText = logsDiv.textContent;
-                        if (logText.includes("Training finished.") || logText.includes("Training aborted.") || logText.includes("Error:")) {
+                        if (logsDiv.textContent.includes("Training finished.") || logsDiv.textContent.includes("aborted")) {
                             clearInterval(logInterval);
-                            startTrainingBtn.disabled = false;
-                            generateSampleBtn.disabled = false;
-                            let finalMessage = 'Training finished.';
-                            if (logText.includes("Training aborted.")) finalMessage = 'Training aborted.';
-                            if (logText.includes("Error:")) finalMessage = 'Training failed. Check logs.';
-                            displayStatus(finalMessage, logText.includes("Error:") || logText.includes("aborted."));
+                            setUIBusy(false);
+                            isTraining = false;
+                            await fetchCheckpoints();
+                            displayStatus('Training finished.', false);
                         }
                     }, 2000);
                 } else {
-                    displayStatus('Error starting DiT training: ' + (data.message || 'Unknown error'), true); // MODIFIED
-                    startTrainingBtn.disabled = false;
+                    displayStatus('Error starting training: ' + data.message, true);
+                    setUIBusy(false);
+                    isTraining = false;
                 }
             } catch (error) {
-                displayStatus('Network error starting DiT training: ' + error.message, true); // MODIFIED
-                startTrainingBtn.disabled = false;
+                displayStatus('Network error: ' + error.message, true);
+                setUIBusy(false);
+                isTraining = false;
+            }
+        });
+        
+        loadCheckpointBtn.addEventListener('click', async () => {
+            const filename = checkpointSelector.value;
+            if (!filename) {
+                displayStatus('Please select a model to load.', true);
+                return;
+            }
+            
+            loadCheckpointBtn.disabled = true;
+            displayStatus(`Loading model: ${filename}...`);
+            
+            try {
+                const response = await fetch('/load_checkpoint', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({filename})
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayStatus(data.message, false);
+                    const isConditional = data.config.training_mode === 'conditional';
+                    generationControls.style.display = 'block'; // Always show generation controls
+                    document.getElementById('attr_grid').style.display = isConditional ? 'grid' : 'none';
+                    document.querySelector('label[for="attr_grid"]').style.display = isConditional ? 'block' : 'none';
+                    // Update UI with loaded config values for reference
+                    if (isConditional) {
+                         document.getElementById('guidance_scale').value = data.config.guidance_scale || 8.0;
+                    }
+                } else {
+                    displayStatus(`Error loading model: ${data.message}`, true);
+                }
+            } catch (error) {
+                displayStatus(`Network error: ${error.message}`, true);
+            } finally {
+                loadCheckpointBtn.disabled = false;
             }
         });
 
         generateSampleBtn.addEventListener('click', async () => {
             generateSampleBtn.disabled = true;
-            displayStatus('Generating samples with DiT...', false); // MODIFIED
-            sampleImageContainer.innerHTML = ''; 
+            displayStatus('Generating samples...', false);
+            sampleImageContainer.innerHTML = '';
             noSampleText.style.display = 'block';
 
+            const attributes = celeba_attributes.map((attr, index) => {
+                const checkbox = document.getElementById(`attr_${index}`);
+                return checkbox.checked ? 1 : 0;
+            });
+            const guidance_scale = parseFloat(document.getElementById('guidance_scale').value);
+
             try {
-                const response = await fetch('/generate_sample');
+                const response = await fetch('/generate_sample', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ attributes, guidance_scale })
+                });
                 const data = await response.json();
-                if (response.ok && data.status === 'success' && data.image_data_list) {
+                
+                if (response.ok) {
                     data.image_data_list.forEach(imgDataBase64 => {
                         const imgElement = document.createElement('img');
                         imgElement.src = 'data:image/png;base64,' + imgDataBase64;
-                        imgElement.alt = 'Generated DiT Sample'; // MODIFIED
-                        imgElement.classList.add('sample-image-item'); 
+                        imgElement.classList.add('sample-image-item');
                         sampleImageContainer.appendChild(imgElement);
                     });
-                    noSampleText.style.display = 'none'; 
-                    displayStatus(`${data.image_data_list.length} DiT samples generated.`, false); // MODIFIED
+                    noSampleText.style.display = 'none';
+                    displayStatus(`${data.image_data_list.length} samples generated.`, false);
                 } else {
-                    displayStatus('Error generating DiT samples: ' + (data.message || 'Unknown error'), true); // MODIFIED
+                    displayStatus('Error generating samples: ' + data.message, true);
                 }
             } catch (error) {
-                displayStatus('Network error generating DiT samples: ' + error.message, true); // MODIFIED
+                displayStatus('Network error: ' + error.message, true);
             } finally {
                 generateSampleBtn.disabled = false;
             }
         });
-        
-        fetchLogs(); 
+
+        function initialize() {
+            celeba_attributes.forEach((attr, index) => {
+                const item = document.createElement('div');
+                item.className = 'attr-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="attr_${index}" data-key="${attr.key}">
+                    <label for="attr_${index}">${attr.name_cn} (${attr.key})</label>
+                `;
+                attrGrid.appendChild(item);
+            });
+            fetchLogs();
+            fetchCheckpoints();
+            // Trigger change event to set initial visibility of CFG control
+            trainingModeSelect.dispatchEvent(new Event('change'));
+        }
+
+        initialize();
     </script>
 </body>
 </html>
