@@ -1,0 +1,463 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VQGAN Training & Testing Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .log-container {
+            height: 400px;
+            background-color: #212529;
+            color: #dee2e6;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            overflow-y: scroll;
+            border-radius: 0.25rem;
+            padding: 1rem;
+        }
+        .card { margin-bottom: 1.5rem; }
+        .nav-tabs .nav-link { color: #495057; }
+        .nav-tabs .nav-link.active { color: #000; font-weight: bold; }
+        .image-gallery { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .image-pair, .generated-image { text-align: center; }
+        .image-pair img, .generated-image img {
+            max-width: 128px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .spinner-border-sm { vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">VQGAN Training & Testing Demo</h1>
+
+        <ul class="nav nav-tabs" id="mainTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train-tab-pane" type="button" role="tab" aria-controls="train-tab-pane" aria-selected="true">Train</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test-tab-pane" type="button" role="tab" aria-controls="test-tab-pane" aria-selected="false">Test</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Train Tab -->
+            <div class="tab-pane fade show active" id="train-tab-pane" role="tabpanel" aria-labelledby="train-tab" tabindex="0">
+                <div class="row mt-4">
+                    <!-- Column 1: Training Controls -->
+                    <div class="col-lg-6">
+                        <!-- Stage 1 Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Stage 1: VQGAN Training</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="s1-form">
+                                    <div class="mb-3">
+                                        <label for="s1-epochs" class="form-label">Epochs</label>
+                                        <input type="number" class="form-control" id="s1-epochs" value="200">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="s1-save-freq" class="form-label">Save Checkpoint Every (epochs)</label>
+                                        <input type="number" class="form-control" id="s1-save-freq" value="1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="s1-n-embed" class="form-label">VQ Codebook Size (n_embed)</label>
+                                        <input type="number" class="form-control" id="s1-n-embed" value="512">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="s1-commit-cost" class="form-label">VQ Commitment Cost</label>
+                                        <input type="number" step="0.01" class="form-control" id="s1-commit-cost" value="0.25">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="s1-checkpoint" class="form-label">Continue from Checkpoint (optional)</label>
+                                        <select class="form-select" id="s1-checkpoint">
+                                            <option value="">Start from scratch</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="start-s1-btn" class="btn btn-primary">Start Stage 1 Training</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Stage 2 Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Stage 2: Transformer Training</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="s2-form">
+                                    <div class="mb-3">
+                                        <label for="s2-vqgan-checkpoint" class="form-label">Base VQGAN Checkpoint (Required)</label>
+                                        <select class="form-select" id="s2-vqgan-checkpoint" required>
+                                            <option value="" disabled selected>Select a Stage 1 checkpoint</option>
+                                        </select>
+                                    </div>
+                                    <hr>
+                                    <div class="mb-3"><label class="form-label">Transformer Hyperparameters</label></div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="s2-epochs" class="form-label">Epochs</label>
+                                            <input type="number" class="form-control" id="s2-epochs" value="100">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="s2-save-freq" class="form-label">Save Freq (epochs)</label>
+                                            <input type="number" class="form-control" id="s2-save-freq" value="5">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="s2-n-layer" class="form-label">n_layer</label>
+                                            <input type="number" class="form-control" id="s2-n-layer" value="8">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="s2-n-head" class="form-label">n_head</label>
+                                            <input type="number" class="form-control" id="s2-n-head" value="8">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="s2-n-embd" class="form-label">n_embd</label>
+                                            <input type="number" class="form-control" id="s2-n-embd" value="512">
+                                        </div>
+                                    </div>
+                                     <div class="mb-3">
+                                        <label for="s2-checkpoint" class="form-label">Continue from Checkpoint (optional)</label>
+                                        <select class="form-select" id="s2-checkpoint">
+                                            <option value="">Start from scratch</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="start-s2-btn" class="btn btn-success">Start Stage 2 Training</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Column 2: Logs and Controls -->
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5>Training Log</h5>
+                                <button type="button" id="stop-btn" class="btn btn-danger" disabled>Stop Training</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <strong>Note:</strong> TensorBoard logs (graphs, losses, images) are saved in the <code>runs/</code> directory.
+                                    Run <code>tensorboard --logdir runs</code> in your terminal to view them.
+                                </div>
+                                <pre id="log-output" class="log-container">Welcome! Select a training stage and click start.</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Tab -->
+            <div class="tab-pane fade" id="test-tab-pane" role="tabpanel" aria-labelledby="test-tab" tabindex="0">
+                 <div class="row mt-4">
+                    <!-- Reconstruction Test -->
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Stage 1: Test Reconstruction (6 images)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="test-s1-checkpoint" class="form-label">Select VQGAN Checkpoint</label>
+                                    <select class="form-select" id="test-s1-checkpoint" required></select>
+                                </div>
+                                <button id="run-recon-test-btn" class="btn btn-primary">Run Reconstruction Test</button>
+                                <hr>
+                                <div id="recon-results" class="image-gallery"></div>
+                            </div>
+                        </div>
+                    </div>
+                     <!-- Generation Test -->
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Stage 2: Test Generation (6 images)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="test-s2-vqgan-checkpoint" class="form-label">Base VQGAN Checkpoint</label>
+                                    <select class="form-select" id="test-s2-vqgan-checkpoint" required></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="test-s2-transformer-checkpoint" class="form-label">Transformer Checkpoint</label>
+                                    <select class="form-select" id="test-s2-transformer-checkpoint" required></select>
+                                </div>
+                                <button id="run-gen-test-btn" class="btn btn-success">Run Generation Test</button>
+                                <hr>
+                                <div id="gen-results" class="image-gallery"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logOutput = document.getElementById('log-output');
+            let eventSource;
+
+            // --- UI Elements ---
+            const startS1Btn = document.getElementById('start-s1-btn');
+            const startS2Btn = document.getElementById('start-s2-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            
+            const s1CheckpointSelect = document.getElementById('s1-checkpoint');
+            const s2VqganCheckpointSelect = document.getElementById('s2-vqgan-checkpoint');
+            const s2CheckpointSelect = document.getElementById('s2-checkpoint');
+            
+            const testS1Select = document.getElementById('test-s1-checkpoint');
+            const testS2VqganSelect = document.getElementById('test-s2-vqgan-checkpoint');
+            const testS2TransformerSelect = document.getElementById('test-s2-transformer-checkpoint');
+            
+            const runReconBtn = document.getElementById('run-recon-test-btn');
+            const runGenBtn = document.getElementById('run-gen-test-btn');
+            const reconResultsDiv = document.getElementById('recon-results');
+            const genResultsDiv = document.getElementById('gen-results');
+
+            // --- Helper Functions ---
+            function showSpinner(button) {
+                button.disabled = true;
+                button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+            }
+
+            function hideSpinner(button, originalText) {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+
+            function addLog(message) {
+                logOutput.textContent += message + '\n';
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+
+            function clearLogs() {
+                logOutput.textContent = '';
+            }
+            
+            function setTrainingUIState(isTraining) {
+                startS1Btn.disabled = isTraining;
+                startS2Btn.disabled = isTraining;
+                stopBtn.disabled = !isTraining;
+            }
+
+            // --- Core Logic ---
+            async function fetchCheckpoints() {
+                try {
+                    const response = await fetch('/get_checkpoints');
+                    const data = await response.json();
+
+                    // Clear existing options
+                    [s1CheckpointSelect, s2VqganCheckpointSelect, s2CheckpointSelect, testS1Select, testS2VqganSelect, testS2TransformerSelect].forEach(sel => {
+                        // Keep the first "default" option if it exists
+                        const firstOption = sel.options[0];
+                        sel.innerHTML = '';
+                        if (firstOption && (firstOption.value === "" || firstOption.disabled)) {
+                            sel.appendChild(firstOption);
+                        }
+                    });
+
+                    data.stage1.forEach(path => {
+                        [s1CheckpointSelect, s2VqganCheckpointSelect, testS1Select, testS2VqganSelect].forEach(sel => {
+                            const option = new Option(path, path);
+                            sel.add(option);
+                        });
+                    });
+                    data.stage2.forEach(path => {
+                        [s2CheckpointSelect, testS2TransformerSelect].forEach(sel => {
+                            const option = new Option(path, path);
+                            sel.add(option);
+                        });
+                    });
+                } catch (error) {
+                    console.error('Failed to fetch checkpoints:', error);
+                    addLog('Error: Could not fetch checkpoints from server.');
+                }
+            }
+            
+            function connectEventSource() {
+                if (eventSource) {
+                    eventSource.close();
+                }
+                eventSource = new EventSource('/logs');
+                eventSource.onmessage = (event) => {
+                    if (event.data === "---TRAINING-COMPLETE---") {
+                        addLog("\nTraining process finished or was stopped.");
+                        setTrainingUIState(false);
+                        fetchCheckpoints(); // Refresh checkpoints list
+                        eventSource.close();
+                    } else {
+                        addLog(event.data);
+                    }
+                };
+                eventSource.onerror = () => {
+                    // Don't log error, as it can happen on server restart or stop
+                    eventSource.close();
+                };
+            }
+
+            async function checkServerStatus() {
+                try {
+                    const response = await fetch('/status');
+                    const data = await response.json();
+                    if (data.is_running) {
+                        addLog(`Reconnected to an active training process (Stage ${data.current_stage})...`);
+                        setTrainingUIState(true);
+                        connectEventSource();
+                    }
+                } catch (error) {
+                    console.error("Could not check server status", error);
+                }
+            }
+            
+            async function startTraining(stage, payload) {
+                if (!confirm(`Are you sure you want to start Stage ${stage} training?`)) return;
+                
+                clearLogs();
+                addLog(`Starting Stage ${stage} training...`);
+                setTrainingUIState(true);
+                connectEventSource();
+
+                try {
+                    const response = await fetch('/start_training', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.status !== 'success') {
+                        addLog(`Error: ${result.message}`);
+                        setTrainingUIState(false);
+                    }
+                } catch (error) {
+                    addLog(`Error: Failed to send start command. ${error}`);
+                    setTrainingUIState(false);
+                }
+            }
+
+            startS1Btn.addEventListener('click', () => {
+                const payload = {
+                    stage: 1,
+                    s1_epochs: parseInt(document.getElementById('s1-epochs').value),
+                    s1_save_epoch_freq: parseInt(document.getElementById('s1-save-freq').value),
+                    s1_n_embed: parseInt(document.getElementById('s1-n-embed').value),
+                    s1_commitment_cost: parseFloat(document.getElementById('s1-commit-cost').value),
+                    s1_checkpoint_path: s1CheckpointSelect.value
+                };
+                startTraining(1, payload);
+            });
+
+            startS2Btn.addEventListener('click', () => {
+                if (!s2VqganCheckpointSelect.value) {
+                    alert('Please select a base VQGAN checkpoint for Stage 2 training.');
+                    return;
+                }
+                const payload = {
+                    stage: 2,
+                    s2_vqgan_checkpoint_path: s2VqganCheckpointSelect.value,
+                    s2_epochs: parseInt(document.getElementById('s2-epochs').value),
+                    s2_save_epoch_freq: parseInt(document.getElementById('s2-save-freq').value),
+                    s2_n_layer: parseInt(document.getElementById('s2-n-layer').value),
+                    s2_n_head: parseInt(document.getElementById('s2-n-head').value),
+                    s2_n_embd: parseInt(document.getElementById('s2-n-embd').value),
+                    s2_checkpoint_path: s2CheckpointSelect.value
+                };
+                startTraining(2, payload);
+            });
+
+            stopBtn.addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to stop the current training job?')) return;
+                try {
+                    await fetch('/stop_training', { method: 'POST' });
+                    // UI state will be updated by the EventSource when the thread actually stops
+                } catch (error) {
+                    addLog(`Error sending stop signal: ${error}`);
+                }
+            });
+
+            runReconBtn.addEventListener('click', async () => {
+                const ckpt = testS1Select.value;
+                if (!ckpt) { alert('Please select a VQGAN checkpoint.'); return; }
+                
+                reconResultsDiv.innerHTML = '';
+                showSpinner(runReconBtn);
+
+                try {
+                    const response = await fetch('/test_reconstruction', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ checkpoint_path: ckpt })
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        result.images.forEach(pair => {
+                            const pairDiv = document.createElement('div');
+                            pairDiv.className = 'image-pair';
+                            pairDiv.innerHTML = `
+                                <div><img src="${pair.original}" alt="Original"><br><small>Original</small></div>
+                                <div><img src="${pair.reconstructed}" alt="Reconstructed"><br><small>Recon</small></div>
+                            `;
+                            reconResultsDiv.appendChild(pairDiv);
+                        });
+                    } else {
+                        alert(`Error: ${result.message}`);
+                    }
+                } catch (error) {
+                    alert(`An error occurred: ${error}`);
+                } finally {
+                    hideSpinner(runReconBtn, 'Run Reconstruction Test');
+                }
+            });
+
+            runGenBtn.addEventListener('click', async () => {
+                const vqgan_ckpt = testS2VqganSelect.value;
+                const trans_ckpt = testS2TransformerSelect.value;
+                if (!vqgan_ckpt || !trans_ckpt) {
+                    alert('Please select both a VQGAN and a Transformer checkpoint.');
+                    return;
+                }
+                
+                genResultsDiv.innerHTML = '';
+                showSpinner(runGenBtn);
+
+                try {
+                    const response = await fetch('/test_generation', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ 
+                            vqgan_checkpoint_path: vqgan_ckpt,
+                            transformer_checkpoint_path: trans_ckpt 
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        result.images.forEach(img_b64 => {
+                            const imgDiv = document.createElement('div');
+                            imgDiv.className = 'generated-image';
+                            imgDiv.innerHTML = `<div><img src="${img_b64}" alt="Generated"><br><small>Generated</small></div>`;
+                            genResultsDiv.appendChild(imgDiv);
+                        });
+                    } else {
+                        alert(`Error: ${result.message}`);
+                    }
+                } catch (error) {
+                    alert(`An error occurred: ${error}`);
+                } finally {
+                    hideSpinner(runGenBtn, 'Run Generation Test');
+                }
+            });
+
+            // Initial load
+            fetchCheckpoints();
+            checkServerStatus();
+        });
+    </script>
+</body>
+</html>
