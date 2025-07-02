@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOT: Prompt Tuning Demo</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1, h2 { color: #2c3e50; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-button { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-bottom: 2px solid transparent; }
+        .tab-button.active { color: #3498db; border-bottom-color: #3498db; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 20px; align-items: center; }
+        label { font-weight: bold; }
+        input, select, button { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; width: 100%; box-sizing: border-box; }
+        button { cursor: pointer; color: #fff; border-color: transparent; }
+        .btn-start { background-color: #27ae60; }
+        .btn-stop { background-color: #c0392b; }
+        .btn-test { background-color: #2980b9; }
+        .btn-refresh { background-color: #7f8c8d; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        #log-container { margin-top: 20px; background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; height: 400px; overflow-y: scroll; white-space: pre-wrap; font-family: "Courier New", Courier, monospace; }
+        .status-indicator { margin-left: 15px; font-weight: bold; }
+        .status-running { color: #f39c12; }
+        .status-idle { color: #27ae60; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SLOT: Prompt Tuning Demo</h1>
+    <p>Train a soft prompt for Qwen2.5-1.5B-Instruct on a subset of GSM8K.</p>
+    <p>Current Status: <span id="status-indicator" class="status-idle">Idle</span></p>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'Train')">Train</button>
+        <button class="tab-button" onclick="openTab(event, 'Test')">Test</button>
+    </div>
+
+    <!-- Train Tab -->
+    <div id="Train" class="tab-content active">
+        <h2>Training Configuration</h2>
+        <form id="train-form" class="form-grid">
+            <label for="num_prompt_tokens">Prompt Tokens:</label>
+            <input type="number" id="num_prompt_tokens" name="num_prompt_tokens" value="20">
+            
+            <label for="learning_rate">Learning Rate:</label>
+            <input type="number" id="learning_rate" name="learning_rate" value="0.001" step="0.0001">
+
+            <label for="batch_size">Batch Size:</label>
+            <input type="number" id="batch_size" name="batch_size" value="1" title="For 4090 with bfloat16, batch size 1 is recommended.">
+
+            <label for="epochs">Epochs:</label>
+            <input type="number" id="epochs" name="epochs" value="3">
+            
+            <label for="continue_from_checkpoint">Continue From:</label>
+            <select id="continue_from_checkpoint" name="continue_from_checkpoint">
+                <option value="">Start new training</option>
+            </select>
+        </form>
+        <div class="btn-group">
+            <button id="start-train-btn" class="btn-start" style="flex: 2;">Start Training</button>
+            <button id="stop-process-btn" class="btn-stop" style="flex: 2;">Stop Process</button>
+            <button class="btn-refresh" onclick="fetchCheckpoints()">Refresh Checkpoints</button>
+        </div>
+    </div>
+
+    <!-- Test Tab -->
+    <div id="Test" class="tab-content">
+        <h2>Test Model</h2>
+        <form id="test-form" class="form-grid">
+             <label for="test_checkpoint_path">Checkpoint:</label>
+            <select id="test_checkpoint_path" name="test_checkpoint_path">
+                <option value="">Select a checkpoint to test</option>
+            </select>
+        </form>
+         <div class="btn-group">
+            <button id="start-test-btn" class="btn-test" style="flex: 2;">Start Test</button>
+            <button class="btn-refresh" onclick="fetchCheckpoints()">Refresh Checkpoints</button>
+        </div>
+    </div>
+    
+    <h2>Logs</h2>
+    <div id="log-container">Welcome! Select a tab and start a process.</div>
+</div>
+
+<script>
+    const startTrainBtn = document.getElementById('start-train-btn');
+    const startTestBtn = document.getElementById('start-test-btn');
+    const stopBtn = document.getElementById('stop-process-btn');
+    const logContainer = document.getElementById('log-container');
+    const statusIndicator = document.getElementById('status-indicator');
+    
+    let eventSource = null;
+    let isProcessRunning = false;
+
+    function setUIState(running) {
+        isProcessRunning = running;
+        startTrainBtn.disabled = running;
+        startTestBtn.disabled = running;
+        stopBtn.disabled = !running;
+
+        if (running) {
+            statusIndicator.textContent = 'Running...';
+            statusIndicator.className = 'status-indicator status-running';
+        } else {
+            statusIndicator.textContent = 'Idle';
+            statusIndicator.className = 'status-indicator status-idle';
+        }
+    }
+
+    async function fetchCheckpoints() {
+        try {
+            const response = await fetch('/get_checkpoints');
+            const checkpoints = await response.json();
+            
+            const trainSelect = document.getElementById('continue_from_checkpoint');
+            const testSelect = document.getElementById('test_checkpoint_path');
+            
+            const currentTrainVal = trainSelect.value;
+            const currentTestVal = testSelect.value;
+
+            trainSelect.innerHTML = '<option value="">Start new training</option>';
+            testSelect.innerHTML = '<option value="">Select a checkpoint to test</option>';
+
+            checkpoints.forEach(path => {
+                trainSelect.innerHTML += `<option value="${path}">${path}</option>`;
+                testSelect.innerHTML += `<option value="${path}">${path}</option>`;
+            });
+
+            trainSelect.value = currentTrainVal;
+            testSelect.value = currentTestVal;
+
+        } catch (error) {
+            console.error('Error fetching checkpoints:', error);
+            logContainer.innerHTML += '\nError fetching checkpoints.';
+        }
+    }
+
+    function listenToLogs() {
+        if (eventSource) {
+            eventSource.close();
+        }
+        eventSource = new EventSource('/log_stream');
+        
+        eventSource.onopen = () => {
+             console.log("Connection to log stream opened.");
+             setUIState(true);
+        };
+
+        eventSource.onmessage = (event) => {
+            const message = event.data;
+            if (message === '---STREAM-END---') {
+                logContainer.innerHTML += "\n\n--- Process Finished ---";
+                eventSource.close();
+                setUIState(false);
+                fetchCheckpoints(); // Refresh checkpoints list after process finishes
+            } else {
+                logContainer.innerHTML += message + '\n';
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error("EventSource failed:", err);
+            logContainer.innerHTML += '\n\n--- Log stream connection lost ---';
+            eventSource.close();
+            setUIState(false);
+        };
+    }
+
+    startTrainBtn.addEventListener('click', async () => {
+        logContainer.innerHTML = 'Starting training process...\n';
+        setUIState(true);
+        const formData = new FormData(document.getElementById('train-form'));
+        try {
+            const response = await fetch('/start_train', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (response.ok) {
+                listenToLogs();
+            } else {
+                logContainer.innerHTML += `\nError: ${result.message}`;
+                setUIState(false);
+            }
+        } catch(error) {
+             logContainer.innerHTML += `\nFetch Error: ${error}`;
+             setUIState(false);
+        }
+    });
+
+    startTestBtn.addEventListener('click', async () => {
+        const testForm = document.getElementById('test-form');
+        if (!testForm.test_checkpoint_path.value) {
+            alert('Please select a checkpoint to test.');
+            return;
+        }
+        logContainer.innerHTML = 'Starting test process...\n';
+        setUIState(true);
+        const formData = new FormData(testForm);
+         try {
+            const response = await fetch('/start_test', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (response.ok) {
+                listenToLogs();
+            } else {
+                logContainer.innerHTML += `\nError: ${result.message}`;
+                setUIState(false);
+            }
+        } catch(error) {
+             logContainer.innerHTML += `\nFetch Error: ${error}`;
+             setUIState(false);
+        }
+    });
+
+    stopBtn.addEventListener('click', async () => {
+        logContainer.innerHTML += '\n\n--- Sending stop signal... ---';
+        const response = await fetch('/stop_process', { method: 'POST' });
+        const result = await response.json();
+        // The log stream will handle the final state change
+    });
+    
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Initial setup on page load
+    window.onload = () => {
+        fetchCheckpoints();
+        setUIState(false);
+    };
+
+</script>
+
+</body>
+</html>
