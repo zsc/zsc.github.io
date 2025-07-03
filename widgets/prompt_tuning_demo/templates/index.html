@@ -3,246 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLOT: Prompt Tuning Demo</title>
+    <title>SLOT Algorithm Demo</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        h1, h2 { color: #2c3e50; }
-        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
-        .tab-button { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-bottom: 2px solid transparent; }
-        .tab-button.active { color: #3498db; border-bottom-color: #3498db; font-weight: bold; }
+        :root {
+            --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #0d6efd;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --log-bg: #1e1e1e;
+            --log-text: #d4d4d4;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+        }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container { max-width: 960px; width: 100%; }
+        h1 { color: var(--primary-color); text-align: center; }
+        .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem; }
+        .tab-link {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-link.active { border-bottom-color: var(--primary-color); color: var(--primary-color); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .form-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 20px; align-items: center; }
-        label { font-weight: bold; }
-        input, select, button { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; width: 100%; box-sizing: border-box; }
-        button { cursor: pointer; color: #fff; border-color: transparent; }
-        .btn-start { background-color: #27ae60; }
-        .btn-stop { background-color: #c0392b; }
-        .btn-test { background-color: #2980b9; }
-        .btn-refresh { background-color: #7f8c8d; }
-        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
-        #log-container { margin-top: 20px; background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; height: 400px; overflow-y: scroll; white-space: pre-wrap; font-family: "Courier New", Courier, monospace; }
-        .status-indicator { margin-left: 15px; font-weight: bold; }
-        .status-running { color: #f39c12; }
-        .status-idle { color: #27ae60; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+        input[type="number"], select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            box-sizing: border-box;
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        button {
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .button-danger { background-color: var(--danger-color); }
+        .log-container {
+            background-color: var(--log-bg);
+            color: var(--log-text);
+            font-family: monospace;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            height: 400px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .status-bar {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            background-color: #e9ecef;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .result-box {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+            white-space: pre-wrap;
+        }
+        .result-box h3 { margin-top: 0; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 </head>
 <body>
+    <div class="container">
+        <h1>SLOT Algorithm Demo</h1>
+        <p style="text-align: center;">Test-time optimization of Qwen2.5-1.5B-Instruct on the GSM8K dataset.</p>
 
-<div class="container">
-    <h1>SLOT: Prompt Tuning Demo</h1>
-    <p>Train a soft prompt for Qwen2.5-1.5B-Instruct on a subset of GSM8K.</p>
-    <p>Current Status: <span id="status-indicator" class="status-idle">Idle</span></p>
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'train')">Batch Evaluation</button>
+            <button class="tab-link" onclick="openTab(event, 'test')">Interactive Test</button>
+        </div>
 
-    <div class="tabs">
-        <button class="tab-button active" onclick="openTab(event, 'Train')">Train</button>
-        <button class="tab-button" onclick="openTab(event, 'Test')">Test</button>
-    </div>
+        <!-- Batch Evaluation Tab -->
+        <div id="train" class="tab-content active">
+            <div class="card">
+                <h3>Configuration</h3>
+                <div class="form-group">
+                    <label for="t-steps">Optimization Steps (T)</label>
+                    <input type="number" id="t-steps" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="lr">Learning Rate (η)</label>
+                    <input type="number" id="lr" step="0.001" value="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="num-samples">Number of GSM8K Test Samples</label>
+                    <input type="number" id="num-samples" value="100">
+                </div>
+                <div class="form-group">
+                    <label for="resume-dir">Resume from Previous Run (Optional)</label>
+                    <select id="resume-dir"><option value="">Start a new run</option></select>
+                </div>
+                <button id="start-eval-btn">Start Evaluation</button>
+                <button id="stop-eval-btn" class="button-danger" disabled>Stop Evaluation</button>
+            </div>
+            <div class="status-bar">
+                Status: <span id="eval-status">Idle</span> | 
+                Progress: <span id="eval-progress">N/A</span> | 
+                Accuracy: <span id="eval-accuracy">N/A</span>
+            </div>
+            <div class="card">
+                <h3>Logs</h3>
+                <p>To view detailed metrics, run: <code>tensorboard --logdir=experiments</code></p>
+                <div id="eval-log" class="log-container">Welcome! Configure your evaluation run and click Start.</div>
+            </div>
+        </div>
 
-    <!-- Train Tab -->
-    <div id="Train" class="tab-content active">
-        <h2>Training Configuration</h2>
-        <form id="train-form" class="form-grid">
-            <label for="num_prompt_tokens">Prompt Tokens:</label>
-            <input type="number" id="num_prompt_tokens" name="num_prompt_tokens" value="20">
-            
-            <label for="learning_rate">Learning Rate:</label>
-            <input type="number" id="learning_rate" name="learning_rate" value="0.001" step="0.0001">
-
-            <label for="batch_size">Batch Size:</label>
-            <input type="number" id="batch_size" name="batch_size" value="1" title="For 4090 with bfloat16, batch size 1 is recommended.">
-
-            <label for="epochs">Epochs:</label>
-            <input type="number" id="epochs" name="epochs" value="3">
-            
-            <label for="continue_from_checkpoint">Continue From:</label>
-            <select id="continue_from_checkpoint" name="continue_from_checkpoint">
-                <option value="">Start new training</option>
-            </select>
-        </form>
-        <div class="btn-group">
-            <button id="start-train-btn" class="btn-start" style="flex: 2;">Start Training</button>
-            <button id="stop-process-btn" class="btn-stop" style="flex: 2;">Stop Process</button>
-            <button class="btn-refresh" onclick="fetchCheckpoints()">Refresh Checkpoints</button>
+        <!-- Interactive Test Tab -->
+        <div id="test" class="tab-content">
+            <div class="card">
+                <h3>Test a Single Prompt</h3>
+                <div class="form-group">
+                    <label for="test-exp-select">Use Hyperparameters from Run</label>
+                    <select id="test-exp-select"></select>
+                </div>
+                <div class="form-group">
+                    <label for="user-prompt">Your Prompt</label>
+                    <textarea id="user-prompt" placeholder="e.g., A train travels at 60 mph for 2 hours and then at 40 mph for 3 hours. What is the total distance traveled?"></textarea>
+                </div>
+                <button id="run-test-btn">Run SLOT Test</button>
+            </div>
+            <div id="test-log-card" class="card" style="display:none;">
+                <h3>Test Log</h3>
+                <div id="test-log" class="log-container" style="height: 100px;"></div>
+            </div>
+            <div id="test-results" class="results-grid" style="display:none;">
+                <div class="result-box">
+                    <h3>Original Model Response</h3>
+                    <div id="base-response"></div>
+                </div>
+                <div class="result-box">
+                    <h3>SLOT Optimized Response</h3>
+                    <div id="slot-response"></div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Test Tab -->
-    <div id="Test" class="tab-content">
-        <h2>Test Model</h2>
-        <form id="test-form" class="form-grid">
-             <label for="test_checkpoint_path">Checkpoint:</label>
-            <select id="test_checkpoint_path" name="test_checkpoint_path">
-                <option value="">Select a checkpoint to test</option>
-            </select>
-        </form>
-         <div class="btn-group">
-            <button id="start-test-btn" class="btn-test" style="flex: 2;">Start Test</button>
-            <button class="btn-refresh" onclick="fetchCheckpoints()">Refresh Checkpoints</button>
-        </div>
-    </div>
-    
-    <h2>Logs</h2>
-    <div id="log-container">Welcome! Select a tab and start a process.</div>
-</div>
 
 <script>
-    const startTrainBtn = document.getElementById('start-train-btn');
-    const startTestBtn = document.getElementById('start-test-btn');
-    const stopBtn = document.getElementById('stop-process-btn');
-    const logContainer = document.getElementById('log-container');
-    const statusIndicator = document.getElementById('status-indicator');
-    
-    let eventSource = null;
-    let isProcessRunning = false;
+    const socket = io();
 
-    function setUIState(running) {
-        isProcessRunning = running;
-        startTrainBtn.disabled = running;
-        startTestBtn.disabled = running;
-        stopBtn.disabled = !running;
+    // UI Elements
+    const startBtn = document.getElementById('start-eval-btn');
+    const stopBtn = document.getElementById('stop-eval-btn');
+    const runTestBtn = document.getElementById('run-test-btn');
+    const evalLog = document.getElementById('eval-log');
+    const testLog = document.getElementById('test-log');
+    const statusEl = document.getElementById('eval-status');
+    const progressEl = document.getElementById('eval-progress');
+    const accuracyEl = document.getElementById('eval-accuracy');
+    const resumeSelect = document.getElementById('resume-dir');
+    const testExpSelect = document.getElementById('test-exp-select');
 
-        if (running) {
-            statusIndicator.textContent = 'Running...';
-            statusIndicator.className = 'status-indicator status-running';
-        } else {
-            statusIndicator.textContent = 'Idle';
-            statusIndicator.className = 'status-indicator status-idle';
-        }
+    // --- Tab Logic ---
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
     }
 
-    async function fetchCheckpoints() {
+    // --- Common Functions ---
+    function appendLog(logElement, message) {
+        logElement.innerHTML += message + '\n';
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    async function fetchExperiments() {
         try {
-            const response = await fetch('/get_checkpoints');
-            const checkpoints = await response.json();
-            
-            const trainSelect = document.getElementById('continue_from_checkpoint');
-            const testSelect = document.getElementById('test_checkpoint_path');
-            
-            const currentTrainVal = trainSelect.value;
-            const currentTestVal = testSelect.value;
-
-            trainSelect.innerHTML = '<option value="">Start new training</option>';
-            testSelect.innerHTML = '<option value="">Select a checkpoint to test</option>';
-
-            checkpoints.forEach(path => {
-                trainSelect.innerHTML += `<option value="${path}">${path}</option>`;
-                testSelect.innerHTML += `<option value="${path}">${path}</option>`;
+            const response = await fetch('/get_experiments');
+            const dirs = await response.json();
+            resumeSelect.innerHTML = '<option value="">Start a new run</option>';
+            testExpSelect.innerHTML = '';
+            dirs.forEach(dir => {
+                resumeSelect.innerHTML += `<option value="${dir}">${dir}</option>`;
+                testExpSelect.innerHTML += `<option value="${dir}">${dir}</option>`;
             });
-
-            trainSelect.value = currentTrainVal;
-            testSelect.value = currentTestVal;
-
         } catch (error) {
-            console.error('Error fetching checkpoints:', error);
-            logContainer.innerHTML += '\nError fetching checkpoints.';
+            console.error('Failed to fetch experiments:', error);
         }
     }
 
-    function listenToLogs() {
-        if (eventSource) {
-            eventSource.close();
-        }
-        eventSource = new EventSource('/log_stream');
-        
-        eventSource.onopen = () => {
-             console.log("Connection to log stream opened.");
-             setUIState(true);
+    // --- Batch Evaluation Logic ---
+    startBtn.addEventListener('click', () => {
+        const config = {
+            T: document.getElementById('t-steps').value,
+            lr: document.getElementById('lr').value,
+            num_samples: document.getElementById('num-samples').value,
+            resume_dir: document.getElementById('resume-dir').value
         };
-
-        eventSource.onmessage = (event) => {
-            const message = event.data;
-            if (message === '---STREAM-END---') {
-                logContainer.innerHTML += "\n\n--- Process Finished ---";
-                eventSource.close();
-                setUIState(false);
-                fetchCheckpoints(); // Refresh checkpoints list after process finishes
-            } else {
-                logContainer.innerHTML += message + '\n';
-                logContainer.scrollTop = logContainer.scrollHeight;
-            }
-        };
-
-        eventSource.onerror = (err) => {
-            console.error("EventSource failed:", err);
-            logContainer.innerHTML += '\n\n--- Log stream connection lost ---';
-            eventSource.close();
-            setUIState(false);
-        };
-    }
-
-    startTrainBtn.addEventListener('click', async () => {
-        logContainer.innerHTML = 'Starting training process...\n';
-        setUIState(true);
-        const formData = new FormData(document.getElementById('train-form'));
-        try {
-            const response = await fetch('/start_train', { method: 'POST', body: formData });
-            const result = await response.json();
-            if (response.ok) {
-                listenToLogs();
-            } else {
-                logContainer.innerHTML += `\nError: ${result.message}`;
-                setUIState(false);
-            }
-        } catch(error) {
-             logContainer.innerHTML += `\nFetch Error: ${error}`;
-             setUIState(false);
-        }
+        evalLog.innerHTML = '';
+        socket.emit('start_eval', config);
     });
 
-    startTestBtn.addEventListener('click', async () => {
-        const testForm = document.getElementById('test-form');
-        if (!testForm.test_checkpoint_path.value) {
-            alert('Please select a checkpoint to test.');
+    stopBtn.addEventListener('click', () => {
+        socket.emit('stop_eval');
+        statusEl.textContent = 'Stopping...';
+    });
+
+    socket.on('eval_started', () => {
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        statusEl.textContent = 'Running...';
+        progressEl.textContent = '0/100';
+        accuracyEl.textContent = '0.00%';
+    });
+
+    socket.on('eval_finished', () => {
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        statusEl.textContent = 'Finished';
+        fetchExperiments(); // Refresh list after run
+    });
+
+    socket.on('log_message', (msg) => appendLog(evalLog, msg.data));
+    socket.on('status_update', (data) => {
+        progressEl.textContent = data.progress;
+        accuracyEl.textContent = data.accuracy;
+    });
+
+    // --- Interactive Test Logic ---
+    runTestBtn.addEventListener('click', () => {
+        const selectedExp = testExpSelect.value;
+        if (!selectedExp) {
+            alert('Please select an experiment to use its hyperparameters.');
             return;
         }
-        logContainer.innerHTML = 'Starting test process...\n';
-        setUIState(true);
-        const formData = new FormData(testForm);
-         try {
-            const response = await fetch('/start_test', { method: 'POST', body: formData });
-            const result = await response.json();
-            if (response.ok) {
-                listenToLogs();
-            } else {
-                logContainer.innerHTML += `\nError: ${result.message}`;
-                setUIState(false);
-            }
-        } catch(error) {
-             logContainer.innerHTML += `\nFetch Error: ${error}`;
-             setUIState(false);
+        const prompt = document.getElementById('user-prompt').value;
+        if (!prompt) {
+            alert('Please enter a prompt.');
+            return;
         }
+
+        // Extract T and lr from experiment name, e.g., "slot_eval_T10_lr0.01_..."
+        const tMatch = selectedExp.match(/T(\d+)/);
+        const lrMatch = selectedExp.match(/lr([\d\.]+)/);
+        if (!tMatch || !lrMatch) {
+            alert('Could not parse hyperparameters from experiment name. Format should be: ..._T<steps>_lr<rate>_...');
+            return;
+        }
+
+        const config = {
+            prompt: prompt,
+            T: tMatch[1],
+            lr: lrMatch[1]
+        };
+
+        runTestBtn.disabled = true;
+        document.getElementById('test-log-card').style.display = 'block';
+        document.getElementById('test-results').style.display = 'none';
+        testLog.innerHTML = 'Starting test...\n';
+        socket.emit('run_test', config);
     });
 
-    stopBtn.addEventListener('click', async () => {
-        logContainer.innerHTML += '\n\n--- Sending stop signal... ---';
-        const response = await fetch('/stop_process', { method: 'POST' });
-        const result = await response.json();
-        // The log stream will handle the final state change
+    socket.on('test_log', (msg) => appendLog(testLog, msg.data));
+
+    socket.on('test_result', (data) => {
+        document.getElementById('test-results').style.display = 'grid';
+        document.getElementById('base-response').textContent = data.base;
+        document.getElementById('slot-response').textContent = data.slot;
     });
     
-    function openTab(evt, tabName) {
-        let i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tab-button");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-    }
+    socket.on('test_finished', () => {
+        runTestBtn.disabled = false;
+    });
 
-    // Initial setup on page load
+
+    // --- Initialization ---
     window.onload = () => {
-        fetchCheckpoints();
-        setUIState(false);
+        fetchExperiments();
     };
 
 </script>
-
 </body>
 </html>
