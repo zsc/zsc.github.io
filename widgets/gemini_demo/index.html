@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gemini API on GitHub Pages (Secure)</title>
+</head>
+<body>
+  <h1>Gemini API Demo (Secure Method)</h1>
+  <input type="text" id="prompt-input" placeholder="输入你的问题...">
+  <button onclick="callProxy()">提问</button>
+  <pre id="result-output"></pre>
+
+  <script>
+    // 这是你的 Vercel 代理 API 地址
+    const PROXY_API_URL = "https://gemini-proxy-n3vbyme6v-marianne-duttons-projects.vercel.app/api/gemini"; // <--- 替换成你自己的 Vercel URL
+
+    async function callProxy() {
+      const promptInput = document.getElementById('prompt-input');
+      const resultOutput = document.getElementById('result-output');
+      const prompt = promptInput.value;
+
+      if (!prompt) {
+        resultOutput.textContent = "请输入问题！";
+        return;
+      }
+
+      resultOutput.textContent = "正在思考中...";
+
+      try {
+        const response = await fetch(PROXY_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: prompt }), // 将 prompt 作为 JSON 发送
+        });
+
+        if (!response.ok) {
+            throw new Error(`API 请求失败，状态码: ${response.status}`);
+        }
+
+        const data = await response.json();
+        resultOutput.textContent = data.text; // 从代理返回的 JSON 中获取结果
+
+      } catch (error) {
+        console.error("Error calling proxy API:", error);
+        resultOutput.textContent = "调用代理 API 时出错，请查看控制台。";
+      }
+    }
+  </script>
+</body>
+</html>
