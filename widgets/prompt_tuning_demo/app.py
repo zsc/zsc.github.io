@@ -118,7 +118,7 @@ def start_test():
     try:
         args = argparse.Namespace(
             checkpoint_path=checkpoint_path,
-            num_test_samples=200,
+            num_test_samples=100,
             max_new_tokens=256
         )
         
