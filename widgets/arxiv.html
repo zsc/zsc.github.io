@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arXiv 论文摘要生成器</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --border-color: #dce1e6;
+            --text-color: #333;
+            --error-color: #d9534f;
+            --success-color: #5cb85c;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .controls input {
+            flex-grow: 1;
+            padding: 10px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .controls input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .controls button:disabled {
+            background-color: #a0c7f1;
+            cursor: not-allowed;
+        }
+        .prompt-config {
+            margin-bottom: 20px;
+        }
+        .prompt-config summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 5px 0;
+        }
+        .prompt-config textarea {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            font-family: var(--font-family);
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .status-bar {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e9f3ff;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            min-height: 1.2em;
+        }
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .tab-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            margin-bottom: -2px;
+            background: #f0f0f0;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+        .tab-button.active {
+            background: #fff;
+            border-color: var(--border-color);
+            border-bottom-color: #fff;
+            font-weight: bold;
+        }
+        .tab-button.unread::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--error-color);
+            border-radius: 50%;
+        }
+        .tab-button.error {
+            color: var(--error-color);
+        }
+        .tab-content {
+            display: none;
+            flex-grow: 1;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            color: var(--error-color);
+            background: #fdecea;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        /* Markdown-rendered content styling */
+        .markdown-body {
+            line-height: 1.6;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: .3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+        }
+        .markdown-body ul {
+            padding-left: 2em;
+        }
+        .markdown-body code {
+            padding: .2em .4em;
+            margin: 0;
+            font-size: 85%;
+            background-color: rgba(27,31,35,.05);
+            border-radius: 3px;
+        }
+        .markdown-body pre {
+            padding: 16px;
+            overflow: auto;
+            font-size: 85%;
+            line-height: 1.45;
+            background-color: #f6f8fa;
+            border-radius: 3px;
+        }
+        .markdown-body pre code {
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>arXiv 论文摘要生成器 (via Gemini)</h1>
+        <div class="controls">
+            <input type="password" id="apiKeyInput" placeholder="在此输入您的 GEMINI_API_KEY">
+            <input type="text" id="arxivInput" placeholder="在此输入 arXiv ID 或 URL (例如: 2305.10601)">
+            <button id="summarizeBtn">生成摘要</button>
+        </div>
+
+        <div class="prompt-config">
+            <details>
+                <summary>自定义 Prompt (点击展开/折叠)</summary>
+                <textarea id="promptInput" rows="4"></textarea>
+            </details>
+        </div>
+
+        <div id="statusBar" class="status-bar">准备就绪。</div>
+
+        <div class="tabs-container">
+            <div id="tabsNav" class="tabs-nav"></div>
+            <div id="tabsContent" class="tabs-content-wrapper"></div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generai";
+
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const arxivInput = document.getElementById('arxivInput');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const statusBar = document.getElementById('statusBar');
+        const tabsNav = document.getElementById('tabsNav');
+        const tabsContent = document.getElementById('tabsContent');
+        const promptInput = document.getElementById('promptInput');
+
+        // --- 状态管理 ---
+        let papers = {}; // { id: { status, summary, error, isUnread } }
+        let unreadCount = 0;
+        let activeTabId = null;
+        let genAI = null;
+
+        // --- 初始化设置 ---
+        function initialize() {
+            // 设置默认 Prompt
+            const defaultPrompt = "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue. The response is formatted as: <戏剧>the play goes here</play>\\n<戏剧>\\n<回答>answer here </回答>.User: 必须用中文回答，如有公式不要错过（公式用 latex），深入并长篇讨论上面论文。语气要专业。以“<戏剧>”开头。";
+            promptInput.value = defaultPrompt;
+
+            // 从 URL 参数加载 API Key
+            const urlParams = new URLSearchParams(window.location.search);
+            const apiKeyFromUrl = urlParams.get('apiKey');
+            if (apiKeyFromUrl) {
+                apiKeyInput.value = apiKeyFromUrl;
+            }
+
+            render();
+        }
+
+        // --- Favicon 更新 ---
+        const faviconLink = document.querySelector("link[rel~='icon']");
+        const originalFavicon = faviconLink.href;
+
+        function updateFavicon() {
+            if (unreadCount === 0) {
+                faviconLink.href = originalFavicon;
+                document.title = "arXiv 论文摘要生成器";
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+
+            const baseIcon = new Image();
+            baseIcon.onload = () => {
+                ctx.drawImage(baseIcon, 0, 0, 32, 32);
+                drawNotification();
+            };
+            baseIcon.onerror = () => {
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0,0,32,32);
+                drawNotification();
+            };
+            baseIcon.src = originalFavicon;
+
+            const drawNotification = () => {
+                ctx.beginPath();
+                ctx.arc(23, 9, 9, 0, 2 * Math.PI);
+                ctx.fillStyle = 'var(--error-color)';
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px ' + getComputedStyle(document.body).fontFamily;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const text = unreadCount > 9 ? '9+' : unreadCount.toString();
+                ctx.fillText(text, 23, 9);
+                faviconLink.href = canvas.toDataURL('image/png');
+                document.title = `(${unreadCount}) arXiv 论文摘要生成器`;
+            };
+        }
+
+        // --- UI 渲染 ---
+        function render() {
+            tabsNav.innerHTML = '';
+            tabsContent.innerHTML = '';
+
+            if (Object.keys(papers).length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'tab-content active';
+                emptyState.textContent = '暂无摘要。请输入 arXiv ID 开始。';
+                tabsContent.appendChild(emptyState);
+                return;
+            }
+            
+            Object.keys(papers).forEach(id => {
+                const paper = papers[id];
+                const button = document.createElement('button');
+                button.className = 'tab-button';
+                button.textContent = id;
+                button.dataset.id = id;
+                if (id === activeTabId) button.classList.add('active');
+                if (paper.isUnread) button.classList.add('unread');
+                if (paper.status === 'error') button.classList.add('error');
+                button.onclick = () => switchTab(id);
+                tabsNav.appendChild(button);
+
+                const content = document.createElement('div');
+                content.className = 'tab-content';
+                content.id = `content-${id}`;
+                if (id === activeTabId) content.classList.add('active');
+
+                switch (paper.status) {
+                    case 'loading':
+                        content.innerHTML = `<div class="loading-spinner"></div><p style="text-align:center;">正在处理中...</p>`;
+                        break;
+                    case 'success':
+                        const markdownBody = document.createElement('div');
+                        markdownBody.className = 'markdown-body';
+                        markdownBody.innerHTML = marked.parse(paper.summary);
+                        content.appendChild(markdownBody);
+                        break;
+                    case 'error':
+                        content.innerHTML = `<div class="error-message"><strong>发生错误:</strong><br><pre>${paper.error}</pre></div>`;
+                        break;
+                }
+                tabsContent.appendChild(content);
+            });
+        }
+        
+        function switchTab(id) {
+            activeTabId = id;
+            const paper = papers[id];
+            if (paper && paper.isUnread) {
+                paper.isUnread = false;
+                unreadCount--;
+                updateFavicon();
+            }
+            render();
+        }
+
+        // --- 核心逻辑 ---
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i < retries - 1) {
+                        statusBar.textContent = `请求失败，正在重试... (${i + 1}/${retries})`;
+                        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        function normalizeArxivId(input) {
+            const trimmed = input.trim();
+            const urlMatch = trimmed.match(/arxiv\.org\/(?:abs|pdf)\/(\d{4}\.\d{4,5}(?:v\d+)?)/);
+            if (urlMatch) return urlMatch[1];
+            
+            const idMatch = trimmed.match(/^(\d{4}\.\d{4,5}(?:v\d+)?)$/);
+            if (idMatch) return idMatch[1];
+            
+            return null;
+        }
+        
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+
+        summarizeBtn.onclick = async () => {
+            const apiKey = apiKeyInput.value.trim();
+            const arxivValue = arxivInput.value.trim();
+            const customPrompt = promptInput.value.trim();
+
+            if (!apiKey) {
+                statusBar.textContent = '错误：请输入您的 Gemini API Key。';
+                return;
+            }
+             if (!customPrompt) {
+                statusBar.textContent = '错误：自定义 Prompt 不能为空。';
+                return;
+            }
+            
+            if (!genAI) {
+                try {
+                    genAI = new GoogleGenerativeAI(apiKey);
+                } catch (e) {
+                    statusBar.textContent = `API Key 初始化失败: ${e.message}`;
+                    return;
+                }
+            }
+
+            const id = normalizeArxivId(arxivValue);
+            if (!id) {
+                statusBar.textContent = '错误：无法识别的 arXiv ID 或 URL 格式。';
+                return;
+            }
+            
+            if (papers[id] && papers[id].status !== 'error') {
+                statusBar.textContent = `摘要 "${id}" 已存在，切换至该 Tab。`;
+                switchTab(id);
+                return;
+            }
+
+            summarizeBtn.disabled = true;
+            arxivInput.value = '';
+            activeTabId = id;
+            papers[id] = { status: 'loading', summary: '', error: null, isUnread: true };
+            unreadCount++;
+            updateFavicon();
+            render();
+
+            try {
+                const proxyUrl = 'https://corsproxy.io/?';
+                const pdfUrl = `${proxyUrl}https://arxiv.org/pdf/${id}.pdf`;
+                statusBar.textContent = `[${id}] 正在从 arXiv 下载 PDF...`;
+                
+                const pdfResp = await fetchWithRetry(pdfUrl);
+                const pdfArrayBuffer = await pdfResp.arrayBuffer();
+
+                statusBar.textContent = `[${id}] PDF 下载完成，正在进行 Base64 编码...`;
+                const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
+                
+                statusBar.textContent = `[${id}] 正在发送至 Gemini API 进行摘要...`;
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+                
+                const result = await model.generateContent([
+                    customPrompt,
+                    {
+                        inlineData: {
+                            mimeType: 'application/pdf',
+                            data: pdfBase64
+                        }
+                    }
+                ]);
+
+                const response = result.response;
+                const summaryText = response.text();
+
+                papers[id].status = 'success';
+                papers[id].summary = summaryText;
+                statusBar.textContent = `[${id}] 摘要生成成功！`;
+
+            } catch (e) {
+                console.error(e);
+                papers[id].status = 'error';
+                papers[id].error = e.message;
+                statusBar.textContent = `[${id}] 处理失败: ${e.message}`;
+            } finally {
+                summarizeBtn.disabled = false;
+                render();
+            }
+        };
+        
+        // 启动应用
+        initialize();
+
+    </script>
+</body>
+</html>
