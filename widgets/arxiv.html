@@ -403,7 +403,7 @@
 
         function normalizeArxivId(input) {
             const trimmed = input.trim();
-            const urlMatch = trimmed.match(/arxiv\.org\/(?:abs|pdf)\/(\d{4}\.\d{4,5}(?:v\d+)?)/);
+            const urlMatch = trimmed.match(/arxiv\.org\/(?:abs|pdf|html)\/(\d{4}\.\d{4,5}(?:v\d+)?)/);
             if (urlMatch) return urlMatch[1];
             
             const idMatch = trimmed.match(/^(\d{4}\.\d{4,5}(?:v\d+)?)$/);
@@ -472,11 +472,12 @@
                 
                 const pdfResp = await fetchWithRetry(pdfUrl);
                 const pdfArrayBuffer = await pdfResp.arrayBuffer();
+                const pdfSize = pdfArrayBuffer.byteLength;
 
                 statusBar.textContent = `[${id}] PDF 下载完成，正在进行 Base64 编码...`;
                 const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
                 
-                statusBar.textContent = `[${id}] 正在发送至 Gemini API 进行摘要...`;
+                statusBar.textContent = `[${id}] PDF（${pdfSize}）正在发送至 Gemini API 进行摘要...`;
                 const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
                 
                 const result = await model.generateContent([
