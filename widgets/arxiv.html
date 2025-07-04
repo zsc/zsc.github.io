@@ -135,6 +135,7 @@
             background: #f0f0f0;
             border-radius: 5px 5px 0 0;
             position: relative;
+            padding-right: 28px; /* 为关闭按钮留出空间 */
         }
         .tab-button.active {
             background: #fff;
@@ -151,6 +152,23 @@
             height: 8px;
             background-color: var(--error-color);
             border-radius: 50%;
+        }
+        .close-tab-btn {
+            position: absolute;
+            top: 50%;
+            right: 6px;
+            transform: translateY(-50%);
+            font-size: 20px;
+            line-height: 1;
+            color: #aaa;
+            display: none; /* 默认隐藏 */
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .tab-button:hover .close-tab-btn {
+            display: inline-block; /* 悬停时显示 */
+            color: #333;
         }
         .tab-button.error {
             color: var(--error-color);
@@ -378,8 +396,14 @@
                 if (paper.isUnread) button.classList.add('unread');
                 if (paper.status === 'error') button.classList.add('error');
                 button.onclick = () => switchTab(id);
-                tabsNav.appendChild(button);
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'close-tab-btn';
+                closeBtn.innerHTML = '×';
+                closeBtn.title = '关闭标签页';
+                closeBtn.onclick = (event) => closeTab(event, id);
+                button.appendChild(closeBtn);
 
+                tabsNav.appendChild(button);
                 const content = document.createElement('div');
                 content.className = 'tab-content';
                 content.id = `content-${id}`;
@@ -417,6 +441,33 @@
                 paper.isUnread = false;
                 unreadCount--;
                 updateFavicon();
+            }
+            render();
+        }
+
+        function closeTab(event, idToClose) {
+            event.stopPropagation(); // 阻止事件冒泡以防触发 switchTab
+
+            if (!papers[idToClose]) return;
+
+            if (papers[idToClose].isUnread) {
+                unreadCount--;
+                updateFavicon();
+            }
+            
+            const allIds = Object.keys(papers);
+            const closedIndex = allIds.indexOf(idToClose);
+
+            delete papers[idToClose];
+            
+            if (activeTabId === idToClose) {
+                const remainingIds = Object.keys(papers);
+                if (remainingIds.length === 0) {
+                    activeTabId = null;
+                } else {
+                    const newIndex = Math.min(closedIndex, remainingIds.length - 1);
+                    activeTabId = remainingIds[newIndex];
+                }
             }
             render();
         }
