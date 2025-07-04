@@ -25,6 +25,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            box-sizing: border-box;
         }
         h1 {
             text-align: center;
@@ -44,10 +45,11 @@
         }
         .controls {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 15px;
+            align-items: center;
         }
-        .controls input {
+        .controls input[type="text"], .controls input[type="password"] {
             flex-grow: 1;
             padding: 10px 12px;
             border-radius: 5px;
@@ -59,6 +61,14 @@
             outline: none;
             border-color: var(--primary-color);
         }
+        .controls select {
+            padding: 10px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            background-color: #fff;
+            cursor: pointer;
+        }
         .controls button {
             padding: 10px 20px;
             font-size: 16px;
@@ -69,6 +79,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            white-space: nowrap;
         }
         .controls button:disabled {
             background-color: #a0c7f1;
@@ -157,6 +168,23 @@
         .tab-content.active {
             display: block;
         }
+        .download-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #e9f3ff;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .download-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
@@ -219,6 +247,10 @@
         <div class="controls">
             <input type="password" id="apiKeyInput" placeholder="在此输入您的 GEMINI_API_KEY">
             <input type="text" id="arxivInput" placeholder="在此输入 arXiv ID 或 URL (例如: 2305.10601)">
+            <select id="modelSelect">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            </select>
             <button id="summarizeBtn">生成摘要</button>
         </div>
 
@@ -255,6 +287,7 @@
         const tabsNav = document.getElementById('tabsNav');
         const tabsContent = document.getElementById('tabsContent');
         const promptInput = document.getElementById('promptInput');
+        const modelSelect = document.getElementById('modelSelect');
 
         // --- 状态管理 ---
         let papers = {}; // { id: { status, summary, error, isUnread } }
@@ -357,6 +390,13 @@
                         content.innerHTML = `<div class="loading-spinner"></div><p style="text-align:center;">正在处理中...</p>`;
                         break;
                     case 'success':
+                        // Create and add download button
+                        const downloadBtn = document.createElement('button');
+                        downloadBtn.className = 'download-btn';
+                        downloadBtn.textContent = '下载 Markdown';
+                        downloadBtn.onclick = () => downloadMarkdown(id);
+                        content.appendChild(downloadBtn);
+
                         const markdownBody = document.createElement('div');
                         markdownBody.className = 'markdown-body';
                         markdownBody.innerHTML = marked.parse(paper.summary);
@@ -382,6 +422,30 @@
         }
 
         // --- 核心逻辑 ---
+        function downloadMarkdown(id) {
+            const paper = papers[id];
+            if (!paper || paper.status !== 'success') return;
+
+            const arxivUrl = `https://arxiv.org/abs/${id}`;
+            const processedSummary = paper.summary
+              .replace(/\$/g, '$$')        // 将$替换为$$
+              .replace(/\$\$\$\$/g, '$$')  // 将$$$$替换为$$
+              .replace(/\$\$/g, '$$\n'); // 在$$后添加换行
+
+            const fileContent = `${arxivUrl}\n\n---\n\n${processedSummary}\n\n（用[这里](https://zhuanlan.zhihu.com/p/1906706224516424563)方法 Gemini 2.5 生成，格式有修改）`;
+
+            const blob = new Blob([fileContent], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${id}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -426,6 +490,7 @@
             const apiKey = apiKeyInput.value.trim();
             const arxivValue = arxivInput.value.trim();
             const customPrompt = promptInput.value.trim();
+            const selectedModel = modelSelect.value;
 
             if (!apiKey) {
                 statusBar.textContent = '错误：请输入您的 Gemini API Key。';
@@ -472,13 +537,13 @@
                 
                 const pdfResp = await fetchWithRetry(pdfUrl);
                 const pdfArrayBuffer = await pdfResp.arrayBuffer();
-                const pdfSize = pdfArrayBuffer.byteLength;
 
                 statusBar.textContent = `[${id}] PDF 下载完成，正在进行 Base64 编码...`;
+                const pdfSize = (pdfArrayBuffer.byteLength / 1024 / 1024).toFixed(2); // in MB
                 const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
                 
-                statusBar.textContent = `[${id}] PDF（${pdfSize}）正在发送至 Gemini API 进行摘要...`;
-                const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+                statusBar.textContent = `[${id}] PDF（${pdfSize} MB）正在发送至 Gemini API (${selectedModel}) 进行摘要...`;
+                const model = genAI.getGenerativeModel({ model: selectedModel });
                 
                 const result = await model.generateContent([
                     customPrompt,
