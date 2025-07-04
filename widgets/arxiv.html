@@ -516,19 +516,23 @@
                 return;
             }
             
-            if (papers[id] && papers[id].status !== 'error') {
-                statusBar.textContent = `摘要 "${id}" 已存在，切换至该 Tab。`;
+            if (papers[id] && papers[id].status === 'loading') {
+                statusBar.textContent = `摘要 "${id}" 已经在处理中，请稍候。`;
                 switchTab(id);
                 return;
             }
 
-            summarizeBtn.disabled = true;
+            // Do not disable the button, allowing concurrent submissions.
             arxivInput.value = '';
             activeTabId = id;
+
+            // Only increment unread count if the tab is new or was already read.
+            if (!papers[id] || !papers[id].isUnread) {
+                unreadCount++;
+                updateFavicon();
+            }
             papers[id] = { status: 'loading', summary: '', error: null, isUnread: true };
-            unreadCount++;
-            updateFavicon();
-            render();
+            render(); // Render immediately to show the loading state.
 
             try {
                 const proxyUrl = 'https://corsproxy.io/?';
@@ -568,7 +572,7 @@
                 papers[id].error = e.message;
                 statusBar.textContent = `[${id}] 处理失败: ${e.message}`;
             } finally {
-                summarizeBtn.disabled = false;
+                // The button is no longer disabled globally. Just render the final state.
                 render();
             }
         };
