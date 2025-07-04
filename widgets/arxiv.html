@@ -298,7 +298,7 @@
         // --- 初始化设置 ---
         function initialize() {
             // 设置默认 Prompt
-            const defaultPrompt = "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue. The response is formatted as: <戏剧>the play goes here</play>\\n<戏剧>\\n<回答>answer here </回答>.User: 必须用中文回答，如有公式不要错过（公式用 latex），深入并长篇讨论上面论文。语气要专业。以“<戏剧>”开头。";
+            const defaultPrompt = "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue. The response is formatted as: <戏剧>the play goes here</戏剧>\\n<回答>answer here.\\nUser: 必须用中文回答，如有公式不要错过（公式用 latex），深入并长篇讨论上面论文。语气要专业。";
             promptInput.value = defaultPrompt;
 
             // 从 URL 参数加载 API Key
