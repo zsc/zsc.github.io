@@ -442,8 +442,14 @@
                         const markdownBody = document.createElement('div');
                         markdownBody.className = 'markdown-body';
                         
-                        // 1. 先用 Marked.js 渲染 Markdown
-                        markdownBody.innerHTML = marked.parse(paper.summary);
+                        // [FIX START] 先对 LaTeX 中的下划线进行转义，防止被 Markdown 误认为斜体
+                        // 正则表达式会匹配所有 $$...$$ 和 $...$ 的内容块
+                        const processedSummary = paper.summary.replace(/(\$\$[\s\S]+?\$\$|\$[^\$]+?\$)/g, (match) => {
+                            // 在匹配到的公式块内部，将所有 _ 替换为 \_
+                            return match.replace(/_/g, '\\_');
+                        });
+                        // 1. 用处理过的文本进行 Markdown 解析
+                        markdownBody.innerHTML = marked.parse(processedSummary);
                         content.appendChild(markdownBody);
 
                         // 2. 【核心改动】然后用 KaTeX 渲染 HTML 中的数学公式
