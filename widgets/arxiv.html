@@ -517,9 +517,8 @@
 
             const arxivUrl = `https://arxiv.org/abs/${id}`;
             const processedSummary = paper.summary
-              .replace(/\$/g, '$$')        // 将$替换为$$
-              .replace(/\$\$\$\$/g, '$$')  // 将$$$$替换为$$
-              .replace(/\$\$/g, '$$\n') // 在$$后添加换行
+              .replace(/\$/g, '$$$$')        // 将$替换为$$
+              .replace(/\$\$\$\$/g, '$$$$')  // 将$$$$替换为$$
               .replace(/\*\*\n\*/g, "**\n\n*"); // 避免列表渲染错
 
             const fileContent = `${arxivUrl}\n\n---\n\n${processedSummary}\n\n（用[这里](https://zhuanlan.zhihu.com/p/1906706224516424563)方法 Gemini 2.5 生成，格式有修改）`;
