@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>arXiv 论文摘要生成器</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    
+    <!-- 1. 引入 Marked.js 用于 Markdown 解析 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- 2. 【新增】引入 KaTeX 用于 LaTeX 渲染 -->
+    <!-- KaTeX CSS for styling math formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <!-- KaTeX Core JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <!-- KaTeX Auto-render extension -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -256,6 +267,14 @@
             background: transparent;
             border: 0;
         }
+        /* 【新增】KaTeX 块级公式样式 */
+        .markdown-body .katex-display {
+            display: block;
+            margin: 1em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -414,7 +433,6 @@
                         content.innerHTML = `<div class="loading-spinner"></div><p style="text-align:center;">正在处理中...</p>`;
                         break;
                     case 'success':
-                        // Create and add download button
                         const downloadBtn = document.createElement('button');
                         downloadBtn.className = 'download-btn';
                         downloadBtn.textContent = '下载 Markdown';
@@ -423,8 +441,24 @@
 
                         const markdownBody = document.createElement('div');
                         markdownBody.className = 'markdown-body';
+                        
+                        // 1. 先用 Marked.js 渲染 Markdown
                         markdownBody.innerHTML = marked.parse(paper.summary);
                         content.appendChild(markdownBody);
+
+                        // 2. 【核心改动】然后用 KaTeX 渲染 HTML 中的数学公式
+                        // `renderMathInElement` 是由 KaTeX auto-render 扩展提供的全局函数
+                        if (window.renderMathInElement) {
+                            renderMathInElement(markdownBody, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},  // 块级公式
+                                    {left: '$', right: '$', display: false},   // 行内公式
+                                    {left: '\\[', right: '\\]', display: true},
+                                    {left: '\\(', right: '\\)', display: false}
+                                ],
+                                throwOnError: false // 如果公式有错，不抛出异常，而是显示原始文本
+                            });
+                        }
                         break;
                     case 'error':
                         content.innerHTML = `<div class="error-message"><strong>发生错误:</strong><br><pre>${paper.error}</pre></div>`;
