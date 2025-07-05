@@ -442,11 +442,9 @@
                         const markdownBody = document.createElement('div');
                         markdownBody.className = 'markdown-body';
                         
-                        // [FIX START] 先对 LaTeX 中的下划线进行转义，防止被 Markdown 误认为斜体
                         // 正则表达式会匹配所有 $$...$$ 和 $...$ 的内容块
                         const processedSummary = paper.summary.replace(/(\$\$[\s\S]+?\$\$|\$[^\$]+?\$)/g, (match) => {
-                            // 在匹配到的公式块内部，将所有 _ 替换为 \_
-                            return match.replace(/_/g, '\\_');
+                            return match.replace(/_/g, '\\_').replace(/\*/g, '\\*');
                         });
                         // 1. 用处理过的文本进行 Markdown 解析
                         markdownBody.innerHTML = marked.parse(processedSummary);
@@ -521,7 +519,8 @@
             const processedSummary = paper.summary
               .replace(/\$/g, '$$')        // 将$替换为$$
               .replace(/\$\$\$\$/g, '$$')  // 将$$$$替换为$$
-              .replace(/\$\$/g, '$$\n'); // 在$$后添加换行
+              .replace(/\$\$/g, '$$\n') // 在$$后添加换行
+              .replace(/\*\*\n\*/g, "**\n\n*"); // 避免列表渲染错
 
             const fileContent = `${arxivUrl}\n\n---\n\n${processedSummary}\n\n（用[这里](https://zhuanlan.zhihu.com/p/1906706224516424563)方法 Gemini 2.5 生成，格式有修改）`;
 
