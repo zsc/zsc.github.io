@@ -447,7 +447,8 @@
                             return match.replace(/_/g, '\\_').replace(/\*/g, '\\*');
                         });
                         // 1. 用处理过的文本进行 Markdown 解析
-                        markdownBody.innerHTML = marked.parse(processedSummary);
+                        const arxivUrl = `https://arxiv.org/abs/${id}`;
+                        markdownBody.innerHTML = marked.parse(`${arxivUrl}\n\n${processedSummary}`);
                         content.appendChild(markdownBody);
 
                         // 2. 【核心改动】然后用 KaTeX 渲染 HTML 中的数学公式
