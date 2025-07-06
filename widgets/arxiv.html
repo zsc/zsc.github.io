@@ -282,8 +282,8 @@
     <div class="container">
         <h1>arXiv 论文摘要生成器 (via Gemini)</h1>
         <div class="controls">
-            <input type="password" id="apiKeyInput" placeholder="在此输入您的 GEMINI_API_KEY">
-            <input type="text" id="arxivInput" placeholder="在此输入 arXiv ID 或 URL (例如: 2305.10601)">
+            <input type="password" id="apiKeyInput" placeholder="GEMINI_API_KEY">
+            <input type="text" id="arxivInput" placeholder="arXiv ID 或 URL (例如: 2305.10601)">
             <select id="modelSelect">
                 <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                 <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
@@ -449,6 +449,12 @@
                         // 1. 用处理过的文本进行 Markdown 解析
                         const arxivUrl = `https://arxiv.org/abs/${id}`;
                         markdownBody.innerHTML = marked.parse(`${arxivUrl}\n\n${processedSummary}`);
+
+                        const links = markdownBody.querySelectorAll('a');
+                        links.forEach(link => {
+                            link.target = '_blank';
+                            link.rel = 'noopener noreferrer'; // Security best practice for target="_blank"
+                        });
                         content.appendChild(markdownBody);
 
                         // 2. 【核心改动】然后用 KaTeX 渲染 HTML 中的数学公式
@@ -522,7 +528,7 @@
               .replace(/\$\$\$\$/g, '$$$$')  // 将$$$$替换为$$
               .replace(/\*\*\n\*/g, "**\n\n*"); // 避免列表渲染错
 
-            const fileContent = `${arxivUrl}\n\n${processedSummary}\n\n（用[这里](https://zhuanlan.zhihu.com/p/1906706224516424563)方法 Gemini 2.5 生成，格式有修改）`;
+            const fileContent = `${arxivUrl}\n\n${processedSummary}\n\n（[https://zsc.github.io/widgets/arxiv.html](https://zsc.github.io/widgets/arxiv.html) Gemini 2.5 生成，格式略有修改）`;
 
             const blob = new Blob([fileContent], { type: 'text/markdown;charset=utf-8' });
             const url = URL.createObjectURL(blob);
