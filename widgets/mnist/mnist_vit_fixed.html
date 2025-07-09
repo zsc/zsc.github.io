@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST ViT 训练与测试 Demo (tf.js)</title>
+    <!-- TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <!-- Chart.js for plotting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MNIST Labels (Ensure these files exist in the same directory) -->
+    <script src="https://zsc.github.io/widgets/mnist/mnist_train_labels.js"></script>
+    <script src="https://zsc.github.io/widgets/mnist/mnist_test_labels.js"></script>
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f9; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-button { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: 500; color: #555; position: relative; }
+        .tab-button.active { color: #3498db; }
+        .tab-button.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: #3498db; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .control-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .config-group { border: 1px solid #e0e0e0; padding: 15px; border-radius: 6px; }
+        .config-group h3 { margin-top: 0; color: #34495e; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .form-item { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .form-item label { font-weight: 500; margin-right: 10px; }
+        .form-item input, .form-item select { width: 100px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: right;}
+        .actions { text-align: center; margin: 20px 0; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #3498db; background-color: #3498db; color: white; border-radius: 5px; transition: background-color 0.3s; }
+        button:hover:not(:disabled) { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; border-color: #bdc3c7; cursor: not-allowed; }
+        .status-log { background: #ecf0f1; border: 1px solid #dce4e6; padding: 15px; margin-top: 20px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto; }
+        .chart-container { position: relative; max-height: 350px; margin: 20px auto; }
+        #test-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; margin-top: 20px; }
+        .test-item { text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        .test-item canvas { width: 84px; height: 84px; border: 1px solid #ccc; image-rendering: pixelated; }
+        .test-item p { margin: 5px 0 0 0; font-size: 14px; }
+        .correct { color: #27ae60; font-weight: bold; }
+        .incorrect { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MNIST Vision Transformer Demo</h1>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('train')">训练 (Train)</button>
+        <button class="tab-button" onclick="showTab('test')">测试 (Test)</button>
+    </div>
+
+    <!-- Training Tab -->
+    <div id="train-tab" class="tab-content active">
+        <div class="control-panel">
+            <div class="config-group">
+                <h3>ViT Hyperparameters</h3>
+                <div class="form-item">
+                    <label for="numLayers">Transformer Layers:</label>
+                    <input type="number" id="numLayers" value="2" min="1" max="8">
+                </div>
+                <div class="form-item">
+                    <label for="numHeads">Attention Heads:</label>
+                    <input type="number" id="numHeads" value="4" min="1" max="16">
+                </div>
+                <div class="form-item">
+                    <label for="embeddingDim">Embedding Dim:</label>
+                    <input type="number" id="embeddingDim" value="64" min="16" max="256" step="16">
+                </div>
+                 <div class="form-item">
+                    <label>Patch Size:</label>
+                    <input type="text" value="3x3 (固定)" disabled>
+                </div>
+                 <div class="form-item">
+                    <label>Token Vocabulary:</label>
+                    <input type="text" value="512 (固定)" disabled>
+                </div>
+            </div>
+            <div class="config-group">
+                <h3>Training Parameters</h3>
+                 <div class="form-item">
+                    <label for="dataFraction">Data Fraction:</label>
+                    <select id="dataFraction">
+                        <option value="1">100% (60k)</option>
+                        <option value="0.25">25% (15k)</option>
+                        <option value="0.1" selected>10% (6k)</option>
+                        <option value="0.0167">~1.7% (1k)</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label for="learningRate">Learning Rate:</label>
+                    <input type="number" id="learningRate" value="0.001" step="0.0001" min="0">
+                </div>
+                <div class="form-item">
+                    <label for="batchSize">Batch Size:</label>
+                    <input type="number" id="batchSize" value="32" step="1" min="4">
+                </div>
+                <div class="form-item">
+                    <label for="epochs">Epochs:</label>
+                    <input type="number" id="epochs" value="5" min="1" max="50">
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button id="train-button" onclick="trainModel()">开始训练</button>
+            <button id="stop-button" onclick="stopTraining()" disabled>停止训练</button>
+        </div>
+        <div id="status" class="status-log">等待操作...</div>
+        <div class="chart-container">
+            <canvas id="accuracyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Testing Tab -->
+    <div id="test-tab" class="tab-content">
+        <div class="actions">
+            <button id="test-button" onclick="runRandomTests()">随机抽取并测试</button>
+        </div>
+        <div id="test-results"></div>
+    </div>
+</div>
+
+<script>
+// --- Global State ---
+let model;
+let trainData, testData;
+let accuracyChart;
+let isTraining = false;
+let stopTrainingFlag = false;
+let lastLoadedFraction = -1; // Track the last data fraction used
+
+// --- DOM Elements ---
+const trainButton = document.getElementById('train-button');
+const stopButton = document.getElementById('stop-button');
+const testButton = document.getElementById('test-button');
+const statusLog = document.getElementById('status');
+const testResultsDiv = document.getElementById('test-results');
+
+const UI = {
+    getNumLayers: () => parseInt(document.getElementById('numLayers').value),
+    getNumHeads: () => parseInt(document.getElementById('numHeads').value),
+    getEmbeddingDim: () => parseInt(document.getElementById('embeddingDim').value),
+    getLearningRate: () => parseFloat(document.getElementById('learningRate').value),
+    getBatchSize: () => parseInt(document.getElementById('batchSize').value),
+    getEpochs: () => parseInt(document.getElementById('epochs').value),
+    getDataFraction: () => parseFloat(document.getElementById('dataFraction').value),
+};
+
+// --- Constants ---
+const IMG_WIDTH = 28;
+const IMG_HEIGHT = 28;
+const NUM_CLASSES = 10;
+
+const TRAIN_IMG_SRC = 'mnist_train_stitched.png';
+const TRAIN_IMG_PER_ROW = 245;
+const TRAIN_SAMPLES = 60000;
+
+const TEST_IMG_SRC = 'mnist_test_stitched.png';
+const TEST_IMG_PER_ROW = 100;
+const TEST_SAMPLES = 10000;
+
+// ViT specific constants
+const PATCH_SIZE = 3;
+const CROP_SIZE = 27; // 28 is not divisible by 3, so we crop to 27x27
+const NUM_PATCHES = (CROP_SIZE / PATCH_SIZE) * (CROP_SIZE / PATCH_SIZE); // 9 * 9 = 81
+const TOKEN_VOCAB_SIZE = 2 ** (PATCH_SIZE * PATCH_SIZE); // 2^9 = 512
+
+// --- Initialization ---
+window.onload = () => {
+    initChart();
+    showTab('train');
+    log('页面加载完成。点击 "开始训练" 以加载数据并开始。');
+};
+
+function log(message) {
+    console.log(message);
+    statusLog.textContent = message + '\n' + statusLog.textContent;
+}
+
+function initChart() {
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+    accuracyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: '训练准确率 (Train Accuracy)',
+                    data: [],
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: '测试准确率 (Test Accuracy)',
+                    data: [],
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    fill: false,
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Epoch' } },
+                y: { title: { display: true, text: 'Accuracy' }, beginAtZero: true, suggestedMax: 1.0 }
+            }
+        }
+    });
+}
+
+function updateChart(epoch, trainAcc, testAcc) {
+    accuracyChart.data.labels.push(epoch);
+    accuracyChart.data.datasets[0].data.push(trainAcc);
+    accuracyChart.data.datasets[1].data.push(testAcc);
+    accuracyChart.update();
+}
+
+function resetChart() {
+    accuracyChart.data.labels = [];
+    accuracyChart.data.datasets[0].data = [];
+    accuracyChart.data.datasets[1].data = [];
+    accuracyChart.update();
+}
+
+// --- Tab Navigation ---
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+    document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+}
+
+// --- Data Loading and Preprocessing ---
+class MnistStitchedLoader {
+    constructor(imgSrc, imgPerRow, numSamples, labels) {
+        this.imgSrc = imgSrc;
+        this.imgPerRow = imgPerRow;
+        this.numSamples = numSamples;
+        this.labels = labels;
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+        this.isLoaded = false;
+        this.pixelData = null; // This will be the final stacked tensor
+    }
+
+    async load() {
+        log(`正在加载图像: ${this.imgSrc}...`);
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        const imgLoadPromise = new Promise((resolve, reject) => {
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
+        img.src = this.imgSrc;
+        await imgLoadPromise;
+
+        this.canvas.width = img.width;
+        this.canvas.height = img.height;
+        this.ctx.drawImage(img, 0, 0);
+        this.isLoaded = true;
+        log('图像加载并绘制到离屏画布完成。');
+    }
+
+    getImageData(index) {
+        const row = Math.floor(index / this.imgPerRow);
+        const col = index % this.imgPerRow;
+        const x = col * IMG_WIDTH;
+        const y = row * IMG_HEIGHT;
+        return this.ctx.getImageData(x, y, IMG_WIDTH, IMG_HEIGHT);
+    }
+    
+    async processData() {
+        if (!this.isLoaded) await this.load();
+        
+        log(`开始处理 ${this.numSamples} 个样本...`);
+        const allTokens = [];
+        const originalImages = [];
+
+        const patchLutWeights = tf.tidy(() => 
+            tf.tensor1d([256, 128, 64, 32, 16, 8, 4, 2, 1], 'int32')
+        );
+
+        for (let i = 0; i < this.numSamples; i++) {
+            if (i > 0 && i % 5000 === 0) {
+                 log(`已处理 ${i} / ${this.numSamples} 个样本...`);
+                 await tf.nextFrame(); // Yield to main thread
+            }
+            
+            const { tokens, pixelData } = tf.tidy(() => {
+                const imageData = this.getImageData(i);
+                let imgTensor = tf.browser.fromPixels(imageData, 1).toFloat().div(255.0);
+                const binarizedTensor = imgTensor.greater(0.5).toFloat();
+                const cropped = binarizedTensor.slice([0, 0, 0], [CROP_SIZE, CROP_SIZE, 1]);
+                const patches = cropped.reshape([
+                    CROP_SIZE / PATCH_SIZE, PATCH_SIZE,
+                    CROP_SIZE / PATCH_SIZE, PATCH_SIZE,
+                    1
+                ]).transpose([0, 2, 1, 3, 4]).reshape([NUM_PATCHES, PATCH_SIZE * PATCH_SIZE]);
+
+                const tokenResult = patches.toInt().matMul(patchLutWeights.as2D(9, 1)).squeeze();
+                return { tokens: tokenResult, pixelData: binarizedTensor };
+            });
+            
+            allTokens.push(tokens);
+            originalImages.push(pixelData);
+        }
+
+        patchLutWeights.dispose();
+        
+        log('数据处理完成。正在合并 Tensors...');
+        const X = tf.stack(allTokens);
+        const y = tf.oneHot(tf.tensor1d(this.labels.slice(0, this.numSamples), 'int32'), NUM_CLASSES);
+        this.pixelData = tf.stack(originalImages);
+
+        allTokens.forEach(t => t.dispose());
+        originalImages.forEach(t => t.dispose());
+        log('Tensors 合并完成。');
+
+        return { tokens: X, labels: y, pixels: this.pixelData };
+    }
+}
+
+async function loadAllData() {
+    const dataFraction = UI.getDataFraction();
+    const trainSamplesToLoad = Math.floor(TRAIN_SAMPLES * dataFraction);
+    const testSamplesToLoad = Math.floor(TEST_SAMPLES * dataFraction);
+
+    log(`数据比例: ${dataFraction * 100}%. 加载 ${trainSamplesToLoad} 训练样本和 ${testSamplesToLoad} 测试样本。`);
+    
+    // Dispose previous data if it exists
+    if (trainData) {
+        tf.dispose([trainData.tokens, trainData.labels, trainData.pixels]);
+    }
+    if (testData) {
+        tf.dispose([testData.tokens, testData.labels, testData.pixels]);
+    }
+    
+    const trainLoader = new MnistStitchedLoader(TRAIN_IMG_SRC, TRAIN_IMG_PER_ROW, trainSamplesToLoad, mnistTrainLabels);
+    trainData = await trainLoader.processData();
+    
+    const testLoader = new MnistStitchedLoader(TEST_IMG_SRC, TEST_IMG_PER_ROW, testSamplesToLoad, mnistTestLabels);
+    testData = await testLoader.processData();
+
+    log(`数据加载完毕:`);
+    log(`  - 训练数据 Tokens: ${trainData.tokens.shape}`);
+    log(`  - 训练数据 标签: ${trainData.labels.shape}`);
+    log(`  - 测试数据 Tokens: ${testData.tokens.shape}`);
+    log(`  - 测试数据 标签: ${testData.labels.shape}`);
+}
+
+// --- Simplified Model Definition ---
+function createViTModel() {
+    const numLayers = UI.getNumLayers();
+    const numHeads = UI.getNumHeads();
+    const embeddingDim = UI.getEmbeddingDim();
+    const mlpDim = embeddingDim * 2; // Reduced for stability
+
+    tf.util.assert(embeddingDim % numHeads === 0, `Embedding Dim (${embeddingDim}) must be divisible by Num Heads (${numHeads})`);
+
+    const model = tf.sequential();
+    
+    // Token Embedding
+    model.add(tf.layers.embedding({
+        inputDim: TOKEN_VOCAB_SIZE,
+        outputDim: embeddingDim,
+        inputLength: NUM_PATCHES,
+        name: 'token_embedding'
+    }));
+
+    // Simplified Transformer blocks using dense layers
+    for (let i = 0; i < numLayers; i++) {
+        // Flatten for dense processing
+        model.add(tf.layers.flatten());
+        
+        // Dense layer to simulate attention mechanism
+        model.add(tf.layers.dense({
+            units: NUM_PATCHES * embeddingDim,
+            activation: 'relu',
+            name: `attention_dense_${i}`
+        }));
+        
+        // Reshape back
+        model.add(tf.layers.reshape({
+            targetShape: [NUM_PATCHES, embeddingDim]
+        }));
+        
+        // MLP layers
+        model.add(tf.layers.dense({
+            units: mlpDim,
+            activation: 'relu',
+            name: `mlp1_${i}`
+        }));
+        
+        model.add(tf.layers.dense({
+            units: embeddingDim,
+            activation: 'relu',
+            name: `mlp2_${i}`
+        }));
+    }
+    
+    // Classification head
+    model.add(tf.layers.globalAveragePooling1d());
+    model.add(tf.layers.dense({
+        units: 128,
+        activation: 'relu',
+        name: 'pre_classifier'
+    }));
+    model.add(tf.layers.dropout({ rate: 0.1 }));
+    model.add(tf.layers.dense({
+        units: NUM_CLASSES,
+        activation: 'softmax',
+        name: 'classifier'
+    }));
+
+    // Print model summary
+    model.summary(null, null, (msg) => log(msg));
+    return model;
+}
+
+// --- Training Logic ---
+async function trainModel() {
+    trainButton.disabled = true;
+    stopButton.disabled = false;
+    isTraining = true;
+    stopTrainingFlag = false;
+    statusLog.textContent = '';
+    resetChart();
+
+    try {
+        const currentFraction = UI.getDataFraction();
+        if (lastLoadedFraction !== currentFraction) {
+            log(`数据比例已更改或数据未加载。重新加载数据...`);
+            await loadAllData();
+            lastLoadedFraction = currentFraction;
+        }
+        
+        log('创建简化 ViT 模型...');
+        if (model) {
+            model.dispose();
+        }
+        model = createViTModel();
+
+        const learningRate = UI.getLearningRate();
+        model.compile({
+            optimizer: tf.train.adam(learningRate),
+            loss: 'categoricalCrossentropy',
+            metrics: ['accuracy']
+        });
+
+        log('开始训练...');
+        const batchSize = UI.getBatchSize();
+        const epochs = UI.getEpochs();
+
+        await model.fit(trainData.tokens, trainData.labels, {
+            batchSize: batchSize,
+            epochs: epochs,
+            validationData: [testData.tokens, testData.labels],
+            callbacks: {
+                onEpochEnd: async (epoch, logs) => {
+                    const epochNum = epoch + 1;
+                    const trainAcc = (logs.acc * 100).toFixed(2);
+                    const testAcc = (logs.val_acc * 100).toFixed(2);
+                    log(`Epoch ${epochNum}/${epochs} - 训练准确率: ${trainAcc}%, 测试准确率: ${testAcc}%`);
+                    updateChart(epochNum, logs.acc, logs.val_acc);
+                    if (stopTrainingFlag) {
+                        model.stopTraining = true;
+                    }
+                    await tf.nextFrame();
+                }
+            }
+        });
+
+        if (stopTrainingFlag) {
+            log('训练已手动停止。');
+        } else {
+            log('训练完成！');
+        }
+
+    } catch (err) {
+        log(`发生错误: ${err.message}`);
+        console.error(err);
+    } finally {
+        isTraining = false;
+        stopTrainingFlag = false;
+        trainButton.disabled = false;
+        stopButton.disabled = true;
+    }
+}
+
+function stopTraining() {
+    if (isTraining) {
+        log('将在当前 Epoch 结束后停止训练...');
+        stopTrainingFlag = true;
+        stopButton.disabled = true;
+    }
+}
+
+// --- Testing Logic ---
+async function runRandomTests(numTests = 16) {
+    if (!model) {
+        alert('请先训练模型！');
+        return;
+    }
+    if (!testData || !testData.pixels) {
+        alert('测试数据未加载，请先运行一次训练。');
+        return;
+    }
+
+    log(`从测试集抽取 ${numTests} 个样本进行测试...`);
+    testResultsDiv.innerHTML = '';
+
+    tf.tidy(() => {
+        const numSamplesInTestData = testData.pixels.shape[0];
+        if (numTests > numSamplesInTestData) {
+            numTests = numSamplesInTestData;
+            log(`请求的测试数量大于可用数量，测试数量调整为 ${numTests}`);
+        }
+
+        const indices = tf.util.createShuffledIndices(numSamplesInTestData).slice(0, numTests);
+        const testImagesTokens = testData.tokens.gather(indices);
+        const testImagesPixels = testData.pixels.gather(indices);
+        const trueLabels = testData.labels.gather(indices).argMax(1);
+
+        const predictions = model.predict(testImagesTokens).argMax(1);
+
+        const testImagesPixelsArray = testImagesPixels.arraySync();
+        const trueLabelsArray = trueLabels.arraySync();
+        const predictionsArray = predictions.arraySync();
+
+        for (let i = 0; i < numTests; i++) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'test-item';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = IMG_WIDTH;
+            canvas.height = IMG_HEIGHT;
+            
+            const imgTensor = tf.tensor(testImagesPixelsArray[i]).squeeze();
+            tf.browser.toPixels(imgTensor, canvas);
+            
+            const p = document.createElement('p');
+            const pred = predictionsArray[i];
+            const actual = trueLabelsArray[i];
+            p.innerHTML = `预测: ${pred}<br>真实: ${actual}`;
+
+            if (pred === actual) {
+                p.classList.add('correct');
+            } else {
+                p.classList.add('incorrect');
+            }
+            resultDiv.appendChild(canvas);
+            resultDiv.appendChild(p);
+            testResultsDiv.appendChild(resultDiv);
+        }
+    });
+    log('测试完成。');
+}
+
+// Mock data for testing without external files
+if (typeof mnistTrainLabels === 'undefined') {
+    log('警告: 未找到 mnist_train_labels.js，使用模拟数据进行测试');
+    window.mnistTrainLabels = Array.from({length: 60000}, () => Math.floor(Math.random() * 10));
+}
+if (typeof mnistTestLabels === 'undefined') {
+    log('警告: 未找到 mnist_test_labels.js，使用模拟数据进行测试');
+    window.mnistTestLabels = Array.from({length: 10000}, () => Math.floor(Math.random() * 10));
+}
+</script>
+
+</body>
+</html>
