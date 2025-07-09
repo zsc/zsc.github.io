@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIFE Video Frame Interpolation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+            color: #333;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        input[type="file"], select, input[type="number"] {
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #a9cce3;
+            cursor: not-allowed;
+        }
+        .result-box, .flash-message {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .result-box {
+            background-color: #e8f6f3;
+            border: 1px solid #1abc9c;
+        }
+        .result-box a {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.7rem 1.2rem;
+            background-color: #1abc9c;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .result-box a:hover {
+            background-color: #16a085;
+        }
+        .flash-message.error {
+            background-color: #fbeee6;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+        }
+        .loader {
+            display: none; /* Hidden by default */
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RIFE Video Frame Interpolation</h1>
+        <p>Upload a video and select the interpolation parameters. The process may take a long time depending on video length and hardware.</p>
+
+        <!-- Flash messages for errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form id="rife-form" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="video_file">1. Upload Video File</label>
+                <input type="file" id="video_file" name="video_file" accept="video/mp4,video/quicktime,video/x-matroska,video/x-msvideo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="multiplier">2. Frame Rate Multiplier (e.g., 2x for 30fps -> 60fps)</label>
+                <select id="multiplier" name="multiplier">
+                    <option value="2" selected>2x</option>
+                    <option value="4">4x</option>
+                    <option value="8">8x</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="scale">3. Spatial Upscale Factor (1.0 = No Change)</label>
+                <input type="number" id="scale" name="scale" value="1.0" min="0.5" max="4.0" step="0.1">
+                <small>This is a RIFE model parameter. 1.0 does not change video resolution. 2.0 would double width and height.</small>
+            </div>
+
+            <button type="submit" id="submit-button">Interpolate Video</button>
+            <div id="loader" class="loader">
+                <p><strong>Processing... Please wait.</strong></p>
+                <p>This page will update automatically when finished.</p>
+            </div>
+        </form>
+
+        <!-- Result section, shown only when a file has been processed -->
+        {% if processed_file %}
+        <div class="result-box">
+            <h2>Processing Complete!</h2>
+            <p>Your new video is ready for download.</p>
+            <p><strong>Filename:</strong> {{ processed_file }}</p>
+            <a href="{{ url_for('download_file', filename=processed_file) }}">Download Video</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Simple script to show a loading message on form submission
+        document.getElementById('rife-form').addEventListener('submit', function() {
+            // Check if a file is selected
+            if (document.getElementById('video_file').files.length > 0) {
+                document.getElementById('submit-button').disabled = true;
+                document.getElementById('submit-button').innerText = 'Processing...';
+                document.getElementById('loader').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
