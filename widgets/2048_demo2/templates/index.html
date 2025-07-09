@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Double-DQN Transformer Demo</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; text-align: center; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-link { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: 500; color: #7f8c8d; }
+        .tab-link.active { color: #3498db; border-bottom: 2px solid #3498db; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        
+        /* Form and Controls */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #3498db; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+        /* Training Status */
+        #training-status-box { background: #ecf0f1; border: 1px solid #bdc3c7; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        #training-log { background: #2c3e50; color: #ecf0f1; font-family: 'Courier New', Courier, monospace; height: 200px; overflow-y: auto; padding: 10px; border-radius: 4px; white-space: pre-wrap; margin-top: 10px; }
+        .progress-bar { width: 100%; background-color: #ddd; border-radius: 4px; }
+        .progress-bar-inner { width: 0%; height: 20px; background-color: #2ecc71; border-radius: 4px; text-align: center; color: white; line-height: 20px; transition: width 0.5s; }
+
+        /* Test Game Board */
+        #game-area { text-align: center; }
+        #game-info { margin-bottom: 15px; font-size: 1.2em; }
+        #board-container { display: inline-block; background-color: #bbada0; padding: 10px; border-radius: 6px; }
+        .game-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .grid-cell { width: 100px; height: 100px; background-color: #cdc1b4; border-radius: 3px; }
+        .tile { width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; font-size: 45px; font-weight: bold; border-radius: 3px; }
+        .tile-2 { background: #eee4da; color: #776e65; }
+        .tile-4 { background: #ede0c8; color: #776e65; }
+        .tile-8 { background: #f2b179; color: #f9f6f2; }
+        .tile-16 { background: #f59563; color: #f9f6f2; }
+        .tile-32 { background: #f67c5f; color: #f9f6f2; }
+        .tile-64 { background: #f65e3b; color: #f9f6f2; }
+        .tile-128 { background: #edcf72; color: #f9f6f2; }
+        .tile-256 { background: #edcc61; color: #f9f6f2; }
+        .tile-512 { background: #edc850; color: #f9f6f2; }
+        .tile-1024 { background: #edc53f; color: #f9f6f2; }
+        .tile-2048 { background: #edc22e; color: #f9f6f2; }
+        .tile-high { background: #3c3a32; color: #f9f6f2; }
+        .game-over-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(238, 228, 218, 0.73); color: #776e65; font-size: 60px; font-weight: bold; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>2048 Double-DQN Transformer</h1>
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'Train')">Train</button>
+            <button class="tab-link" onclick="openTab(event, 'Test')">Test</button>
+        </div>
+
+        <!-- Training Tab -->
+        <div id="Train" class="tab-content active">
+            <div class="grid-container">
+                <div>
+                    <h2>Hyperparameters</h2>
+                    <form id="train-form">
+                        <div class="grid-container">
+                            <div>
+                                <h3>Model</h3>
+                                <div class="form-group"><label>Embedding Dim:</label><input type="number" name="embed_dim" value="32"></div>
+                                <div class="form-group"><label>Num Heads:</label><input type="number" name="num_heads" value="8"></div>
+                                <div class="form-group"><label>Num Layers:</label><input type="number" name="num_layers" value="8"></div>
+                                <h3>Training</h3>
+                                <div class="form-group"><label>Learning Rate:</label><input type="text" name="lr" value="1e-4"></div>
+                                <div class="form-group"><label>Gamma:</label><input type="number" step="0.00000001" name="gamma" value="0.999"></div>
+                                <div class="form-group"><label>Batch Size:</label><input type="number" name="batch_size" value="256"></div>
+                                <div class="form-group"><label>Epsilon Decay Steps:</label><input type="number" name="epsilon_decay" value="2000"></div>
+                            </div>
+                            <div>
+                                <h3>Environment & Buffer</h3>
+                                <div class="form-group"><label>Buffer Size:</label><input type="number" name="buffer_size" value="50000"></div>
+                                <div class="form-group"><label>Learning Starts:</label><input type="number" name="learning_starts" value="10000"></div>
+                                <div class="form-group"><label>Target Update Freq:</label><input type="number" name="target_update_freq" value="1000"></div>
+                                <div class="form-group"><label>Num Parallel Envs:</label><input type="number" name="num_envs" value="32"></div>
+                                <h3>Execution & Logging</h3>
+                                <div class="form-group"><label>Total Steps:</label><input type="number" name="total_steps" value="1000000"></div>
+                                <div class="form-group"><label>Save Freq:</label><input type="number" name="save_freq" value="500000"></div>
+                                <div class="form-group"><label><input type="checkbox" name="force_cpu"> Force CPU</label></div>
+                            </div>
+                        </div>
+                        <button type="submit" id="start-train-btn">Start Training</button>
+                    </form>
+                </div>
+                <div>
+                    <h2>Training Status</h2>
+                    <div id="training-status-box">
+                        <p><strong>Status:</strong> <span id="training-status-text">Idle</span></p>
+                        <p><strong>Progress:</strong> <span id="training-progress-text">N/A</span></p>
+                        <div class="progress-bar">
+                            <div class="progress-bar-inner" id="training-progress-bar"></div>
+                        </div>
+                        <p><strong>Message:</strong> <span id="training-message-text">Training has not started.</span></p>
+                        <p><strong>TensorBoard:</strong> <a id="tensorboard-link" href="#" target="_blank">Not available</a></p>
+                        <h3>Logs:</h3>
+                        <div id="training-log"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Tab -->
+        <div id="Test" class="tab-content">
+            <div class="grid-container">
+                <div>
+                    <h2>Controls</h2>
+                    <div class="form-group">
+                        <label>Select Checkpoint:</label>
+                        <div style="display:flex; gap: 5px;">
+                            <select id="checkpoint-selector"></select>
+                            <button onclick="loadCheckpoints()">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-budget">Search Budget (Nodes): <span id="search-budget-value">100</span></label>
+                        <input type="range" id="search-budget" min="10" max="100000" value="1000" style="width:100%;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="start-test-btn" onclick="startTestGame()">Start New Game</button>
+                        <button id="play-continuous-btn" onclick="playContinuously()">Play Continuously</button>
+                        <button id="stop-continuous-btn" onclick="stopContinuousPlay()" disabled>Stop</button>
+                    </div>
+                </div>
+                <div id="game-area">
+                    <div id="game-info">
+                        <span>Score: <b id="score">0</b></span> | 
+                        <span>Max Tile: <b id="max-tile">0</b></span> |
+                        <span>AI Move: <b id="ai-move">N/A</b></span>
+                    </div>
+                    <div id="board-container">
+                        <div id="game-over-display" style="display: none;">Game Over</div>
+                        <div class="game-grid" id="game-board"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global State ---
+        let statusInterval;
+        let isPlayingContinuously = false;
+        let currentBoardState = {
+            board: [],
+            // BUGFIX: board_int is now stored as a string to preserve 64-bit precision.
+            // It will be "0" initially.
+            board_int: "0",
+            total_score: 0
+        };
+
+        // --- Tab Navigation ---
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+            document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+            document.getElementById(tabName).style.display = 'block';
+            evt.currentTarget.classList.add('active');
+        }
+
+        // --- Training Tab Logic ---
+        const trainForm = document.getElementById('train-form');
+        const startTrainBtn = document.getElementById('start-train-btn');
+        trainForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            startTrainBtn.disabled = true;
+            startTrainBtn.textContent = 'Starting...';
+
+            const formData = new FormData(trainForm);
+            const params = {};
+            for (const [key, value] of formData.entries()) {
+                if (key === 'force_cpu') {
+                    params[key] = true;
+                } else if (key === 'lr') {
+                    params[key] = parseFloat(value);
+                } else {
+                    params[key] = parseInt(value, 10);
+                }
+            }
+            if (!params.force_cpu) params.force_cpu = false;
+
+            try {
+                const response = await fetch('/api/start_training', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                if (response.ok) {
+                    pollStatus();
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.message}`);
+                    startTrainBtn.disabled = false;
+                    startTrainBtn.textContent = 'Start Training';
+                }
+            } catch (error) {
+                alert(`Network error: ${error}`);
+                startTrainBtn.disabled = false;
+                startTrainBtn.textContent = 'Start Training';
+            }
+        });
+
+        function pollStatus() {
+            if (statusInterval) clearInterval(statusInterval);
+            statusInterval = setInterval(async () => {
+                const response = await fetch('/api/get_status');
+                const data = await response.json();
+                updateStatusUI(data);
+
+                if (data.status === 'finished' || data.status === 'error') {
+                    clearInterval(statusInterval);
+                    startTrainBtn.disabled = false;
+                    startTrainBtn.textContent = 'Start Training';
+                }
+            }, 2000);
+        }
+
+        function updateStatusUI(data) {
+            document.getElementById('training-status-text').textContent = data.status;
+            document.getElementById('training-message-text').textContent = data.message;
+            
+            const progressPercent = data.total_steps > 0 ? (data.progress / data.total_steps) * 100 : 0;
+            const progressBar = document.getElementById('training-progress-bar');
+            progressBar.style.width = `${progressPercent.toFixed(2)}%`;
+            progressBar.textContent = `${progressPercent.toFixed(1)}%`;
+            document.getElementById('training-progress-text').textContent = `${data.progress} / ${data.total_steps}`;
+
+            const tbLink = document.getElementById('tensorboard-link');
+            if (data.tensorboard_url) {
+                tbLink.href = data.tensorboard_url;
+                tbLink.textContent = data.tensorboard_url;
+            } else {
+                tbLink.textContent = 'Not available';
+            }
+
+            const logDiv = document.getElementById('training-log');
+            logDiv.innerHTML = data.log_lines.join('\n');
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // --- Testing Tab Logic ---
+        const checkpointSelector = document.getElementById('checkpoint-selector');
+        const searchBudgetSlider = document.getElementById('search-budget');
+        const budgetValueSpan = document.getElementById('search-budget-value');
+
+        searchBudgetSlider.addEventListener('input', (e) => {
+            budgetValueSpan.textContent = e.target.value;
+        });
+
+        async function loadCheckpoints() {
+            const response = await fetch('/api/get_checkpoints');
+            const checkpoints = await response.json();
+            checkpointSelector.innerHTML = '';
+            if (checkpoints.length === 0) {
+                checkpointSelector.innerHTML = '<option>No checkpoints found</option>';
+            } else {
+                checkpoints.forEach(ckpt => {
+                    const option = document.createElement('option');
+                    option.value = ckpt.path;
+                    option.textContent = ckpt.name;
+                    option.dataset.hyperparams = JSON.stringify(ckpt.hyperparams);
+                    checkpointSelector.appendChild(option);
+                });
+            }
+        }
+
+        async function startTestGame() {
+            stopContinuousPlay();
+            document.getElementById('score').textContent = '0';
+            document.getElementById('max-tile').textContent = '0';
+            document.getElementById('ai-move').textContent = 'N/A';
+            document.getElementById('game-over-display').style.display = 'none';
+
+            const selectedOption = checkpointSelector.options[checkpointSelector.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset.hyperparams) {
+                alert('Please select a valid checkpoint.');
+                return;
+            }
+
+            const payload = {
+                path: selectedOption.value,
+                hyperparams: JSON.parse(selectedOption.dataset.hyperparams)
+            };
+
+            const response = await fetch('/api/start_test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                currentBoardState.board = data.board;
+                // BUGFIX: The server must send board_int as a string.
+                // We store it as a string to prevent precision loss.
+                currentBoardState.board_int = data.board_int;
+                currentBoardState.total_score = 0;
+                renderBoard(data.board);
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        }
+        
+        function renderBoard(boardArray) {
+            const boardGrid = document.getElementById('game-board');
+            boardGrid.innerHTML = '';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const value = boardArray[r][c];
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    if (value > 0) {
+                        const tile = document.createElement('div');
+                        tile.className = 'tile';
+                        tile.textContent = value;
+                        const tileClass = value > 2048 ? 'tile-high' : `tile-${value}`;
+                        tile.classList.add(tileClass);
+                        cell.appendChild(tile);
+                    }
+                    boardGrid.appendChild(cell);
+                }
+            }
+        }
+
+        async function makeAiMove() {
+            if (!isPlayingContinuously) return;
+
+            const payload = {
+                // BUGFIX: Send the board_int string. JSON.stringify will handle it correctly.
+                board_int: currentBoardState.board_int,
+                search_budget: parseInt(searchBudgetSlider.value, 10)
+            };
+
+            const response = await fetch('/api/test_move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+
+            if (data.is_done) {
+                document.getElementById('game-over-display').style.display = 'flex';
+                stopContinuousPlay();
+                return;
+            }
+
+            currentBoardState.board = data.board;
+            // BUGFIX: Receive the new board_int as a string from the server.
+            currentBoardState.board_int = data.board_int;
+            currentBoardState.total_score += data.score_gained;
+
+            document.getElementById('score').textContent = currentBoardState.total_score;
+            document.getElementById('max-tile').textContent = data.max_tile;
+            document.getElementById('ai-move').textContent = data.action;
+            renderBoard(data.board);
+
+            // Schedule the next move
+            if (isPlayingContinuously) {
+                setTimeout(makeAiMove, 200); // 200ms delay between moves
+            }
+        }
+
+        function playContinuously() {
+            if (!currentBoardState.board_int || currentBoardState.board_int === "0") {
+                alert("Start a new game first.");
+                return;
+            }
+            isPlayingContinuously = true;
+            document.getElementById('play-continuous-btn').disabled = true;
+            document.getElementById('stop-continuous-btn').disabled = false;
+            document.getElementById('start-test-btn').disabled = true;
+            makeAiMove();
+        }
+
+        function stopContinuousPlay() {
+            isPlayingContinuously = false;
+            document.getElementById('play-continuous-btn').disabled = false;
+            document.getElementById('stop-continuous-btn').disabled = true;
+            document.getElementById('start-test-btn').disabled = false;
+        }
+
+        // --- Initial Load ---
+        window.onload = () => {
+            document.querySelector('.tab-link').click(); // Set initial tab
+            loadCheckpoints();
+            // Create initial empty board grid
+            renderBoard(Array(4).fill(Array(4).fill(0)));
+        };
+
+    </script>
+</body>
+</html>
