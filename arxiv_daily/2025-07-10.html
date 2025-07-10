@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周舒畅博士学术速递</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f8f8f8;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 0.5em;
+        }
+        h2 {
+            font-size: 1.8em;
+            color: #34495e;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+            margin-top: 2em;
+            margin-bottom: 1em;
+        }
+        p.intro {
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 3em;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden; /* Ensures border-radius applies to children */
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #eef;
+            cursor: pointer;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .pdf-link {
+            font-size: 0.8em;
+            margin-left: 5px;
+            white-space: nowrap; /* Keep [PDF] on one line */
+        }
+        .paper-row {
+            position: relative; /* Crucial for tooltip positioning */
+        }
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            left: 105%; /* Position to the right of the row */
+            top: 0;
+            width: 450px; /* Adjust width as needed */
+            background-color: #333; /* Dark background for contrast */
+            color: #fff;
+            padding: 15px;
+            border: 1px solid #555;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            z-index: 1000; /* High z-index to be on top */
+            transition: opacity 0.2s ease-in-out; /* Fast fade-in */
+            pointer-events: none; /* Allows interaction with elements behind it */
+            line-height: 1.4;
+            font-size: 0.9em;
+            word-wrap: break-word; /* Ensure text wraps */
+        }
+        .tooltip-text strong {
+            color: #aaffaa; /* Highlight authors */
+        }
+        .tooltip-text em {
+            color: #ffffaa; /* Highlight abstracts */
+        }
+        .paper-row:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Media query for smaller screens */
+        @media (max-width: 768px) {
+            body {
+                margin: 10px;
+                padding: 0 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+            .tooltip-text {
+                left: 50%; /* Center tooltip on smaller screens */
+                transform: translateX(-50%);
+                top: auto;
+                bottom: 100%; /* Position above the row */
+                width: 90%;
+            }
+            .paper-row:hover .tooltip-text {
+                bottom: 105%; /* Adjust for spacing */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>今日学术速递：周舒畅博士关注前沿精选</h1>
+    <p class="intro">以下是根据周舒畅博士的学术兴趣画像，为您筛选和推荐的最新学术论文。这些论文涵盖了从生成式AI到决策智能，再到基础理论与效率优化的多个关键领域。</p>
+
+    <h2>综合推荐 Top 10</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>论文标题</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06892" target="_blank">
+                        挤压浸透的海绵：用于大型语言模型的有效离线强化微调 (Squeeze the Soaked Sponge: Efficient Off-policy Reinforcement Finetuning for Large Language Model)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06892" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Jing Liang, Hongyao Tang, Yi Ma, Jinyi Liu, Yan Zheng, Shuyue Hu, Lei Bai, Jianye Hao<br><br>
+                        <em>中文摘要:</em> 强化学习 (RL) 已证明其提升大型语言模型 (LLM) 推理能力的可能性。大多数现有强化微调 (RFT) 方法的主要局限性在于它们本质上是基于策略的 RL，即过去学习过程中生成的数据并未得到充分利用。这不可避免地带来了巨大的计算和时间成本，对持续的经济高效扩展构成了严格的瓶颈。为此，我们开启了离线 RL 的复兴，并提出了 Reincarnating Mix-policy Proximal Policy Gradient (ReMix)，这是一种通用的方法，可以使像 PPO 和 GRPO 这样的基于策略的 RFT 方法利用离线策略数据。ReMix 包括三个主要组成部分：(1) 具有增加的更新到数据 (UTD) 比率的混合策略近端策略梯度，用于高效训练；(2) KL-凸策略约束，以平衡稳定性和灵活性之间的权衡；(3) 策略转世，以实现从高效早期学习到稳定渐近改进的无缝过渡。在我们的实验中，我们在 PPO、GRPO 和 1.5B、7B 基模型上训练了一系列 ReMix 模型。ReMix 在五个数学推理基准（即 AIME'24、AMC'23、Minerva、OlympiadBench 和 MATH500）上显示了平均 Pass@1 准确率 52.10%（对于 1.5B 模型），使用了 0.079M 响应回滚，进行了 350 个训练步骤，并实现了 63.27%/64.39%（对于 7B 模型），使用了 0.007M/0.011M 响应回滚，进行了 50/75 个训练步骤。与 15 个最近的先进模型相比，ReMix 在推出数据量方面显示了 SOTA 级别的性能，训练成本降低了 30 倍到 450 倍。此外，我们通过多方面的分析揭示了有价值的发现，包括由于离线策略差异引起的鞭打效应导致的对较短响应的隐性偏好，以及在存在严重离线策略的情况下自我反思行为的崩溃模式等。<br><br>
+                        <em>English Abstract:</em> Reinforcement Learning (RL) has demonstrated its potential to improve the reasoning ability of Large Language Models (LLMs). One major limitation of most existing Reinforcement Finetuning (RFT) methods is that they are on-policy RL in nature, i.e., data generated during the past learning process is not fully utilized. This inevitably comes at a significant cost of compute and time, posing a stringent bottleneck on continuing economic and efficient scaling. To this end, we launch the renaissance of off-policy RL and propose Reincarnating Mix-policy Proximal Policy Gradient (ReMix), a general approach to enable on-policy RFT methods like PPO and GRPO to leverage off-policy data. ReMix consists of three major components: (1) Mix-policy proximal policy gradient with an increased Update-To-Data (UTD) ratio for efficient training; (2) KL-Convex policy constraint to balance the trade-off between stability and flexibility; (3) Policy reincarnation to achieve a seamless transition from efficient early-stage learning to steady asymptotic improvement. In our experiments, we train a series of ReMix models upon PPO, GRPO and 1.5B, 7B base models. ReMix shows an average Pass@1 accuracy of 52.10% (for 1.5B model) with 0.079M response rollouts, 350 training steps and achieves 63.27%/64.39% (for 7B model) with 0.007M/0.011M response rollouts, 50/75 training steps, on five math reasoning benchmarks (i.e., AIME'24, AMC'23, Minerva, OlympiadBench, and MATH500). Compared with 15 recent advanced models, ReMix shows SOTA-level performance with an over 30x to 450x reduction in training cost in terms of rollout data volume. In addition, we reveal insightful findings via multifaceted analysis, including the implicit preference for shorter responses due to the Whipping Effect of off-policy discrepancy, the collapse mode of self-reflection behavior under the presence of severe off-policyness, etc.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06812" target="_blank">
+                         democratizing 高保真伴随语音手势视频生成 (Democratizing High-Fidelity Co-Speech Gesture Video Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06812" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Xu Yang, Shaoli Huang, Shenbo Xie, Xuelin Chen, Yifei Liu, Changxing Ding<br><br>
+                        <em>中文摘要:</em> 伴随语音手势视频生成旨在合成逼真的、与音频对齐的说话者视频，包括同步的面部表情和身体手势。由于音频和视觉内容之间存在显著的一对多映射关系，以及缺乏大规模公共数据集和高计算需求，这项任务面临挑战。我们提出一个轻量级框架，利用 2D 全身骨骼作为高效的辅助条件，将音频信号与视觉输出桥接起来。我们的方法引入了一个基于细粒度音频片段和从说话者参考图像中提取的骨骼进行条件化的扩散模型，通过骨骼-音频特征融合预测骨骼运动，以确保严格的音频协调性和身体形状一致性。生成的骨骼随后被馈送到一个现成的、使用说话者参考图像的人体视频生成模型中，以合成高保真视频。为了 democratize 研究，我们提出了 CSG-405——第一个包含 405 小时的高分辨率视频的公共数据集，涵盖 71 种语音类型，并附带 2D 骨骼和多样化的说话者人口统计信息。实验表明，我们的方法在视觉质量和同步性方面优于最先进的方法，并且能够泛化到不同的说话者和上下文。<br><br>
+                        <em>English Abstract:</em> Co-speech gesture video generation aims to synthesize realistic, audio-aligned videos of speakers, complete with synchronized facial expressions and body gestures. This task presents challenges due to the significant one-to-many mapping between audio and visual content, further complicated by the scarcity of large-scale public datasets and high computational demands. We propose a lightweight framework that utilizes 2D full-body skeletons as an efficient auxiliary condition to bridge audio signals with visual outputs. Our approach introduces a diffusion model conditioned on fine-grained audio segments and a skeleton extracted from the speaker's reference image, predicting skeletal motions through skeleton-audio feature fusion to ensure strict audio coordination and body shape consistency. The generated skeletons are then fed into an off-the-shelf human video generation model with the speaker's reference image to synthesize high-fidelity videos. To democratize research, we present CSG-405-the first public dataset with 405 hours of high-resolution videos across 71 speech types, annotated with 2D skeletons and diverse speaker demographics. Experiments show that our method exceeds state-of-the-art approaches in visual quality and synchronization while generalizing across speakers and contexts.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06853" target="_blank">
+                        DiffSpectra：基于扩散模型的谱图反推分子结构 (DiffSpectra: Molecular Structure Elucidation from Spectra using Diffusion Models)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06853" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Liang Wang, Yu Rong, Tingyang Xu, Zhenyi Zhong, Zhiyuan Liu, Pengju Wang, Deli Zhao, Qiang Liu, Shu Wu, Liang Wang<br><br>
+                        <em>中文摘要:</em> 从谱图反推分子结构是化学领域的一个基础性问题，对化合物鉴定、合成和药物开发具有深远影响。传统方法严重依赖专家解读，缺乏可扩展性。先锋机器学习方法引入了基于检索的策略，但其对有限库的依赖限制了对新型分子的泛化能力。生成模型提供了一种有前景的替代方案，但大多数采用基于自回归SMILES的架构，忽略了3D几何形状，并且难以整合不同的谱图模态。在这项工作中，我们提出了DiffSpectra，一个利用扩散模型直接从多模态谱数据推断2D和3D分子结构的生成框架。DiffSpectra将结构推断形式化为条件生成过程。其去噪网络由扩散分子变换器（Diffusion Molecule Transformer）参数化，这是一种SE(3)等变架构，可以整合拓扑和几何信息。条件信息由SpecFormer提供，这是一种基于变换器的谱编码器，可以捕获来自多模态谱图的谱内和谱间依赖关系。大量的实验表明，DiffSpectra在结构推断方面实现了高精度，通过采样恢复精确结构的top-1准确率为16.01%，top-20准确率为96.86%。该模型从3D几何建模、SpecFormer预训练和多模态条件化中获益显著。这些结果突出了谱图条件扩散建模在解决分子结构推断挑战中的有效性。据我们所知，DiffSpectra是第一个统一多模态谱图推理和联合2D/3D生成建模，用于从头分子结构推断的框架。<br><br>
+                        <em>English Abstract:</em> Molecular structure elucidation from spectra is a foundational problem in chemistry, with profound implications for compound identification, synthesis, and drug development. Traditional methods rely heavily on expert interpretation and lack scalability. Pioneering machine learning methods have introduced retrieval-based strategies, but their reliance on finite libraries limits generalization to novel molecules. Generative models offer a promising alternative, yet most adopt autoregressive SMILES-based architectures that overlook 3D geometry and struggle to integrate diverse spectral modalities. In this work, we present DiffSpectra, a generative framework that directly infers both 2D and 3D molecular structures from multi-modal spectral data using diffusion models. DiffSpectra formulates structure elucidation as a conditional generation process. Its denoising network is parameterized by Diffusion Molecule Transformer, an SE(3)-equivariant architecture that integrates topological and geometric information. Conditioning is provided by SpecFormer, a transformer-based spectral encoder that captures intra- and inter-spectral dependencies from multi-modal spectra. Extensive experiments demonstrate that DiffSpectra achieves high accuracy in structure elucidation, recovering exact structures with 16.01% top-1 accuracy and 96.86% top-20 accuracy through sampling. The model benefits significantly from 3D geometric modeling, SpecFormer pre-training, and multi-modal conditioning. These results highlight the effectiveness of spectrum-conditioned diffusion modeling in addressing the challenge of molecular structure elucidation. To our knowledge, DiffSpectra is the first framework to unify multi-modal spectral reasoning and joint 2D/3D generative modeling for de novo molecular structure elucidation.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.07060" target="_blank">
+                        DeepRetro：基于迭代LLM推理的反合成路径发现 (DeepRetro: Retrosynthetic Pathway Discovery using Iterative LLM Reasoning)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.07060" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Shreyas Vinaya Sathyanarayana, Rahil Shah, Sharanabasava D. Hiremath, Rishikesh Panda, Rahul Jana, Riya Singh, Rida Irfan, Ashwin Murali, Bharath Ramsundar<br><br>
+                        <em>中文摘要:</em> 反合成，即为目标化合物识别前体分子，对于合成复杂分子至关重要，但面临着发现超越预定义模板的新路径的挑战。最近基于大型语言模型（LLM）的反合成方法显示出前景，但有效地利用LLM推理能力进行有效的多步规划仍然是一个悬而未决的问题。为了应对这一挑战，我们引入DeepRetro，一个开源的、迭代的、混合LLM驱动的反合成框架。我们的方法将传统基于模板/蒙特卡洛树搜索工具的优势与LLM的生成能力相结合，形成一个循序渐进、反馈驱动的循环。最初，使用基于模板的引擎尝试合成规划。如果失败，LLM随后会提出单步反合成断裂。至关重要的是，这些建议在严格的有效性、稳定性和幻觉检查之后，才能将结果的前体递归地反馈到管道中以进行进一步评估。这种迭代细化允许动态路径探索和校正。我们通过基准评估和案例研究展示了该管道的潜力，展示了其识别可行且潜在的新反合成路线的能力。特别是，我们开发了一个交互式图形用户界面，允许专家化学家向推理算法提供人工参与的反馈。这种方法成功地为复杂的天然产物化合物生成了新的路径，证明了迭代LLM推理在复杂化学合成领域取得突破的潜力。<br><br>
+                        <em>English Abstract:</em> Retrosynthesis, the identification of precursor molecules for a target compound, is pivotal for synthesizing complex molecules, but faces challenges in discovering novel pathways beyond predefined templates. Recent large language model (LLM) approaches to retrosynthesis have shown promise but effectively harnessing LLM reasoning capabilities for effective multi-step planning remains an open question. To address this challenge, we introduce DeepRetro, an open-source, iterative, hybrid LLM-based retrosynthetic framework. Our approach integrates the strengths of conventional template-based/Monte Carlo tree search tools with the generative power of LLMs in a step-wise, feedback-driven loop. Initially, synthesis planning is attempted with a template-based engine. If this fails, the LLM subsequently proposes single-step retrosynthetic disconnections. Crucially, these suggestions undergo rigorous validity, stability, and hallucination checks before the resulting precursors are recursively fed back into the pipeline for further evaluation. This iterative refinement allows for dynamic pathway exploration and correction. We demonstrate the potential of this pipeline through benchmark evaluations and case studies, showcasing its ability to identify viable and potentially novel retrosynthetic routes. In particular, we develop an interactive graphical user interface that allows expert human chemists to provide human-in-the-loop feedback to the reasoning algorithm. This approach successfully generates novel pathways for complex natural product compounds, demonstrating the potential for iterative LLM reasoning to advance state-of-art in complex chemical syntheses.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06613" target="_blank">
+                        去噪多 Beta VAE：用于解纠缠和生成的表征学习 (Denoising Multi-Beta VAE: Representation Learning for Disentanglement and Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06613" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Anshuk Uppal, Yuhta Takida, Chieh-Hsin Lai, Yuki Mitsufuji<br><br>
+                        <em>中文摘要:</em> 生成模型中解纠缠且可解释的潜在表征通常以牺牲生成质量为代价。β-VAE 框架引入了一个超参数 β 来平衡解纠缠和重建质量，其中设置 β > 1 会引入信息瓶颈，从而优先考虑解纠缠而非清晰、准确的重建。为了解决这种权衡，我们提出了一种新颖的生成建模框架，该框架利用一系列 β 值来学习多个相应的潜在表征。首先，我们通过训练单个变分自动编码器 (VAE) 来获得一系列表征，并使用一种新的损失函数来控制每个潜在表征中保留的信息，使得更高的 β 值优先考虑解纠缠而非重建保真度。然后，我们引入一个非线性扩散模型，该模型可以平滑地过渡到对应于不同 β 值的潜在表征。该模型去噪到更少解纠缠且更具信息量的表征，最终实现（几乎）无损的表征，从而实现清晰的重建。此外，我们的模型支持在没有输入图像的情况下进行样本生成，充当独立的生成模型。我们在解纠缠和生成质量方面评估我们的框架。此外，我们观察到潜在空间中关于 β 变化的平滑过渡，从而可以一致地操纵生成的输出。<br><br>
+                        <em>English Abstract:</em> Disentangled and interpretable latent representations in generative models typically come at the cost of generation quality. The $\\beta$-VAE framework introduces a hyperparameter $\\beta$ to balance disentanglement and reconstruction quality, where setting $\\beta > 1$ introduces an information bottleneck that favors disentanglement over sharp, accurate reconstructions. To address this trade-off, we propose a novel generative modeling framework that leverages a range of $\\beta$ values to learn multiple corresponding latent representations. First, we obtain a slew of representations by training a single variational autoencoder (VAE), with a new loss function that controls the information retained in each latent representation such that the higher $\\beta$ value prioritize disentanglement over reconstruction fidelity. We then, introduce a non-linear diffusion model that smoothly transitions latent representations corresponding to different $\\beta$ values. This model denoises towards less disentangled and more informative representations, ultimately leading to (almost) lossless representations, enabling sharp reconstructions. Furthermore, our model supports sample generation without input images, functioning as a standalone generative model. We evaluate our framework in terms of both disentanglement and generation quality. Additionally, we observe smooth transitions in the latent spaces with respect to changes in $\\beta$, facilitating consistent manipulation of generated outputs.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06738" target="_blank">
+                        DIFFUMA：通过双路径Mamba和扩散增强实现高保真时空视频预测 (DIFFUMA: High-Fidelity Spatio-Temporal Video Prediction via Dual-Path Mamba and Diffusion Enhancement)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06738" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Xinyu Xie, Weifeng Cao, Jun Shi, Yangyang Hu, Hui Liang, Wanyong Liang, Xiaoliang Qian<br><br>
+                        <em>中文摘要:</em> 时空视频预测在天气预报、工业自动化等关键领域发挥着重要作用。然而，在半导体制造等高精度工业场景中，缺乏专门的基准数据集严重阻碍了复杂过程建模和预测的研究。为了应对这一挑战，我们做出了双重贡献。首先，我们构建并发布了芯片切割车道数据集（CHDL），这是第一个专门用于半导体晶圆切割过程的公共时间图像数据集。通过工业级视觉系统捕获，CHDL为高保真过程建模、缺陷检测和数字孪生开发提供了一个急需且具有挑战性的基准。其次，我们提出了DIFFUMA，这是一种创新的双路径预测架构，专门设计用于此类细粒度动力学。该模型通过并行Mamba模块捕获全局长程时间上下文，同时利用由时间特征引导的扩散模块恢复和增强细粒度空间细节，有效对抗特征退化。实验表明，在我们的CHDL基准上，DIFFUMA显著优于现有方法，均方误差（MSE）降低了39%，结构相似性（SSIM）从0.926提高到接近完美的0.988。这种卓越的性能也推广到自然现象数据集。我们的工作不仅提供了新的最先进（SOTA）模型，更重要的是，为社区提供了一个宝贵的数据资源，以推动工业人工智能的未来研究。<br><br>
+                        <em>English Abstract:</em> Spatio-temporal video prediction plays a pivotal role in critical domains, ranging from weather forecasting to industrial automation. However, in semiconductor manufacturing such high-precision industrial scenarios, the absence of specialized benchmark datasets severely hampers research on modeling and predicting complex processes. To address this challenge, we make a twofold contribution.First, we construct and release the Chip Dicing Lane Dataset (CHDL), the first public temporal image dataset dedicated to the semiconductor wafer dicing process. Captured via an industrial-grade vision system, CHDL provides a much-needed and challenging benchmark for high-fidelity process modeling, defect detection, and digital twin development.Second, we propose DIFFUMA, an innovative dual-path prediction architecture specifically designed for such fine-grained dynamics. The model captures global long-range temporal context through a parallel Mamba module, while simultaneously leveraging a diffusion module, guided by temporal features, to restore and enhance fine-grained spatial details, effectively combating feature degradation. Experiments demonstrate that on our CHDL benchmark, DIFFUMA significantly outperforms existing methods, reducing the Mean Squared Error (MSE) by 39% and improving the Structural Similarity (SSIM) from 0.926 to a near-perfect 0.988. This superior performance also generalizes to natural phenomena datasets. Our work not only delivers a new state-of-the-art (SOTA) model but, more importantly, provides the community with an invaluable data resource to drive future research in industrial AI.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06674" target="_blank">
+                        探索基于状态空间模型的语言模型在音乐生成中的应用 (Exploring State-Space-Model based Language Model in Music Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06674" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Wei-Jaw Lee, Fang-Chih Hsieh, Xuanjun Chen, Fang-Duo Tsai, Yi-Hsuan Yang<br><br>
+                        <em>中文摘要:</em> 近期，状态空间模型 (SSM)，特别是 Mamba 的出现，已使其成为 Transformer 在各个领域中的强大替代方案或补充模块。在这项工作中，我们旨在探索基于 Mamba 的架构在文本到音乐生成中的潜力。我们采用残差向量量化 (RVQ) 的离散标记作为建模表示，并通过实验发现，单个码本可以捕捉音乐中的语义信息。受到这一观察的启发，我们专注于建模单个码本表示，并调整最初设计为 Mamba 编码器的 SiMBA，使其充当序列建模的解码器。我们将它的性能与标准的基于 Transformer 的解码器进行比较。我们的结果表明，在资源有限的情况下，SiMBA 实现了更快的收敛速度，并生成了更接近真实值的输出。这证明了 SSM 在高效且富有表现力的文本到音乐生成方面的潜力。我们已将音频示例放在 Github 上。<br><br>
+                        <em>English Abstract:</em> The recent surge in State Space Models (SSMs), particularly the emergence of Mamba, has established them as strong alternatives or complementary modules to Transformers across diverse domains. In this work, we aim to explore the potential of Mamba-based architectures for text-to-music generation. We adopt discrete tokens of Residual Vector Quantization (RVQ) as the modeling representation and empirically find that a single-layer codebook can capture semantic information in music. Motivated by this observation, we focus on modeling a single-codebook representation and adapt SiMBA, originally designed as a Mamba-based encoder, to function as a decoder for sequence modeling. We compare its performance against a standard Transformer-based decoder. Our results suggest that, under limited-resource settings, SiMBA achieves much faster convergence and generates outputs closer to the ground truth. This demonstrates the promise of SSMs for efficient and expressive text-to-music generation. We put audio examples on Github.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.07017" target="_blank">
+                        首次回报，熵诱导探索 (First Return, Entropy-Eliciting Explore)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.07017" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Tianyu Zheng, Tianshun Xing, Qingshui Gu, Taoran Liang, Xingwei Qu, Xin Zhou, Yizhi Li, Zhoufutu Wen, Chenghua Lin, Wenhao Huang, Qian Liu, Ge Zhang, Zejun Ma<br><br>
+                        <em>中文摘要:</em> 基于可验证奖励的强化学习 (RLVR) 提高了大型语言模型 (LLM) 的推理能力，但它在不稳定的探索方面存在困难。我们提出 FR3E（首次回报，熵诱导探索），这是一种结构化的探索框架，可以识别推理轨迹中的高不确定性决策点，并执行有针对性的 rollout 以构建语义上扎实的中间反馈。我们的方法在不依赖密集监督的情况下提供有针对性的指导。在数学推理基准测试 (AIME24) 上的经验结果表明，FR3E 促进了更稳定的训练，产生了更长、更连贯的响应，并增加了完全正确的轨迹的比例。这些结果突出了该框架通过更强大、更结构化的探索来提高 LLM 推理的有效性。<br><br>
+                        <em>English Abstract:</em> Reinforcement Learning from Verifiable Rewards (RLVR) improves the reasoning abilities of Large Language Models (LLMs) but it struggles with unstable exploration. We propose FR3E (First Return, Entropy-Eliciting Explore), a structured exploration framework that identifies high-uncertainty decision points in reasoning trajectories and performs targeted rollouts to construct semantically grounded intermediate feedback. Our method provides targeted guidance without relying on dense supervision. Empirical results on mathematical reasoning benchmarks(AIME24) show that FR3E promotes more stable training, produces longer and more coherent responses, and increases the proportion of fully correct trajectories. These results highlight the framework's effectiveness in improving LLM reasoning through more robust and structured exploration.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06261" target="_blank">
+                        Gemini 2.5：凭借先进的推理、多模态、长上下文和下一代代理能力突破界限 (Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06261" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blistein, Ori Ram, Dan Zhang, Evan Rosen, Luke Marris, Sam Petulla, Colin Gaffney, Asaf Aharoni, Nathan Lintz, Tiago Cardal Pais, Henrik Jacobsson, Idan Szpektor, Nan-Jiang Jiang, Krishna Haridasan, Ahmed Omran, Nikunj Saunshi, Dara Bahri, Gaurav Mishra, Eric Chu, Toby Boyd, Brad Hekman, Aaron Parisi, Chaoyi Zhang, Kornraphop Kawintiranon, Tania Bedrax-Weiss, Oliver Wang, Ya Xu, Ollie Purkiss, Uri Mendlovic, Ilaï Deutel, Nam Nguyen, Adam Langley, Flip Korn, Lucia Rossazza, Alexandre Ramé, Sagar Waghmare, Helen Miller, Vaishakh Keshava, Ying Jian, Xiaofan Zhang, Raluca Ada Popa, Kedar Dhamdhere, Blaž Bratanič, Kyuyeun Kim, Terry Koo, Ferran Alet, Yi-ting Chen, Arsha Nagrani, Hannah Muckenhirn, Zhiyuan Zhang, Corbin Quick, Filip Pavetić, Duc Dung Nguyen, Joao Carreira, Michael Elabd, Haroon Qureshi, Fabian Mentzer, Yao-Yuan Yang, Danielle Eisenbud, Anmol Gulati, Ellie Talius, Eric Ni, Sahra Ghalebikesabi, Edouard Yvinec, Alaa Saade, Thatcher Ulrich, Lorenzo Blanco, Dan A. Calian, Muhuan Huang, Aäron van den Oord, Naman Goyal, Terry Chen, Praynaa Rawlani, Christian Schallhart, Swachhand Lokhande, Xianghong Luo, Jyn Shan, Ceslee Montgomery, Victoria Krakovna, Federico Piccinini, Omer Barak, Jingyu Cui, Yiling Jia, Mikhail Dektiarev, Alexey Kolganov, Shiyu Huang, Zhe Chen, Xingyu Wang, Jessica Austin, Peter de Boursac, Evgeny Sluzhaev, Frank Ding, Huijian Li, Surya Bhupatiraju<br><br>
+                        <em>中文摘要:</em> 在本报告中，我们介绍了 Gemini 2.X 模型系列：Gemini 2.5 Pro 和 Gemini 2.5 Flash，以及我们早期的 Gemini 2.0 Flash 和 Flash-Lite 模型。Gemini 2.5 Pro 是我们迄今为止功能最强大的模型，在前沿编码和推理基准测试中取得了最佳性能。除了其惊人的编码和推理能力外，Gemini 2.5 Pro 是一款思考型模型，擅长多模态理解，现在能够处理高达 3 小时的视频内容。其长上下文、多模态和推理能力的独特组合可以结合起来，解锁新的代理工作流程。Gemini 2.5 Flash 以远低于计算和延迟要求的方式提供出色的推理能力，而 Gemini 2.0 Flash 和 Flash-Lite 则以低延迟和低成本提供高性能。总而言之，Gemini 2.X 模型生成涵盖了模型能力与成本的完整帕累托前沿，使用户能够探索使用复杂代理解决问题的可能性边界。<br><br>
+                        <em>English Abstract:</em> In this report, we introduce the Gemini 2.X model family: Gemini 2.5 Pro and Gemini 2.5 Flash, as well as our earlier Gemini 2.0 Flash and Flash-Lite models. Gemini 2.5 Pro is our most capable model yet, achieving SoTA performance on frontier coding and reasoning benchmarks. In addition to its incredible coding and reasoning skills, Gemini 2.5 Pro is a thinking model that excels at multimodal understanding and it is now able to process up to 3 hours of video content. Its unique combination of long context, multimodal and reasoning capabilities can be combined to unlock new agentic workflows. Gemini 2.5 Flash provides excellent reasoning abilities at a fraction of the compute and latency requirements and Gemini 2.0 Flash and Flash-Lite provide high performance at low latency and cost. Taken together, the Gemini 2.X model generation spans the full Pareto frontier of model capability vs cost, allowing users to explore the boundaries of what is possible with complex agentic problem solving.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06992" target="_blank">
+                        MCA-RG：利用医学概念对齐增强大型语言模型以生成放射学报告 (MCA-RG: Enhancing LLMs with Medical Concept Alignment for Radiology Report Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06992" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Qilong Xing, Zikai Song, Youjia Zhang, Na Feng, Junqing Yu, Wei Yang<br><br>
+                        <em>中文摘要:</em> 尽管大型语言模型（LLM）在放射学报告生成（RRG）方面取得了显著进展，但由于难以将病理和解剖特征准确映射到相应的文本描述，其临床应用仍然面临挑战。此外，语义无关的特征提取进一步阻碍了准确诊断报告的生成。为了应对这些挑战，我们引入了医学概念对齐放射学报告生成（MCA-RG），这是一种知识驱动的框架，它明确地将视觉特征与不同的医学概念对齐，以增强报告生成过程。MCA-RG利用两个策划的概念库：一个包含病灶相关知识的病理库，以及一个包含解剖描述的解剖库。视觉特征与这些医学概念对齐并进行定制增强。我们进一步提出了一种基于解剖的对比学习程序，以提高解剖特征的泛化能力，并结合病理特征的匹配损失，以优先考虑临床相关区域。此外，还采用特征门控机制来过滤掉低质量的概念特征。最后，视觉特征对应于各个医学概念，并被用来指导报告生成过程。在两个公共基准（MIMIC-CXR和CheXpert Plus）上的实验表明，MCA-RG实现了卓越的性能，突出了其在放射学报告生成方面的有效性。<br><br>
+                        <em>English Abstract:</em> Despite significant advancements in adapting Large Language Models (LLMs) for radiology report generation (RRG), clinical adoption remains challenging due to difficulties in accurately mapping pathological and anatomical features to their corresponding text descriptions. Additionally, semantic agnostic feature extraction further hampers the generation of accurate diagnostic reports. To address these challenges, we introduce Medical Concept Aligned Radiology Report Generation (MCA-RG), a knowledge-driven framework that explicitly aligns visual features with distinct medical concepts to enhance the report generation process. MCA-RG utilizes two curated concept banks: a pathology bank containing lesion-related knowledge, and an anatomy bank with anatomical descriptions. The visual features are aligned with these medical concepts and undergo tailored enhancement. We further propose an anatomy-based contrastive learning procedure to improve the generalization of anatomical features, coupled with a matching loss for pathological features to prioritize clinically relevant regions. Additionally, a feature gating mechanism is employed to filter out low-quality concept features. Finally, the visual features are corresponding to individual medical concepts, and are leveraged to guide the report generation process. Experiments on two public benchmarks (MIMIC-CXR and CheXpert Plus) demonstrate that MCA-RG achieves superior performance, highlighting its effectiveness in radiology report generation.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06625" target="_blank">
+                        Q-STAC：Q引导的斯坦因变分模型预测演员-评论家 (Q-STAC: Q-Guided Stein Variational Model Predictive Actor-Critic)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06625" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Shizhe Cai, Jayadeep Jacob, Zeya Yin, Fabio Ramos<br><br>
+                        <em>中文摘要:</em> 深度强化学习在连续控制任务中取得了显著的成功，但通常需要大量的训练数据，难以处理复杂的长时序规划，并且在运行过程中难以维持安全约束。与此同时，模型预测控制（MPC）提供了可解释性和约束满足性，但通常只能产生局部最优解，并且需要仔细设计成本函数。本文介绍了一种名为Q引导的斯坦因变分模型预测演员-评论家（Q-STAC）的新框架，它通过约束斯坦因变分梯度下降（SVGD）将贝叶斯MPC与演员-评论家强化学习相结合，从而弥合了这两种方法之间的差距。我们的方法直接使用学习到的Q值作为目标来优化控制序列，无需显式设计成本函数，同时利用已知的系统动力学来提高样本效率并确保控制信号保持在安全范围内。在2D导航和机器人操作任务上的大量实验表明，与最先进的算法相比，Q-STAC实现了更高的样本效率、鲁棒性和最优性，同时保持了策略分布的高表达能力。实验视频可在我们的网站上找到：https://sites.google.com/view/q-stac<br><br>
+                        <em>English Abstract:</em> Deep reinforcement learning has shown remarkable success in continuous control tasks, yet often requires extensive training data, struggles with complex, long-horizon planning, and fails to maintain safety constraints during operation. Meanwhile, Model Predictive Control (MPC) offers explainability and constraint satisfaction, but typically yields only locally optimal solutions and demands careful cost function design. This paper introduces the Q-guided STein variational model predictive Actor-Critic (Q-STAC), a novel framework that bridges these approaches by integrating Bayesian MPC with actor-critic reinforcement learning through constrained Stein Variational Gradient Descent (SVGD). Our method optimizes control sequences directly using learned Q-values as objectives, eliminating the need for explicit cost function design while leveraging known system dynamics to enhance sample efficiency and ensure control signals remain within safe boundaries. Extensive experiments on 2D navigation and robotic manipulation tasks demonstrate that Q-STAC achieves superior sample efficiency, robustness, and optimality compared to state-of-the-art algorithms, while maintaining the high expressiveness of policy distributions. Experiment videos are available on our website: https://sites.google.com/view/q-stac
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06993" target="_blank">
+                        以用户为中心的地理体验：基于LLM的增强规划、导航和动态适应框架 (The User-Centric Geo-Experience: An LLM-Powered Framework for Enhanced Planning, Navigation, and Dynamic Adaptation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06993" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Jieren Deng, Aleksandar Cvetkovic, Pak Kiu Chung, Dragomir Yankov, Chiqun Zhang<br><br>
+                        <em>中文摘要:</em> 传统的旅行规划系统通常是静态和分散的，难以应对现实世界的复杂情况，例如不断变化的环境条件和意外的行程中断。在本文中，我们指出了现有服务提供商之间存在的三个差距，导致令人沮丧的用户体验：智能行程规划、精确的“最后100米”导航以及动态行程适应。我们提出了三个协同代理：一个旅行规划代理，它采用基于网格的空间定位和地图分析来帮助解决复杂的跨模态用户查询；一个目的地助手代理，为每个行程的最后导航阶段提供细粒度的指导；以及一个本地发现代理，它利用图像嵌入和检索增强生成（RAG）来检测和响应行程计划中断。通过评估和实验，我们的系统在查询解释、导航精度和中断恢复能力方面表现出显著的改进，突显了它在城市探索到应急响应等领域的应用前景。<br><br>
+                        <em>English Abstract:</em> Traditional travel-planning systems are often static and fragmented, leaving them ill-equipped to handle real-world complexities such as evolving environmental conditions and unexpected itinerary disruptions. In this paper, we identify three gaps between existing service providers causing frustrating user experience: intelligent trip planning, precision "last-100-meter" navigation, and dynamic itinerary adaptation. We propose three cooperative agents: a Travel Planning Agent that employs grid-based spatial grounding and map analysis to help resolve complex multi-modal user queries; a Destination Assistant Agent that provides fine-grained guidance for the final navigation leg of each journey; and a Local Discovery Agent that leverages image embeddings and Retrieval-Augmented Generation (RAG) to detect and respond to trip plan disruptions. With evaluations and experiments, our system demonstrates substantial improvements in query interpretation, navigation accuracy, and disruption resilience, underscoring its promise for applications from urban exploration to emergency response.
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>生成式AI与多模态 Top 10</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>论文标题</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06812" target="_blank">
+                         democratizing 高保真伴随语音手势视频生成 (Democratizing High-Fidelity Co-Speech Gesture Video Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06812" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Xu Yang, Shaoli Huang, Shenbo Xie, Xuelin Chen, Yifei Liu, Changxing Ding<br><br>
+                        <em>中文摘要:</em> 伴随语音手势视频生成旨在合成逼真的、与音频对齐的说话者视频，包括同步的面部表情和身体手势。由于音频和视觉内容之间存在显著的一对多映射关系，以及缺乏大规模公共数据集和高计算需求，这项任务面临挑战。我们提出一个轻量级框架，利用 2D 全身骨骼作为高效的辅助条件，将音频信号与视觉输出桥接起来。我们的方法引入了一个基于细粒度音频片段和从说话者参考图像中提取的骨骼进行条件化的扩散模型，通过骨骼-音频特征融合预测骨骼运动，以确保严格的音频协调性和身体形状一致性。生成的骨骼随后被馈送到一个现成的、使用说话者参考图像的人体视频生成模型中，以合成高保真视频。为了 democratize 研究，我们提出了 CSG-405——第一个包含 405 小时的高分辨率视频的公共数据集，涵盖 71 种语音类型，并附带 2D 骨骼和多样化的说话者人口统计信息。实验表明，我们的方法在视觉质量和同步性方面优于最先进的方法，并且能够泛化到不同的说话者和上下文。<br><br>
+                        <em>English Abstract:</em> Co-speech gesture video generation aims to synthesize realistic, audio-aligned videos of speakers, complete with synchronized facial expressions and body gestures. This task presents challenges due to the significant one-to-many mapping between audio and visual content, further complicated by the scarcity of large-scale public datasets and high computational demands. We propose a lightweight framework that utilizes 2D full-body skeletons as an efficient auxiliary condition to bridge audio signals with visual outputs. Our approach introduces a diffusion model conditioned on fine-grained audio segments and a skeleton extracted from the speaker's reference image, predicting skeletal motions through skeleton-audio feature fusion to ensure strict audio coordination and body shape consistency. The generated skeletons are then fed into an off-the-shelf human video generation model with the speaker's reference image to synthesize high-fidelity videos. To democratize research, we present CSG-405-the first public dataset with 405 hours of high-resolution videos across 71 speech types, annotated with 2D skeletons and diverse speaker demographics. Experiments show that our method exceeds state-of-the-art approaches in visual quality and synchronization while generalizing across speakers and contexts.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06853" target="_blank">
+                        DiffSpectra：基于扩散模型的谱图反推分子结构 (DiffSpectra: Molecular Structure Elucidation from Spectra using Diffusion Models)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06853" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Liang Wang, Yu Rong, Tingyang Xu, Zhenyi Zhong, Zhiyuan Liu, Pengju Wang, Deli Zhao, Qiang Liu, Shu Wu, Liang Wang<br><br>
+                        <em>中文摘要:</em> 从谱图反推分子结构是化学领域的一个基础性问题，对化合物鉴定、合成和药物开发具有深远影响。传统方法严重依赖专家解读，缺乏可扩展性。先锋机器学习方法引入了基于检索的策略，但其对有限库的依赖限制了对新型分子的泛化能力。生成模型提供了一种有前景的替代方案，但大多数采用基于自回归SMILES的架构，忽略了3D几何形状，并且难以整合不同的谱图模态。在这项工作中，我们提出了DiffSpectra，一个利用扩散模型直接从多模态谱数据推断2D和3D分子结构的生成框架。DiffSpectra将结构推断形式化为条件生成过程。其去噪网络由扩散分子变换器（Diffusion Molecule Transformer）参数化，这是一种SE(3)等变架构，可以整合拓扑和几何信息。条件信息由SpecFormer提供，这是一种基于变换器的谱编码器，可以捕获来自多模态谱图的谱内和谱间依赖关系。大量的实验表明，DiffSpectra在结构推断方面实现了高精度，通过采样恢复精确结构的top-1准确率为16.01%，top-20准确率为96.86%。该模型从3D几何建模、SpecFormer预训练和多模态条件化中获益显著。这些结果突出了谱图条件扩散建模在解决分子结构推断挑战中的有效性。据我们所知，DiffSpectra是第一个统一多模态谱图推理和联合2D/3D生成建模，用于从头分子结构推断的框架。<br><br>
+                        <em>English Abstract:</em> Molecular structure elucidation from spectra is a foundational problem in chemistry, with profound implications for compound identification, synthesis, and drug development. Traditional methods rely heavily on expert interpretation and lack scalability. Pioneering machine learning methods have introduced retrieval-based strategies, but their reliance on finite libraries limits generalization to novel molecules. Generative models offer a promising alternative, yet most adopt autoregressive SMILES-based architectures that overlook 3D geometry and struggle to integrate diverse spectral modalities. In this work, we present DiffSpectra, a generative framework that directly infers both 2D and 3D molecular structures from multi-modal spectral data using diffusion models. DiffSpectra formulates structure elucidation as a conditional generation process. Its denoising network is parameterized by Diffusion Molecule Transformer, an SE(3)-equivariant architecture that integrates topological and geometric information. Conditioning is provided by SpecFormer, a transformer-based spectral encoder that captures intra- and inter-spectral dependencies from multi-modal spectra. Extensive experiments demonstrate that DiffSpectra achieves high accuracy in structure elucidation, recovering exact structures with 16.01% top-1 accuracy and 96.86% top-20 accuracy through sampling. The model benefits significantly from 3D geometric modeling, SpecFormer pre-training, and multi-modal conditioning. These results highlight the effectiveness of spectrum-conditioned diffusion modeling in addressing the challenge of molecular structure elucidation. To our knowledge, DiffSpectra is the first framework to unify multi-modal spectral reasoning and joint 2D/3D generative modeling for de novo molecular structure elucidation.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.07060" target="_blank">
+                        DeepRetro：基于迭代LLM推理的反合成路径发现 (DeepRetro: Retrosynthetic Pathway Discovery using Iterative LLM Reasoning)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.07060" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Shreyas Vinaya Sathyanarayana, Rahil Shah, Sharanabasava D. Hiremath, Rishikesh Panda, Rahul Jana, Riya Singh, Rida Irfan, Ashwin Murali, Bharath Ramsundar<br><br>
+                        <em>中文摘要:</em> 反合成，即为目标化合物识别前体分子，对于合成复杂分子至关重要，但面临着发现超越预定义模板的新路径的挑战。最近基于大型语言模型（LLM）的反合成方法显示出前景，但有效地利用LLM推理能力进行有效的多步规划仍然是一个悬而未决的问题。为了应对这一挑战，我们引入DeepRetro，一个开源的、迭代的、混合LLM驱动的反合成框架。我们的方法将传统基于模板/蒙特卡洛树搜索工具的优势与LLM的生成能力相结合，形成一个循序渐进、反馈驱动的循环。最初，使用基于模板的引擎尝试合成规划。如果失败，LLM随后会提出单步反合成断裂。至关重要的是，这些建议在严格的有效性、稳定性和幻觉检查之后，才能将结果的前体递归地反馈到管道中以进行进一步评估。这种迭代细化允许动态路径探索和校正。我们通过基准评估和案例研究展示了该管道的潜力，展示了其识别可行且潜在的新反合成路线的能力。特别是，我们开发了一个交互式图形用户界面，允许专家化学家向推理算法提供人工参与的反馈。这种方法成功地为复杂的天然产物化合物生成了新的路径，证明了迭代LLM推理在复杂化学合成领域取得突破的潜力。<br><br>
+                        <em>English Abstract:</em> Retrosynthesis, the identification of precursor molecules for a target compound, is pivotal for synthesizing complex molecules, but faces challenges in discovering novel pathways beyond predefined templates. Recent large language model (LLM) approaches to retrosynthesis have shown promise but effectively harnessing LLM reasoning capabilities for effective multi-step planning remains an open question. To address this challenge, we introduce DeepRetro, an open-source, iterative, hybrid LLM-based retrosynthetic framework. Our approach integrates the strengths of conventional template-based/Monte Carlo tree search tools with the generative power of LLMs in a step-wise, feedback-driven loop. Initially, synthesis planning is attempted with a template-based engine. If this fails, the LLM subsequently proposes single-step retrosynthetic disconnections. Crucially, these suggestions undergo rigorous validity, stability, and hallucination checks before the resulting precursors are recursively fed back into the pipeline for further evaluation. This iterative refinement allows for dynamic pathway exploration and correction. We demonstrate the potential of this pipeline through benchmark evaluations and case studies, showcasing its ability to identify viable and potentially novel retrosynthetic routes. In particular, we develop an interactive graphical user interface that allows expert human chemists to provide human-in-the-loop feedback to the reasoning algorithm. This approach successfully generates novel pathways for complex natural product compounds, demonstrating the potential for iterative LLM reasoning to advance state-of-art in complex chemical syntheses.
+                    </div>
+                </td>
+            </tr>
+            <tr class="paper-row">
+                <td>
+                    <a href="https://arxiv.org/abs/2507.06613" target="_blank">
+                        去噪多 Beta VAE：用于解纠缠和生成的表征学习 (Denoising Multi-Beta VAE: Representation Learning for Disentanglement and Generation)
+                    </a>
+                    <a href="https://arxiv.org/pdf/2507.06613" target="_blank" class="pdf-link">[PDF]</a>
+                    <div class="tooltip-text">
+                        <strong>作者:</strong> Anshuk Uppal, Yuhta Takida, Chieh-Hsin Lai, Yuki Mitsufuji<br><br>
+                        <em>中文摘要:</em> 生成模型中解纠缠且可解释的潜在表征通常以牺牲生成质量为代价。β-VAE 框架引入了一个超参数 β 来平衡解纠缠和重建质量，其中设置 β > 1 会引入信息瓶颈，从而优先考虑解纠缠而非清晰、准确的重建。为了解决这种权衡，我们提出了一种新颖的生成建模框架，该框架利用一系列 β 值来学习多个相应的潜在表征。首先，我们通过训练单个变分自动编码器 (VAE) 来获得一系列表征，并使用一种新的损失函数来控制每个潜在表征中保留的信息，使得更高的 β 值优先考虑解纠缠而非重建保真度。然后，我们引入一个非线性扩散模型，该模型可以平滑地过渡到对应于不同 β 值的潜在表征。该模型去噪到更少解纠缠且更具信息量的表征，最终实现（几乎）无损的表征，从而实现清晰的重建。此外，我们的模型支持在没有输入图像的情况下进行样本生成，充当独立的生成模型。我们在解纠缠和生成质量方面评估我们的框架。此外，我们观察到潜在空间中关于 β 变化的平滑过渡，从而可以一致地操纵生成的输出。<br><br>
+                        <em>English Abstract:</em> Disentangled and interpretable latent representations in generative models typically come at the cost of generation quality. The $\\beta$-VAE framework introduces a hyperparameter $\\beta$ to balance disentanglement and reconstruction quality, where setting $\\beta > 1$ introduces an information bottleneck that favors disentanglement over sharp, accurate reconstructions. To address this trade-off, we propose a novel generative modeling framework that leverages a range of $\\beta$ values to learn multiple corresponding latent representations. First, we obtain a slew of representations by training a single variational autoencoder (VAE), with a new loss function that controls the information retained in each latent representation such that the higher $\\beta$ value prioritize disentanglement over reconstruction fidelity. We then, introduce a non-linear diffusion model that smoothly transitions latent representations corresponding to different $\\beta$ values. This model denoises towards less disentangled and more informative representations, ultimately leading to (almost) lossless representations, enabling sharp reconstructions. Furthermore, our model supports sample generation without input images, functioning as a standalone generative model. We evaluate our framework in terms of both disentanglement and generation quality. Additionally, we observe smooth transitions in the latent spaces with respect to changes in $\\beta$, facilitating consistent manipulation of generated outputs
