@@ -317,6 +317,88 @@
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generai";
 
+        // --- Headless Mode ---
+        // Check for URL parameters to run in headless mode.
+        // Example: ?apiKey=YOUR_KEY&id=2305.10601
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiKeyParam = urlParams.get('apiKey');
+        const arxivIdParam = urlParams.get('id');
+
+        if (apiKeyParam && arxivIdParam) {
+            // If both params are present, run in headless mode and output raw text.
+            // This block will execute and the 'else' block with the UI will be skipped.
+
+            // Helper functions needed for headless mode
+            const normalizeArxivId = (input) => {
+                const trimmed = input.trim();
+                const urlMatch = trimmed.match(/arxiv\.org\/(?:abs|pdf|html)\/(\d{4}\.\d{4,5}(?:v\d+)?)/);
+                if (urlMatch) return urlMatch[1];
+                const idMatch = trimmed.match(/^(\d{4}\.\d{4,5}(?:v\d+)?)$/);
+                if (idMatch) return idMatch[1];
+                return null;
+            };
+
+            const arrayBufferToBase64 = (buffer) => {
+                let binary = '';
+                const bytes = new Uint8Array(buffer);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return window.btoa(binary);
+            };
+
+            const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+                        }
+                        return response;
+                    } catch (error) {
+                        if (i < retries - 1) {
+                            console.log(`Request failed, retrying... (${i + 1}/${retries})`);
+                            await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+                        } else {
+                            throw error;
+                        }
+                    }
+                }
+            };
+
+            (async () => {
+                // Replace the document body with a simple <pre> tag for text output
+                document.body.innerHTML = '<pre style="white-space: pre-wrap; word-break: break-word; font-family: monospace;"></pre>';
+                const outputElement = document.body.querySelector('pre');
+
+                try {
+                    const id = normalizeArxivId(arxivIdParam);
+                    if (!id) throw new Error("Invalid arXiv ID format provided in 'id' parameter.");
+
+                    outputElement.textContent = `Processing arXiv ID: ${id}... Please wait.`;
+
+                    const genAI = new GoogleGenerativeAI(apiKeyParam);
+                    const proxyUrl = 'https://corsproxy.io/?';
+                    const pdfUrl = `${proxyUrl}https://arxiv.org/pdf/${id}.pdf`;
+
+                    const pdfResp = await fetchWithRetry(pdfUrl);
+                    const pdfArrayBuffer = await pdfResp.arrayBuffer();
+                    const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
+
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" }); // Use default model from UI
+                    const prompt = "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue. The response is formatted as: <戏剧>the play goes here</戏剧>\\n<回答>answer here.\\nUser: 必须用中文回答，如有公式不要错过（公式用 latex），深入并长篇讨论上面论文。语气要专业。";
+                    const result = await model.generateContent([prompt, { inlineData: { mimeType: 'application/pdf', data: pdfBase64 } }]);
+
+                    outputElement.textContent = result.response.text();
+                } catch (e) {
+                    console.error(e);
+                    outputElement.textContent = `An error occurred:\n\n${e.message}\n\n${e.stack || ''}`;
+                }
+            })();
+        } else {
+            // --- Normal UI Mode ---
+
         const apiKeyInput = document.getElementById('apiKeyInput');
         const arxivInput = document.getElementById('arxivInput');
         const summarizeBtn = document.getElementById('summarizeBtn');
@@ -675,6 +757,8 @@
         
         // 启动应用
         initialize();
+
+        } // End of the 'else' block for Normal UI Mode
 
     </script>
 </body>
