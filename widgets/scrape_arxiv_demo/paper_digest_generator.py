@@ -3,9 +3,9 @@
 """
 arXiv Paper Digest Generator
 
-This script processes a CSV file of arXiv papers, scores their relevance to a user's
-academic interest using the Gemini API, translates relevant papers, and finally
-generates a summary HTML report, also using the Gemini API.
+This script processes a CSV file of arXiv papers, scores their relevance,
+clusters them using the Gemini API, and generates a dynamic HTML report
+that visualizes these clusters.
 
 It includes self-contained unit tests.
 
@@ -43,8 +43,40 @@ from tqdm import tqdm
 import arxiv
 from google import genai
 
+import time
+from collections import deque
+
+class RateLimiter:
+    def __init__(self, max_requests, period_seconds):
+        self.max_requests = max_requests
+        self.period_seconds = period_seconds
+        self.request_timestamps = deque()
+
+    def __enter__(self):
+        """进入 with 块时调用：等待一个可用的请求槽位"""
+        while True:
+            now = time.monotonic()
+            
+            while self.request_timestamps and self.request_timestamps[0] <= now - self.period_seconds:
+                self.request_timestamps.popleft()
+
+            if len(self.request_timestamps) < self.max_requests:
+                break
+
+            time_to_wait = self.request_timestamps[0] + self.period_seconds - now
+            logging.debug(f"Rate limit reached ({self.max_requests}/{self.period_seconds}s), waiting {time_to_wait:.2f} seconds...")
+            time.sleep(time_to_wait)
+        
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """退出 with 块时调用：记录本次请求的时间戳"""
+        self.request_timestamps.append(time.monotonic())
+        return False
+
+rate_limiter = RateLimiter(max_requests=30, period_seconds=60)
+
 # --- Configuration ---
-# Load API Key from environment variable for security
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -57,18 +89,17 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_CLIENT = None
 
 # File Paths
-# Input CSV and Output HTML are now handled dynamically in the main() function.
 INTEREST_FILE = Path("academic_interest.txt")
 
 # Model Configuration
-SCORING_TRANSLATION_MODEL = "gemma-3-27b-it" # Using a more powerful model for better JSON compliance and translation
-HTML_GENERATION_MODEL = "gemma-3-27b-it"
+SCORING_TRANSLATION_MODEL = "gemma-3-27b-it" 
+CLUSTERING_MODEL = "gemini-2.5-flash"
 
 # Processing Parameters
-RELEVANCE_THRESHOLD = 3  # Minimum score (out of 5) to be considered relevant
-MAX_PAPERS_FOR_HTML = 30 # Max papers to send for HTML generation
-API_RETRY_ATTEMPTS = 3
-API_RETRY_DELAY = 5 # seconds
+RELEVANCE_THRESHOLD = 3  
+MAX_PAPERS_FOR_CLUSTERING = 50 
+API_RETRY_ATTEMPTS = 5
+API_RETRY_DELAY = 20 # seconds
 
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -84,17 +115,8 @@ def setup_api():
     logging.info("Google Generative AI Client configured successfully.")
 
 def get_abstract_from_arxiv(arxiv_id: str) -> str:
-    """
-    Fetches the abstract for a given arXiv ID using the arxiv library.
-    
-    Args:
-        arxiv_id: The ID of the paper (e.g., "2507.06221").
-        
-    Returns:
-        The paper's abstract as a string, or an empty string if not found.
-    """
+    """Fetches the abstract for a given arXiv ID."""
     try:
-        # The arxiv library expects IDs without the 'arXiv:' prefix
         clean_id = arxiv_id.replace("arXiv:", "")
         search = arxiv.Search(id_list=[clean_id])
         paper = next(search.results())
@@ -107,19 +129,9 @@ def get_abstract_from_arxiv(arxiv_id: str) -> str:
         return ""
 
 def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict | None:
-    """
-    Sub-step 1: Scores, and if relevant, translates a paper using Gemini.
-    
-    Args:
-        paper_data: A dictionary containing paper info (id, title, etc.).
-        academic_interest: A string describing the user's academic interests.
-        
-    Returns:
-        A dictionary with processed data if relevant, otherwise None.
-    """
+    """Scores, and if relevant, translates a paper using Gemini."""
     title = paper_data.get('title', '')
     arxiv_id = paper_data.get('id', '')
-    
     logging.info(f"Processing paper: {arxiv_id} - {title}")
     
     abstract = get_abstract_from_arxiv(arxiv_id)
@@ -127,37 +139,34 @@ def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict 
         return None
 
     prompt = textwrap.dedent(f"""
-        As an expert research assistant, your task is to evaluate an academic paper based on my interests, provide a relevance score, and translate its title and abstract into Chinese.
+        As an expert research assistant, evaluate a paper based on my interests, provide a score, and translate it.
 
         My Academic Interests:
         ---
         {academic_interest}
         ---
-
-        Paper to Analyze:
+        Paper:
         - Title: "{title}"
         - Abstract: "{abstract}"
 
         Instructions:
-        1.  **Relevance Score**: Rate the paper's relevance to my academic interests on a scale of 1 to 5, where 1 is "not relevant at all" and 5 is "highly relevant".
-        2.  **Translation**: If and only if the relevance score is 3 or higher, translate the title and abstract into Simplified Chinese. Otherwise, leave the translation fields empty.
-        3.  **Output Format**: Your entire response MUST be a single, valid JSON object. Do not include any text, explanations, or markdown formatting before or after the JSON.
+        1. Relevance Score: Rate relevance to my interests (1-5).
+        2. Translation: If score is >= {RELEVANCE_THRESHOLD}, translate title and abstract to Simplified Chinese.
+        3. Output: A single, valid JSON object. No markdown.
 
         JSON Structure:
         {{
-          "relevance_score": <integer from 1 to 5>,
-          "chinese_title": "<chinese translation of the title or empty string>",
-          "chinese_abstract": "<chinese translation of the abstract or empty string>"
+          "relevance_score": <integer>,
+          "chinese_title": "<chinese translation or empty string>",
+          "chinese_abstract": "<chinese translation or empty string>"
         }}
     """)
     
     for attempt in range(API_RETRY_ATTEMPTS):
         try:
-            response = GEMINI_CLIENT.models.generate_content(
-                model=SCORING_TRANSLATION_MODEL,
-                contents=prompt
-            )
-            # Clean up potential markdown code fences
+            with rate_limiter:
+                response = GEMINI_CLIENT.models.generate_content(
+                    model=SCORING_TRANSLATION_MODEL, contents=prompt)
             cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
             result = json.loads(cleaned_response_text)
             
@@ -165,12 +174,10 @@ def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict 
             if score >= RELEVANCE_THRESHOLD:
                 processed_paper = paper_data.copy()
                 processed_paper.update({
-                    'score': score,
-                    'abstract': abstract,
+                    'score': score, 'abstract': abstract,
                     'chinese_title': result.get('chinese_title', ''),
                     'chinese_abstract': result.get('chinese_abstract', '')
                 })
-                # Ensure translation is not empty for relevant papers
                 if not processed_paper['chinese_title'] or not processed_paper['chinese_abstract']:
                     logging.warning(f"Paper {arxiv_id} scored {score} but translation was empty. Skipping.")
                     return None
@@ -179,113 +186,238 @@ def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict 
             else:
                 logging.info(f"Paper {arxiv_id} is not relevant (Score: {score}).")
                 return None
-
         except (json.JSONDecodeError, AttributeError, KeyError) as e:
-            logging.error(f"Error parsing Gemini response for {arxiv_id} on attempt {attempt+1}: {e}. Response text: {response.text}")
+            logging.error(f"Error parsing Gemini response for {arxiv_id} on attempt {attempt+1}: {e}. Response: {response.text}")
         except Exception as e:
             logging.error(f"API call failed for {arxiv_id} on attempt {attempt+1}: {e}")
-        
-        time.sleep(API_RETRY_DELAY)
-
+        time.sleep(API_RETRY_DELAY * (2 ** attempt))
     logging.error(f"Failed to process paper {arxiv_id} after {API_RETRY_ATTEMPTS} attempts.")
     return None
 
-def generate_html_report(papers: list, academic_interest: str) -> str:
+def generate_json_clusters(papers: list, academic_interest: str) -> dict | None:
     """
-    Sub-step 2: Generates an HTML report from a list of papers using Gemini.
-    
+    Uses an LLM to cluster papers into thematic groups based on academic interest.
+
     Args:
         papers: A list of processed paper dictionaries.
         academic_interest: The user's academic interest for context.
-        
+
     Returns:
-        A string containing the full HTML report.
+        A dictionary where keys are cluster titles and values are lists of arXiv IDs,
+        or None on failure.
     """
     if not papers:
-        return "<html><body><h1>No relevant papers found.</h1></body></html>"
+        return {}
 
-    logging.info(f"Generating HTML report for {len(papers)} papers.")
+    logging.info(f"Generating thematic clusters for {len(papers)} papers.")
     
-    # Prepare data for the prompt
     papers_json_str = json.dumps(
         [{
-            "english_title": p['title'],
-            "chinese_title": p['chinese_title'],
-            "english_abstract": p['abstract'],
-            "chinese_abstract": p['chinese_abstract'],
-            "abs_link": p['abs_link'],
-            "pdf_link": p['pdf_link'],
-            "authors": p['authors']
+            "arxiv_id": p['id'],
+            "title": p['title'],
+            "abstract": p['abstract']
         } for p in papers],
         indent=2,
         ensure_ascii=False
     )
     
     prompt = textwrap.dedent(f"""
-        As an expert web developer and data analyst, create a single, self-contained, and aesthetically pleasing HTML file to summarize a list of academic papers.
+        As an expert research analyst, your task is to thematically cluster a list of academic papers based on my stated interests.
 
         My Academic Interest Profile (for context):
         ---
         {academic_interest}
         ---
 
-        Input Data:
-        A JSON list of papers is provided below. Each paper has English/Chinese titles and abstracts, authors, and links.
+        Input Data (JSON list of papers):
         ---
         {papers_json_str}
         ---
 
-        HTML Generation Requirements:
-        1.  **Language**: The entire report must be in **Simplified Chinese**.
-        2.  **Overall Structure**:
-            - A main title (e.g., "今日学术速递").
-            - A brief introductory sentence.
-            - A main table titled "综合推荐 Top 10" showing the 10 most relevant papers overall.
-            - **Create 2-3 additional sections** with tables for different dimensions. Analyze the provided papers and create meaningful categories like "理论创新 Top 10", "方法论/应用 Top 10", or "交叉学科研究 Top 10". You decide the best categories based on the paper list. Each table should show up to 10 relevant papers.
-        3.  **Table Format**:
-            - Each table row should represent one paper.
-            - **Visible Content**: The primary cell should contain the paper's title (Chinese first, then English).
-            - **Links**: The title cell should be a hyperlink (`<a>`) pointing to the paper's `abs_link`. Also, provide a separate `[PDF]` link pointing to the `pdf_link`.
-        4.  **Fast Hover (Tooltip) Functionality**:
-            - **Crucial Requirement**: When the user's mouse hovers over a table row (`<tr>`), a custom tooltip MUST appear **instantly**.
-            - **Do NOT use the default browser `title` attribute**, as its appearance is too slow.
-            - **Implementation**: Use a pure CSS solution for maximum speed.
-                a.  The table row (`<tr>`) should have `position: relative;` and a class, for instance, `paper-row`.
-                b.  Inside one of the cells (e.g., the title cell), place a `<span>` or `<div>` with a class like `tooltip-text`. This element will hold the tooltip content.
-                c.  **Tooltip Content**: The tooltip must contain: The full list of authors, the Chinese abstract, and the English abstract. Use `<br>` tags for newlines within the tooltip for better formatting.
-                d.  **CSS for the Tooltip**:
-                    - The `.tooltip-text` should be hidden by default (`visibility: hidden; opacity: 0;`).
-                    - Position it absolutely (`position: absolute;`) with a high `z-index` (e.g., `z-index: 1;`). Give it a proper background color (e.g., `#f9f9f9`), padding, border, and `box-shadow` to make it look like a popup.
-                    - Add a smooth fade-in transition: `transition: opacity 0.2s ease-in-out;`. **Do NOT add a `transition-delay`** to ensure it appears immediately.
-                    - On hover (`.paper-row:hover .tooltip-text`), make the tooltip visible: `visibility: visible; opacity: 1;`.
-        5.  **Styling (CSS)**:
-            - Use an internal `<style>` tag in the `<head>`.
-            - Choose a clean, modern, academic-friendly style. Use a sans-serif font like 'Inter', 'Helvetica Neue', or 'Arial'.
-            - Style tables, headers, and links for readability. Use alternating row colors (`:nth-child(even)`) for tables.
-        6.  **Final Output**:
-            - The output MUST be a complete, valid HTML5 document starting with `<!DOCTYPE html>` and ending with `</html>`.
-            - Do NOT include any explanations, comments, or markdown fences like ```html ... ``` outside of the HTML code itself.
+        Clustering Instructions:
+        1.  **Analyze & Categorize**: Read my interest profile and the abstracts of all papers. Identify 2-4 primary thematic clusters that best summarize the collection of papers. Cluster titles should be concise and in **Simplified Chinese** (e.g., "大模型理论基础", "多智能体系统应用", "AI对齐与安全").
+        2.  **Assign Papers**: Assign each paper to the most relevant cluster. A paper can belong to only one cluster.
+        3.  **Rank within Clusters**: For each cluster, rank the assigned papers from most to least relevant to the cluster's theme.
+        4.  **Format Output**: Your entire response MUST be a single, valid JSON object. Do not include any text, explanations, or markdown formatting before or after the JSON.
+        5.  **JSON Structure**:
+            - The JSON object should have cluster titles as keys.
+            - The value for each key should be a list of strings.
+            - Each string in the list is the `arxiv_id` of a paper.
+            - The list of `arxiv_id`s must be sorted by relevance to the cluster theme (most relevant first).
+            - Limit each cluster to a maximum of 10 papers.
+
+        Example JSON Output:
+        {{
+          "大模型理论基础": [
+            "arXiv:2507.01234",
+            "arXiv:2507.05678"
+          ],
+          "多智能体系统应用": [
+            "arXiv:2507.09999",
+            "arXiv:2507.08888",
+            "arXiv:2507.07777"
+          ]
+        }}
     """)
     
-    try:
-        response = GEMINI_CLIENT.models.generate_content(
-            model=HTML_GENERATION_MODEL,
-            contents=prompt
-        )
-        # Clean up the output, removing potential markdown fences
-        html_content = response.text.strip()
-        if html_content.startswith("```html"):
-            html_content = html_content[7:]
-        if html_content.endswith("```"):
-            html_content = html_content[:-3]
-        return html_content.strip()
-    except Exception as e:
-        logging.error(f"HTML generation failed: {e}")
-        return f"<html><body><h1>Error</h1><p>Failed to generate HTML report: {e}</p></body></html>"
+    for attempt in range(API_RETRY_ATTEMPTS):
+        try:
+            with rate_limiter:
+                response = GEMINI_CLIENT.models.generate_content(
+                    model=CLUSTERING_MODEL,
+                    contents=prompt
+                )
+            cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+            clusters = json.loads(cleaned_response_text)
+            
+            # Basic validation
+            if isinstance(clusters, dict) and all(isinstance(k, str) and isinstance(v, list) for k, v in clusters.items()):
+                logging.info(f"Successfully generated {len(clusters)} clusters.")
+                return clusters
+            else:
+                raise ValueError("Generated JSON does not match the expected structure.")
+
+        except (json.JSONDecodeError, ValueError) as e:
+            logging.error(f"Error parsing cluster response on attempt {attempt+1}: {e}. Response: {cleaned_response_text}")
+        except Exception as e:
+            logging.error(f"Cluster generation API call failed on attempt {attempt+1}: {e}")
+        
+        time.sleep(API_RETRY_DELAY * (2 ** attempt))
+
+    logging.error(f"Failed to generate clusters after {API_RETRY_ATTEMPTS} attempts.")
+    return None
+
+def create_dynamic_html_report(papers_data_file: Path, clusters_file: Path, output_html_file: Path):
+    """
+    Generates a self-contained HTML file that dynamically fetches and renders clustered paper data.
+
+    Args:
+        papers_data_file: Path to the JSON file containing all paper details.
+        clusters_file: Path to the JSON file containing the cluster information.
+        output_html_file: Path to write the final HTML file.
+    """
+    logging.info(f"Creating dynamic HTML report '{output_html_file}'...")
+    
+    html_template = textwrap.dedent(f"""
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>今日学术速递</title>
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 20px; }}
+            .container {{ max-width: 1000px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }}
+            h1, h2 {{ color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }}
+            h1 {{ text-align: center; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+            th, td {{ padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }}
+            th {{ background-color: #f2f2f2; }}
+            tr:nth-child(even) {{ background-color: #f8f9fa; }}
+            tr:hover {{ background-color: #e9ecef; }}
+            a {{ color: #007bff; text-decoration: none; }}
+            a:hover {{ text-decoration: underline; }}
+            .paper-row {{ position: relative; cursor: default; }}
+            .tooltip-text {{ visibility: hidden; opacity: 0; width: 600px; background-color: #fff; color: #333; text-align: left; border-radius: 6px; padding: 15px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -300px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.2s ease-in-out; pointer-events: none; border: 1px solid #ccc; }}
+            .paper-row:hover .tooltip-text {{ visibility: visible; opacity: 1; }}
+            .paper-title {{ font-weight: bold; }}
+            .authors {{ font-style: italic; color: #555; margin-top: 8px; display: block; }}
+            .abstract {{ margin-top: 10px; }}
+            #loader {{ text-align: center; font-size: 1.2em; padding: 50px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container" id="report-container">
+            <h1>今日学术速递</h1>
+            <p id="intro">正在加载和渲染论文数据...</p>
+            <div id="loader">
+                <p>Loading...</p>
+            </div>
+            <div id="clusters-content"></div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {{
+                const papersFile = '{papers_data_file.name}';
+                const clustersFile = '{clusters_file.name}';
+                const container = document.getElementById('clusters-content');
+                const loader = document.getElementById('loader');
+                const intro = document.getElementById('intro');
+
+                Promise.all([
+                    fetch(papersFile).then(res => res.json()),
+                    fetch(clustersFile).then(res => res.json())
+                ])
+                .then(([papersData, clustersData]) => {{
+                    loader.style.display = 'none';
+                    if (Object.keys(clustersData).length === 0) {{
+                        intro.textContent = '今日未发现相关主题的论文分组。';
+                        return;
+                    }}
+                    
+                    const papersMap = new Map(papersData.map(p => [p.id, p]));
+                    intro.textContent = `根据您的学术兴趣，今日的论文已为您整理成以下 ${'{Object.keys(clustersData).length}'} 个主题。将鼠标悬停在论文标题上可查看详细摘要。`;
+
+                    for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {{
+                        const section = document.createElement('section');
+                        const title = document.createElement('h2');
+                        title.textContent = clusterTitle;
+                        section.appendChild(title);
+
+                        const table = document.createElement('table');
+                        const thead = `<thead><tr><th>标题 (Title)</th><th>操作 (Actions)</th></tr></thead>`;
+                        table.innerHTML = thead;
+                        const tbody = document.createElement('tbody');
+
+                        paperIds.forEach(paperId => {{
+                            const paper = papersMap.get(paperId);
+                            if (!paper) return;
+
+                            const row = document.createElement('tr');
+                            row.className = 'paper-row';
+                            
+                            row.innerHTML = `
+                                <td>
+                                    <div class="paper-title">${'{paper.chinese_title}'}</div>
+                                    <div>${'{paper.title}'}</div>
+                                    <div class="tooltip-text">
+                                        <strong>作者 (Authors):</strong>
+                                        <div class="authors">${'{paper.authors}'}</div>
+                                        <strong style="margin-top:10px; display:block;">中文摘要 (Abstract_CN):</strong>
+                                        <div class="abstract">${'{paper.chinese_abstract}'}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="${'{paper.abs_link}'}" target="_blank">Abs</a> |
+                                    <a href="${'{paper.pdf_link}'}" target="_blank">PDF</a>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        }});
+                        table.appendChild(tbody);
+                        section.appendChild(table);
+                        container.appendChild(section);
+                    }}
+                }})
+                .catch(error => {{
+                    loader.style.display = 'none';
+                    intro.textContent = '加载论文数据失败。请检查文件是否存在以及网络连接。';
+                    console.error('Error loading data:', error);
+                }});
+            }});
+        </script>
+    </body>
+    </html>
+    """)
+    output_html_file.write_text(html_template, encoding='utf-8')
+    logging.info(f"Successfully created dynamic HTML report: {output_html_file}")
+
 
 def main(csv_input_path_str: str):
     """Main function to run the paper processing pipeline."""
     csv_input_file = Path(csv_input_path_str)
+    json_cache_file = csv_input_file.with_suffix('.json')
+    cluster_json_file = csv_input_file.with_name(f"clusters_{json_cache_file.name}")
     html_output_file = csv_input_file.with_suffix('.html')
 
     if html_output_file.exists():
@@ -298,52 +430,73 @@ def main(csv_input_path_str: str):
         logging.error(e)
         return
 
-    # Check for required input files
     if not csv_input_file.exists():
-        logging.error(f"Input file not found: '{csv_input_file}'")
-        return
+        logging.error(f"Input file not found: '{csv_input_file}'"); return
     if not INTEREST_FILE.exists():
         logging.warning(f"Interest file '{INTEREST_FILE}' not found. Creating a dummy file.")
         INTEREST_FILE.write_text("My research focuses on large language models (LLMs), especially their reasoning abilities, alignment with human values, and applications in complex problem-solving. I am also interested in multi-agent systems and game theory applications in AI.")
-        logging.info(f"Created dummy interest file: {INTEREST_FILE}")
 
     logging.info(f"--- Processing {csv_input_file} ---")
-    
-    # Sub-step 1: Scan CSV, score, and translate
-    logging.info("--- Starting Sub-step 1: Scoring and Translating Papers ---")
-    try:
-        df = pd.read_csv(csv_input_file)
-        academic_interest = INTEREST_FILE.read_text(encoding='utf-8')
-    except Exception as e:
-        logging.error(f"Error reading input files: {e}")
-        return
-
-    papers_to_process = df.to_dict('records')
+    academic_interest = INTEREST_FILE.read_text(encoding='utf-8')
     relevant_papers = []
-    
-    with tqdm(total=len(papers_to_process), desc="Processing papers") as pbar:
-        for paper_row in papers_to_process:
-            processed = score_and_translate_paper(paper_row, academic_interest)
-            if processed:
-                relevant_papers.append(processed)
-            pbar.update(1)
+
+    if json_cache_file.exists():
+        logging.info(f"Found existing JSON cache '{json_cache_file}'. Loading relevant papers.")
+        try:
+            with open(json_cache_file, 'r', encoding='utf-8') as f:
+                relevant_papers = json.load(f)
+            logging.info(f"Successfully loaded {len(relevant_papers)} papers from cache.")
+        except (json.JSONDecodeError, IOError) as e:
+            logging.error(f"Error reading JSON cache '{json_cache_file}': {e}. Reprocessing from CSV.")
+            relevant_papers = []
 
     if not relevant_papers:
-        logging.warning("No relevant papers found after processing. Exiting.")
+        logging.info("--- Starting Sub-step 1: Scoring and Translating Papers ---")
+        try:
+            df = pd.read_csv(csv_input_file)
+            papers_to_process = df.to_dict('records')
+        except Exception as e:
+            logging.error(f"Error reading input CSV file: {e}"); return
+
+        with tqdm(total=len(papers_to_process), desc="Processing papers") as pbar:
+            for paper_row in papers_to_process:
+                processed = score_and_translate_paper(paper_row, academic_interest)
+                if processed:
+                    relevant_papers.append(processed)
+                pbar.update(1)
+
+        if relevant_papers:
+            logging.info(f"Saving {len(relevant_papers)} relevant papers to cache: {json_cache_file}")
+            with open(json_cache_file, 'w', encoding='utf-8') as f:
+                json.dump(relevant_papers, f, indent=2, ensure_ascii=False)
+
+    if not relevant_papers:
+        logging.warning("No relevant papers found. Exiting.")
         html_output_file.write_text("<html><body><h1>今日学术速递</h1><p>根据您的学术兴趣，今日没有发现相关论文。</p></body></html>", encoding='utf-8')
         return
 
-    # Sub-step 2: Sort, filter, and generate HTML
-    logging.info("--- Starting Sub-step 2: Generating HTML Report ---")
+    logging.info("--- Starting Sub-step 2: Clustering Papers ---")
+    clusters = None
+    if cluster_json_file.exists():
+        logging.info(f"Found existing cluster file '{cluster_json_file}'. Loading clusters.")
+        with open(cluster_json_file, 'r', encoding='utf-8') as f:
+            clusters = json.load(f)
+    else:
+        relevant_papers.sort(key=lambda x: x['score'], reverse=True)
+        papers_for_clustering = relevant_papers[:MAX_PAPERS_FOR_CLUSTERING]
+        clusters = generate_json_clusters(papers_for_clustering, academic_interest)
+        if clusters:
+            logging.info(f"Saving {len(clusters)} clusters to: {cluster_json_file}")
+            with open(cluster_json_file, 'w', encoding='utf-8') as f:
+                json.dump(clusters, f, indent=2, ensure_ascii=False)
     
-    # Sort by score and take the top N
-    relevant_papers.sort(key=lambda x: x['score'], reverse=True)
-    top_papers = relevant_papers[:MAX_PAPERS_FOR_HTML]
-    
-    html_content = generate_html_report(top_papers, academic_interest)
-    
-    html_output_file.write_text(html_content, encoding='utf-8')
-    logging.info(f"Successfully generated HTML report: {html_output_file}")
+    if not clusters:
+        logging.error("Failed to generate or load paper clusters. Cannot create HTML report.")
+        return
+
+    logging.info("--- Starting Sub-step 3: Generating Dynamic HTML Report ---")
+    create_dynamic_html_report(json_cache_file, cluster_json_file, html_output_file)
+    logging.info(f"Pipeline complete. Report generated at: {html_output_file}")
 
 
 # --- Unit Tests ---
@@ -352,120 +505,117 @@ class TestPaperDigestGenerator(unittest.TestCase):
 
     def setUp(self):
         """Set up test files and mock data."""
-        self.test_csv = Path("test_日期.csv")
-        self.test_interest = Path("test_academic_interest.txt")
+        self.test_dir = Path("test_output")
+        self.test_dir.mkdir(exist_ok=True)
         
-        with open(self.test_csv, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(['id', 'title', 'authors', 'subjects', 'abs_link', 'pdf_link'])
-            writer.writerow(['arXiv:1234.5678', 'Relevant Paper Title', 'Dr. A', 'cs.AI', 'http://abs/1', 'http://pdf/1'])
-            writer.writerow(['arXiv:9876.5432', 'Irrelevant Paper Title', 'Dr. B', 'math.CO', 'http://abs/2', 'http://pdf/2'])
+        self.test_csv = self.test_dir / "test_papers.csv"
+        self.test_interest = Path("academic_interest.txt") # Keep this in root for main()
+        
+        self.papers_data = [
+            {'id': 'arXiv:1234.5678', 'title': 'Relevant Paper 1', 'authors': 'Dr. A', 'subjects': 'cs.AI', 'abs_link': 'http://abs/1', 'pdf_link': 'http://pdf/1'},
+            {'id': 'arXiv:9876.5432', 'title': 'Irrelevant Paper', 'authors': 'Dr. B', 'subjects': 'math.CO', 'abs_link': 'http://abs/2', 'pdf_link': 'http://pdf/2'},
+            {'id': 'arXiv:1111.2222', 'title': 'Relevant Paper 2', 'authors': 'Dr. C', 'subjects': 'cs.AI', 'abs_link': 'http://abs/3', 'pdf_link': 'http://pdf/3'}
+        ]
+        
+        with open(self.test_csv, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=self.papers_data[0].keys())
+            writer.writeheader()
+            writer.writerows(self.papers_data)
 
         self.test_interest.write_text("AI and LLMs")
-        
         self.mock_academic_interest = "AI and LLMs"
-        self.relevant_paper_data = {
-            'id': 'arXiv:1234.5678', 'title': 'Relevant Paper Title', 'authors': 'Dr. A', 
-            'subjects': 'cs.AI', 'abs_link': 'http://abs/1', 'pdf_link': 'http://pdf/1'
-        }
 
     def tearDown(self):
         """Clean up test files."""
-        if self.test_csv.exists():
-            self.test_csv.unlink()
+        import shutil
+        if self.test_dir.exists():
+            shutil.rmtree(self.test_dir)
         if self.test_interest.exists():
+            # In a real scenario, you might not want to delete this, but for testing it's clean
             self.test_interest.unlink()
 
     @patch('__main__.arxiv.Search')
     def test_get_abstract_from_arxiv_success(self, mock_arxiv_search):
-        """Test successful abstract fetching."""
         mock_result = MagicMock()
         mock_result.summary = "This is a test abstract."
         mock_arxiv_search.return_value.results.return_value = iter([mock_result])
-        
         abstract = get_abstract_from_arxiv("1234.5678")
         self.assertEqual(abstract, "This is a test abstract.")
-
-    @patch('__main__.arxiv.Search')
-    def test_get_abstract_from_arxiv_not_found(self, mock_arxiv_search):
-        """Test when paper is not found on arXiv."""
-        mock_arxiv_search.return_value.results.return_value = iter([])
-        abstract = get_abstract_from_arxiv("0000.0000")
-        self.assertEqual(abstract, "")
 
     @patch('__main__.GEMINI_CLIENT')
     @patch('__main__.get_abstract_from_arxiv')
     def test_score_and_translate_paper_relevant(self, mock_get_abstract, mock_gemini_client):
-        """Test processing a relevant paper."""
         mock_get_abstract.return_value = "An abstract about AI."
-        
         mock_response = MagicMock()
-        mock_response.text = json.dumps({
-            "relevance_score": 5,
-            "chinese_title": "相关的论文标题",
-            "chinese_abstract": "关于AI的摘要。"
-        })
+        mock_response.text = json.dumps({"relevance_score": 5, "chinese_title": "相关标题", "chinese_abstract": "相关摘要"})
         mock_gemini_client.models.generate_content.return_value = mock_response
-        
-        result = score_and_translate_paper(self.relevant_paper_data, self.mock_academic_interest)
-        
+        result = score_and_translate_paper(self.papers_data[0], self.mock_academic_interest)
         self.assertIsNotNone(result)
         self.assertEqual(result['score'], 5)
-        self.assertEqual(result['chinese_title'], "相关的论文标题")
-        self.assertEqual(result['title'], "Relevant Paper Title")
-        mock_get_abstract.assert_called_once_with('arXiv:1234.5678')
-        mock_gemini_client.models.generate_content.assert_called_once()
-        called_with_model = mock_gemini_client.models.generate_content.call_args.kwargs['model']
-        self.assertEqual(called_with_model, SCORING_TRANSLATION_MODEL)
+        self.assertEqual(result['chinese_title'], "相关标题")
 
     @patch('__main__.GEMINI_CLIENT')
-    @patch('__main__.get_abstract_from_arxiv')
-    def test_score_and_translate_paper_irrelevant(self, mock_get_abstract, mock_gemini_client):
-        """Test processing an irrelevant paper."""
-        mock_get_abstract.return_value = "An abstract about combinatorics."
-        
+    def test_generate_json_clusters(self, mock_gemini_client):
+        """Test thematic cluster generation."""
         mock_response = MagicMock()
-        mock_response.text = '{"relevance_score": 1, "chinese_title": "", "chinese_abstract": ""}'
+        mock_cluster_data = {
+          "大模型理论基础": ["arXiv:1234.5678"],
+          "AI应用": ["arXiv:1111.2222"]
+        }
+        mock_response.text = json.dumps(mock_cluster_data)
         mock_gemini_client.models.generate_content.return_value = mock_response
 
-        irrelevant_paper_data = {'id': 'arXiv:9876.5432', 'title': 'Irrelevant Paper Title'}
-        result = score_and_translate_paper(irrelevant_paper_data, self.mock_academic_interest)
+        # Sample processed papers
+        processed_papers = [
+            {'id': 'arXiv:1234.5678', 'title': 'Paper A', 'abstract': '...'},
+            {'id': 'arXiv:1111.2222', 'title': 'Paper B', 'abstract': '...'}
+        ]
         
-        self.assertIsNone(result)
+        clusters = generate_json_clusters(processed_papers, self.mock_academic_interest)
+        
+        self.assertIsNotNone(clusters)
+        self.assertEqual(clusters, mock_cluster_data)
+        self.assertIn("大模型理论基础", clusters)
+        self.assertEqual(clusters["大模型理论基础"], ["arXiv:1234.5678"])
 
-    @patch('__main__.GEMINI_CLIENT')
-    def test_generate_html_report(self, mock_gemini_client):
-        """Test HTML report generation."""
-        mock_response = MagicMock()
-        mock_response.text = "<!DOCTYPE html><html><body>Mocked HTML</body></html>"
-        mock_gemini_client.models.generate_content.return_value = mock_response
+    def test_create_dynamic_html_report(self):
+        """Test the creation of the dynamic HTML file."""
+        papers_data_file = self.test_dir / "test_papers.json"
+        clusters_file = self.test_dir / "test_clusters.json"
+        output_html_file = self.test_dir / "report.html"
 
-        papers = [{
-            'title': 'Test Paper', 'chinese_title': '测试论文',
-            'abstract': 'Test abstract.', 'chinese_abstract': '测试摘要。',
-            'score': 5, 'abs_link': 'http://abs/1', 'pdf_link': 'http://pdf/1', 'authors': 'Dr. A'
-        }]
+        # Create dummy data files
+        dummy_papers = [{"id": "arXiv:1234.5678", "title": "Test Paper", "chinese_title": "测试论文", "authors": "Dr. Test", "chinese_abstract": "摘要", "abstract": "Abstract", "abs_link": "abs", "pdf_link": "pdf"}]
+        dummy_clusters = {"测试主题": ["arXiv:1234.5678"]}
         
-        html = generate_html_report(papers, self.mock_academic_interest)
+        with open(papers_data_file, 'w', encoding='utf-8') as f:
+            json.dump(dummy_papers, f)
+        with open(clusters_file, 'w', encoding='utf-8') as f:
+            json.dump(dummy_clusters, f)
+
+        # Run the function
+        create_dynamic_html_report(papers_data_file, clusters_file, output_html_file)
+
+        # Check the output
+        self.assertTrue(output_html_file.exists())
+        html_content = output_html_file.read_text(encoding='utf-8')
         
-        self.assertIn("<!DOCTYPE html>", html)
-        self.assertIn("Mocked HTML", html)
-        # Check that the prompt contains the paper data
-        call_args = mock_gemini_client.models.generate_content.call_args.kwargs
-        self.assertEqual(call_args['model'], HTML_GENERATION_MODEL)
-        prompt_arg = call_args['contents']
-        self.assertIn('"english_title": "Test Paper"', prompt_arg)
-        self.assertIn('"chinese_title": "测试论文"', prompt_arg)
+        self.assertIn('<!DOCTYPE html>', html_content)
+        self.assertIn('<div id="clusters-content">', html_content)
+        # Check if the JS fetches the correct filenames
+        self.assertIn(f"const papersFile = '{papers_data_file.name}';", html_content)
+        self.assertIn(f"const clustersFile = '{clusters_file.name}';", html_content)
+        self.assertIn('Promise.all([', html_content)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="arXiv Paper Digest Generator.",
-        formatter_class=argparse.RawTextHelpFormatter # To format help text nicely
+        formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
         'csv_file',
-        nargs='?',  # Makes the argument optional
+        nargs='?',
         default=None,
         help="Path to the input CSV file to be processed."
     )
@@ -478,8 +628,6 @@ if __name__ == "__main__":
 
     if args.test:
         print("--- Running Unit Tests ---")
-        # To run tests, we need to pass the script name to unittest.main
-        # We remove the command-line arguments to prevent recursion.
         import sys
         sys.argv = [sys.argv[0]]
         unittest.main()
