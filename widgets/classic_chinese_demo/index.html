@@ -268,8 +268,8 @@
             }
         }
 
-        // --- MAIN EVENT LISTENER ---
-        generateBtn.addEventListener('click', async () => {
+        // --- CORE LOGIC ---
+        async function fetchAndDisplayContent() {
             if (!apiKey) {
                 apiKey = getApiKey();
                 if (!apiKey) {
@@ -277,23 +277,23 @@
                     return;
                 }
             }
-
+            
             // 1. Set loading state
             generateBtn.disabled = true;
             loader.style.display = 'block';
             resultContainer.innerHTML = '';
-
+            
             try {
                 // 2. Select random text
                 const randomIndex = Math.floor(Math.random() * texts.length);
                 const selectedText = texts[randomIndex];
-
+                
                 // 3. Call API
                 const htmlContent = await callStepFunAPI(selectedText);
-
+                
                 // 4. Display result
                 resultContainer.innerHTML = htmlContent;
-
+                
             } catch (error) {
                 // 5. Handle errors
                 resultContainer.innerHTML = `<p class="error-text">加载失败，请检查你的阶跃星辰 API Key 或网络连接。<br><small>${error.message}</small></p>`;
@@ -302,16 +302,19 @@
                 loader.style.display = 'none';
                 generateBtn.disabled = false;
             }
-        });
+        }
+
+        // --- EVENT LISTENERS & INITIALIZATION ---
+        generateBtn.addEventListener('click', fetchAndDisplayContent);
         
-        // --- INITIALIZATION ---
-        // Check for API key on page load to provide a better user experience
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('STEPFUN_API_KEY')) {
                 apiKey = urlParams.get('STEPFUN_API_KEY');
                 console.log("StepFun API Key loaded from URL parameter.");
             }
+            // Perform initial load on page start
+            fetchAndDisplayContent();
         });
 
     </script>
