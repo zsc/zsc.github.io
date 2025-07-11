@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文言文学习助手</title>
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #212529;
+            --accent-color: #007bff;
+            --accent-hover: #0056b3;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.8em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        main {
+            text-align: center;
+        }
+
+        #generateBtn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #generateBtn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        #generateBtn:active {
+            transform: scale(0.98);
+        }
+
+        #generateBtn:disabled {
+            background-color: #a0c7ff;
+            cursor: not-allowed;
+        }
+
+        #resultContainer {
+            margin-top: 20px;
+            text-align: left;
+            min-height: 100px;
+        }
+
+        .initial-text, .error-text {
+            color: #6c757d;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Styles for Gemini-generated content */
+        #resultContainer table {
+            width: 100%;
+            border-collapse: collapse;
+            border-style: hidden;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        #resultContainer td {
+            padding: 10px 5px;
+            vertical-align: top;
+            border: 1px solid var(--border-color);
+        }
+        
+        #resultContainer td:first-child {
+            font-weight: bold;
+            width: 45%;
+        }
+
+        #resultContainer h3 {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+
+        #resultContainer p {
+            text-indent: 2em;
+        }
+
+        /* Loader animation */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 5px solid var(--accent-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #adb5bd;
+        }
+
+    </style>
+    <script src="text.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <header>
+            <h1>文言文学习助手</h1>
+            <p>为高中阶段设计，快速攻克知识难点</p>
+        </header>
+
+        <main>
+            <button id="generateBtn">换一句</button>
+            <div id="loader" class="loader" style="display: none;"></div>
+            <div id="resultContainer">
+                <p class="initial-text">点击上方按钮，随机抽取一句文言文进行学习。</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Powered by 阶跃星辰 (StepFun)</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM ELEMENTS ---
+        const generateBtn = document.getElementById('generateBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const loader = document.getElementById('loader');
+        
+        let apiKey = '';
+
+        // --- API KEY HANDLING ---
+        function getApiKey() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const keyFromUrl = urlParams.get('STEPFUN_API_KEY');
+            if (keyFromUrl) {
+                return keyFromUrl;
+            }
+            // If not in URL, prompt the user.
+            return prompt("Please enter your 阶跃星辰 (StepFun) API Key:", "");
+        }
+
+        function stripMarkdownCodeBlock(htmlString) {
+            // 去除开头的```html和换行符
+            const startPattern = /^```html\s*/;
+            // 去除结尾的```和后面可能的空白字符
+            const endPattern = /```\s*$/;
+
+            return htmlString.replace(startPattern, '').replace(endPattern, '');
+        }
+
+
+        // --- StepFun API CALL (OpenAI Compatible) ---
+        async function callStepFunAPI(text) {
+            const prompt = `
+                You are an expert tutor for Chinese high school students learning Classical Chinese (文言文). Your task is to analyze the following text and generate an HTML snippet for a learning app.
+
+                The text is:
+                "${text}"
+
+                Generate ONLY the HTML content based on the following strict instructions. Do not include \`<html>\`, \`<head>\`, or \`<body>\` tags.
+
+                1.  **Translation Table:**
+                    *   Start with a \`<table>\`.
+                    *   For each sentence or logical clause in the original text, create a \`<tr>\`.
+                    *   In each \`<tr>\`, have two \`<td>\` elements.
+                    *   The first \`<td>\` contains the segment from the original Classical Chinese text.
+                    *   The second \`<td>\` contains the corresponding modern Chinese translation.
+
+                2.  **Analysis Section:**
+                    *   After the \`</table>\`, add an \`<h3>\` with the text "知识点解析".
+                    *   Following the \`<h3>\`, you must generate a series of separate \`<p>\` tags for the analysis. Do NOT use markdown lists or numbered lists.
+                    *   Each analysis point (古今异义, 词类活用, 特殊句式, 文化背景) must be in its own dedicated \`<p>\` tag.
+                    *   Format each paragraph exactly like this: start with a \`<strong>\` tag containing the point's title, add a full-width colon "：", and then write the explanation text directly.
+                    *   Here is a mandatory example for one point: \`<p><strong>古今异义：</strong>这里是关于古今异义的解释内容。</p>\`
+                    *   Apply this exact format to all analysis points required: 古今异义, 词类活用, 特殊句式, and 文化背景.
+                    *   Analysis must be in details and of supreme quality.
+                The final output must be a clean HTML snippet that can be directly injected into a \`<div>\`.
+            `;
+
+            const API_URL = `https://api.stepfun.com/v1/chat/completions`;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "step-2-16k", // Using a standard StepFun model
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0.8,
+                        max_tokens: 2048,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return stripMarkdownCodeBlock(data.choices[0].message.content);
+            } catch (error) {
+                console.error("Error calling StepFun API:", error);
+                throw error; // Re-throw to be caught by the event listener
+            }
+        }
+
+        // --- MAIN EVENT LISTENER ---
+        generateBtn.addEventListener('click', async () => {
+            if (!apiKey) {
+                apiKey = getApiKey();
+                if (!apiKey) {
+                    resultContainer.innerHTML = '<p class="error-text">必须提供 API Key 才能使用。</p>';
+                    return;
+                }
+            }
+
+            // 1. Set loading state
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
+            resultContainer.innerHTML = '';
+
+            try {
+                // 2. Select random text
+                const randomIndex = Math.floor(Math.random() * texts.length);
+                const selectedText = texts[randomIndex];
+
+                // 3. Call API
+                const htmlContent = await callStepFunAPI(selectedText);
+
+                // 4. Display result
+                resultContainer.innerHTML = htmlContent;
+
+            } catch (error) {
+                // 5. Handle errors
+                resultContainer.innerHTML = `<p class="error-text">加载失败，请检查你的阶跃星辰 API Key 或网络连接。<br><small>${error.message}</small></p>`;
+            } finally {
+                // 6. Reset UI
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+        
+        // --- INITIALIZATION ---
+        // Check for API key on page load to provide a better user experience
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('STEPFUN_API_KEY')) {
+                apiKey = urlParams.get('STEPFUN_API_KEY');
+                console.log("StepFun API Key loaded from URL parameter.");
+            }
+        });
+
+    </script>
+</body>
+</html>
