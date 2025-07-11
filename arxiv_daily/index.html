@@ -97,13 +97,24 @@
                                 <div class="authors">${paper.authors}</div>
                                 <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
                                 <div class="abstract">${paper.chinese_abstract}</div>
-                                <div style="margin-top: 15px;"><a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a></div>
+                                <div style="margin-top: 15px;">
+                                    <a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
                             </td>`;
 
                         // Add click event listener to toggle visibility of the details row
                         titleRow.addEventListener('click', () => {
                             titleRow.classList.toggle('expanded');
                             detailsRow.classList.toggle('show');
+                        });
+
+                        // Add click event listener for the collapse button
+                        const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
                         });
                     });
                     table.appendChild(tbody);
