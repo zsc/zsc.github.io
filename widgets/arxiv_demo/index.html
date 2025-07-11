@@ -202,6 +202,10 @@
             padding: 6px 12px;
             margin-bottom: 15px;
             font-size: 14px;
+            /* 【修改】从 block 改为 inline-block 以便和 checkbox 同行 */
+            display: inline-block; 
+            margin-bottom: 0; /* 【修改】移除底部边距 */
+
             font-weight: bold;
             color: var(--primary-color);
             background-color: #e9f3ff;
@@ -319,7 +323,6 @@
     }
     </script>
 
-    <!-- 【新增】引入外部 Prompt 配置文件 -->
     <script src="prompts.js"></script>
 
     <script type="module">
@@ -338,7 +341,7 @@
         // --- 状态管理 ---
         let papers = {}; // { id: { status, summary, error, isUnread } }
         let unreadCount = 0;
-        let activeTabId = null;
+        let activeTabId = null; // 【新增】为每个 paper 增加状态 { ..., incrementImages }
         let genAI = null;
 
         // --- 初始化设置 ---
@@ -467,12 +470,34 @@
                         content.innerHTML = `<div class="loading-spinner"></div><p style="text-align:center;">正在处理中...</p>`;
                         break;
                     case 'success':
+                        const controlsContainer = document.createElement('div');
+                        controlsContainer.style.display = 'flex';
+                        controlsContainer.style.alignItems = 'center';
+                        controlsContainer.style.justifyContent = 'space-between';
+                        controlsContainer.style.marginBottom = '15px';
+
+                        // 【新增】图片数字递增的 Checkbox
+                        const checkboxContainer = document.createElement('div');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `increment-toggle-${id}`;
+                        checkbox.checked = paper.incrementImages;
+                        checkbox.onchange = () => {
+                            papers[id].incrementImages = checkbox.checked;
+                            render(); // 状态改变后重渲染
+                        };
+                        const label = document.createElement('label');
+                        label.htmlFor = `increment-toggle-${id}`;
+                        label.textContent = '图片名数字+1 (例: x1.png → x2.png)';
+                        label.style.cursor = 'pointer';
+                        label.style.marginLeft = '8px';
+                        checkboxContainer.appendChild(checkbox);
+                        checkboxContainer.appendChild(label);
+
                         const downloadBtn = document.createElement('button');
                         downloadBtn.className = 'download-btn';
                         downloadBtn.textContent = '下载 Markdown';
                         downloadBtn.onclick = () => downloadMarkdown(id);
-                        content.appendChild(downloadBtn);
-
                         const markdownBody = document.createElement('div');
                         markdownBody.className = 'markdown-body';
                         
@@ -480,9 +505,12 @@
                         const processedSummary = paper.summary.replace(/(\$\$[\s\S]+?\$\$|\$[^\$]+?\$)/g, (match) => {
                             return match.replace(/_/g, '\\_').replace(/\*/g, '\\*');
                         });
+                        // 【修改】使用 getProcessedSummary 获取可能被修改过的内容
+                        const summaryForDisplay = getProcessedSummary(id);
+
                         // 1. 用处理过的文本进行 Markdown 解析
                         const arxivUrl = `https://arxiv.org/abs/${id}`;
-                        markdownBody.innerHTML = marked.parse(`${arxivUrl}\n\n${processedSummary}`);
+                        markdownBody.innerHTML = marked.parse(`[${arxivUrl}](${arxivUrl})\n\n${summaryForDisplay}`);
 
                         const links = markdownBody.querySelectorAll('a');
                         links.forEach(link => {
@@ -504,6 +532,11 @@
                                 throwOnError: false // 如果公式有错，不抛出异常，而是显示原始文本
                             });
                         }
+                        
+                        controlsContainer.appendChild(checkboxContainer);
+                        controlsContainer.appendChild(downloadBtn);
+                        // 将控制栏插入到内容顶部
+                        content.insertBefore(controlsContainer, markdownBody);
                         break;
                     case 'error':
                         content.innerHTML = `<div class="error-message"><strong>发生错误:</strong><br><pre>${paper.error}</pre></div>`;
@@ -551,18 +584,32 @@
             render();
         }
 
+        // --- 【新增】核心逻辑：处理图片文件名递增 ---
+        function getProcessedSummary(id) {
+            const paper = papers[id];
+            if (!paper || !paper.summary) return '';
+            if (!paper.incrementImages) {
+                return paper.summary;
+            }
+            // 使用正则表达式查找并替换 x[数字].png
+            return paper.summary.replace(/x(\d+)\.png/g, (match, number) => {
+                const incrementedNumber = parseInt(number, 10) + 1;
+                return `x${incrementedNumber}.png`;
+            });
+        }
+
         // --- 核心逻辑 ---
         function downloadMarkdown(id) {
             const paper = papers[id];
             if (!paper || paper.status !== 'success') return;
 
             const arxivUrl = `https://arxiv.org/abs/${id}`;
-            const processedSummary = paper.summary
+            const processedSummary = getProcessedSummary(id)
               .replace(/\$/g, '$$$$')        // 将$替换为$$
               .replace(/\$\$\$\$/g, '$$$$')  // 将$$$$替换为$$
               .replace(/\*\*\n\*/g, "**\n\n*"); // 避免列表渲染错
 
-            const fileContent = `${arxivUrl}\n\n${processedSummary}\n\n（[https://zsc.github.io/widgets/arxiv.html](https://zsc.github.io/widgets/arxiv_demo/index.html) Gemini 2.5 生成，格式略有修改）`;
+            const fileContent = `[${arxivUrl}](${arxivUrl})\n\n${processedSummary}\n\n（[https://zsc.github.io/widgets/arxiv_demo/index.html](https://zsc.github.io/widgets/arxiv_demo/index.html) Gemini 2.5 生成，格式略有修改）`;
 
             const blob = new Blob([fileContent], { type: 'text/markdown;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -661,7 +708,7 @@
                 unreadCount++;
                 updateFavicon();
             }
-            papers[id] = { status: 'loading', summary: '', error: null, isUnread: true };
+            papers[id] = { status: 'loading', summary: '', error: null, isUnread: true, incrementImages: false };
             render(); // Render immediately to show the loading state.
 
             try {
