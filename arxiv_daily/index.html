@@ -17,9 +17,15 @@
         tr:hover { background-color: #e9ecef; }
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .paper-row { position: relative; cursor: default; }
-        .tooltip-text { visibility: hidden; opacity: 0; width: 600px; background-color: #fff; color: #333; text-align: left; border-radius: 6px; padding: 15px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -300px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.2s ease-in-out; pointer-events: none; border: 1px solid #ccc; }
-        .paper-row:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .paper-row { cursor: pointer; }
+        .paper-details {
+            display: none; /* Hidden by default */
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa; /* Use a slightly different bg for the expanded area */
+            border-left: 3px solid #007bff; /* Add an accent bar */
+        }
+        .paper-details.expanded { display: block; /* Show on click */ }
         .paper-title { font-weight: bold; }
         .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
         .abstract { margin-top: 10px; }
@@ -85,7 +91,7 @@
                             <td>
                                 <div class="paper-title">${paper.chinese_title}</div>
                                 <div>${paper.title}</div>
-                                <div class="tooltip-text">
+                                <div class="paper-details">
                                     <strong>作者 (Authors):</strong>
                                     <div class="authors">${paper.authors}</div>
                                     <strong style="margin-top:10px; display:block;">中文摘要 (Abstract_CN):</strong>
@@ -93,10 +99,23 @@
                                 </div>
                             </td>
                             <td>
-                                <a href="${paper.abs_link}" target="_blank">Abs</a> |
-                                <a href="${paper.pdf_link}" target="_blank">PDF</a>
+                                <a href="${paper.abs_link}" target="_blank" rel="noopener noreferrer">Abs</a> |
+                                <a href="${paper.pdf_link}" target="_blank" rel="noopener noreferrer">PDF</a>
                             </td>
                         `;
+
+                        // Add click listener to the row to toggle abstract visibility
+                        row.addEventListener('click', (event) => {
+                            // Do not toggle if an action link was clicked
+                            if (event.target.tagName === 'A') {
+                                return;
+                            }
+                            const details = row.querySelector('.paper-details');
+                            if (details) {
+                                details.classList.toggle('expanded');
+                            }
+                        });
+
                         tbody.appendChild(row);
                     });
                     table.appendChild(tbody);
