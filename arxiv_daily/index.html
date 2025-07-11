@@ -13,20 +13,15 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
         th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        tr:hover { background-color: #e9ecef; }
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .paper-row { cursor: pointer; }
-        .paper-details {
-            display: none; /* Hidden by default */
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8f9fa; /* Use a slightly different bg for the expanded area */
-            border-left: 3px solid #007bff; /* Add an accent bar */
-        }
-        .paper-details.expanded { display: block; /* Show on click */ }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
         .paper-title { font-weight: bold; }
+        .details-row { display: none; } /* Hidden by default */
+        .details-row.show { display: table-row; } /* Revealed on click */
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; }
         .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
         .abstract { margin-top: 10px; }
         #loader { text-align: center; font-size: 1.2em; padding: 50px; }
@@ -35,7 +30,7 @@
 <body>
     <div class="container" id="report-container">
         <h1>今日学术速递</h1>
-        <p id="intro">正在加载和渲染论文数据...</p>
+        <p id="intro">正在加载和渲染论文数据... 将鼠标悬停在论文标题上可查看详细摘要。</p>
         <div id="loader">
             <p>Loading...</p>
         </div>
@@ -67,7 +62,7 @@
                 }
 
                 const papersMap = new Map(papersData.map(p => [p.id, p]));
-                intro.textContent = `根据您的学术兴趣，今日的论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。将鼠标悬停在论文标题上可查看详细摘要。`;
+                intro.textContent = `根据您的学术兴趣，今日的论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。点击论文标题可展开查看摘要。`;
 
                 for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {
                     const section = document.createElement('section');
@@ -76,7 +71,7 @@
                     section.appendChild(title);
 
                     const table = document.createElement('table');
-                    const thead = `<thead><tr><th>标题 (Title)</th><th>操作 (Actions)</th></tr></thead>`;
+                    const thead = `<thead><tr><th>论文 (Paper)</th></tr></thead>`;
                     table.innerHTML = thead;
                     const tbody = document.createElement('tbody');
 
@@ -84,39 +79,32 @@
                         const paper = papersMap.get(paperId);
                         if (!paper) return;
 
-                        const row = document.createElement('tr');
-                        row.className = 'paper-row';
-
-                        row.innerHTML = `
+                        // Create the main row for the title (clickable)
+                        const titleRow = tbody.insertRow();
+                        titleRow.className = 'paper-title-row';
+                        titleRow.innerHTML = `
                             <td>
                                 <div class="paper-title">${paper.chinese_title}</div>
-                                <div>${paper.title}</div>
-                                <div class="paper-details">
-                                    <strong>作者 (Authors):</strong>
-                                    <div class="authors">${paper.authors}</div>
-                                    <strong style="margin-top:10px; display:block;">中文摘要 (Abstract_CN):</strong>
-                                    <div class="abstract">${paper.chinese_abstract}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="${paper.abs_link}" target="_blank" rel="noopener noreferrer">Abs</a> |
-                                <a href="${paper.pdf_link}" target="_blank" rel="noopener noreferrer">PDF</a>
-                            </td>
-                        `;
+                                <div><a href="${paper.pdf_link}" target="_blank" onclick="event.stopPropagation();" title="Download PDF">${paper.title}</a></div>
+                            </td>`;
 
-                        // Add click listener to the row to toggle abstract visibility
-                        row.addEventListener('click', (event) => {
-                            // Do not toggle if an action link was clicked
-                            if (event.target.tagName === 'A') {
-                                return;
-                            }
-                            const details = row.querySelector('.paper-details');
-                            if (details) {
-                                details.classList.toggle('expanded');
-                            }
+                        // Create the hidden row for details
+                        const detailsRow = tbody.insertRow();
+                        detailsRow.className = 'details-row';
+                        detailsRow.innerHTML = `
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">${paper.authors}</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">${paper.chinese_abstract}</div>
+                                <div style="margin-top: 15px;"><a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a></div>
+                            </td>`;
+
+                        // Add click event listener to toggle visibility of the details row
+                        titleRow.addEventListener('click', () => {
+                            titleRow.classList.toggle('expanded');
+                            detailsRow.classList.toggle('show');
                         });
-
-                        tbody.appendChild(row);
                     });
                     table.appendChild(tbody);
                     section.appendChild(table);
