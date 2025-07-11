@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+ 
 """
 arXiv Paper Digest Generator
 
@@ -30,10 +30,12 @@ Execution:
 import os
 import csv
 import json
+import re
 import time
 import logging
 import argparse
 import textwrap
+from collections import deque
 import unittest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -43,8 +45,6 @@ from tqdm import tqdm
 import arxiv
 from google import genai
 
-import time
-from collections import deque
 
 class RateLimiter:
     def __init__(self, max_requests, period_seconds):
@@ -75,6 +75,172 @@ class RateLimiter:
         return False
 
 rate_limiter = RateLimiter(max_requests=30, period_seconds=60)
+
+# --- Robust JSON Parsing Utility ---
+
+# Characters that are plausible candidates for insertion/replacement in a broken JSON string.
+PLAUSIBLE_CHARS = '"{}[],: '
+
+def _apply_simple_fixes(json_str: str) -> tuple[str, list[str]]:
+    """
+    Applies a series of common, simple fixes for LLM-generated JSON.
+    """
+    original_str = json_str
+    mods = []
+    
+    # 1. Extract JSON object/array from surrounding text
+    # Handles markdown code blocks and conversational text.
+    match = re.search(r'```(?:json)?\s*([\[{].*[\]}])\s*```', json_str, re.DOTALL)
+    if match:
+        json_str = match.group(1)
+        mods.append("Extracted JSON from markdown code block.")
+    else:
+        # Fallback to finding the first and last brace/bracket
+        start_brace = json_str.find('{')
+        start_bracket = json_str.find('[')
+        
+        start_pos = -1
+        
+        if start_brace == -1 and start_bracket == -1:
+            # No JSON structure found, nothing to extract
+            pass
+        elif start_brace == -1:
+            start_pos = start_bracket
+        elif start_bracket == -1:
+            start_pos = start_brace
+        else:
+            start_pos = min(start_brace, start_bracket)
+            
+        if start_pos != -1:
+            end_brace = json_str.rfind('}')
+            end_bracket = json_str.rfind(']')
+            end_pos = max(end_brace, end_bracket)
+            
+            if end_pos > start_pos:
+                new_str = json_str[start_pos:end_pos+1]
+                if new_str != json_str:
+                    json_str = new_str
+                    mods.append("Extracted content between first and last brace/bracket.")
+
+    # 2. Remove JavaScript-style comments
+    temp_str = re.sub(r'//.*', '', json_str)
+    temp_str = re.sub(r'/\*.*?\*/', '', temp_str, flags=re.DOTALL)
+    if temp_str != json_str:
+        mods.append("Removed JavaScript-style comments.")
+        json_str = temp_str
+
+    # 3. Fix trailing commas
+    temp_str = re.sub(r',\s*([}\]])', r'\1', json_str)
+    if temp_str != json_str:
+        mods.append("Removed trailing commas.")
+        json_str = temp_str
+        
+    # 4. Fix improper backslash escapes (like in LaTeX or Windows paths)
+    # This regex finds a backslash that is NOT followed by a valid JSON escape char.
+    # The original regex was too conservative and allowed valid but unintended
+    # escapes like \t or \n. This version is more aggressive for LLM-like
+    # errors, preserving only explicit `\"`, `\\`, `\/`, and `\u` sequences.
+    temp_str = re.sub(r'\\(?![\\"\/u])', r'\\\\', json_str)
+    if temp_str != json_str:
+        mods.append("Added escaping to invalid backslashes.")
+        json_str = temp_str
+
+    # 5. Replace single quotes with double quotes (common LLM mistake)
+    # This is a heuristic and might not work for strings containing apostrophes,
+    # but it's a very common and simple fix.
+    if "'" in json_str:
+        try:
+            # A more careful replacement: only for keys and values if possible
+            # For simplicity, we try a global replacement and see if it parses.
+            temp_str = json_str.replace("'", '"')
+            json.loads(temp_str) # Check if this simple fix works
+            mods.append("Replaced single quotes with double quotes.")
+            json_str = temp_str
+        except json.JSONDecodeError:
+            # The simple replacement didn't work, we'll let the BFS handle it.
+            pass
+
+    if not mods:
+        mods.append("No simple fixes applied.")
+        
+    return json_str, mods
+
+
+def fix_invalid_json(invalid_json_str: str) -> tuple[str | None, list[str]]:
+    """
+    Uses pre-computation and a time-limited Breadth-First Search (BFS) to find 
+    the minimum character modifications to make an invalid JSON string valid.
+    """
+    if not invalid_json_str or not invalid_json_str.strip():
+        return "{}", ["Original string was empty, returned a valid empty object."]
+
+    processed_str, pre_mods = _apply_simple_fixes(invalid_json_str)
+    try:
+        json.loads(processed_str)
+        return processed_str, pre_mods
+    except json.JSONDecodeError:
+        if '{' not in processed_str and '[' not in processed_str:
+            return None, ["Could not find a solution. The string does not appear to contain a JSON object or array."]
+        pass
+
+    start_time = time.time()
+    queue = deque([(processed_str, pre_mods)])
+    visited = {processed_str}
+    
+    max_operations = 100000 
+    operation_count = 0
+    deletion_only_mode = False
+    
+    while queue:
+        elapsed_time = time.time() - start_time
+        if elapsed_time > 10.0:
+            return None, ["Failed to find a solution within the 10-second time limit."]
+        
+        if not deletion_only_mode and elapsed_time > 3.0:
+            deletion_only_mode = True
+            new_mods = pre_mods + ["Switched to deletion-only mode after 3s."]
+            queue.clear()
+            visited.clear()
+            queue.append((processed_str, new_mods))
+            visited.add(processed_str)
+            continue
+
+        operation_count += 1
+        if operation_count > max_operations:
+            return None, ["Search space too large, aborted after 100,000 states."]
+
+        current_str, mods = queue.popleft()
+
+        try:
+            result = json.loads(current_str)
+            if isinstance(result, (dict, list)):
+                return current_str, mods
+        except json.JSONDecodeError:
+            pass
+
+        for i in range(len(current_str)):
+            next_str = current_str[:i] + current_str[i+1:]
+            if next_str and next_str not in visited:
+                visited.add(next_str)
+                queue.append((next_str, mods + [f"Deleted '{current_str[i]}' at index {i}"]))
+
+        if not deletion_only_mode:
+            for i in range(len(current_str)):
+                for char in PLAUSIBLE_CHARS:
+                    if current_str[i] == char: continue
+                    next_str = current_str[:i] + char + current_str[i+1:]
+                    if next_str not in visited:
+                        visited.add(next_str)
+                        queue.append((next_str, mods + [f"Replaced '{current_str[i]}' with '{char}' at index {i}"]))
+            
+            for i in range(len(current_str) + 1):
+                for char in PLAUSIBLE_CHARS:
+                    next_str = current_str[:i] + char + current_str[i:]
+                    if next_str not in visited:
+                        visited.add(next_str)
+                        queue.append((next_str, mods + [f"Inserted '{char}' at index {i}"]))
+
+    return None, ["Could not find a solution by exhausting the search queue."]
 
 # --- Configuration ---
 try:
@@ -167,9 +333,21 @@ def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict 
             with rate_limiter:
                 response = GEMINI_CLIENT.models.generate_content(
                     model=SCORING_TRANSLATION_MODEL, contents=prompt)
-            cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
-            result = json.loads(cleaned_response_text)
             
+            try:
+                # First, try to parse with simple cleaning
+                cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+                result = json.loads(cleaned_response_text)
+            except json.JSONDecodeError:
+                # If it fails, use the robust fixer on the original text
+                logging.warning(f"Initial JSON parsing failed for {arxiv_id}. Attempting to fix...")
+                fixed_json_str, mods = fix_invalid_json(response.text)
+                if not fixed_json_str:
+                    # Raise an error to be caught by the outer 'except' and trigger a retry
+                    raise ValueError(f"JSON fixer failed to produce a result. Fix attempts: {mods}")
+                logging.info(f"Successfully fixed JSON for {arxiv_id}. Modifications: {mods}")
+                result = json.loads(fixed_json_str)
+
             score = result.get("relevance_score", 0)
             if score >= RELEVANCE_THRESHOLD:
                 processed_paper = paper_data.copy()
@@ -186,7 +364,7 @@ def score_and_translate_paper(paper_data: dict, academic_interest: str) -> dict 
             else:
                 logging.info(f"Paper {arxiv_id} is not relevant (Score: {score}).")
                 return None
-        except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        except (json.JSONDecodeError, AttributeError, KeyError, ValueError) as e:
             logging.error(f"Error parsing Gemini response for {arxiv_id} on attempt {attempt+1}: {e}. Response: {response.text}")
         except Exception as e:
             logging.error(f"API call failed for {arxiv_id} on attempt {attempt+1}: {e}")
@@ -261,24 +439,35 @@ def generate_json_clusters(papers: list, academic_interest: str) -> dict | None:
     """)
     
     for attempt in range(API_RETRY_ATTEMPTS):
+        response_text = ""
         try:
             with rate_limiter:
                 response = GEMINI_CLIENT.models.generate_content(
                     model=CLUSTERING_MODEL,
                     contents=prompt
                 )
-            cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
-            clusters = json.loads(cleaned_response_text)
+            response_text = response.text
+
+            try:
+                cleaned_response_text = response_text.strip().replace("```json", "").replace("```", "").strip()
+                clusters = json.loads(cleaned_response_text)
+            except json.JSONDecodeError:
+                logging.warning(f"Initial cluster JSON parsing failed. Attempting to fix...")
+                fixed_json_str, mods = fix_invalid_json(response_text)
+                if not fixed_json_str:
+                    raise ValueError(f"JSON fixer failed for clusters. Fix attempts: {mods}")
+                logging.info(f"Successfully fixed cluster JSON. Modifications: {mods}")
+                clusters = json.loads(fixed_json_str)
             
             # Basic validation
             if isinstance(clusters, dict) and all(isinstance(k, str) and isinstance(v, list) for k, v in clusters.items()):
                 logging.info(f"Successfully generated {len(clusters)} clusters.")
                 return clusters
             else:
-                raise ValueError("Generated JSON does not match the expected structure.")
+                raise ValueError(f"Generated JSON does not match the expected structure. Got: {clusters}")
 
         except (json.JSONDecodeError, ValueError) as e:
-            logging.error(f"Error parsing cluster response on attempt {attempt+1}: {e}. Response: {cleaned_response_text}")
+            logging.error(f"Error parsing or validating cluster response on attempt {attempt+1}: {e}. Response: {response_text}")
         except Exception as e:
             logging.error(f"Cluster generation API call failed on attempt {attempt+1}: {e}")
         
@@ -494,9 +683,11 @@ def main(csv_input_path_str: str):
         logging.error("Failed to generate or load paper clusters. Cannot create HTML report.")
         return
 
-    logging.info("--- Starting Sub-step 3: Generating Dynamic HTML Report ---")
-    create_dynamic_html_report(json_cache_file, cluster_json_file, html_output_file)
-    logging.info(f"Pipeline complete. Report generated at: {html_output_file}")
+    logging.info('Pipeline complete.')
+    # can be shared, comment out
+    # logging.info("--- Starting Sub-step 3: Generating Dynamic HTML Report ---")
+    # create_dynamic_html_report(json_cache_file, cluster_json_file, html_output_file) 
+    # logging.info(f"Pipeline complete. Report generated at: {html_output_file}")
 
 
 # --- Unit Tests ---
