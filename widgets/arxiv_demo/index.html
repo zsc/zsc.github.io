@@ -562,7 +562,7 @@
               .replace(/\$\$\$\$/g, '$$$$')  // 将$$$$替换为$$
               .replace(/\*\*\n\*/g, "**\n\n*"); // 避免列表渲染错
 
-            const fileContent = `${arxivUrl}\n\n${processedSummary}\n\n（[https://zsc.github.io/widgets/arxiv.html](https://zsc.github.io/widgets/arxiv.html) Gemini 2.5 生成，格式略有修改）`;
+            const fileContent = `${arxivUrl}\n\n${processedSummary}\n\n（[https://zsc.github.io/widgets/arxiv.html](https://zsc.github.io/widgets/arxiv_demo/index.html) Gemini 2.5 生成，格式略有修改）`;
 
             const blob = new Blob([fileContent], { type: 'text/markdown;charset=utf-8' });
             const url = URL.createObjectURL(blob);
