@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Word Daily Dose</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --highlight-bg: #ffc107;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+        .date-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .date-selector label {
+            font-weight: 500;
+        }
+        .date-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .submit-btn:disabled {
+            background-color: #a0c7ff;
+            cursor: not-allowed;
+        }
+        #output {
+            margin-top: 1.5rem;
+        }
+        .loader {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1rem;
+            color: #6c757d;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .content-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        .root-highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .word-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .word-list li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-left: 3px solid var(--primary-color);
+            background-color: var(--secondary-color);
+            border-radius: 0 4px 4px 0;
+        }
+        .word-list strong {
+            font-size: 1.1rem;
+        }
+        .description-text {
+            line-height: 1.6;
+        }
+        .description-text p {
+            margin-bottom: 1em;
+        }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .image-gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px var(--shadow-color);
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Root Word Daily Dose</h1>
+        <div class="date-selector">
+            <label for="date-picker">Select a Date:</label>
+            <input type="date" id="date-picker" class="date-input">
+            <button id="fetch-button" class="submit-btn">Get Today's Words</button>
+        </div>
+
+        <div id="output">
+            <div class="loader" id="loader" style="display: none;">
+                <p>Generating vocabulary lesson... Please wait.</p>
+            </div>
+            <div id="error-container" class="error" style="display: none;"></div>
+            <div id="content-container"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Powered by Gemini & Google Search</p>
+    </footer>
+
+    <script type="module">
+        // Import the Google AI SDK for browser
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+        const fetchButton = document.getElementById('fetch-button');
+        const datePicker = document.getElementById('date-picker');
+        const outputDiv = document.getElementById('output');
+        const loader = document.getElementById('loader');
+        const errorContainer = document.getElementById('error-container');
+        const contentContainer = document.getElementById('content-container');
+
+        // Declare a global variable for the SDK client instance.
+        // It will be initialized later, after the API key is retrieved.
+        let genAI;
+
+        // Set default date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        datePicker.value = `${yyyy}-${mm}-${dd}`;
+        
+        // --- API Key Retrieval ---
+        function getApiKey() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('apiKey');
+        }
+        
+        const GEMINI_API_KEY = getApiKey();
+        // The Google Search API Key is often the same as the main project key for Google Cloud AI Platform.
+        // If it's a different key, you might pass it as another URL param e.g., `googleApiKey=...`
+        const GOOGLE_SEARCH_API_KEY = GEMINI_API_KEY; 
+        const GOOGLE_SEARCH_CX = '76281310c40334064'; // IMPORTANT: Replace with your actual CX ID
+
+        fetchButton.addEventListener('click', handleFetch);
+
+        function showError(message) {
+            contentContainer.innerHTML = '';
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+            loader.style.display = 'none';
+            fetchButton.disabled = false;
+        }
+
+        async function handleFetch() {
+            if (!GEMINI_API_KEY) {
+                showError("Gemini API Key not found in URL. Please append '?apiKey=YOUR_KEY' to the address.");
+                return;
+            }
+            if (!GOOGLE_SEARCH_CX || GOOGLE_SEARCH_CX === 'YOUR_CUSTOM_SEARCH_ENGINE_ID') {
+                showError("Google Custom Search Engine ID (CX) is not set in the script. Please configure it.");
+                return;
+            }
+
+            // Initialize the SDK on the first valid fetch attempt.
+            // This ensures the API key is available before creating the client instance.
+            if (!genAI) {
+                genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+            }
+
+            const selectedDate = datePicker.value;
+            if (!selectedDate) {
+                showError("Please select a valid date.");
+                return;
+            }
+
+            fetchButton.disabled = true;
+            loader.style.display = 'block';
+            errorContainer.style.display = 'none';
+            contentContainer.innerHTML = '';
+
+            try {
+                const date = new Date(selectedDate);
+                const month = date.toLocaleString('en-US', { month: 'long' });
+                const day = date.getDate();
+                
+                const geminiResponse = await callGeminiApi(month, day);
+                const searchResults = await callGoogleImageSearch(geminiResponse.event_keywords);
+                
+                renderContent(geminiResponse, searchResults);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showError(`Failed to fetch data. ${error.message}. Check the console for more details.`);
+            } finally {
+                loader.style.display = 'none';
+                fetchButton.disabled = false;
+            }
+        }
+
+        function createGeminiPrompt(month, day) {
+            return `
+You are an expert English teacher creating vocabulary lessons for a Chinese high school student (Grade 10-11).
+For the date ${month} ${day}, identify a single, significant historical event relevant to Chinese high school curriculum (history, or history of science like math, physics, chemistry, biology).
+
+Based on this event, choose one common and useful English root word.
+
+Your task is to generate a JSON object with the following exact structure:
+{
+  "event_title": "Short title of the event (English)",
+  "event_title_zh": "Short title of the event (Chinese)",
+  "root_word": "The chosen root word",
+  "root_meaning": "The meaning of the root (English and Chinese)",
+  "event_keywords": "3-4 keywords for image search",
+  "word_cluster": [
+    { "word": "word1", "definition_zh": "Chinese definition" },
+    { "word": "word2", "definition_zh": "Chinese definition" },
+    { "word": "word3", "definition_zh": "Chinese definition" }
+  ],
+  "description_en": "A 100-150 word paragraph in English describing the event. You MUST use all words from the 'word_cluster'. You MUST wrap the root part of each word with '<span class=\"root-highlight\">root</span>'. For example, if the root is 'port', the word 'transport' should be written as 'trans<span class=\"root-highlight\">port</span>'.",
+  "description_zh": "A precise, 1:1 Chinese translation of the English paragraph.",
+  "extra_words": [
+    { "word": "extra_word1", "definition_zh": "Chinese definition" },
+    { "word": "extra_word2", "definition_zh": "Chinese definition" }
+  ]
+}
+Ensure the English is natural and the Chinese translations are simple and accurate for a high school student.
+The root word must be highlighted correctly inside the derived words in the 'description_en' field.
+Do not output anything other than the JSON object.
+`;
+        }
+
+        async function callGeminiApi(month, day) {
+            const prompt = createGeminiPrompt(month, day);
+            // Use the globally initialized genAI object from handleFetch
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+            const generationConfig = {
+                responseMimeType: "application/json",
+                temperature: 0.5,
+            };
+
+            try {
+                const result = await model.generateContent({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig,
+                });
+                const response = result.response;
+                const text = response.text();
+                return JSON.parse(text);
+            } catch (error) {
+                console.error("Gemini SDK Error:", error);
+                throw new Error(`Gemini API Error: ${error.message}`);
+            }
+        }
+        
+        async function callGoogleImageSearch(query) {
+            const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_CX}&q=${encodeURIComponent(query)}&searchType=image&num=2`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                const errorBody = await response.json();
+                console.error("Google Search API Error:", errorBody);
+                // Don't block the UI for a failed image search, just return empty
+                return []; 
+            }
+            const data = await response.json();
+            return data.items || [];
+        }
+
+
+        function renderContent(data, images) {
+            contentContainer.innerHTML = `
+                <div class="content-section">
+                    <h2>${data.event_title}</h2>
+                    <p>${data.event_title_zh}</p>
+                </div>
+
+                <div class="content-section">
+                    <h3>Root Word</h3>
+                    <p><span class="root-highlight">${data.root_word}</span>: ${data.root_meaning}</p>
+                </div>
+
+                <div class="content-section word-list">
+                    <h3>Core Vocabulary</h3>
+                    <ul>
+                        ${data.word_cluster.map(w => `<li><strong>${w.word}</strong>: ${w.definition_zh}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="content-section description-text">
+                    <h3>Event Description</h3>
+                    <p>${data.description_en}</p>
+                    <p style="color: #6c757d;">${data.description_zh}</p>
+                </div>
+
+                ${data.extra_words.length > 0 ? `
+                <div class="content-section word-list">
+                    <h3>Extended Vocabulary</h3>
+                    <ul>
+                        ${data.extra_words.map(w => `<li><strong>${w.word}</strong>: ${w.definition_zh}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                ${images.length > 0 ? `
+                <div class="content-section image-gallery">
+                    ${images.map(img => `<img src="${img.link}" alt="${img.title}">`).join('')}
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // Initial check on load
+        if (!GEMINI_API_KEY) {
+            showError("Welcome! To get started, please provide your Google AI API key in the URL. Append '?apiKey=YOUR_KEY' to the current web address and reload the page.");
+            fetchButton.disabled = true;
+        } else if (!GOOGLE_SEARCH_CX || GOOGLE_SEARCH_CX === 'YOUR_CUSTOM_SEARCH_ENGINE_ID') {
+            showError("Configuration needed: Please edit the HTML file and replace 'YOUR_CUSTOM_SEARCH_ENGINE_ID' with your actual Google Custom Search Engine ID (CX).");
+            fetchButton.disabled = true;
+        }
+
+    </script>
+</body>
+</html>
