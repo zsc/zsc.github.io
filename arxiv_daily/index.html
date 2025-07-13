@@ -39,94 +39,135 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Get date from URL param 'date', default to today's date in YYYY-MM-DD format
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateParam = urlParams.get('date');
-            const dateString = dateParam || new Date().toISOString().slice(0, 10);
-
-            const papersFile = `${dateString}.json`;
-            const clustersFile = `clusters_${dateString}.json`;
             const container = document.getElementById('clusters-content');
             const loader = document.getElementById('loader');
             const intro = document.getElementById('intro');
+            const maxRetries = 7; // Maximum number of days to go back
 
-            Promise.all([
-                fetch(papersFile).then(res => res.json()),
-                fetch(clustersFile).then(res => res.json())
-            ])
-            .then(([papersData, clustersData]) => {
-                loader.style.display = 'none';
-                if (Object.keys(clustersData).length === 0) {
-                    intro.textContent = '今日未发现相关主题的论文分组。';
+            /**
+             * Attempts to load and render data for a given date.
+             * If it fails, it recursively calls itself for the previous day.
+             * @param {Date} date The date to try loading data for.
+             * @param {number} attempt The current attempt number (1-based).
+             */
+            const tryLoadData = (date, attempt = 1) => {
+                if (attempt > maxRetries) {
+                    loader.style.display = 'none';
+                    intro.textContent = `加载最近 ${maxRetries} 天的数据失败。请检查文件是否存在以及网络连接。 (Failed to load data for the last ${maxRetries} days.)`;
+                    console.error(`Failed to load data after ${maxRetries} attempts.`);
                     return;
                 }
 
-                const papersMap = new Map(papersData.map(p => [p.id, p]));
-                intro.textContent = `根据您的学术兴趣，今日的论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。点击论文标题可展开查看摘要。`;
+                const dateString = date.toISOString().slice(0, 10);
+                const papersFile = `${dateString}.json`;
+                const clustersFile = `clusters_${dateString}.json`;
 
-                for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {
-                    const section = document.createElement('section');
-                    const title = document.createElement('h2');
-                    title.textContent = clusterTitle;
-                    section.appendChild(title);
+                console.log(`Attempt #${attempt}: Trying to load data for ${dateString}`);
 
-                    const table = document.createElement('table');
-                    const thead = `<thead><tr><th>论文 (Paper)</th></tr></thead>`;
-                    table.innerHTML = thead;
-                    const tbody = document.createElement('tbody');
+                Promise.all([
+                    fetch(papersFile),
+                    fetch(clustersFile)
+                ])
+                .then(([papersResponse, clustersResponse]) => {
+                    // fetch() promise resolves on 404, so we must check the .ok status
+                    if (!papersResponse.ok || !clustersResponse.ok) {
+                        throw new Error(`Data not found for ${dateString}. Statuses: ${papersResponse.status}, ${clustersResponse.status}`);
+                    }
+                    // If files exist, return a new promise for their JSON content
+                    return Promise.all([papersResponse.json(), clustersResponse.json()]);
+                })
+                .then(([papersData, clustersData]) => {
+                    // --- SUCCESS ---
+                    loader.style.display = 'none';
+                    if (Object.keys(clustersData).length === 0) {
+                        intro.textContent = `日期 ${dateString} 未发现相关主题的论文分组。`;
+                        return;
+                    }
 
-                    paperIds.forEach(paperId => {
-                        const paper = papersMap.get(paperId);
-                        if (!paper) return;
+                    intro.textContent = `为您找到日期 ${dateString} 的数据。论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。点击论文标题可展开查看摘要。`;
 
-                        // Create the main row for the title (clickable)
-                        const titleRow = tbody.insertRow();
-                        titleRow.className = 'paper-title-row';
-                        titleRow.innerHTML = `
-                            <td>
-                                <div class="paper-title">${paper.chinese_title}</div>
-                                <div><a href="${paper.pdf_link}" target="_blank" onclick="event.stopPropagation();" title="Download PDF">${paper.title}</a></div>
-                            </td>`;
+                    // --- Start Rendering Logic (same as before) ---
+                    for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {
+                        const section = document.createElement('section');
+                        const title = document.createElement('h2');
+                        title.textContent = clusterTitle;
+                        section.appendChild(title);
 
-                        // Create the hidden row for details
-                        const detailsRow = tbody.insertRow();
-                        detailsRow.className = 'details-row';
-                        detailsRow.innerHTML = `
-                            <td class="details-cell">
-                                <strong>作者 (Authors):</strong>
-                                <div class="authors">${paper.authors}</div>
-                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
-                                <div class="abstract">${paper.chinese_abstract}</div>
-                                <div style="margin-top: 15px;">
-                                    <a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a>
-                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
-                                </div>
-                            </td>`;
+                        const table = document.createElement('table');
+                        const thead = `<thead><tr><th>论文 (Paper)</th></tr></thead>`;
+                        table.innerHTML = thead;
+                        const tbody = document.createElement('tbody');
 
-                        // Add click event listener to toggle visibility of the details row
-                        titleRow.addEventListener('click', () => {
-                            titleRow.classList.toggle('expanded');
-                            detailsRow.classList.toggle('show');
+                        const papersMap = new Map(papersData.map(p => [p.id, p]));
+
+                        paperIds.forEach(paperId => {
+                            const paper = papersMap.get(paperId);
+                            if (!paper) return;
+
+                            const titleRow = tbody.insertRow();
+                            titleRow.className = 'paper-title-row';
+                            titleRow.innerHTML = `
+                                <td>
+                                    <div class="paper-title">${paper.chinese_title}</div>
+                                    <div><a href="${paper.pdf_link}" target="_blank" onclick="event.stopPropagation();" title="Download PDF">${paper.title}</a></div>
+                                </td>`;
+
+                            const detailsRow = tbody.insertRow();
+                            detailsRow.className = 'details-row';
+                            detailsRow.innerHTML = `
+                                <td class="details-cell">
+                                    <strong>作者 (Authors):</strong>
+                                    <div class="authors">${paper.authors}</div>
+                                    <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                    <div class="abstract">${paper.chinese_abstract}</div>
+                                    <div style="margin-top: 15px;">
+                                        <a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a>
+                                        <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                    </div>
+                                </td>`;
+
+                            titleRow.addEventListener('click', () => {
+                                titleRow.classList.toggle('expanded');
+                                detailsRow.classList.toggle('show');
+                            });
+
+                            const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                            collapseBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                titleRow.classList.remove('expanded');
+                                detailsRow.classList.remove('show');
+                            });
                         });
+                        table.appendChild(tbody);
+                        section.appendChild(table);
+                        container.appendChild(section);
+                    }
+                    // --- End Rendering Logic ---
+                })
+                .catch(error => {
+                    // --- FAILURE, INITIATE RETRY ---
+                    console.warn(error.message); // Log the reason for this attempt's failure
 
-                        // Add click event listener for the collapse button
-                        const collapseBtn = detailsRow.querySelector('.collapse-btn');
-                        collapseBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            titleRow.classList.remove('expanded');
-                            detailsRow.classList.remove('show');
-                        });
-                    });
-                    table.appendChild(tbody);
-                    section.appendChild(table);
-                    container.appendChild(section);
-                }
-            })
-            .catch(error => {
-                loader.style.display = 'none';
-                intro.textContent = '加载论文数据失败。请检查文件是否存在以及网络连接。';
-                console.error('Error loading data:', error);
-            });
+                    // Calculate the previous day
+                    const previousDay = new Date(date);
+                    previousDay.setDate(date.getDate() - 1);
+
+                    // Recursively call for the previous day
+                    tryLoadData(previousDay, attempt + 1);
+                });
+            };
+
+            // --- INITIALIZATION ---
+            // Get date from URL param 'date', default to today's date
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
+            
+            // To prevent timezone issues, we create a Date object from the YYYY-MM-DD string.
+            // new Date('YYYY-MM-DD') creates a date at midnight UTC.
+            const initialDate = dateParam ? new Date(dateParam) : new Date();
+
+            // Start the loading process
+            tryLoadData(initialDate);
         });
     </script>
 </body>
