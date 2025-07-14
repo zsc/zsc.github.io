@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM-Index Search</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+            margin-top: 0;
+        }
+        #search-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        #search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        #status {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            height: 20px;
+            margin-bottom: 20px;
+        }
+        #results {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 60vh;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+        }
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .result-item:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        .result-item mark {
+            background-color: #ffda79;
+            color: #000;
+            border-radius: 3px;
+            padding: 2px 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>FM-Index Text Search</h1>
+        <input type="text" id="search-input" placeholder="Type to search..." disabled>
+        <div id="status">Loading index files...</div>
+        <ul id="results"></ul>
+    </div>
+
+    <script>
+    // --- Global Variables ---
+    const searchInput = document.getElementById('search-input');
+    const statusDiv = document.getElementById('status');
+    const resultsUl = document.getElementById('results');
+
+    // This object will hold all the loaded FM-Index data
+    const fmIndex = {
+        bwt: null,
+        cTable: null,
+        alphabet: null,
+        charToIndex: null,
+        occCheckpoints: null,
+        sampledSA: null,
+        docMap: null,
+        originalArticles: null,
+        // Config params will be loaded from c_table.json
+        saSamplingRate: 0,
+        occCheckpointInterval: 0,
+    };
+
+    // --- Debounce Function ---
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            console.time('Index Loading');
+            statusDiv.textContent = 'Loading index files... (can take a few seconds)';
+
+            // Fetch all necessary files concurrently
+            const [
+                cTableResponse,
+                docMapResponse,
+                bwtResponse,
+                saSampledResponse,
+                occCheckpointsResponse,
+                articlesResponse
+            ] = await Promise.all([
+                fetch('./index/c_table.json'),
+                fetch('./index/doc_map.json'),
+                fetch('./index/bwt.bin'),
+                fetch('./index/sa_sampled.bin'),
+                fetch('./index/occ_checkpoints.bin'),
+                fetch('./data/articles.csv') // Fetch original text for display
+            ]);
+
+            // --- 1. Parse JSON and Config ---
+            const cTableData = await cTableResponse.json();
+            fmIndex.cTable = cTableData.c_table;
+            fmIndex.alphabet = cTableData.alphabet;
+            fmIndex.saSamplingRate = cTableData.sa_sampling_rate;
+            fmIndex.occCheckpointInterval = cTableData.occ_checkpoint_interval;
+            fmIndex.charToIndex = new Map(fmIndex.alphabet.map((char, i) => [char, i]));
+            
+            fmIndex.docMap = await docMapResponse.json();
+
+            // --- 2. Parse Binary Data ---
+            const bwtBuffer = await bwtResponse.arrayBuffer();
+            // Use TextDecoder for potential UTF-8 characters, though ASCII is fine.
+            fmIndex.bwt = new TextDecoder().decode(bwtBuffer);
+
+            const saSampledBuffer = await saSampledResponse.arrayBuffer();
+            const saData = new Uint32Array(saSampledBuffer);
+            fmIndex.sampledSA = new Map();
+            for (let i = 0; i < saData.length; i += 2) {
+                fmIndex.sampledSA.set(saData[i], saData[i+1]); // key: BWT index, value: SA value
+            }
+
+            const occCheckpointsBuffer = await occCheckpointsResponse.arrayBuffer();
+            fmIndex.occCheckpoints = new Uint32Array(occCheckpointsBuffer);
+
+            // --- 3. Parse Original Articles for Display ---
+            const articlesText = await articlesResponse.text();
+            fmIndex.originalArticles = articlesText.split('\n').filter(line => line.trim() !== '');
+
+            console.timeEnd('Index Loading');
+            statusDiv.textContent = `Index ready. ${fmIndex.docMap.length.toLocaleString()} articles loaded.`;
+            searchInput.disabled = false;
+            searchInput.focus();
+
+        } catch (error) {
+            console.error('Failed to load FM-Index:', error);
+            statusDiv.textContent = 'Error: Could not load index files. Check console.';
+            statusDiv.style.color = 'red';
+        }
+    });
+
+    // --- Event Listener ---
+    searchInput.addEventListener('input', debounce(handleSearch, 200));
+
+    // --- Core Search Logic ---
+
+    /**
+     * Calculates Occ(c, i) - number of occurrences of character 'c' in bwt[0...i].
+     * Uses the checkpointed table for speed.
+     * @param {string} char The character to count.
+     * @param {number} index The position in the BWT string (inclusive).
+     * @returns {number} The count of the character.
+     */
+    function getOcc(char, index) {
+        if (index < 0) return 0;
+
+        const charIdx = fmIndex.charToIndex.get(char);
+        if (charIdx === undefined) return 0;
+
+        const alphabetSize = fmIndex.alphabet.length;
+        const checkpointRow = Math.floor(index / fmIndex.occCheckpointInterval);
+        const checkpointIndex = checkpointRow * alphabetSize + charIdx;
+
+        let count = fmIndex.occCheckpoints[checkpointIndex];
+
+        // Scan forward from the checkpoint (up to the index)
+        const startScan = checkpointRow * fmIndex.occCheckpointInterval;
+        // PATCH: Add a scan limit to avoid UI freezing.
+        const SCAN_LIMIT = 6000;
+        let scanned = 0;
+        for (let i = startScan; i <= index; i++) {
+            if (fmIndex.bwt[i] === char) {
+                count++;
+            }
+            scanned++;
+            if (scanned > SCAN_LIMIT) {
+                // Safeguard: break to prevent UI hang. The result may be less accurate for huge jumps.
+                break;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Performs backward search to find the BWT range [sp, ep] for a query.
+     * @param {string} query The search pattern (already lowercased).
+     * @returns {{sp: number, ep: number} | null} The start/end range or null if not found.
+     */
+    function backwardSearch(query) {
+        if (!query) return null;
+
+        let i = query.length - 1;
+        let char = query[i];
+        
+        if (!fmIndex.cTable.hasOwnProperty(char)) return null;
+
+        let sp = fmIndex.cTable[char];
+        let nextChar = fmIndex.alphabet[fmIndex.alphabet.indexOf(char) + 1];
+        let ep = (nextChar ? fmIndex.cTable[nextChar] : fmIndex.bwt.length) - 1;
+
+        while (i > 0) {
+            if (sp > ep) return null;
+            i--;
+            char = query[i];
+            
+            if (!fmIndex.cTable.hasOwnProperty(char)) return null;
+
+            const c = fmIndex.cTable[char];
+            sp = c + getOcc(char, sp - 1);
+            ep = c + getOcc(char, ep) - 1;
+        }
+
+        return (sp > ep) ? null : { sp, ep };
+    }
+
+    /**
+     * Locates the original text position for a given BWT index.
+     * Uses the sampled Suffix Array and LF-mapping.
+     * @param {number} bwtIndex The index in the BWT range.
+     * @returns {number} The position in the original concatenated text.
+     */
+    function locate(bwtIndex) {
+        let count = 0;
+        let currentIndex = bwtIndex;
+        const MAX_STEPS = 30000;  // <--- PATCH: prevent infinite/very long loop
+        let steps = 0;
+
+        // Walk backwards until we hit a sampled SA value
+        while (!fmIndex.sampledSA.has(currentIndex)) {
+            if (++steps > MAX_STEPS) {
+                console.warn("locate() aborted: exceeded step limit at BWT index", bwtIndex);
+                return null; // Could not resolve
+            }
+            const char = fmIndex.bwt[currentIndex];
+            currentIndex = fmIndex.cTable[char] + getOcc(char, currentIndex) - 1;
+            count++;
+        }
+
+        return fmIndex.sampledSA.get(currentIndex) + count;
+    }
+    
+    /**
+     * Finds which document a given text position belongs to.
+     * @param {number} textPos Position in the concatenated lowercased text.
+     * @returns {{docIndex: number, posInDoc: number} | null}
+     */
+    function findDocument(textPos) {
+        // Binary search could be faster, but linear is fine for 20k docs.
+        for (let i = 0; i < fmIndex.docMap.length; i++) {
+            const doc = fmIndex.docMap[i];
+            // The position is within the range of this document in the concatenated text
+            if (textPos >= doc.start && textPos < doc.start + doc.len) {
+                return {
+                    docIndex: i,
+                    posInDoc: textPos - doc.start,
+                };
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Main search handler triggered by user input.
+     */
+    function handleSearch() {
+        const query = searchInput.value.trim();
+
+        // Only search if the query has 2 or more characters
+        if (query.length < 2) {
+            resultsUl.innerHTML = ''; // Clear results
+            if (query.length === 0) {
+                statusDiv.textContent = `Index ready. ${fmIndex.docMap.length.toLocaleString()} articles loaded.`;
+            } else {
+                statusDiv.textContent = 'Please enter at least 2 characters to search.';
+            }
+            return;
+        }
+
+        statusDiv.textContent = `Searching for "${query}"...`;
+        
+        // Use a timeout to allow the UI to update before a potentially long search
+        setTimeout(() => {
+            console.time(`Search for "${query}"`);
+            const lowerQuery = query.toLowerCase();
+            const range = backwardSearch(lowerQuery);
+            
+            if (!range) {
+                displayResults([], query);
+                console.timeEnd(`Search for "${query}"`);
+                return;
+            }
+
+            const matches = new Set(); // Use a Set to store unique document indices
+            const maxResults = 300; // Limit results to prevent UI freezing
+            // Add a hard limit on locate() calls to prevent the browser from freezing on very common queries.
+            const maxLocates = 5000;
+            let locateCount = 0;
+            
+            // Collect all matching document indices
+            for (let i = range.sp; i <= range.ep; i++) {
+                if (locateCount++ >= maxLocates) {
+                    console.warn(`Search for "${query}" was truncated after ${maxLocates} occurrences to prevent freezing.`);
+                    break;
+                }
+
+                const textPos = locate(i);
+                if (textPos === null) continue;
+                const docInfo = findDocument(textPos);
+                if (docInfo) {
+                    matches.add(docInfo.docIndex);
+                }
+                if (matches.size >= maxResults) break; // Stop once we have enough unique documents
+            }
+            
+            const results = [];
+            for (const docIndex of matches) {
+                results.push({
+                    docIndex: docIndex,
+                    originalText: fmIndex.originalArticles[docIndex]
+                });
+            }
+
+            console.timeEnd(`Search for "${query}"`);
+            displayResults(results, query);
+        }, 10);
+    }
+    
+    // --- UI Rendering ---
+
+    // Robust CSV row parser (handles quoted fields with commas)
+    function parseCsvRow(row) {
+        const re = /("([^"]|"")*"|[^,]*)(,|$)/g;
+        const fields = [];
+        let match;
+        let lastIndex = 0;
+        while ((match = re.exec(row)) !== null && fields.length < 7) {
+            let val = match[1];
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.slice(1, -1).replace(/""/g, '"');
+            }
+            fields.push(val);
+            lastIndex = re.lastIndex;
+            if (fields.length === 7) break;
+        }
+        return fields;
+    }
+
+
+    /**
+     * Renders the search results to the page.
+     * @param {Array<{docIndex: number, originalText: string}>} results
+     * @param {string} query The original user query for highlighting.
+     */
+    function displayResults(results, query) {
+        resultsUl.innerHTML = ''; // Clear previous results
+
+        if (results.length === 0) {
+            statusDiv.textContent = `No results found for "${query}".`;
+            return;
+        }
+
+        statusDiv.textContent = `Found ${results.length} matching article(s) for "${query}".`;
+
+        const fragment = document.createDocumentFragment();
+        const lowerQuery = query.toLowerCase();
+
+        results.forEach(result => {
+            const li = document.createElement('li');
+            li.className = 'result-item';
+
+            const fields = parseCsvRow(result.originalText);
+
+            // Defensive: Check we have 7 columns (skip header)
+            if (fields.length < 7 || fields[0] === "ID") {
+                return; // skip header or malformed row
+            }
+
+            // Prepare labels
+            const [id, title, authors, subjects, abstract, abstractLink, pdfLink] = fields;
+
+            // Helper for highlighting in any field
+            function highlight(text) {
+                if (!text) return '';
+                const lowerText = text.toLowerCase();
+                let startIndex = 0;
+                let highlightedHtml = '';
+                let matchPos = lowerText.indexOf(lowerQuery, startIndex);
+
+                while (matchPos !== -1) {
+                    highlightedHtml += escapeHtml(text.substring(startIndex, matchPos));
+                    highlightedHtml += `<mark>${escapeHtml(text.substring(matchPos, matchPos + query.length))}</mark>`;
+                    startIndex = matchPos + query.length;
+                    matchPos = lowerText.indexOf(lowerQuery, startIndex);
+                }
+                highlightedHtml += escapeHtml(text.substring(startIndex));
+                return highlightedHtml;
+            }
+
+            // Build card-like HTML with line breaks and labels
+            li.innerHTML = `
+                <div style="font-size:16px;font-weight:bold;margin-bottom:2px;">
+                    <a href="${escapeHtml(abstractLink)}" target="_blank" style="text-decoration:none;color:#0067c5;">
+                        ${highlight(title)}
+                    </a>
+                </div>
+                <div style="font-size:13px;color:#555;margin-bottom:2px;">
+                    <strong>Authors:</strong> ${highlight(authors)}
+                </div>
+                <div style="font-size:13px;color:#888;margin-bottom:2px;">
+                    <strong>Subjects:</strong> ${highlight(subjects)}
+                </div>
+                <div style="font-size:14px;color:#333;margin-bottom:2px;">
+                    <strong>Abstract:</strong> ${highlight(abstract)}
+                </div>
+                <div style="margin-top:2px;">
+                    <a href="${escapeHtml(pdfLink)}" target="_blank" style="font-size:12px;">[PDF]</a>
+                </div>
+            `;
+            fragment.appendChild(li);
+        });
+
+        resultsUl.appendChild(fragment);
+    }
+
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    </script>
+</body>
+</html>
