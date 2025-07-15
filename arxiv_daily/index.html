@@ -1,15 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今日学术速递</title>
+    <title>AI 学术速递生成器</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        h1, h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
-        h1 { text-align: center; }
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
         th { background-color: #f2f2f2; }
@@ -19,156 +38,349 @@
         .paper-title-row:hover { background-color: #e9ecef; }
         .paper-title-row.expanded { background-color: #e2e6ea; }
         .paper-title { font-weight: bold; }
-        .details-row { display: none; } /* Hidden by default */
-        .details-row.show { display: table-row; } /* Revealed on click */
-        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
         .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
         .abstract { margin-top: 10px; }
-        #loader { text-align: center; font-size: 1.2em; padding: 50px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
     </style>
+    <!-- Import Google Gemini JS SDK -->
+    <script type="module">
+        import { GoogleGenerativeAI } from 'https://esm.run/@google/generative-ai';
+        window.GoogleGenerativeAI = GoogleGenerativeAI;
+    </script>
 </head>
 <body>
-    <div class="container" id="report-container">
-        <h1>今日学术速递</h1>
-        <p id="intro">正在加载和渲染论文数据... 将鼠标悬停在论文标题上可查看详细摘要。</p>
-        <div id="loader">
-            <p>Loading...</p>
+    <div class="container">
+        <div class="config-panel">
+            <h2>配置 (Configuration)</h2>
+            <div class="form-group">
+                <label for="apiKey">Gemini API Key</label>
+                <input type="password" id="apiKey" placeholder="在此输入您的 Gemini API 密钥">
+            </div>
+            <div class="form-group">
+                <label for="sheetUrl">Google Sheet URL (Published to web)</label>
+                <input type="text" id="sheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTNzCzhuK4kdc3_-1gYqEYqKkyuhfK-hNPiNRkd0V_nsg6qaMl_1xBvcqGxCCF_oAzOolYugdvxaDIL/pubhtml">
+            </div>
+            <div class="form-group">
+                <label for="academicInterest">学术兴趣 (Academic Interest)</label>
+                <textarea id="academicInterest" placeholder="例如: Large language models for code generation, and agent-based AI systems"></textarea>
+            </div>
+             <div class="form-group">
+                <label for="reportDate">报告日期 (Report Date)</label>
+                <input type="date" id="reportDate">
+            </div>
+            <button id="generateBtn" class="btn">生成学术速递</button>
+            <button id="downloadBtn" class="btn btn-download">下载HTML报告</button>
         </div>
-        <div id="clusters-content"></div>
+
+        <div id="status"></div>
+
+        <div id="report-container-wrapper">
+            <!-- The generated report will be injected here -->
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('clusters-content');
-            const loader = document.getElementById('loader');
-            const intro = document.getElementById('intro');
-            const maxRetries = 7; // Maximum number of days to go back
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const apiKeyInput = document.getElementById('apiKey');
+        const sheetUrlInput = document.getElementById('sheetUrl');
+        const interestInput = document.getElementById('academicInterest');
+        const reportDateInput = document.getElementById('reportDate');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusDiv = document.getElementById('status');
+        const reportWrapper = document.getElementById('report-container-wrapper');
 
-            /**
-             * Attempts to load and render data for a given date.
-             * If it fails, it recursively calls itself for the previous day.
-             * @param {Date} date The date to try loading data for.
-             * @param {number} attempt The current attempt number (1-based).
-             */
-            const tryLoadData = (date, attempt = 1) => {
-                if (attempt > maxRetries) {
-                    loader.style.display = 'none';
-                    intro.textContent = `加载最近 ${maxRetries} 天的数据失败。请检查文件是否存在以及网络连接。 (Failed to load data for the last ${maxRetries} days.)`;
-                    console.error(`Failed to load data after ${maxRetries} attempts.`);
-                    return;
-                }
+        // --- Initial Setup ---
+        const loadSettings = () => {
+            const savedInterest = localStorage.getItem('academicInterest');
+            if (savedInterest) {
+                interestInput.value = savedInterest;
+            }
+            reportDateInput.value = new Date().toISOString().slice(0, 10);
+        };
 
-                const dateString = date.toISOString().slice(0, 10);
-                const papersFile = `${dateString}.json`;
-                const clustersFile = `clusters_${dateString}.json`;
+        const saveSettings = () => {
+            localStorage.setItem('academicInterest', interestInput.value);
+        };
 
-                console.log(`Attempt #${attempt}: Trying to load data for ${dateString}`);
+        loadSettings();
 
-                Promise.all([
-                    fetch(papersFile),
-                    fetch(clustersFile)
-                ])
-                .then(([papersResponse, clustersResponse]) => {
-                    // fetch() promise resolves on 404, so we must check the .ok status
-                    if (!papersResponse.ok || !clustersResponse.ok) {
-                        throw new Error(`Data not found for ${dateString}. Statuses: ${papersResponse.status}, ${clustersResponse.status}`);
+        // --- Core Logic ---
+        const showStatus = (message, isError = false) => {
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = message;
+            statusDiv.style.color = isError ? '#721c24' : '#155724';
+            statusDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+            status.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+        };
+
+        const hideStatus = () => {
+            statusDiv.style.display = 'none';
+        };
+        
+        const fetchAndParseGoogleSheet = async (url) => {
+            showStatus('1/4: 正在抓取 Google Sheet 数据...');
+            // We use a CORS proxy to bypass browser restrictions on fetching cross-origin content.
+            // allorigins.win is a popular free and open-source proxy.
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`无法抓取数据，服务器响应: ${response.status}`);
+                const htmlText = await response.text();
+                
+                showStatus('2/4: 正在解析 HTML 表格...');
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+
+                const table = doc.querySelector('.waffle');
+                if (!table) throw new Error('在返回的HTML中未找到 .waffle 表格。');
+
+                const papers = [];
+                const rows = table.querySelectorAll('tbody tr');
+
+                // Skip header row (index 0)
+                for (let i = 1; i < rows.length; i++) {
+                    const cells = rows[i].querySelectorAll('td');
+                    if (cells.length < 7) continue; // Ensure row has enough data
+
+                    const paper = {
+                        id: cells[0].textContent.trim(),
+                        title: cells[1].textContent.trim(),
+                        authors: cells[2].textContent.trim(),
+                        subjects: cells[3].textContent.trim(),
+                        abstract: cells[4].textContent.trim(),
+                        abs_link: cells[5].querySelector('a')?.href || '',
+                        pdf_link: cells[6].querySelector('a')?.href || ''
+                    };
+                    // Only add papers with a valid ID and title
+                    if (paper.id && paper.title) {
+                        papers.push(paper);
                     }
-                    // If files exist, return a new promise for their JSON content
-                    return Promise.all([papersResponse.json(), clustersResponse.json()]);
-                })
-                .then(([papersData, clustersData]) => {
-                    // --- SUCCESS ---
-                    loader.style.display = 'none';
-                    if (Object.keys(clustersData).length === 0) {
-                        intro.textContent = `日期 ${dateString} 未发现相关主题的论文分组。`;
+                }
+                if (papers.length === 0) throw new Error('解析完成，但未提取到任何论文数据。请检查表格格式。');
+                return papers;
+
+            } catch (error) {
+                showStatus(`抓取或解析失败: ${error.message}`, true);
+                console.error(error);
+                return null;
+            }
+        };
+
+        const processWithGemini = async (papers, interest, apiKey) => {
+            showStatus(`3/4: 已提取 ${papers.length} 篇论文，正在调用 Gemini AI 进行筛选、翻译和聚类...`);
+            
+            if (!window.GoogleGenerativeAI) {
+                showStatus('Gemini AI SDK未能加载。请检查网络连接或浏览器控制台。', true);
+                return null;
+            }
+
+            try {
+                const genAI = new window.GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
+                const prompt = `
+You are an expert academic research assistant. I will provide you with a list of arXiv papers in a JSON array.
+Your task is to perform the following steps and return a single, valid JSON object as your response. Do not add any text before or after the JSON block.
+
+My primary academic interest is: "${interest}"
+
+Here are the tasks:
+1.  From the provided list, select the top 20 most relevant and highest-quality papers related to my academic interest.
+2.  For EACH of these 20 selected papers, you MUST perform two translations:
+    a. Translate the English "title" into Chinese.
+    b. Translate the English "abstract" into Chinese.
+3.  Based on the content of these 20 papers, group them into 3 to 5 thematic clusters. The cluster titles should be concise and in Chinese.
+4.  Structure your final output as a single valid JSON object with two top-level keys: "papers" and "clusters".
+
+The required JSON output format is EXACTLY as follows:
+{
+  "papers": [
+    {
+      "id": "The original paper ID, e.g., 'arXiv:2401.12345'",
+      "title": "The original English title of the paper",
+      "chinese_title": "Your Chinese translation of the title",
+      "authors": "The original authors string",
+      "abs_link": "The original abstract page link",
+      "pdf_link": "The original PDF link",
+      "chinese_abstract": "Your detailed Chinese translation of the abstract."
+    }
+  ],
+  "clusters": {
+    "一个简洁的中文聚类标题 1": ["id_of_paper_1", "id_of_paper_2"],
+    "另一个简洁的中文聚类标题 2": ["id_of_paper_3", "id_of_paper_4", "id_of_paper_5"],
+    "简洁的中文聚类标题 3": ["id_of_paper_6", "id_of_paper_7"]
+  }
+}
+
+Now, process the following list of papers:
+${JSON.stringify(papers)}
+`;
+
+                const result = await model.generateContent(prompt);
+                const responseText = result.response.text();
+                
+                // Clean the response to ensure it's valid JSON
+                const jsonString = responseText.trim().replace(/^```json\s*|```$/g, '');
+                const data = JSON.parse(jsonString);
+                
+                if (!data.papers || !data.clusters) {
+                    throw new Error("Gemini返回的JSON格式不正确，缺少'papers'或'clusters'键。");
+                }
+                
+                return data;
+
+            } catch(error) {
+                showStatus(`Gemini AI 处理失败: ${error.message}. 请检查API Key和浏览器控制台。`, true);
+                console.error("Gemini Error:", error);
+                return null;
+            }
+        };
+
+        const renderReport = (data, dateString) => {
+            showStatus('4/4: 正在渲染报告...');
+
+            const { papers: papersData, clusters: clustersData } = data;
+            
+            let html = `
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (${dateString})</h1>
+                    <p id="intro">为您找到日期 ${dateString} 的数据。论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">`;
+
+            const papersMap = new Map(papersData.map(p => [p.id, p]));
+
+            for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {
+                html += `
+                    <section>
+                        <h2>${clusterTitle}</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>`;
+                
+                paperIds.forEach(paperId => {
+                    const paper = papersMap.get(paperId);
+                    if (!paper) {
+                        console.warn(`Paper ID ${paperId} found in clusters but not in paper list.`);
                         return;
                     }
-
-                    intro.textContent = `为您找到日期 ${dateString} 的数据。论文已为您整理成以下 ${Object.keys(clustersData).length} 个主题。点击论文标题可展开查看摘要。`;
-
-                    // --- Start Rendering Logic (same as before) ---
-                    for (const [clusterTitle, paperIds] of Object.entries(clustersData)) {
-                        const section = document.createElement('section');
-                        const title = document.createElement('h2');
-                        title.textContent = clusterTitle;
-                        section.appendChild(title);
-
-                        const table = document.createElement('table');
-                        const thead = `<thead><tr><th>论文 (Paper)</th></tr></thead>`;
-                        table.innerHTML = thead;
-                        const tbody = document.createElement('tbody');
-
-                        const papersMap = new Map(papersData.map(p => [p.id, p]));
-
-                        paperIds.forEach(paperId => {
-                            const paper = papersMap.get(paperId);
-                            if (!paper) return;
-
-                            const titleRow = tbody.insertRow();
-                            titleRow.className = 'paper-title-row';
-                            titleRow.innerHTML = `
-                                <td>
-                                    <div class="paper-title">${paper.chinese_title}</div>
-                                    <div><a href="${paper.pdf_link}" target="_blank" onclick="event.stopPropagation();" title="Download PDF">${paper.title}</a></div>
-                                </td>`;
-
-                            const detailsRow = tbody.insertRow();
-                            detailsRow.className = 'details-row';
-                            detailsRow.innerHTML = `
-                                <td class="details-cell">
-                                    <strong>作者 (Authors):</strong>
-                                    <div class="authors">${paper.authors}</div>
-                                    <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
-                                    <div class="abstract">${paper.chinese_abstract}</div>
-                                    <div style="margin-top: 15px;">
-                                        <a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a>
-                                        <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
-                                    </div>
-                                </td>`;
-
-                            titleRow.addEventListener('click', () => {
-                                titleRow.classList.toggle('expanded');
-                                detailsRow.classList.toggle('show');
-                            });
-
-                            const collapseBtn = detailsRow.querySelector('.collapse-btn');
-                            collapseBtn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                titleRow.classList.remove('expanded');
-                                detailsRow.classList.remove('show');
-                            });
-                        });
-                        table.appendChild(tbody);
-                        section.appendChild(table);
-                        container.appendChild(section);
-                    }
-                    // --- End Rendering Logic ---
-                })
-                .catch(error => {
-                    // --- FAILURE, INITIATE RETRY ---
-                    console.warn(error.message); // Log the reason for this attempt's failure
-
-                    // Calculate the previous day
-                    const previousDay = new Date(date);
-                    previousDay.setDate(date.getDate() - 1);
-
-                    // Recursively call for the previous day
-                    tryLoadData(previousDay, attempt + 1);
+                    html += `
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">${paper.chinese_title}</div>
+                                <div><a href="${paper.pdf_link}" target="_blank" onclick="event.stopPropagation();" title="Download PDF">${paper.id} - ${paper.title}</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">${paper.authors}</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">${paper.chinese_abstract.replace(/\n/g, '<br>')}</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="${paper.abs_link}" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>`;
                 });
-            };
 
-            // --- INITIALIZATION ---
-            // Get date from URL param 'date', default to today's date
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateParam = urlParams.get('date');
+                html += `
+                            </tbody>
+                        </table>
+                    </section>`;
+            }
+
+            html += `</div></div>`;
+            reportWrapper.innerHTML = html;
+
+            // Add event listeners to the newly created elements
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                titleRow.addEventListener('click', () => {
+                    titleRow.classList.toggle('expanded');
+                    detailsRow.classList.toggle('show');
+                });
+
+                const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                collapseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    titleRow.classList.remove('expanded');
+                    detailsRow.classList.remove('show');
+                });
+            });
+
+            hideStatus();
+            downloadBtn.style.display = 'inline-block';
+        };
+
+        const downloadReport = () => {
+            const reportHTML = document.getElementById('report-container-wrapper').innerHTML;
+            const styles = document.querySelector('style').innerHTML;
+            const date = reportDateInput.value || new Date().toISOString().slice(0, 10);
             
-            // To prevent timezone issues, we create a Date object from the YYYY-MM-DD string.
-            // new Date('YYYY-MM-DD') creates a date at midnight UTC.
-            const initialDate = dateParam ? new Date(dateParam) : new Date();
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - ${date}</title>
+                    <style>${styles}</style>
+                </head>
+                <body>
+                    ${reportHTML}
+                </body>
+                </html>`;
+            
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `academic-digest-${date}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
 
-            // Start the loading process
-            tryLoadData(initialDate);
+        // --- Main Event Handler ---
+        generateBtn.addEventListener('click', async () => {
+            // Reset UI
+            reportWrapper.innerHTML = '';
+            downloadBtn.style.display = 'none';
+
+            // Get and validate inputs
+            const apiKey = apiKeyInput.value.trim();
+            const sheetUrl = sheetUrlInput.value.trim();
+            const interest = interestInput.value.trim();
+            const reportDate = reportDateInput.value;
+
+            if (!apiKey || !sheetUrl || !interest) {
+                showStatus('请填写 Gemini API Key, Google Sheet URL, 和您的学术兴趣。', true);
+                return;
+            }
+            saveSettings();
+            generateBtn.disabled = true;
+
+            const rawPapers = await fetchAndParseGoogleSheet(sheetUrl);
+            if (rawPapers) {
+                const processedData = await processWithGemini(rawPapers, interest, apiKey);
+                if (processedData) {
+                    renderReport(processedData, reportDate);
+                }
+            }
+            
+            generateBtn.disabled = false;
         });
+
+        downloadBtn.addEventListener('click', downloadReport);
+    });
     </script>
 </body>
 </html>
