@@ -12,6 +12,8 @@
         /* --- Config Panel --- */
         .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
         .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
         .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
@@ -54,18 +56,20 @@
 <body>
     <div class="container">
         <div class="config-panel">
-            <h2>配置 (Configuration)</h2>
-            <div class="form-group">
-                <label for="apiKey">Gemini API Key</label>
-                <input type="password" id="apiKey" placeholder="在此输入您的 Gemini API 密钥">
-            </div>
-            <div class="form-group">
-                <label for="sheetUrl">Google Sheet URL (Published to web)</label>
-                <input type="text" id="sheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTNzCzhuK4kdc3_-1gYqEYqKkyuhfK-hNPiNRkd0V_nsg6qaMl_1xBvcqGxCCF_oAzOolYugdvxaDIL/pubhtml">
-            </div>
-            <div class="form-group">
-                <label for="academicInterest">学术兴趣 (Academic Interest)</label>
-                <textarea id="academicInterest" placeholder="例如: Large language models for code generation, and agent-based AI systems"></textarea>
+            <h2 class="toggle-header">配置 (Configuration)</h2>
+            <div id="config-details" style="display: none;">
+                <div class="form-group">
+                    <label for="apiKey">Gemini API Key</label>
+                    <input type="password" id="apiKey" placeholder="在此输入您的 Gemini API 密钥">
+                </div>
+                <div class="form-group">
+                    <label for="sheetUrl">Google Sheet URL (Published to web)</label>
+                    <input type="text" id="sheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTNzCzhuK4kdc3_-1gYqEYqKkyuhfK-hNPiNRkd0V_nsg6qaMl_1xBvcqGxCCF_oAzOolYugdvxaDIL/pubhtml">
+                </div>
+                <div class="form-group">
+                    <label for="academicInterest">学术兴趣 (Academic Interest)</label>
+                    <textarea id="academicInterest" placeholder="例如: Large language models for code generation, and agent-based AI systems"></textarea>
+                </div>
             </div>
              <div class="form-group">
                 <label for="reportDate">报告日期 (Report Date)</label>
@@ -93,9 +97,24 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const statusDiv = document.getElementById('status');
         const reportWrapper = document.getElementById('report-container-wrapper');
+        const configTitle = document.querySelector('.toggle-header');
+        const configDetails = document.getElementById('config-details');
 
         // --- Initial Setup ---
         const loadSettings = () => {
+            // Allow setting API key via URL parameter, e.g., ?apiKey=...
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const apiKeyFromUrl = urlParams.get('apiKey');
+                if (apiKeyFromUrl) {
+                    apiKeyInput.value = apiKeyFromUrl;
+                    // If key is from URL, expand the settings for visibility
+                    configDetails.style.display = 'block';
+                }
+            } catch (e) {
+                console.warn("Could not parse URL parameters.", e);
+            }
+
             const savedInterest = localStorage.getItem('academicInterest');
             if (savedInterest) {
                 interestInput.value = savedInterest;
@@ -106,6 +125,11 @@
         const saveSettings = () => {
             localStorage.setItem('academicInterest', interestInput.value);
         };
+
+        // Add listener for the collapsible config panel
+        configTitle.addEventListener('click', () => {
+            configDetails.style.display = configDetails.style.display === 'none' ? 'block' : 'none';
+        });
 
         loadSettings();
 
