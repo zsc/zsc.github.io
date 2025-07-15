@@ -347,6 +347,27 @@ ${JSON.stringify(papers)}
             const reportHTML = document.getElementById('report-container-wrapper').innerHTML;
             const styles = document.querySelector('style').innerHTML;
             const date = reportDateInput.value || new Date().toISOString().slice(0, 10);
+
+            const interactiveScript = `
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });`;
             
             const fullHtml = `
                 <!DOCTYPE html>
@@ -358,6 +379,7 @@ ${JSON.stringify(papers)}
                 </head>
                 <body>
                     ${reportHTML}
+                    <script>${interactiveScript}<\/script>
                 </body>
                 </html>`;
             
