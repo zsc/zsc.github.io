@@ -306,7 +306,7 @@
      * Main search handler triggered by user input.
      */
     function handleSearch() {
-        const query = searchInput.value.trim();
+        const query = searchInput.value.replace(/[\r\n]+$/, '');
 
         // Only search if the query has 2 or more characters
         if (query.length < 2) {
