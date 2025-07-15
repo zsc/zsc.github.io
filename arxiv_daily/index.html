@@ -139,7 +139,7 @@
             statusDiv.textContent = message;
             statusDiv.style.color = isError ? '#721c24' : '#155724';
             statusDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
-            status.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+            statusDiv.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
         };
 
         const hideStatus = () => {
@@ -149,8 +149,7 @@
         const fetchAndParseGoogleSheet = async (url) => {
             showStatus('1/4: 正在抓取 Google Sheet 数据...');
             // We use a CORS proxy to bypass browser restrictions on fetching cross-origin content.
-            // allorigins.win is a popular free and open-source proxy.
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`
             
             try {
                 const response = await fetch(proxyUrl);
@@ -206,7 +205,7 @@
 
             try {
                 const genAI = new window.GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
                 const prompt = `
 You are an expert academic research assistant. I will provide you with a list of arXiv papers in a JSON array.
