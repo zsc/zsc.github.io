@@ -131,8 +131,6 @@
             configDetails.style.display = configDetails.style.display === 'none' ? 'block' : 'none';
         });
 
-        loadSettings();
-
         // --- Core Logic ---
         const showStatus = (message, isError = false) => {
             statusDiv.style.display = 'block';
@@ -140,6 +138,65 @@
             statusDiv.style.color = isError ? '#721c24' : '#155724';
             statusDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
             statusDiv.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+        };
+
+        const makeReportInteractive = () => {
+            const reportContainer = document.getElementById('report-container');
+            if (!reportContainer) return;
+
+            reportContainer.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('details-row')) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        };
+
+        const loadLatestReport = async (maxDays = 7) => {
+            for (let i = 0; i < maxDays; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().slice(0, 10);
+                const url = `academic-digest-${dateString}.html`;
+
+                showStatus(`正在查找报告 (${dateString})...`);
+                try {
+                    // Use "no-cache" to ensure we don't get a stale 404 response from the browser cache
+                    const response = await fetch(url, { cache: 'no-cache' });
+                    if (response.ok || response.status === 304) {
+                        const htmlText = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(htmlText, 'text/html');
+                        const loadedReportWrapper = doc.getElementById('report-container-wrapper');
+
+                        if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
+                            reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
+                            showStatus(`已成功加载 ${dateString} 的报告。`, false);
+                            // The download button is part of the generator, but we can enable it
+                            // to allow re-downloading of the loaded report.
+                            downloadBtn.style.display = 'inline-block';
+                            makeReportInteractive();
+                            return true; // Found and loaded
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`无法加载或解析报告 ${url}:`, error);
+                    // Continue to next day
+                }
+            }
+            return false; // Not found
         };
 
         const hideStatus = () => {
@@ -322,23 +379,7 @@ ${JSON.stringify(papers)}
             html += `</div></div>`;
             reportWrapper.innerHTML = html;
 
-            // Add event listeners to the newly created elements
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.querySelectorAll('.paper-title-row').forEach(titleRow => {
-                const detailsRow = titleRow.nextElementSibling;
-                titleRow.addEventListener('click', () => {
-                    titleRow.classList.toggle('expanded');
-                    detailsRow.classList.toggle('show');
-                });
-
-                const collapseBtn = detailsRow.querySelector('.collapse-btn');
-                collapseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    titleRow.classList.remove('expanded');
-                    detailsRow.classList.remove('show');
-                });
-            });
-
+            makeReportInteractive();
             hideStatus();
             downloadBtn.style.display = 'inline-block';
         };
@@ -394,6 +435,17 @@ ${JSON.stringify(papers)}
             URL.revokeObjectURL(url);
         };
 
+        const initializePage = async () => {
+            loadSettings(); // Load user settings from localStorage first
+            showStatus('正在查找最新的学术速递报告...');
+            const wasLoaded = await loadLatestReport(7); // Try loading for last 7 days
+
+            if (!wasLoaded) {
+                // Keep the status message, but make it an "error" style to be more prominent
+                showStatus('未找到近期报告。请配置并生成新报告。', true);
+            }
+        };
+
         // --- Main Event Handler ---
         generateBtn.addEventListener('click', async () => {
             // Reset UI
@@ -425,7 +477,9 @@ ${JSON.stringify(papers)}
         });
 
         downloadBtn.addEventListener('click', downloadReport);
+        initializePage();
     });
+
     </script>
 </body>
 </html>
