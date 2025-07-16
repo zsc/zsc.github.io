@@ -1,0 +1,470 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-16</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-16)</h1>
+                    <p id="intro">为您找到日期 2025-07-16 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>强化学习与模型对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">在演化之光下阐明强化学习的三大信条</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11482" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11482 - Illuminating the Three Dogmas of Reinforcement Learning under Evolutionary Light</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Mani Hamidi, Terrence W. Deacon</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习（RL）的三个核心信条——关于智能体（agency）的定义、学习的目标以及奖励假设的范围——已被认为是需要进行概念修正的关键目标，这对理论和应用都具有重大影响。我们提出了一个受开放式演化理论启发的框架，以重新审视这三个“信条”。我们重新审视了每个假设，并解决了随之提出的相关问题。为了使我们的论点与作为生物学习模型的RL相关，我们首先确定演化动力学在个体一生中可以合理地在活体大脑内运作，而不仅限于跨代过程。我们从重新审视第二个信条开始，借鉴演化见解来丰富学习的“适应而非搜索”观点。然后，我们讨论关于奖励假说局限性的第三个信条，利用演化适应度的类比来阐明标量奖励与多目标之争。在讨论了对RL探索的实际影响后，我们转向第一个——也是可以说最根本的——问题：缺乏对智能体的正式解释。我们认为，与其他两个问题不同，单靠演化范式无法解决智能体问题，尽管它指明了一个富有成效的方向。我们主张整合生命起源理论的思想，其中维持和复制的热力学为理解生物系统中的智能体和资源受限的强化学习提供了有希望的基础。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11482" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">点沙成金：通过因果边界回收数据以桥接在线策略与离线策略学习</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11269" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11269 - Turning Sand to Gold: Recycling Data to Bridge On-Policy and Off-Policy Learning via Causal Bound</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tal Fiskus, Uri Shaham</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">深度强化学习（DRL）智能体在解决各种领域的复杂决策任务方面表现出色。然而，它们通常需要大量的训练步骤和庞大的经验回放缓冲区，导致巨大的计算和资源需求。为了解决这些挑战，我们引入了一个新颖的理论结果，该结果将Neyman-Rubin潜在结果框架应用于DRL。与大多数关注于限制反事实损失的方法不同，我们在事实损失上建立了一个因果边界，这类似于DRL中的在线策略损失。这个边界是通过在经验回放缓冲区中存储过去的值网络输出来计算的，从而有效地利用了通常被丢弃的数据。在Atari 2600和MuJoCo领域的各种智能体（如DQN和SAC）上进行的广泛实验表明，与不使用我们提出的项的相同智能体相比，奖励率提高了高达2427%，并且经验回放缓冲区的大小减少了高达96%，以微不足道的成本显著提高了样本效率。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11269" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">将手段视为目的所导致的错位</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10995" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10995 - Misalignment from Treating Means as Ends</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Henrik Marklund, Alex Infanger, Benjamin Van Roy</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">奖励函数，无论是学习得来的还是手动指定的，都很少是完美的。这些奖励函数通常不是准确表达人类的目标，而是被人类关于如何最好地实现这些目标的信念所扭曲。具体来说，这些奖励函数常常表达了人类终极目标（本身就是目的）和工具性目标（实现目的的手段）的结合。我们构建了一个简单的例子，其中即使是工具性目标和终极目标的轻微混淆也会导致严重的错位：按照真实奖励函数衡量时，优化这个错误指定的奖励函数会导致糟糕的性能。这个例子提炼出了使得强化学习对工具性目标和终极目标的混淆高度敏感的环境的基本特性。我们讨论了这种问题如何在一个常见的奖励学习方法中出现，以及它如何在真实环境中表现出来。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10995" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过最优传输映射实现带Wasserstein正则化的离线强化学习</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10843" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10843 - Offline Reinforcement Learning with Wasserstein Regularization via Optimal Transport Maps</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Motoki Omura, Yusuke Mukuta, Kazuki Ota, Takayuki Osa, Tatsuya Harada</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">离线强化学习（RL）旨在从静态数据集中学习最优策略，这使得它在数据收集成本高昂的场景（如机器人技术）中尤其有价值。离线RL的一个主要挑战是分布偏移，即学习到的策略偏离了数据集的分布，可能导致不可靠的分布外动作。为了缓解这个问题，已经采用了正则化技术。虽然许多现有方法利用基于密度比的度量（如f-散度）进行正则化，但我们提出了一种利用Wasserstein距离的方法，该方法对分布外数据具有鲁棒性，并能捕捉动作之间的相似性。我们的方法采用输入凸神经网络（ICNNs）来建模最优传输映射，从而能够以无判别器的方式计算Wasserstein距离，避免了对抗性训练并确保了学习的稳定性。我们的方法在D4RL基准数据集上表现出与广泛使用的现有方法相当或更优的性能。代码可在 https://www.google.com/url?q=https://github.com/omura-motoki/icnn-w-regularization&amp;sa=D&amp;source=editors&amp;ust=1752648727457788&amp;usg=AOvVaw0U1s-hMhP6K2zLwM3yM0z- 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10843" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">基础-组合-强化：通过形式化语言为强化学习智能体分配任务</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10741" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10741 - Ground-Compose-Reinforce: Tasking Reinforcement Learning Agents through Formal Language</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Andrew C. Li, Toryn Q. Klassen, Andrew Wang, Parand A. Alamdari, Sheila A. McIlraith</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在构建能够通过语言与人类互动的具身智能体时，将语言与复杂的感知（如像素）和行动相结合是一个关键挑战。在过去的研究中，这通常通过手动设计语言基础或整理大量将语言与环境元素相关联的数据集来解决。我们提出了“基础-组合-强化”（Ground-Compose-Reinforce），一个用于从数据中学习形式化语言基础，并通过这种语言直接为强化学习（RL）智能体分配任务的神经符号框架。凭借数据驱动的学习，我们的框架避免了手动设计领域特定元素，如奖励函数或符号检测器。凭借组合式形式化语言语义，我们的框架实现了数据高效的基础学习和对任意语言组合的泛化。在基于图像的网格世界和MuJoCo机器人领域的实验表明，我们的方法能够在有限数据的情况下可靠地将形式化语言指令映射到行为，而端到端的数据驱动方法则失败了。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10741" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GHPO：用于稳定高效的LLM强化学习的自适应引导</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10628" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10628 - GHPO: Adaptive Guidance for Stable and Efficient LLM Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ziru Liu, Cheng Gong, Xinyu Fu, Yaofang Liu, Ran Chen, Shoubo Hu, Suiyun Zhang, Rui Liu, Qingfu Zhang, Dandan Tu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">基于可验证奖励的强化学习（RLVR）最近已成为一个强大的范式，用于促进大型语言模型（LLM）的自我提升，尤其是在复杂推理任务领域。然而，主流的在线策略（on-policy）强化学习方法常常面临严重的训练不稳定和效率低下问题。这主要是由于能力与难度不匹配所致，即训练数据的复杂性经常超出模型当前的能力，导致奖励信号极其稀疏，学习进程停滞。对于规模较小、资源效率更高的LLM而言，这一挑战尤为突出。为克服此问题，我们引入了引导式混合策略优化（GHPO），一个新颖的难度感知强化学习框架。GHPO通过采用自适应提示优化来提供有针对性的引导，从而动态校准任务难度。这种独特的方法自适应地平衡了直接模仿学习（用于解决当前超出模型能力范围的问题）和基于探索的强化学习（用于处理更易于管理的任务），从而有效地创建了一个平滑且优化的学习课程。广泛的实验表明，GHPO在六个具有挑战性的数学基准测试中平均性能提升约5%，始终优于强大的在线策略强化学习和课程学习基准。进一步的分析证实，我们的框架显著增强了训练稳定性和最终的推理性能，从而为开发强大而鲁棒的推理模型提供了一个可扩展且高效的解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10628" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">手术刀与锤子：GRPO增强现有能力，SFT取而代之</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10616" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10616 - Scalpel vs. Hammer: GRPO Amplifies Existing Capabilities, SFT Replaces Them</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Neel Rajani, Aryo Pradipta Gema, Seraphina Goldfarb-Tarrant, Ivan Titov</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">通过数学和代码数据集训练大型语言模型（LLM）进行推理已成为LLM后训练的一个主要新焦点。两种特别流行的方法是强化学习（RL）和监督微调（SFT），但它们的训练动态尚不明确。我们对在相同数学问题上使用相同模型和相似超参数的RL和SFT进行了比较分析。我们发现，RL在数学领域内带来了微小的增益，在像MMLU这样的知识密集型基准测试上略有下降，而这两种趋势在SFT中都更为明显。我们还分析了各个检查点的模型参数，观察到两种算法都最多地修改了查询和键的权重。同时，SFT表现出更大的更新，并且更多地影响了中间层的MLP，这使我们假设这可能是导致领域外性能下降的原因。因此，我们研究了在训练期间冻结模型的部分是否可以减轻在知识密集型基准测试上性能下降的问题。然而，我们的结果并不确定，在GPQA:Diamond上有所裨益，但在其他基准测试上则有所下降。总而言之，我们的观察初步表明了为什么RL会增强现有能力，而SFT则会用新技能取代旧技能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10616" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过受控价值向量激活实现大型语言模型的内部价值对齐</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11316" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11316 - Internal Value Alignment in Large Language Models through Controlled Value Vector Activation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Haoran Jin, Meng Li, Xiting Wang, Zhihao Xu, Minlie Huang, Yantao Jia, Defu Lian</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">使大型语言模型（LLM）与人类价值观对齐已引起越来越多的关注，因为它提供了清晰性、透明度以及适应不断变化场景的能力。在本文中，我们介绍了一种名为“受控价值向量激活”（ConVA）的方法，通过解释价值在其潜在表示中的编码方式，并修改相关激活以确保LLM中价值的一致性，从而直接对齐LLM的内部价值观。为了确保解释的准确性和无偏性，我们提出了一种上下文控制的价值向量识别方法。为了在不牺牲模型性能的情况下持续控制价值，我们引入了一种门控价值向量激活方法，以实现有效且最小程度的价值控制。实验表明，我们的方法在10个基本价值上实现了最高的控制成功率，同时不损害LLM的性能和流畅性，并且即使在面对相反和潜在恶意的输入提示时也能确保目标价值。源代码和数据可在以下网址获取：https://www.google.com/url?q=https://github.com/horace-jin/ConVA&amp;sa=D&amp;source=editors&amp;ust=1752648727453733&amp;usg=AOvVaw012-nLg9951-UvU8kQn2_N。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11316" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过知识偏好优化增强安全可控的蛋白质生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10923" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10923 - Enhancing Safe and Controllable Protein Generation via Knowledge Preference Optimization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuhao Wang, Keyan Ding, Kehua Feng, Zeyuan Wang, Ming Qin, Xiaotong Li, Qiang Zhang, Huajun Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">蛋白质语言模型已成为序列生成的强大工具，在功能优化和从头设计方面提供了巨大优势。然而，这些模型也带来了生成有害蛋白质序列的重大风险，例如那些增强病毒传播性或逃避免疫反应的序列。这些担忧凸显了关键的生物安全和伦理挑战。为解决这些问题，我们提出了一个知识引导偏好优化（KPO）框架，该框架通过蛋白质安全知识图谱整合先验知识。该框架利用一种高效的图剪枝策略来识别偏好序列，并采用强化学习来最小化生成有害蛋白质的风险。实验结果表明，KPO在保持高功能性的同时，有效降低了产生有害序列的可能性，为在生物技术中应用生成模型提供了一个鲁棒的安全保障框架。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10923" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>高效模型与推理优化</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">AirLLM：基于扩散策略的自适应LoRA用于LLM的无线远程微调</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11515" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11515 - AirLLM: Diffusion Policy-based Adaptive LoRA for Remote Fine-Tuning of LLM over the Air</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shiyi Yang, Xiaoxue Yu, Rongpeng Li, Jianhang Zhu, Zhifeng Zhao, Honggang Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在边缘设备上运行大型语言模型（LLM）日益受到有限通信带宽以及紧张的计算和内存成本的挑战。因此，云辅助的远程微调变得不可或缺。然而，现有的低秩适应（LoRA）方法通常采用固定或启发式的秩配置，随后通过无线方式传输所有LoRA参数可能相当低效。为了解决这一限制，我们开发了AirLLM，一个用于通信感知LoRA自适应的分层扩散策略框架。具体而言，AirLLM将秩配置建模为一个结构化的动作向量，该向量跨越所有LoRA插入的投影。为了解决潜在的高维顺序决策问题，近端策略优化（PPO）代理通过联合观察无线状态和语言复杂性来生成粗粒度决策，然后通过去噪扩散隐式模型（DDIM）进行细化，以产生高分辨率、任务和信道自适应的秩向量。这两个模块交替优化，其中DDIM在无分类器指导（CFG）范式下进行训练，以保持与PPO奖励的一致性。在不同信噪比下的实验表明，AirLLM在显著降低传输成本的同时，持续增强了微调性能，凸显了强化学习驱动、扩散精炼的秩自适应对于可扩展和高效的无线远程微调的有效性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11515" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一阶误差至关重要：对量化大语言模型的精确补偿</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11017" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11017 - First-Order Error Matters: Accurate Compensation for Quantized Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xingyu Zheng, Haotong Qin, Yuye Li, Jiakai Wang, Jinyang Guo, Michele Magno, Xianglong Liu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">训练后量化（PTQ）为压缩大型语言模型（LLM）提供了一种有效的方法，显著减少了内存访问和计算成本。现有的基于补偿的权重校准方法通常依赖于二阶泰勒展开来建模量化误差，其假设是，在训练良好的全精度模型中，一阶项可以忽略不计。然而，我们揭示了渐进式补偿过程会引入潜在权重与其全精度对应物之间累积的一阶偏差，使得这一假设存在根本性缺陷。为了解决这个问题，我们提出了FOEM，一种新颖的PTQ方法，该方法明确地引入一阶梯度项以改善量化误差补偿。FOEM通过直接计算潜在权重和全精度权重之间的差异来近似梯度，避免了基于反向传播的梯度计算所带来的高成本和有限泛化能力。这种方法引入的额外计算开销极小。此外，FOEM利用预先计算的Cholesky因子来实时高效地恢复Hessian子矩阵的逆。在广泛的模型和基准测试上的大量实验表明，FOEM始终优于经典的GPTQ方法。在3位仅权重量化中，FOEM将Llama3-8B的困惑度降低了89.6%，并将Llama3-70B的5-shot MMLU准确率从51.7%提高到74.9%，接近78.6%的全精度性能。此外，FOEM可以无缝集成到GPTAQ和SpinQuant等先进技术中，在具有挑战性的W4A4KV4设置下产生额外的改进，并进一步缩小了与全精度基线之间的准确率差距，超越了当前最先进方法所能达到的水平。代码已在 https://www.google.com/url?q=https://github.com/hahnyuan/FOEM&amp;sa=D&amp;source=editors&amp;ust=1752648727453308&amp;usg=AOvVaw2gQdM_R86gVv4E45H8b8uC 上提供。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11017" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">WhisperKit：利用十亿级Transformer实现设备端实时自动语音识别</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10860" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10860 - WhisperKit: On-device Real-time ASR with Billion-Scale Transformers</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Atila Orhon, Arda Okan, Berkin Durmus, Zach Nagengast, Eduardo Pacheco</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">实时自动语音识别（ASR）是许多机器学习商业应用的基础构建模块，包括实时字幕、听写、会议转录和医疗文书记录。在公司选择部署系统时，准确性和延迟是最重要的因素。我们介绍了WhisperKit，这是一个优化的设备端实时ASR推理系统，其性能显著优于领先的基于云的系统。我们与部署了多种模型的服务器端系统进行了基准测试，包括一个前沿模型（OpenAI gpt-4o-transcribe）、一个专有模型（Deepgram nova-3）和一个开源模型（Fireworks large-v3-turbo）。我们的结果显示，WhisperKit在延迟最低（0.46秒）的情况下，达到了最高的准确率（2.2%的词错误率）。本文详细描述了WhisperKit系统背后的优化技术。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10860" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SystolicAttention：在单个脉动阵列内融合FlashAttention</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11331" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11331 - SystolicAttention: Fusing FlashAttention within a Single Systolic Array</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jiawei Lin, Guokai Chen, Yuanlong Li, Thomas Bourgeat</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">Transformer模型严重依赖于缩放点积注意力（SDPA），通常使用FlashAttention算法实现。然而，当前基于脉动阵列的加速器在执行FlashAttention时面临重大挑战。脉动阵列只能在连续且大规模的矩阵乘法中实现高利用率。相比之下，FlashAttention需要频繁交错的矩阵乘法和softmax操作。脉动阵列与外部向量单元之间频繁的数据交换导致脉动阵列利用率低下。softmax涉及大量非矩阵运算，这进一步加剧了问题，因为这些运算不适合脉动阵列。此外，在脉动阵列上并发执行矩阵乘法和在向量单元上执行softmax会导致寄存器文件和SRAM端口竞争，进一步降低性能。为了克服这些限制，我们提出了FSA，一种增强的脉动阵列架构，使整个FlashAttention算法能够完全在单个脉动阵列内运行，无需外部向量单元。FSA的核心是SystolicAttention，这是一种新颖的调度算法，它将FlashAttention操作以细粒度、元素级重叠的方式映射到脉动阵列上。这显著提高了阵列利用率，同时保留了原始的浮点运算顺序以维持数值稳定性。我们在可综合的RTL中实现了FSA，并与最先进的商业加速器进行了性能评估。我们的结果表明，与AWS NeuronCore-v2和Google TPUv5e相比，FSA的注意力FLOPs/s利用率分别提高了1.77倍和4.83倍，而面积开销仅增加了约10%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11331" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一款用于心理健康支持的离线移动对话代理：通过情感对话和心理学文本学习，并以学生为中心进行评估</div>
+                                <div><a href="https://arxiv.org/pdf/2507.10580" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.10580 - An Offline Mobile Conversational Agent for Mental Health Support: Learning from Emotional Dialogues and Psychological Texts with Student-Centered Evaluation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Vimaleswar A, Prabhu Nandan Sahu, Nilesh Kumar Sahu, Haroon R Lone</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">心理健康在个体整体福祉中扮演着至关重要的角色。近年来，数字平台被越来越多地用于扩展心理健康和情感支持。然而，用户可访问性有限、互联网连接问题以及数据隐私等持续存在的挑战，凸显了开发一款基于智能手机的离线解决方案的必要性。为了应对这些挑战，我们提出了EmoSApp（情感支持应用）：一款完全离线、基于智能手机的对话应用，专为心理健康和情感支持而设计。该系统利用大型语言模型（LLM），特别是通过Torchtune和Executorch为资源受限设备进行微调、量化和部署的模型，使得所有推理都在智能手机上进行。为了让EmoSApp具备强大的领域专业知识，我们在我们自己策划的包含14582个心理健康问答对的“知识数据集”以及多轮对话数据上对LLaMA-3.2-1B-Instruct模型进行了微调。通过与学生群体的定性人类评估，我们证明了EmoSApp能够连贯、富有同情心地回应，维持互动对话，并为用户的心理健康问题提供相关建议。此外，在九个标准常识和推理基准上的定量评估也证明了我们微调、量化后的模型在低资源环境下的有效性。通过优先考虑设备端部署和专门的领域适应，EmoSApp为未来在便携、安全和高度定制化的AI驱动心理健康解决方案领域的创新提供了一个蓝图。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.10580" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态与三维内容生成</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">RoMaP：利用正则化分数蒸馏采样在3D高斯溅射中实现鲁棒的3D蒙版部件级编辑</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11061" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11061 - Robust 3D-Masked Part-level Editing in 3D Gaussian Splatting with Regularized Score Distillation Sampling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hayeon Kim, Ji Ha Jang, Se Young Chun</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近年来，3D神经表示和实例级编辑模型的进步使得高效创建高质量3D内容成为可能。然而，实现精确的局部3D编辑仍然具有挑战性，特别是对于高斯溅射（Gaussian Splatting），这主要是由于多视图2D部件分割的不一致性以及分数蒸馏采样（SDS）损失固有的模糊性。为了解决这些限制，我们提出了RoMaP，一个新颖的局部3D高斯编辑框架，能够实现精确且显著的部件级修改。首先，我们引入了一个鲁棒的3D掩码生成模块，该模块采用了我们的3D几何感知标签预测（3D-GALP）技术，利用球谐函数（SH）系数来建模与视图相关的标签变化和软标签属性，从而在不同视点间产生准确且一致的部件分割。其次，我们提出了一种正则化的SDS损失，它将标准SDS损失与额外的正则化项相结合。特别地，我们通过“调度潜在混合与部件”（SLaMP）编辑方法引入了L1锚点损失，该方法能生成高质量的部件编辑2D图像，并将修改限制在目标区域内，同时保持上下文的连贯性。额外的正则化项，如高斯先验移除，通过允许超出既有上下文的更改，进一步提高了灵活性，而鲁棒的3D掩码则防止了意外的编辑。实验结果表明，我们的RoMaP在重建和生成的高斯场景与对象上，无论在定性还是定量上都达到了最先进的局部3D编辑水平，为更鲁棒和灵活的部件级3D高斯编辑提供了可能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11061" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">流式4D视觉几何变换器</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11539" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11539 - Streaming 4D Visual Geometry Transformer</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Dong Zhuo, Wenzhao Zheng, Jiahe Guo, Yuqi Wu, Jie Zhou, Jiwen Lu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">从视频中感知和重建4D时空几何是计算机视觉领域一项基础而富有挑战性的任务。为了促进交互式和实时应用，我们提出了一种流式4D视觉几何变换器，其理念与自回归大型语言模型相似。我们探索了一种简单高效的设计，并采用因果变换器架构以在线方式处理输入序列。我们使用时间因果注意力并缓存历史键值作为隐式记忆，以实现高效的流式长期4D重建。这种设计可以通过增量式地整合历史信息来处理实时4D重建，同时保持高质量的空间一致性。为了高效训练，我们提出从稠密的双向视觉几何接地变换器（VGGT）中蒸馏知识到我们的因果模型。在推理方面，我们的模型支持从大型语言模型领域迁移优化的高效注意力算子（如FlashAttention）。在各种4D几何感知基准上的大量实验表明，我们的模型在在线场景中提高了推理速度，同时保持了有竞争力的性能，为可扩展和交互式的4D视觉系统铺平了道路。代码可在以下网址获取：https://www.google.com/url?q=https://github.com/Doooooing/Streaming-VGGT&amp;sa=D&amp;source=editors&amp;ust=1752648727455077&amp;usg=AOvVaw2sE-QxH7W46tLp4tP8zB2n。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11539" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MMOne：在同一场景中表示多种模态</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11129" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11129 - MMOne: Representing Multiple Modalities in One Scene</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zhifeng Gu, Bing Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">人类通过多模态线索感知世界，以理解并与环境互动。学习一个适用于多种模态的场景表示，可以增强对物理世界的理解。然而，由于不同模态之间的内在差异，模态冲突带来了两个关键挑战：属性差异和粒度差异。为了应对这些挑战，我们提出了一个通用框架MMOne，用于在同一场景中表示多种模态，并且可以轻松扩展到其他模态。具体来说，我们提出了一个带有新颖模态指示器的模态建模模块，以捕捉每种模态的独特性质。此外，我们设计了一种多模态分解机制，根据模态差异将多模态高斯函数分离为单模态高斯函数。我们通过将多模态信息分解为共享和模态特定组件来解决模态之间的本质区别，从而得到一个更紧凑、更高效的多模态场景表示。广泛的实验表明，我们的方法持续增强了每种模态的表示能力，并且可以扩展到其他模态。代码可在 https://www.google.com/url?q=https://mmone-project.github.io/&amp;sa=D&amp;source=editors&amp;ust=1752648727455502&amp;usg=AOvVaw2e811p4nE83P09i8r7lV89 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11129" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">EditGen：利用交叉注意力控制实现基于指令的自回归音频编辑</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11096" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11096 - EditGen: Harnessing Cross-Attention Control for Instruction-Based Auto-Regressive Audio Editing</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Vassilis Sioros, Alexandros Potamianos, Giorgos Paraskevopoulos</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在本研究中，我们探讨了如何利用交叉注意力控制在自回归模型中进行高效的音频编辑。受图像编辑方法的启发，我们开发了一种类似Prompt-to-Prompt的方法，通过交叉注意力和自注意力机制来指导编辑。我们集成了一种受Auffusion影响的基于扩散的策略，扩展了模型的功能以支持精细化编辑，为提示引导的音频编辑建立了一个基准。此外，我们通过引入一个预训练的冻结自回归模型MUSICGEN，提出了一种替代方法，并基于替换、重加权和精炼注意力分数，提出了三种编辑机制。我们采用常用的音乐专用评估指标和人类研究，来衡量时变可控性、对全局文本提示的遵循度以及整体音频的真实感。自动评估和人类评估均表明，所提出的将prompt-to-prompt指导与自回归生成模型相结合的方法，在生成音频的旋律、动态和节奏方面，显著优于基于扩散的基准模型。我们的代码可在 https://www.google.com/url?q=https://github.com/VassilisSioros/EditGen&amp;sa=D&amp;source=editors&amp;ust=1752648727454230&amp;usg=AOvVaw35F2k4tF53W1w7vLqXkK_y 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11096" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>大语言模型基础与架构</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">大型语言模型一次能遵循多少条指令？</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11538" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11538 - How Many Instructions Can LLMs Follow at Once?</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Daniel Jaroslawicz, Brendan Whiting, Parth Shah, Karime Maamari</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">生产级别的LLM系统需要同时稳健地遵守数十甚至数百条指令。然而，LLM在高指令密度下的指令遵循能力尚未得到表征，因为现有的基准测试仅在具有单个或少量指令的任务上评估模型。我们引入了IFScale，这是一个包含500个关键词包含指令的商业报告写作任务的简单基准，用于衡量指令遵循性能如何随着指令密度的增加而下降。我们评估了来自七个主要提供商的20个最先进的模型，发现即使是最好的前沿模型，在500条指令的最大密度下也只能达到68%的准确率。我们的分析揭示，模型大小和推理能力与3种不同的性能下降模式、对早期指令的偏好以及指令遵循错误的独特类别相关。我们的见解可以为现实世界应用中指令密集型提示的设计提供信息，并突显了重要的性能-延迟权衡。我们开放了该基准和所有结果，以供进一步分析，网址为：https://www.google.com/url?q=https://github.com/llm-scaling-co/ifscale&amp;sa=D&amp;source=editors&amp;ust=1752648727458852&amp;usg=AOvVaw3bM6tF0x7v4sK92i8mRk6E。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11538" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">大型语言模型中的专家混合模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.11181" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11181 - Mixture of Experts in Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Danyang Zhang, Junhao Song, Ziqian Bi, Yingfang Yuan, Tianyang Wang, Joe Yeong, Junfeng Hao</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文全面回顾了大型语言模型中的专家混合（MoE）架构，强调了其在保持最小计算开销的同时显著提升模型性能的能力。通过对理论基础、核心架构设计以及大型语言模型（LLM）应用的系统性分析，我们考察了专家门控和路由机制、层级和稀疏MoE配置、元学习方法、多模态和多任务学习场景、现实世界部署案例，以及深度学习中的最新进展和挑战。我们的分析指出了MoE的主要优势，包括与等效贝叶斯方法相比更强的模型容量、改进的任务特定性能以及有效扩展模型容量的能力。我们还强调了确保专家多样性、准确校准和可靠的推理聚合的重要性，因为这些对于最大化MoE架构的有效性至关重要。最后，本综述概述了当前的研究局限性、开放性挑战以及有前景的未来方向，为MoE架构及其应用的持续创新提供了基础。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.11181" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
