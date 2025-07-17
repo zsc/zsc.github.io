@@ -1,0 +1,470 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-17</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-17)</h1>
+                    <p id="intro">为您找到日期 2025-07-17 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>生成式人工智能与多模态模型</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">量化更多，损失更少：基于残差量化语音表示的自回归生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12197&amp;sa=D&amp;source=editors&amp;ust=1752729352493186&amp;usg=AOvVaw1UfuluNu2cor9f142eeRif" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12197 - Quantize More, Lose Less: Autoregressive Generation from Residually Quantized Speech Representations</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yichen Han, Xiaoyang Hao, Keming Chen, Weibo Xiong, Jun He, Ruonan Zhang, Junjie Cao, Yue Liu, Bowen Li, Dongrui Zhang, Hui Xia, Huilei Fu, Kai Jia, Kaixuan Guo, Mingli Jin, Qingyun Meng, Ruidong Ma, Ruiqian Fang, Shaotong Guo, Xuhui Li, Yang Xiang, Ying Zhang, Yulong Liu, Yunfeng Li, Yuyi Zhang, Yuze Zhou, Zhen Wang, Zhaowen Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在离散建模范式下，文本到语音（TTS）合成技术取得了新的进展。现有的自回归方法通常依赖于单码本表示，这会造成显著的信息损失。即使采用流匹配等后处理精炼技术，这些方法也无法恢复细粒度的细节（例如，韵律的细微差别、特定说话人的音色），尤其是在歌声或音乐合成等具有挑战性的场景中。我们提出了QTTS，这是一个基于我们新音频编解码器QDAC的新型TTS框架。QDAC的核心创新在于其端到端地训练一个基于ASR的自回归网络与一个GAN，从而实现了卓越的语义特征解耦，以进行可扩展的、近无损的压缩。QTTS使用两种创新策略对这些离散编码进行建模：分层并行架构，它使用双AR结构来建模码本间的依赖关系以实现更高质量的合成；以及延迟多头方法，它采用具有固定延迟的并行化预测来加速推理速度。我们的实验表明，与基线相比，所提出的框架实现了更高的合成质量并更好地保留了表现力内容。这表明通过多码本建模来扩展压缩是实现高保真、通用语音和音频生成的一个有前景的方向。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12197&amp;sa=D&amp;source=editors&amp;ust=1752729352493132&amp;usg=AOvVaw2oOVVhdukXKBue9FavQAYz" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Inversion-DPO：针对扩散模型的精确高效后训练方法</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11554&amp;sa=D&amp;source=editors&amp;ust=1752729352523802&amp;usg=AOvVaw0GbEn6qkQsWmDCdMJdpIf7" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11554 - Inversion-DPO: Precise and Efficient Post-Training for Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zejian Li, Yize Li, Chenye Meng, Zhongni Liu, Yang Ling, Shengyuan Zhang, Guang Yang, Changyuan Yang, Zhiyuan Yang, Lingyun Sun</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">扩散模型（DM）的最新进展得益于对齐方法，这些方法通过后训练使模型更好地符合人类偏好。然而，这些方法通常需要对基础模型和奖励模型进行计算密集型训练，这不仅带来了巨大的计算开销，还可能损害模型的准确性和训练效率。为了解决这些限制，我们提出了Inversion-DPO，一种新颖的对齐框架，它通过使用DDIM逆向为扩散模型重新构建直接偏好优化（DPO），从而避免了奖励建模。我们的方法通过从优胜和劣败样本到噪声的确定性逆向过程，在Diffusion-DPO中进行难以处理的后验采样，从而推导出一个新的后训练范式。该范式无需辅助奖励模型或不准确的近似，显著提高了训练的精度和效率。我们将Inversion-DPO应用于文本到图像生成的基础任务和组合图像生成的挑战性任务。大量实验表明，与现有的后训练方法相比，Inversion-DPO取得了显著的性能提升，并突显了训练后的生成模型生成高保真、组合连贯图像的能力。为了进行组合图像生成的后训练，我们策划了一个包含11,140张图像的配对数据集，这些图像具有复杂的结构注释和综合评分，旨在增强生成模型的组合能力。Inversion-DPO为扩散模型中高效、高精度的对齐探索了一条新途径，推动了其在复杂现实生成任务中的适用性。我们的代码可在 https://this URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11554&amp;sa=D&amp;source=editors&amp;ust=1752729352523755&amp;usg=AOvVaw2WGMbsdkfP9IB2MuGLglao" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">EgoVLA：从第一人称人类视频中学习视觉-语言-动作模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12440&amp;sa=D&amp;source=editors&amp;ust=1752729352480922&amp;usg=AOvVaw0NmOT_Oda74d1cVGaUljfy" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12440 - EgoVLA: Learning Vision-Language-Action Models from Egocentric Human Videos</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ruihan Yang, Qinxi Yu, Yecheng Wu, Rui Yan, Borui Li, An-Chieh Cheng, Xueyan Zou, Yunhao Fang, Hongxu Yin, Sifei Liu, Song Han, Yao Lu, Xiaolong Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">用于模仿学习的真实机器人数据收集已在机器人操作领域取得了显著进展。然而，该过程中对机器人硬件的需求从根本上限制了数据规模。在本文中，我们探索使用第一人称人类视频来训练视觉-语言-动作（VLA）模型。使用人类视频的好处不仅在于其规模，更重要的是场景和任务的丰富性。通过在人类视频上训练的VLA模型来预测人类手腕和手部动作，我们可以执行逆向运动学和重定向，将人类动作转换为机器人动作。我们使用少量机器人操作演示来微调模型，以获得机器人策略，即EgoVLA。我们提出了一个名为Isaac人形机器人操作基准的仿真基准，其中我们设计了多样化的双手操作任务及演示。我们使用Isaac人形机器人操作基准对EgoVLA进行微调和评估，结果显示其相较于基线有显著改进，并对人类数据的重要性进行了消融研究。视频可在我们的网站上找到：https://this URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12440&amp;sa=D&amp;source=editors&amp;ust=1752729352480863&amp;usg=AOvVaw0G6jnXaGG9dOyqcXZijrUs" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于高保真、高产出扩散模型的组合式离散潜在编码</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12318&amp;sa=D&amp;source=editors&amp;ust=1752729352486644&amp;usg=AOvVaw0htuRBGTT4MDVCAtxA4uVH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12318 - Compositional Discrete Latent Code for High Fidelity, Productive Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Samuel Lavoie, Michael Noukhovitch, Aaron Courville</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们认为，扩散模型在建模复杂分布方面的成功，主要来自于它们的输入条件。本文从理想表示应提高样本保真度、易于生成且具有组合性以允许生成训练外样本的角度，研究了用于条件化扩散模型的表示。我们引入了离散潜在编码（DLC），这是一种源自单纯形嵌入（Simplicial Embeddings）的图像表示，通过自监督学习目标进行训练。DLC是离散标记的序列，与标准的连续图像嵌入相对。它们易于生成，并且其组合性使得能够采样超出训练分布的新颖图像。使用DLC训练的扩散模型在生成保真度上有所提高，在ImageNet上为无条件图像生成建立了新的技术水平。此外，我们展示了组合DLC可以使图像生成器产生分布外的样本，这些样本以连贯的方式结合了不同图像的语义。最后，我们展示了如何通过利用大规模预训练语言模型，使DLC能够实现文本到图像的生成。我们高效地微调了一个文本扩散语言模型，以生成DLC，从而产生超出图像生成器训练分布的新颖样本。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12318&amp;sa=D&amp;source=editors&amp;ust=1752729352486595&amp;usg=AOvVaw3CQQOaZFKWCJ3_hGcuvrpF" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">RaDL：面向多实例文本到图像生成的关系感知解耦学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11947&amp;sa=D&amp;source=editors&amp;ust=1752729352503728&amp;usg=AOvVaw09ORY9fPULTswMEKsPnzry" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11947 - RaDL: Relation-aware Disentangled Learning for Multi-Instance Text-to-Image Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Geon Park, Seon Bin Kim, Gunho Jung, Seong-Whan Lee</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着文本到图像（T2I）模型的最新进展，在单个图像提示中有效生成多个实例已成为一个关键挑战。现有方法虽然在生成单个实例的位置方面取得了成功，但常常难以解决关系差异和多重属性泄露的问题。为了解决这些限制，本文提出了关系感知解耦学习（RaDL）框架。RaDL通过可学习的参数增强实例特定属性，并通过关系注意力（Relation Attention）生成关系感知的图像特征，该注意力机制利用从全局提示中提取的动作动词。通过在COCO-Position、COCO-MIG和DrawBench等基准上进行广泛评估，我们证明RaDL优于现有方法，在位置准确性、多重属性考虑以及实例间关系方面表现出显著改进。我们的结果表明，RaDL是生成既考虑多实例图像中每个实例的关系又考虑其多重属性的图像的解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11947&amp;sa=D&amp;source=editors&amp;ust=1752729352503688&amp;usg=AOvVaw09BPUz_EBzXeLzCps9bf2x" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MNIST-Gen：使用分层语义、强化学习和范畴论的模块化MNIST风格数据集生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11821&amp;sa=D&amp;source=editors&amp;ust=1752729352506976&amp;usg=AOvVaw34peHUaxCJAqlKcE6L46J0" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11821 - MNIST-Gen: A Modular MNIST-Style Dataset Generation Using Hierarchical Semantics, Reinforcement Learning, and Category Theory</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Pouya Shaeri, Arash Karimi, Ariane Middel</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">神经网络通常使用标准数据集（如MNIST、FashionMNIST或MNIST的其他变体）进行基准测试，这些数据集虽然易于获取，但仅限于通用类别，如数字或衣物。对于从事特定领域任务（如分类树木、食物或其他现实世界对象）的研究人员来说，这些数据集是不够的且不相关。此外，创建和发布自定义数据集可能耗时、受法律限制或超出单个项目的范围。我们提出了MNIST-Gen，这是一个自动化、模块化和自适应的框架，用于生成根据用户指定类别量身定制的MNIST风格图像数据集，并采用分层语义分类。该系统结合了基于CLIP的语义理解与强化学习和人类反馈，以最少的人工干预实现智能分类。我们的分层方法支持具有语义特征的复杂类别结构，实现了细粒度的子分类和多种处理模式：用于最大控制的单个审查、用于大型数据集的智能批量处理以及用于快速创建的快速批量处理。受范畴论的启发，MNIST-Gen将每个数据转换阶段建模为可组合的态射，增强了清晰度、模块化和可扩展性。作为概念验证，我们生成并基准测试了两个新颖的数据集——Tree-MNIST和Food-MNIST——展示了MNIST-Gen在生产特定任务评估数据方面的实用性，同时与手动方法相比，实现了85%的自动分类准确率和80%的时间节省。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11821&amp;sa=D&amp;source=editors&amp;ust=1752729352506904&amp;usg=AOvVaw3ZFhlqVogFd6Co4l6oyN0l" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">AutoVDC：使用视觉-语言模型进行自动化视觉数据清洗</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12414&amp;sa=D&amp;source=editors&amp;ust=1752729352483765&amp;usg=AOvVaw09QWcJsUHom5LRaPiA2HNs" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12414 - AutoVDC: Automated Vision Data Cleaning Using Vision-Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Santosh Vasa, Aditi Ramadwar, Jnana Rama Krishna Darabattula, Md Zafar Anwar, Stanislaw Antol, Andrei Vatavu, Thomas Monninger, Sihao Ding</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">自动驾驶系统的训练需要带有精确标注的大量数据集以获得鲁棒的性能。人工标注存在不完美之处，通常需要多次迭代才能产出高质量的数据集。然而，手动审查大型数据集既费力又昂贵。在本文中，我们引入了AutoVDC（自动化视觉数据清洗）框架，并研究了利用视觉-语言模型（VLM）自动识别视觉数据集中的错误标注，从而使用户能够消除这些错误并提高数据质量。我们使用KITTI和nuImages数据集验证了我们的方法，这些数据集包含用于自动驾驶的目标检测基准。为了测试AutoVDC的有效性，我们创建了有意注入错误标注的数据集变体，并观察我们方法的错误检测率。此外，我们比较了使用不同VLM的检测率，并探讨了VLM微调对我们流程的影响。结果表明，我们的方法在错误检测和数据清洗实验中表现出高性能，显示出其在显著提高自动驾驶中大规模生产数据集的可靠性和准确性方面的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12414&amp;sa=D&amp;source=editors&amp;ust=1752729352483713&amp;usg=AOvVaw20vAcAGMHIL8ejk4YJOP1A" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">两步思考：通过自基础验证缓解多模态大语言模型中的一致性偏见</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11662&amp;sa=D&amp;source=editors&amp;ust=1752729352477627&amp;usg=AOvVaw3hcPT_wdIbK2o66-I5WYh9" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11662 - Let's Think in Two Steps: Mitigating Agreement Bias in MLLMs with Self-Grounded Verification</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Moises Andrade, Joonhyuk Cha, Brandon Ho, Vriksha Srihari, Karmesh Yadav, Zsolt Kira</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">验证器——为智能体行为分配奖励的函数——一直是AI在数学和棋盘游戏等领域取得进展的关键。然而，将这些成果扩展到没有明确成功标准的领域（例如，计算机使用）仍然是一个挑战：虽然人类可以识别合适的结果，但将这种直觉转化为可扩展的规则并非易事。多模态大型语言模型（MLLM）凭借其世界知识、人类偏好对齐和推理能力，成为一个有前景的解决方案。我们评估了MLLM作为网页导航、计算机使用和机器人操作等领域智能体轨迹的验证器，并发现了一个关键限制：一致性偏见，即MLLM强烈倾向于偏爱其上下文窗口中的信息，常常生成思维链来为有缺陷的行为辩护。这种偏见在各种模型中普遍存在，对测试时扩展具有弹性，并可能影响使用MLLM作为评估器的多种方法（例如，数据过滤）。值得注意的是，尽管MLLM对期望行为表现出强烈且与人类一致的先验知识，但这种偏见仍然存在。为了解决这个问题，我们提出了自基础验证（SGV），这是一种轻量级方法，通过利用其自身的采样机制（通过无条件和条件生成）来更有效地利用MLLM的知识和推理能力。SGV分两步操作：首先，引导MLLM检索关于任务完成的广泛先验知识，这与待评估数据无关。然后，在自生成的先验条件下，它对候选轨迹进行推理和评估。通过SGV增强后，MLLM验证器在准确率和故障检测率上显示出高达20个百分点的提升，并且能够对异构智能体进行实时监督，从而提高了OSWorld中GUI专家的任务完成率、robomimic中扩散策略的完成率以及VisualWebArena中ReAct智能体的完成率——在基准测试中创下新的SOTA，比之前的最佳成绩高出48%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11662&amp;sa=D&amp;source=editors&amp;ust=1752729352477568&amp;usg=AOvVaw3z9VeDzyYnNCpzHEdxHG14" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>强化学习与自主智能体</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Xiangqi-R1：通过强化学习增强大语言模型在中国象棋中的空间策略推理能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12215&amp;sa=D&amp;source=editors&amp;ust=1752729352472691&amp;usg=AOvVaw0Qu1p4ubHUuPQiDNU3CloS" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12215 - Xiangqi-R1: Enhancing Spatial Strategic Reasoning in LLMs for Chinese Chess via Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuhao Chen, Shuochen Liu, Yuanjie Lyu, Chao Zhang, Jiayao Shi, Tong Xu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">长期以来，游戏一直是评估通用人工智能（AGI）的基本基准。虽然大型语言模型（LLM）在通用推理方面表现出令人印象深刻的能力，但它们在空间策略推理方面的有效性仍未得到充分探索，而这对于复杂且完全可观察的棋盘游戏至关重要。在这项工作中，我们采用中国象棋（Xiangqi）作为一个具有挑战性和丰富内涵的试验平台，因其规则复杂且空间复杂度高。为了提升LLM在此类环境中的策略能力，我们提出了一个为象棋量身定制的训练框架，该框架建立在一个包含五百万棋盘-走法对的大规模数据集上，并通过专家注释和引擎评估进行了增强。在此基础上，我们引入了Xiangqi-R1，一个7B参数的模型，通过多阶段方式进行训练：（1）微调合法走法预测以捕捉基本的空间规则，（2）结合策略性注释以改进决策，以及（3）通过组相对策略优化（GRPO）应用强化学习，并使用多维奖励信号来增强推理稳定性。我们的实验结果表明，尽管通用LLM体量庞大且功能强大，但在这些任务中难以达到令人满意的性能。与通用LLM相比，Xiangqi-R1在走法合法性方面提升了18%，在分析准确性方面提升了22%，取得了巨大进步。我们的结果为在空间复杂领域创造通用策略智能指明了一条有前景的道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12215&amp;sa=D&amp;source=editors&amp;ust=1752729352472537&amp;usg=AOvVaw3xfF0SUM0kYkJKQ8u5ymoi" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Kevin：用于生成CUDA内核的多轮强化学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11948&amp;sa=D&amp;source=editors&amp;ust=1752729352503405&amp;usg=AOvVaw3l3tORg6YXzo5mAQhbaPQT" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11948 - Kevin: Multi-Turn RL for Generating CUDA Kernels</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Carlo Baronio, Pietro Marsella, Ben Pan, Simon Guo, Silas Alberti</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">编写GPU内核是一项具有挑战性的任务，对AI系统的效率至关重要。它也是高度迭代的：领域专家编写代码并通过执行反馈来提高性能。此外，它提供了可验证的奖励，如正确性和加速比，使其成为应用强化学习（RL）的天然环境。为了将这种迭代性质明确地融入训练中，我们开发了一个灵活的多轮RL配方，以解决在现实世界环境中遇到的独特挑战，例如从长轨迹中学习和跨轮次的有效奖励归因。我们介绍了Kevin - K(ernel D)evin，这是第一个使用多轮RL进行CUDA内核生成和优化的模型。在我们的评估设置中，Kevin相较于其基础模型（QwQ-32B）显示出显著的提升，将生成的（纯CUDA）内核的正确性从56%提高到82%，平均加速比从基线（PyTorch Eager）的0.53倍提高到1.10倍，并超过了像o4-mini（0.78倍）这样的前沿模型。最后，我们研究了它在测试时扩展轴上的行为：我们发现扩展串行优化的益处大于并行采样。特别是，当给予更多优化轮次时，Kevin显示出更高的改进率。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11948&amp;sa=D&amp;source=editors&amp;ust=1752729352503366&amp;usg=AOvVaw0AOGODa5J75vacwrbigh0z" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">基于扩散模型故障采样器的自动驾驶车辆鲁棒规划</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11991&amp;sa=D&amp;source=editors&amp;ust=1752729352501607&amp;usg=AOvVaw09lPjOt0pXgAbrTv40BvAZ" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11991 - Robust Planning for Autonomous Vehicles with Diffusion-Based Failure Samplers</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Juanran Wang, Marc R. Schlichting, Mykel J. Kochenderfer</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">交叉口等高风险交通区域是碰撞事故的主要原因。本研究利用深度生成模型来增强自动驾驶汽车在交叉口环境中的安全性。我们训练了一个1000步的去噪扩散概率模型，用于生成导致碰撞的传感器噪声序列，该模型基于入侵车辆的当前相对位置和速度，为一辆在四向交叉口行驶的自动驾驶汽车生成噪声。利用生成对抗架构，这个1000步的模型被提炼成一个单步去噪扩散模型，该模型展示了快速的推理速度，同时保持了相似的采样质量。我们展示了该单步模型在构建自动驾驶汽车鲁棒规划器中的一种可能应用。该规划器使用单步模型，根据当前测量的交通状态高效地采样潜在的故障案例，以指导其决策过程。通过仿真实验，该鲁棒规划器与基准的智能驾驶模型（IDM）控制器相比，展示了显著更低的故障率和延迟率。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11991&amp;sa=D&amp;source=editors&amp;ust=1752729352501565&amp;usg=AOvVaw012XQBISwSNA7PG2ZNIPis" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于网联自动驾驶车辆多车协同决策的拓扑增强多智能体强化学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12110&amp;sa=D&amp;source=editors&amp;ust=1752729352474120&amp;usg=AOvVaw3_MW4_ENSmBaCqx1KlEOM4" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12110 - Topology Enhanced MARL for Multi-Vehicle Cooperative Decision-Making of CAVs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ye Han, Lijun Zhang, Dejian Meng, Zhuang Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">探索-利用的权衡是强化学习（RL）中的基本挑战之一，在多智能体强化学习（MARL）中，由于联合状态-动作空间的指数级增长，这一挑战变得更加严峻。本文提出了一种拓扑增强的MARL（TPE-MARL）方法，用于优化混合交通中联网自动驾驶车辆（CAV）的协同决策。这项工作有两个主要贡献：首先，我们为动态交通流构建了一个博弈拓扑张量，有效压缩了高维交通状态信息并减小了MARL算法的搜索空间。其次，在设计的博弈拓扑张量的基础上，并以QMIX为骨干RL算法，我们建立了一个结合了访问次数和智能体互信息的拓扑增强MARL框架。在不同交通密度和CAV渗透率下的广泛模拟证明了TPE-MARL的有效性。对训练动态、探索模式、宏观交通性能指标和微观车辆行为的评估表明，TPE-MARL成功地平衡了探索和利用。因此，它在交通效率、安全性、决策平滑度和任务完成方面表现出优越的性能。此外，该算法在混合自主和完全自主交通场景中都展示了与人类驾驶员相当或超越的决策合理性。我们的工作代码可在 https://this URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12110&amp;sa=D&amp;source=editors&amp;ust=1752729352474028&amp;usg=AOvVaw0cFBPyeJ_SpS8nCSHtGMje" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Aime：迈向全自主多智能体框架</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11988&amp;sa=D&amp;source=editors&amp;ust=1752729352475089&amp;usg=AOvVaw2Hyjxt4DMoFL9T_uAMzfJ9" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11988 - Aime: Towards Fully-Autonomous Multi-Agent Framework</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yexuan Shi, Mingyu Wang, Yunxiang Cao, Hongjie Lai, Junjian Lan, Xin Han, Yu Wang, Jie Geng, Zhenan Li, Zihao Xia, Xiang Chen, Chen Li, Jian Xu, Wenbo Duan, Yuanshuo Zhu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">由大型语言模型（LLM）驱动的多智能体系统（MAS）正在成为解决复杂、多方面问题的强大范式。然而，这些系统的潜力常常受到普遍的“计划-执行”框架的限制，该框架存在关键局限性：僵化的计划执行、静态的智能体能力和低效的通信。这些弱点阻碍了它们在动态环境中的适应性和鲁棒性。本文介绍了Aime，一个旨在通过动态、反应式规划和执行来克服这些挑战的新型多智能体框架。Aime用一种流畅和自适应的架构取代了传统的静态工作流。其核心创新包括：（1）一个动态规划器，根据实时执行反馈持续优化整体策略；（2）一个执行器工厂，实现动态执行器实例化，按需组装具有定制工具和知识的专门智能体；以及（3）一个集中的进度管理模块，作为系统范围内状态一致感知的单一事实来源。我们在涵盖通用推理（GAIA）、软件工程（SWE-bench Verified）和实时网页导航（WebVoyager）的多种基准测试套件上对Aime进行了实证评估。结果表明，Aime在其各自的领域内始终优于甚至高度专业化的最先进智能体。其卓越的适应性和任务成功率使Aime成为一个更具弹性和更有效的基础，适用于多智能体协作。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11988&amp;sa=D&amp;source=editors&amp;ust=1752729352475033&amp;usg=AOvVaw0SdXdjoyHpvX6iUXPEweYR" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>大语言模型的对齐、安全与可解释性</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">我们能在模型思考结束前预测其对齐性吗？迈向监控未对齐的推理模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12428&amp;sa=D&amp;source=editors&amp;ust=1752729352481388&amp;usg=AOvVaw0yRj12P5zQuy8TzJVd20oH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12428 - Can We Predict Alignment Before Models Finish Thinking? Towards Monitoring Misaligned Reasoning Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yik Siu Chan, Zheng-Xin Yong, Stephen H. Bach</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">开放权重的推理语言模型在生成最终响应之前会产生长的思维链（CoT），这提高了性能但也引入了额外的对齐风险，有害内容常常出现在CoT和最终输出中。在这项工作中，我们研究是否可以使用CoT来预测最终响应的未对齐性。我们评估了一系列监控方法，包括人类、高能力的大型语言模型以及使用CoT文本或激活值的文本分类器。首先，我们发现一个在CoT激活值上训练的简单线性探针，在预测最终响应是安全还是不安全方面，显著优于所有基于文本的方法。CoT文本通常不忠实，可能会误导人类和分类器，而模型的潜在表示（即CoT激活值）提供了更可靠的预测信号。其次，该探针在推理完成之前就能做出准确的预测，即使应用于早期的CoT片段也能达到很强的性能。这些发现在不同模型大小、家族和安全基准上都具有普遍性，表明轻量级探针可以为生成过程中的实时安全监控和早期干预提供可能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12428&amp;sa=D&amp;source=editors&amp;ust=1752729352481322&amp;usg=AOvVaw09TQi0DQc1NxgmB_Xvsm4q" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">思想纯度：针对思维链攻击的防御范式</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12314&amp;sa=D&amp;source=editors&amp;ust=1752729352487006&amp;usg=AOvVaw1EBHKcYlKxceAtKQNWQA6N" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12314 - Thought Purity: Defense Paradigm For Chain-of-Thought Attack</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zihao Xue, Zhen Bi, Long Ma, Zhenlin Hu, Yan Wang, Zhenfang Liu, Qing Sheng, Jie Xiao, Jungang Lou</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管经过强化学习训练的大型推理模型（LRM，例如Deepseek-R1）在不断发展的大型语言模型（LLM）领域展示了先进的推理能力，但它们对安全威胁的易感性仍然是一个关键漏洞。这一弱点在思维链（CoT）生成过程中尤其明显，其中像后门提示攻击这样的对抗性方法可以系统地颠覆模型的核心推理机制。新兴的思维链攻击（CoTA）通过利用提示的可控性揭示了这一漏洞，以低成本的干预同时降低了CoT的安全性和任务性能。为了解决这种复合的安全-性能漏洞，我们提出了思想纯度（TP）：一种防御范式，它系统地增强了对恶意内容的抵抗力，同时保持了操作效能。我们的解决方案通过三个协同组件实现这一目标：（1）一个安全优化的数据处理管道；（2）强化学习增强的规则约束；（3）自适应监控指标。我们的方法建立了第一个针对强化学习对齐推理系统中CoTA漏洞的全面防御机制，显著推进了下一代AI架构的安全-功能平衡。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12314&amp;sa=D&amp;source=editors&amp;ust=1752729352486964&amp;usg=AOvVaw0LWOEBHD8V7xzHylCSha3w" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ClarifAI：通过基于案例的推理和本体驱动方法增强人工智能的可解释性和透明度以改善决策</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11733&amp;sa=D&amp;source=editors&amp;ust=1752729352477057&amp;usg=AOvVaw1ejMulNnnfXbHDlC-y5Ggq" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11733 - ClarifAI: Enhancing AI Interpretability and Transparency through Case-Based Reasoning and Ontology-Driven Approach for Improved Decision-Making</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Srikanth Vemula</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本研究引入了ClarifAI（人工智能的清晰度与推理接口），这是一种旨在增强人工智能（AI）在改善决策制定领域中的透明度和可解释性的新颖方法。ClarifAI利用基于案例的推理（CBR）方法论，并整合了本体驱动的方法，旨在满足参与AI驱动应用的各种利益相关者的复杂解释需求。论文阐述了ClarifAI的理论基础，结合CBR和本体论以提供详尽的解释机制。它进一步详细说明了设计原则和架构蓝图，突出了ClarifAI在不同领域增强AI可解释性的潜力及其在高风险环境中的适用性。本研究描绘了ClariAI在推进AI系统可解释性方面的重要作用，为将其部署在关键决策过程中铺平了道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11733&amp;sa=D&amp;source=editors&amp;ust=1752729352476976&amp;usg=AOvVaw2J4SYdqtEHSoKD0YGiYLI0" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>模型效率与优化</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">PoTPTQ：一种针对大语言模型的两步二次幂后训练方法</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11959&amp;sa=D&amp;source=editors&amp;ust=1752729352503073&amp;usg=AOvVaw2SBXmImgWbxHU_hbTFyi-H" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11959 - PoTPTQ: A Two-step Power-of-Two Post-training for LLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xinyu Wang, Vahid Partovi Nia, Peng Lu, Jerry Huang, Xiao-Wen Chang, Boxing Chen, Yufei Cui</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）在各种自然语言处理（NLP）任务中表现出卓越的性能。然而，由于其部署需要大量的计算资源，因此具有挑战性。二次幂（PoT）量化是应对这一困难的通用工具。尽管以前的PoT量化工作可以在CPU上使用定点加法进行高效地反量化，但在GPU上效果不佳。原因是符号位的纠缠和反量化所需的顺序位操作。我们提出了一种新颖的LLM权重PoT量化框架，该框架（i）在极低精度数值格式下超越了最先进的准确性，并且（ii）通过更高效的反量化实现了更快的推理速度。为了保持量化模型的准确性，我们引入了一种两步后训练算法：（i）使用一个稳健的起点初始化量化尺度，以及（ii）使用最小的校准集对这些尺度进行微调。我们的PoT后训练算法的性能超越了当前最先进的整数向量化，尤其是在2位和3位等低精度格式下。我们的PoT量化加速了浮点推理所需的反量化步骤，在NVIDIA V100上实现了3.67倍的加速，在NVIDIA RTX 4090上实现了1.63倍的加速，与均匀整数反量化相比。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11959&amp;sa=D&amp;source=editors&amp;ust=1752729352503035&amp;usg=AOvVaw22kwUr8sIn67L0VbSvNhtX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">针对ONNX模型的选择性量化调优</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12196&amp;sa=D&amp;source=editors&amp;ust=1752729352493660&amp;usg=AOvVaw070uRj9tx-II2admcQ2SQx" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12196 - Selective Quantization Tuning for ONNX Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Nikolaos Louloudakis, Ajitha Rajan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">量化是一个降低深度神经网络模型精度的过程，以减小模型大小和计算需求，但这通常以牺牲准确性为代价。然而，完全量化的模型可能会表现出低于可接受水平的次优性能，并由于实际限制而在低端硬件加速器上面临部署挑战。为了解决这些问题，可以有选择地仅对一部分层应用量化，但选择哪些层不进行量化并非易事。为此，我们提出了TuneQn，这是一个支持在各种CPU和GPU设备上对ONNX模型进行选择性量化、部署和执行的套件，并结合了性能分析和多目标优化。TuneQn生成选择性量化的ONNX模型，将它们部署在不同的硬件上，测量准确性和大小等指标的性能，执行帕累托前沿最小化以确定最佳模型候选者，并可视化结果。为了展示TuneQn的有效性，我们在四种ONNX模型上，使用两种量化设置，在CPU和GPU设备上对TuneQn进行了评估。结果表明，我们的实用工具有效地执行了选择性量化和调优，选择的ONNX模型候选者相比完全量化的模型，准确性损失减少了高达54.14%，相比原始模型，模型大小减少了高达72.9%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12196&amp;sa=D&amp;source=editors&amp;ust=1752729352493607&amp;usg=AOvVaw2eQ_e-D-xdkPa7nSExuN-r" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">深度强化学习网络的在线训练与剪枝</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.11975&amp;sa=D&amp;source=editors&amp;ust=1752729352502327&amp;usg=AOvVaw30Au8lL3OOy_zAUU-Z4UqJ" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.11975 - Online Training and Pruning of Deep Reinforcement Learning Networks</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Valentin Frank Ingmar Guenter, Athanasios Sideris</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">扩展强化学习（RL）算法的深度神经网络（NN）已被证明在使用特征提取网络时可以提升性能，但所获得的性能是以增加计算和内存复杂性为巨大代价的。神经网络剪枝方法已在监督学习中成功解决了这一挑战。然而，它们在RL中的应用尚未得到充分探索。我们提出一种将同步训练和剪枝集成到高级RL方法中的方法，特别是针对由在线特征提取网络（OFENet）增强的RL算法。我们的网络（XiNet）被训练来解决关于RL网络权重和缩放网络中每个单元的0/1随机变量ξ的变分伯努利分布参数的随机优化问题。随机问题公式化引入了正则化项，当一个单元对性能贡献很小时，这些正则化项会促进变分参数收敛到0。在这种情况下，相应的结构被永久性地设为非活动状态并从其网络中剪除。我们提出了一种成本感知、促进稀疏性的正则化方案，该方案专为OFENets的DenseNet架构量身定制，用网络中随机变量的参数来表示相关网络的参数复杂性。然后，当将此成本与正则化项匹配时，与之相关的许多超参数会自动选择，从而有效地结合了RL目标和网络压缩。我们在连续控制基准（MuJoCo）和Soft Actor-Critic RL智能体上评估了我们的方法，证明了OFENets可以在性能损失最小的情况下被大幅剪枝。此外，我们的结果证实，在训练期间剪枝大型网络比从头开始训练小型网络能产生更高效、性能更高的RL智能体。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.11975&amp;sa=D&amp;source=editors&amp;ust=1752729352502286&amp;usg=AOvVaw32Gic-E2y0sshcrVuBPn5d" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">混合光线追踪专家模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12419&amp;sa=D&amp;source=editors&amp;ust=1752729352482855&amp;usg=AOvVaw0SdE9AD3xYG7UjnNG8UdXa" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12419 - Mixture of Raytraced Experts</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Andrea Perin, Giacomo Lagomarsini, Claudio Gallicchio, Giuseppe Nuti</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们引入了混合光线追踪专家模型（Mixture of Raytraced Experts），这是一种堆叠式的混合专家（MoE）架构，可以动态选择专家序列，产生可变宽度和深度的计算图。现有的MoE架构通常需要对给定样本进行固定量的计算。相比之下，我们的方法随着计算在专家序列中循环，可以产生精度不断提高的预测。我们通过从一组候选专家中迭代采样来训练我们的模型，展开序列的方式类似于循环神经网络的训练方式。我们的方法不需要负载均衡机制，初步实验显示，训练周期减少了10%到40%，同时准确性相当或更高。这些结果为MoE领域的研究指明了新的方向，使得设计可能更快、更具表现力的模型成为可能。代码可在 https://this URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12419&amp;sa=D&amp;source=editors&amp;ust=1752729352482777&amp;usg=AOvVaw3imBYinHgaku-Cf7pzbq7M" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
