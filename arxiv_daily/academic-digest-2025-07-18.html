@@ -1,0 +1,462 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-18</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-18)</h1>
+                    <p id="intro">为您找到日期 2025-07-18 的数据。论文已为您整理成以下 3 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>强化学习驱动的大模型进化</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">扩展强化学习：通过延长训练解锁大语言模型中的多样化推理能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12507&amp;sa=D&amp;source=editors&amp;ust=1752816231344338&amp;usg=AOvVaw0d21msB3biI6_fHsvBPIGa" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12507 - Scaling Up RL: Unlocking Diverse Reasoning in LLMs via Prolonged Training</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Mingjie Liu, Shizhe Diao, Jian Hu, Ximing Lu, Xin Dong, Hao Zhang, Alexander Bukharin, Shaokun Zhang, Jiaqi Zeng, Makesh Narsimhan Sreedhar, Gerald Shen, David Mosallanezhad, Di Zhang, Jonas Yang, June Yang, Oleksii Kuchaiev, Guilin Liu, Zhiding Yu, Pavlo Molchanov, Yejin Choi, Jan Kautz, Yi Dong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近来，以推理为中心的语言模型（如OpenAI的O1和DeepSeek-R1）的进展表明，通过思维链推理和迭代探索等方式扩展测试时计算，可以在数学和代码生成等复杂任务上取得显著改进。这些突破是由大规模强化学习（RL）驱动的，特别是当与提供客观和有根据监督的可验证奖励信号相结合时。在本报告中，我们研究了在多样化的推理领域中，对一个小型语言模型进行长时间强化学习的效果。我们的工作确定了有效训练的几个关键要素，包括使用可验证奖励任务、对组相对策略优化（GRPO）的增强，以及提高训练稳定性和泛化能力的实用技术。我们引入了受控的KL正则化、裁剪比率和周期性参考策略重置，作为解锁长期性能增益的关键组成部分。我们的模型在强大的基线上取得了显著的改进，包括在数学任务上提升14.7%，在编码任务上提升13.9%，以及在逻辑谜题任务上提升54.8%。为了促进持续研究，我们公开发布了我们的模型。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12507&amp;sa=D&amp;source=editors&amp;ust=1752816231344275&amp;usg=AOvVaw2YPAF9N_OqpnkP4jkS-krj" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">逆向强化学习与大语言模型后训练的交汇：基础、进展与机遇</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13158&amp;sa=D&amp;source=editors&amp;ust=1752816231314624&amp;usg=AOvVaw0LxQENuIE3YfSSs7v3tno6" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13158 - Inverse Reinforcement Learning Meets Large Language Model Post-Training: Basics, Advances, and Opportunities</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hao Sun, Mihaela van der Schaar</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在大型语言模型（LLM）时代，对齐已成为追求更可靠、可控和更有能力的机器智能过程中一个基础性但富有挑战性的问题。近期推理模型和对话式AI系统的成功凸显了强化学习（RL）在增强这些系统中的关键作用，推动了RL与LLM对齐交叉领域的研究兴趣日益增长。本文通过逆向强化学习（IRL）的视角，全面回顾了LLM对齐的最新进展，强调了LLM对齐中使用的RL技术与传统RL任务中的技术之间的区别。我们特别强调了从人类数据构建神经奖励模型的必要性，并讨论了这种范式转变在形式上和实践中的影响。我们首先介绍RL的基本概念，为不熟悉该领域的读者提供基础。然后，我们考察了该研究议程的最新进展，讨论了为LLM对齐进行IRL时面临的关键挑战和机遇。除了方法论的考虑，我们还探讨了实践方面，包括数据集、基准、评估指标、基础设施以及计算高效的训练和推理技术。最后，我们从稀疏奖励RL的文献中汲取见解，以确定开放性问题和潜在的研究方向。通过综合来自不同研究的发现，我们旨在提供对该领域的结构化和批判性概述，突出未解决的挑战，并勾勒出通过RL和IRL技术改进LLM对齐的有前景的未来方向。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13158&amp;sa=D&amp;source=editors&amp;ust=1752816231314544&amp;usg=AOvVaw37YMfhsZZm82oevmffOocV" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">在精选数据上的监督微调即强化学习（且可以被改进）</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12856&amp;sa=D&amp;source=editors&amp;ust=1752816231324899&amp;usg=AOvVaw3PU30jkJ-SiIM1E1xNSqCp" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12856 - Supervised Fine Tuning on Curated Data is Reinforcement Learning (and can be improved)</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Chongli Qin, Jost Tobias Springenberg</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在经过筛选（或过滤）的数据上进行行为克隆（BC）是大型语言模型监督微调（SFT）以及模仿学习控制策略的主要范式。在此，我们将这一成功策略与通过强化学习（RL）寻找最优策略的理论与实践联系起来。基于现有文献，我们阐明SFT可以被理解为在稀疏奖励设置中最大化RL目标的一个下界。这为其通常观察到的良好性能提供了支持。从这个角度出发，我们意识到对SFT进行一个小的修改可以得到一个重要性加权的变体，其行为更接近于使用RL进行训练，因为它：i) 优化了RL目标的一个更紧的界限，并且 ii) 相比于在筛选数据上的SFT能够提升性能。我们将此变体称为重要性加权监督微调（iw-SFT）。我们展示了它易于实现，并且可以进一步推广到使用质量评分数据进行训练。由此产生的SFT变体在大型语言模型和连续控制任务的策略训练中，与更先进的RL算法相比具有竞争力。例如，在AIME 2024数据集上达到了66.7%的成绩。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12856&amp;sa=D&amp;source=editors&amp;ust=1752816231324812&amp;usg=AOvVaw1KUzAm9RXhv2J7Xz-2kKBJ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">QuestA：通过问题增强扩展大语言模型的推理能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13266&amp;sa=D&amp;source=editors&amp;ust=1752816231306397&amp;usg=AOvVaw3Pvewrui2IXEIUo3PDnTgY" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13266 - QuestA: Expanding Reasoning Capacity in LLMs via Question Augmentation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jiazheng Li, Hong Lu, Kaiyue Wen, Zaiwen Yang, Jiaxuan Gao, Hongzhou Lin, Yi Wu, Jingzhao Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习（RL）已成为训练大型语言推理模型（LLM）的关键组成部分。然而，最近的研究对其在改善多步推理方面的有效性提出了质疑——尤其是在难题上。为了应对这一挑战，我们提出了一种简单而有效的策略，即通过问题增强：在训练期间引入部分解决方案，以降低问题难度并提供更多信息丰富的学习信号。我们的方法，QuestA，在数学推理任务的RL训练中应用时，不仅提高了pass@1，也提高了pass@k——尤其是在标准RL难以取得进展的问题上。这使得我们能够在强大的开源模型（如DeepScaleR和OpenMath Nemotron）之上实现持续改进，进一步增强它们的推理能力。我们使用15亿参数的模型在数学基准测试中取得了新的SOTA结果：在AIME24上达到67.1%（+5.3%），在AIME25上达到59.5%（+10.0%），在HMMT25上达到35.5%（+4.0%）。此外，我们提供了理论解释，说明QuestA提高了样本效率，为通过RL扩展推理能力提供了一条实用且可推广的途径。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13266&amp;sa=D&amp;source=editors&amp;ust=1752816231306282&amp;usg=AOvVaw02p1-XrADqP4wjriuGqIDv" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">从根到奖赏：基于强化学习的动态树推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13142&amp;sa=D&amp;source=editors&amp;ust=1752816231281641&amp;usg=AOvVaw2S6ozlaa7IFPMiIBKgfn9q" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13142 - From Roots to Rewards: Dynamic Tree Reasoning with RL</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ahmed Bahloul, Simon Malberg</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">现代语言模型通过思维链（CoT）推理（Wei等人，2023）和检索增强（Lewis等人，2021）来解决复杂问题，但在错误传播和知识整合方面仍存在困难。树状推理方法，特别是概率思维树（ProbTree）（Cao等人，2023）框架，通过将问题分解为层次结构，并通过参数化和检索知识的置信度加权聚合来选择答案（Yao等人，2023），从而缓解了这些问题。然而，ProbTree的静态实现引入了两个关键限制：（1）推理树在初始构建阶段是固定的，无法动态适应中间结果；（2）每个节点都需要对所有可能的解决方案策略进行详尽评估，导致计算效率低下。我们提出了一个动态强化学习（Sutton和Barto，2018）框架，将基于树的推理转化为一个自适应过程。我们的方法根据实时置信度估计增量式地构建推理树，同时学习动作选择（分解、检索或聚合）的最优策略。这在保持ProbTree概率严谨性的同时，通过选择性扩展和集中的资源分配，提高了解决方案的质量和计算效率。这项工作为树状推理建立了一个新的范式，平衡了概率框架的可靠性与现实世界问答系统所需的灵活性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13142&amp;sa=D&amp;source=editors&amp;ust=1752816231281555&amp;usg=AOvVaw3OzMHbjWYkg8d05zJaf29G" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">由未对齐AI发起的操纵攻击：风险分析与安全案例框架</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12872&amp;sa=D&amp;source=editors&amp;ust=1752816231290124&amp;usg=AOvVaw1MYwvkyZ29UosPygO_bWaH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12872 - Manipulation Attacks by Misaligned AI: Risk Analysis and Safety Case Framework</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Rishane Dassanayake, Mario Demetroudi, James Walpole, Lindley Lentati, Jason R. Brown, Edward James Young</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">前沿AI系统在说服、欺骗和影响人类行为方面的能力正在迅速发展，当前模型在特定情境下已展现出与人类相当的说服力和策略性欺骗能力。人类通常是网络安全系统中最薄弱的环节，一个在前沿公司内部署的未对齐AI系统可能会试图通过操纵员工来破坏人类监督。尽管这一威胁日益增长，操纵攻击却很少受到关注，并且尚无系统性框架来评估和缓解这些风险。为了解决这个问题，我们详细解释了为什么操纵攻击是一个重大威胁，并可能导致灾难性后果。此外，我们提出了一个针对操纵风险的安全案例框架，该框架围绕三个核心论点构建：无能力性、可控性和可信赖性。对于每个论点，我们都规定了证据要求、评估方法和实施考量，供AI公司直接应用。本文首次提供了将操纵风险整合到AI安全治理中的系统性方法论，为AI公司在部署前评估和缓解这些威胁提供了具体基础。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12872&amp;sa=D&amp;source=editors&amp;ust=1752816231290043&amp;usg=AOvVaw2tfH5rMSI5utOD62qK1NPu" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">可解释强化学习综述：目标、方法与需求</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12599&amp;sa=D&amp;source=editors&amp;ust=1752816231294336&amp;usg=AOvVaw0fOudaGSFts2Ep0xTBahZD" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12599 - A Survey of Explainable Reinforcement Learning: Targets, Methods and Needs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Léo Saulières</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近期人工智能（AI）模型的成功伴随着其内部机制的不透明性，这主要是由于深度神经网络的使用。为了理解这些内部机制并解释这些AI模型的输出，人们提出了一系列方法，统称为可解释AI（XAI）。本文专注于XAI的一个子领域，称为可解释强化学习（XRL），其目标是解释通过强化学习学到的智能体的行为。我们提出了一个基于“什么”和“如何”这两个问题的直观分类法。第一个问题关注方法所解释的目标，而第二个问题则关系到提供解释的方式。我们使用这个分类法对超过250篇论文进行了最新技术综述。此外，我们介绍了一系列与XRL密切相关的领域，我们认为这些领域应该引起社区的关注。最后，我们指出了XRL领域的一些需求。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12599&amp;sa=D&amp;source=editors&amp;ust=1752816231294270&amp;usg=AOvVaw2ezDXFhZhIXGKH7bfVqy0n" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过来自隐式人类反馈的强化学习实现人机对齐</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13171&amp;sa=D&amp;source=editors&amp;ust=1752816231312347&amp;usg=AOvVaw276xO6wPHz4jD7KkpZAN09" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13171 - Aligning Humans and Robots via Reinforcement Learning from Implicit Human Feedback</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Suzie Kim, Hye-Bin Shin, Seong-Whan Lee</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">传统的强化学习（RL）方法在稀疏奖励条件下常常难以学习到有效的策略，这需要手动设计复杂的、针对特定任务的奖励函数。为了解决这个限制，从人类反馈中进行强化学习（RLHF）已成为一种有前景的策略，它用人类衍生的评估信号来补充手工制作的奖励。然而，大多数现有的RLHF方法依赖于明确的反馈机制，如按键或偏好标签，这会干扰自然的交互过程并给用户带来巨大的认知负担。我们提出了一种新颖的从隐式人类反馈中进行强化学习（RLIHF）的框架，该框架利用非侵入性的脑电图（EEG）信号，特别是错误相关电位（ErrPs），来提供连续、隐式的反馈，而无需用户明确干预。所提出的方法采用预训练的解码器将原始EEG信号转换为概率性奖励组件，即使在外部奖励稀疏的情况下也能实现有效的策略学习。我们在基于MuJoCo物理引擎的模拟环境中评估我们的方法，使用Kinova Gen2机械臂执行一个复杂的取放任务，该任务要求在操纵目标物体的同时避开障碍物。结果表明，使用解码的EEG反馈训练的智能体所达到的性能与使用密集的、手动设计的奖励训练的智能体相当。这些发现验证了在交互式机器人技术中使用隐式神经反馈进行可扩展和与人类对齐的强化学习的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13171&amp;sa=D&amp;source=editors&amp;ust=1752816231312262&amp;usg=AOvVaw0bFwrSNoGCKun6blePVMCU" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态智能：融合视觉、听觉与3D世界</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Voxtral</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13264&amp;sa=D&amp;source=editors&amp;ust=1752816231307069&amp;usg=AOvVaw3vdIDXoHiguBLFxJ7jAM7f" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13264 - Voxtral</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Alexander H. Liu, Andy Ehrenberg, Andy Lo, Clément Denoix, Corentin Barreau, Guillaume Lample, Jean-Malo Delignon, Khyathi Raghavi Chandu, Patrick von Platen, Pavankumar Reddy Muddireddy, Sanchit Gandhi, Soham Ghosh, Srijan Mishra, Thomas Foubert, Abhinav Rastogi, Adam Yang, Albert Q. Jiang, Alexandre Sablayrolles, Amélie Héliou, Amélie Martin, Anmol Agarwal, Antoine Roux, Arthur Darcet, Arthur Mensch, Baptiste Bout, Baptiste Rozière, Baudouin De Monicault, Chris Bamford, Christian Wallenwein, Christophe Renaudin, Clémence Lanfranchi, Darius Dabert, Devendra Singh Chaplot, Devon Mizelle, Diego de las Casas, Elliot Chane-Sane, Emilien Fugier, Emma Bou Hanna, Gabrielle Berrada, Gauthier Delerce, Gauthier Guinet, Georgii Novikov, Guillaume Martin, Himanshu Jaju, Jan Ludziejewski, Jason Rute, Jean-Hadrien Chabran, Jessica Chudnovsky, Joachim Studnia, Joep Barmentlo, Jonas Amar, Josselin Somerville Roberts, Julien Denize, Karan Saxena, Karmesh Yadav, Kartik Khandelwal, Kush Jain, Lélio Renard Lavaud, Léonard Blier, Lingxiao Zhao, Louis Martin, Lucile Saulnier, Luyu Gao, Marie Pellat, Mathilde Guillaumin, Mathis Felardos, Matthieu Dinot, Maxime Darrin, Maximilian Augustin, Mickaël Seznec, Neha Gupta, Nikhil Raghuraman, Olivier Duchenne, Patricia Wang, Patryk Saffer, Paul Jacob, Paul Wambergue, Paula Kurylowicz, Philomène Chagniot, Pierre Stock, Pravesh Agrawal, Rémi Delacourt, Romain Sauvestre, Roman Soletskyi, Sagar Vaze, Sandeep Subramanian, Saurabh Garg, Shashwat Dalal, Siddharth Gandhi, Sumukh Aithal, Szymon Antoniak, Teven Le Scao, Thibault Schueller, Thibaut Lavril, Thomas Robert, Thomas Wang, Timothée Lacroix, Tom Bewley, Valeriia Nemychnikova, Victor Paltz</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍了Voxtral Mini和Voxtral Small，这是两个多模态音频聊天模型。Voxtral经过训练，能够理解口语音频和文本文档，在多种音频基准测试中达到了最先进的性能，同时保留了强大的文本处理能力。Voxtral Small的性能优于一些闭源模型，而且其体积足够小，可以在本地运行。32K的上下文窗口使该模型能够处理长达40分钟的音频文件和长时间的多轮对话。我们还贡献了三个用于评估语音理解模型在知识和常识方面能力的基准。Voxtral的两个模型均在Apache 2.0许可下发布。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13264&amp;sa=D&amp;source=editors&amp;ust=1752816231306989&amp;usg=AOvVaw34WvCQtEc3KJsSStpK9pqX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">DMQ：剖析扩散模型的离群值以进行训练后量化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12933&amp;sa=D&amp;source=editors&amp;ust=1752816231322047&amp;usg=AOvVaw2x9PcsLQhpjo7hocBlhkR3" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12933 - DMQ: Dissecting Outliers of Diffusion Models for Post-Training Quantization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Dongyeun Lee, Jiwan Hur, Hyounguk Shon, Jae Young Lee, Junmo Kim</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">扩散模型在图像生成方面取得了显著成功，但其巨大的计算成本给在资源受限环境中的部署带来了挑战。近期的训练后量化（PTQ）方法试图通过关注扩散模型的迭代特性来缓解这个问题。然而，这些方法常常忽略离群值，导致在低比特宽度下性能下降。在本文中，我们提出了DMQ，它结合了学习等效缩放（LES）和通道级二的幂次缩放（PTS），以有效应对这些挑战。学习等效缩放优化通道级缩放因子，以重新分配权重和激活之间的量化难度，从而减少整体量化误差。我们认识到，尽管早期去噪步骤的量化误差很小，但由于误差累积，它们对最终输出至关重要，因此我们采用自适应时间步加权方案，在学习过程中优先考虑这些关键步骤。此外，我们发现跳跃连接等层表现出高的通道间方差，因此我们为激活引入了通道级二的幂次缩放。为确保即使在校准集很小的情况下也能稳健地选择PTS因子，我们引入了一种投票算法来增强可靠性。大量实验表明，我们的方法显著优于现有工作，尤其是在W4A6（4位权重，6位激活）和W4A8等低比特宽度下，能够保持高质量的图像生成和模型稳定性。代码可在此https URL获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12933&amp;sa=D&amp;source=editors&amp;ust=1752816231321964&amp;usg=AOvVaw1C962cAFV1I6Kdeh0s96wl" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Argus：利用多视图图像以改进大语言模型的3D场景理解</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12916&amp;sa=D&amp;source=editors&amp;ust=1752816231323171&amp;usg=AOvVaw2dH0X-L-7O-sZCUIPsmgs8" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12916 - Argus: Leveraging Multiview Images for Improved 3-D Scene Understanding With Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yifan Xu, Chao Zhang, Hanqi Jiang, Xiaoyan Wang, Ruifei Ma, Yiwei Li, Zihao Wu, Zeju Li, Xiangde Liu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">基础模型的进步使得在各种下游任务中的应用成为可能。特别是，新时代见证了扩展大型语言模型（LLM）以处理3D场景理解任务的卓越能力。当前方法严重依赖3D点云，但室内场景的3D点云重建常导致信息丢失。一些无纹理的平面或重复性图案容易被忽略，并在重建的3D点云中表现为空洞。此外，结构复杂的物体由于捕获图像与密集重建点云之间的未对齐，容易导致细节失真。2D多视图图像与3D点云呈现视觉一致性，并提供更详细的场景组件表示，可以自然地弥补这些不足。基于这些见解，我们提出了Argus，一个新颖的3D多模态框架，利用多视图图像来增强LLM的3D场景理解。总的来说，Argus可以被视为一个3D大型多模态基础模型（3D-LMM），因为它接受多种模态作为输入（文本指令、2D多视图图像和3D点云），并扩展了LLM处理3D任务的能力。Argus涉及将多视图图像和相机姿态融合并整合为视图即场景特征，这些特征与3D特征交互，创建全面且详细的3D感知场景嵌入。我们的方法弥补了重建3D点云时的信息丢失，并帮助LLM更好地理解3D世界。大量实验表明，我们的方法在各种下游任务中优于现有的3D-LMM。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12916&amp;sa=D&amp;source=editors&amp;ust=1752816231323094&amp;usg=AOvVaw3yclQG1pHPRgN7Zg5gwSNG" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">VideoITG：基于指令时序定位的多模态视频理解</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13353&amp;sa=D&amp;source=editors&amp;ust=1752816231295888&amp;usg=AOvVaw05YkXK61cLkPSJ-EQgJPrt" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13353 - VideoITG: Multimodal Video Understanding with Instructed Temporal Grounding</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shihao Wang, Guo Chen, De-an Huang, Zhiqi Li, Minghan Li, Guilin Li, Jose M. Alvarez, Lei Zhang, Zhiding Yu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">最近的研究表明，选择信息丰富且相关的视频帧可以显著提高视频大型语言模型（Video-LLM）的性能。当前的方法，如减少帧间冗余、使用独立模型进行图文相关性评估或利用时序视频定位进行事件定位，主要采用无监督学习范式，然而它们在处理长视频理解中的复杂场景时存在困难。我们提出了指令时序视频定位（VideoITG），其特点是根据用户指令进行定制化的帧采样。VideoITG的核心是VidThinker流水线，这是一个明确模仿人类标注过程的自动化标注框架。首先，它根据指令生成详细的剪辑级标题；然后，它通过指令引导的推理检索相关视频片段；最后，它执行细粒度的帧选择以精确定位信息最丰富的视觉证据。利用VidThinker，我们构建了VideoITG-40K数据集，包含4万个视频和50万个指令时序定位标注。然后，我们设计了一个即插即用的VideoITG模型，该模型利用Video-LLM的视觉语言对齐和推理能力，以判别性方式进行有效的帧选择。与Video-LLM结合后，VideoITG在多个多模态视频理解基准上实现了一致的性能提升，显示了其在视频理解方面的优越性和巨大潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13353&amp;sa=D&amp;source=editors&amp;ust=1752816231295815&amp;usg=AOvVaw05VHBfWE6ukBX88qjqG96R" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">VisionThink：通过强化学习实现智能高效的视觉语言模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13348&amp;sa=D&amp;source=editors&amp;ust=1752816231296504&amp;usg=AOvVaw3r5IUgRNmycX26HW7cK3yV" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13348 - VisionThink: Smart and Efficient Vision Language Model via Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Senqiao Yang, Junyi Li, Xin Lai, Bei Yu, Hengshuang Zhao, Jiaya Jia</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">最近视觉语言模型（VLM）的进展通过增加视觉令牌的数量来提高性能，而这些视觉令牌通常比文本令牌长得多。然而，我们观察到大多数真实世界的场景并不需要如此大量的视觉令牌。虽然在一小部分与OCR相关的任务中性能显著下降，但在大多数其他通用的VQA任务中，模型仅使用1/4的分辨率仍然能准确执行。因此，我们建议动态地用不同分辨率处理不同样本，并提出一种新的视觉令牌压缩范式，即VisionThink。它从一个降采样的图像开始，并智能地决定这是否足以解决问题。否则，模型可以输出一个特殊令牌来请求更高分辨率的图像。与现有使用固定修剪率或阈值压缩令牌的高效VLM方法相比，VisionThink根据具体情况自主决定是否压缩令牌。因此，它在与OCR相关的任务上表现出强大的细粒度视觉理解能力，同时在较简单的任务上节省了大量的视觉令牌。我们采用强化学习并提出了LLM-as-Judge策略，以成功地将RL应用于通用的VQA任务。此外，我们精心设计了奖励函数和惩罚机制，以实现稳定合理的图像尺寸调整调用率。广泛的实验证明了我们方法的优越性、效率和有效性。我们的代码可在此https URL获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13348&amp;sa=D&amp;source=editors&amp;ust=1752816231296436&amp;usg=AOvVaw112QEDhFY8r9adbg91p4MG" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">UniSLU：基于异构跨任务数据集的统一口语理解</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12951&amp;sa=D&amp;source=editors&amp;ust=1752816231320820&amp;usg=AOvVaw3QAEHJd3VKvZMWciNGGh0v" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12951 - UniSLU: Unified Spoken Language Understanding from Heterogeneous Cross-Task Datasets</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zhichao Sheng, Shilin Zhou, Chen Gong, Zhenghua Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">口语理解（SLU）在以语音为中心的多媒体应用中扮演着至关重要的角色，它使机器能够在会议、访谈和客户服务等场景中理解口语。SLU包含多个任务，包括自动语音识别（ASR）、口语命名实体识别（NER）和口语情感分析（SA）。然而，现有方法通常对口语NER和SA等单个任务使用独立的模型架构，这增加了系统复杂性，限制了跨任务交互，并且未能充分利用跨任务可用的异构数据集。为了解决这些限制，我们提出了UniSLU，一个在单一架构内联合建模多个SLU任务的统一框架。具体来说，我们为不同的SLU任务提出了一个统一的表示，从而能够充分利用跨多个任务的异构数据集。基于此表示，我们提出了一个统一的生成方法，联合建模ASR、口语NER和SA任务，增强了任务间的交互，并实现了与大型语言模型的无缝集成，以利用其强大的生成能力。在公共SLU数据集上的广泛实验证明了我们方法的有效性，与几种基准方法相比，实现了更优的SLU性能，使其非常适合现实世界的基于语音的多媒体场景。我们将在github上发布所有代码和模型，以促进未来的研究。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12951&amp;sa=D&amp;source=editors&amp;ust=1752816231320740&amp;usg=AOvVaw2y9GRGmgpW1VNV5qWVXRdX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">为安全多模态大语言模型自动化引导</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13255&amp;sa=D&amp;source=editors&amp;ust=1752816231309011&amp;usg=AOvVaw2VqnDBFzkYj9Zuvrdc0eqD" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13255 - Automating Steering for Safe Multimodal Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Lyucheng Wu, Mengru Wang, Ziwen Xu, Tri Cao, Nay Oo, Bryan Hooi, Shumin Deng</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态大型语言模型（MLLMs）的最新进展解锁了强大的跨模态推理能力，但同时也带来了新的安全问题，特别是在面对对抗性多模态输入时。为了提高MLLM在推理时的安全性，我们引入了一种模块化和自适应的推理时干预技术，AutoSteer，它不需要对底层模型进行任何微调。AutoSteer包含三个核心组件：（1）一种新颖的安全意识分数（SAS），它能自动识别模型内部层之间与安全最相关的区别；（2）一个经过训练的自适应安全探测器，用于从中间表示中估计有毒输出的可能性；以及（3）一个轻量级的拒绝头，在检测到安全风险时选择性地干预以调节生成。在LLaVA-OV和Chameleon上跨多个安全关键基准的实验表明，AutoSteer显著降低了文本、视觉和跨模态威胁的攻击成功率（ASR），同时保持了通用能力。这些发现将AutoSteer定位为一个实用、可解释且有效的框架，用于更安全地部署多模态AI系统。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13255&amp;sa=D&amp;source=editors&amp;ust=1752816231308920&amp;usg=AOvVaw0VlWLh-hmt-VO1-tU3Vwuk" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>具身智能：世界模型与机器人策略</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Orbis：克服驾驶世界模型中长时程预测的挑战</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13162&amp;sa=D&amp;source=editors&amp;ust=1752816231314015&amp;usg=AOvVaw0wHs5hnHNNsDSolnqE-279" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13162 - Orbis: Overcoming Challenges of Long-Horizon Prediction in Driving World Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Arian Mousakhan, Sudhanshu Mittal, Silvio Galesso, Karim Farid, Thomas Brox</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">现有的自动驾驶世界模型在长时程生成和泛化到挑战性场景方面存在困难。在这项工作中，我们开发了一个使用简单设计选择的模型，并且没有额外的监督或传感器，如地图、深度或多个摄像头。我们表明，尽管我们的模型只有4.69亿参数，并且在280小时的视频数据上进行训练，但它仍能产生最先进的性能。它在转弯操作和城市交通等困难场景中尤其突出。我们测试了离散标记模型是否可能比基于流匹配的连续模型具有优势。为此，我们建立了一个与两种方法都兼容的混合分词器，并允许进行并排比较。我们的研究最终支持连续自回归模型，该模型对个别设计选择的脆弱性较低，并且比基于离散标记构建的模型更强大。代码、模型和定性结果均已在https://...公开提供。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13162&amp;sa=D&amp;source=editors&amp;ust=1752816231313950&amp;usg=AOvVaw3s1sR5aqXUZ9NSpcLPGMx1" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MindJourney：利用世界模型进行测试时扩展以实现空间推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12508&amp;sa=D&amp;source=editors&amp;ust=1752816231343897&amp;usg=AOvVaw28yVf56mXCDa_Vus1-flwo" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12508 - MindJourney: Test-Time Scaling with World Models for Spatial Reasoning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuncong Yang, Jiageng Liu, Zheyuan Zhang, Siyuan Zhou, Reuben Tan, Jianwei Yang, Yilun Du, Chuang Gan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">3D空间中的空间推理是人类认知的核心，对于导航和操纵等具身任务至关重要。然而，最先进的视觉语言模型（VLM）常常在预测自我中心运动后场景会如何变化的简单任务上遇到困难：它们感知2D图像，但缺乏3D动态的内部模型。因此，我们提出了MindJourney，一个测试时扩展框架，通过将其与一个基于视频扩散的可控世界模型相结合，赋予VLM这种缺失的能力。VLM迭代地勾勒出简洁的相机轨迹，而世界模型则在每一步合成相应的视图。然后，VLM在交互式探索过程中收集到的多视图证据上进行推理。无需任何微调，我们的MindJourney在代表性的空间推理基准SAT上实现了超过8%的平均性能提升，这表明将VLM与世界模型配对进行测试时扩展，为实现稳健的3D推理提供了一条简单、即插即用的途径。同时，我们的方法也改进了通过强化学习训练的测试时推理VLM，这证明了我们利用世界模型进行测试时扩展的方法的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12508&amp;sa=D&amp;source=editors&amp;ust=1752816231343835&amp;usg=AOvVaw04xGwD7o5OUKJNRZwGizUp" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">VITA：视觉到动作的流匹配策略</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13231&amp;sa=D&amp;source=editors&amp;ust=1752816231310105&amp;usg=AOvVaw3K0vtP4X7HFyQ0coM2Owe3" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13231 - VITA: Vision-to-Action Flow Matching Policy</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Dechen Gao, Boqi Zhao, Andrew Lee, Ian Chuang, Hanchu Zhou, Hang Wang, Zhe Zhao, Junshan Zhang, Iman Soltani</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了VITA，一种视觉到动作（Vision-To-Action）的流匹配策略，它将潜在的视觉表示演化为用于视觉运动控制的潜在动作。传统的流匹配和扩散策略从标准源分布（例如，高斯噪声）中采样，并需要额外的条件机制（如交叉注意力）来以视觉信息为条件生成动作，这带来了时间和空间上的开销。VITA提出了一种新颖的范式，将潜在图像视为流的源头，学习从视觉到动作的内在映射，同时消除了独立的条件模块并保留了生成建模能力。学习像视觉和动作这样根本不同模态之间的流是具有挑战性的，因为动作数据稀疏，缺乏语义结构，并且高维视觉表示与原始动作之间存在维度不匹配。我们通过一个自动编码器创建一个结构化的动作潜在空间作为流匹配目标来解决这个问题，将原始动作上采样以匹配视觉表示的形状。至关重要的是，我们通过编码器目标和最终动作输出（通过流潜在解码）来监督流匹配，这将动作重构损失通过序贯流匹配ODE求解步骤反向传播，以实现有效的端到端学习。VITA作为简单的MLP层实现，在ALOHA平台上的挑战性双手操作任务中进行了评估，包括5个仿真任务和2个真实世界任务。尽管其简单，仅使用MLP的VITA在性能上优于或匹敌最先进的生成策略，同时与需要不同条件机制或复杂架构的传统流匹配策略相比，推理延迟降低了50-130%。据我们所知，VITA是第一个仅使用MLP的流匹配策略，能够解决像ALOHA基准中那样复杂的双手操作任务。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13231&amp;sa=D&amp;source=editors&amp;ust=1752816231310021&amp;usg=AOvVaw25FP5DySxv7TT80zNuGa7-" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">飞行、失败、修复：利用强化学习和大型多模态模型进行迭代式游戏修复</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12666&amp;sa=D&amp;source=editors&amp;ust=1752816231293896&amp;usg=AOvVaw1WzN5aT_HURx9nbIg0y1Vk" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12666 - Fly, Fail, Fix: Iterative Game Repair with Reinforcement Learning and Large Multimodal Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Alex Zook, Josef Spjut, Jonathan Tremblay</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">游戏设计取决于理解静态规则和内容如何转化为动态的玩家行为——这是现代仅检查游戏代码或资产的生成系统难以捕捉的。我们提出了一个自动化的设计迭代框架，通过将一个进行游戏测试的强化学习（RL）智能体与一个根据智能体行为修改游戏的大型多模态模型（LMM）配对，来弥合这一差距。在每个循环中，RL玩家完成几个回合，产生（i）数值化的游戏指标和/或（ii）一个总结最近视频帧的紧凑图像条。LMM设计师接收一个游戏目标和当前的游戏配置，分析游戏轨迹，并编辑配置以引导未来的行为朝向该目标。我们展示的结果表明，LMM可以对RL智能体提供的行为轨迹进行推理，以迭代地完善游戏机制，这指向了实用、可扩展的AI辅助游戏设计工具。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12666&amp;sa=D&amp;source=editors&amp;ust=1752816231293822&amp;usg=AOvVaw30YyBD805_zPWl7Dm9yMAX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">评估用于模拟四足机器人导航的强化学习算法：受导盲犬行为启发的比较研究</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13277&amp;sa=D&amp;source=editors&amp;ust=1752816231300473&amp;usg=AOvVaw3vJt-rGSBy8Gu2QHwsVQx_" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13277 - Evaluating Reinforcement Learning Algorithms for Navigation in Simulated Robotic Quadrupeds: A Comparative Study Inspired by Guide Dog Behaviour</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Emma M. A. Harrison</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">机器人正日益融入各行各业，尤其是在医疗保健领域。然而，四足机器人的许多有价值应用仍被忽视。本研究探讨了三种强化学习算法在训练模拟四足机器人进行自主导航和避障方面的有效性。目标是开发一个能够进行路径跟踪和避障的机器人导盲犬模拟，长期潜力在于为导盲犬和视障人士提供现实世界中的辅助。本研究还旨在扩展对医疗“宠物”的研究，包括机器人导盲犬和警报犬。对十三篇相关研究论文的比较分析形成了关键的评估标准，包括碰撞检测、寻路算法、传感器使用、机器人类型和模拟平台。该研究关注传感器输入、碰撞频率、奖励信号和学习进程，以确定哪种算法最能支持机器人在复杂环境中的导航。使用了定制的环境来确保在受控条件下对所有三种算法进行公平评估，从而实现一致的数据收集。结果显示，近端策略优化（PPO）在所有指标上均优于深度Q网络（DQN）和Q学习，特别是在每回合到达目标的平均和中位数步数上。通过分析这些结果，本研究为机器人导航、人工智能和医疗机器人技术做出了贡献，为AI驱动的四足机器人移动性的可行性及其在辅助机器人技术中的作用提供了见解。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13277&amp;sa=D&amp;source=editors&amp;ust=1752816231300402&amp;usg=AOvVaw1tgkDy1BtjuREZMn9vPbj0" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
