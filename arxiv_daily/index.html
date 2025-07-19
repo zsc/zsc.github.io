@@ -28,6 +28,145 @@
         .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
         .btn-download:hover { background-color: #218838; }
 
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
         /* --- Report Display --- */
         #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
         #report-container h1 { text-align: center; }
@@ -73,7 +212,17 @@
             </div>
              <div class="form-group">
                 <label for="reportDate">报告日期 (Report Date)</label>
-                <input type="date" id="reportDate">
+                <div class="calendar-container">
+                    <input type="date" id="reportDate" class="calendar-input">
+                    <div id="calendarWidget" class="calendar-widget">
+                        <div class="calendar-header">
+                            <button class="calendar-nav" id="prevMonth">‹</button>
+                            <span class="calendar-month-year" id="currentMonth"></span>
+                            <button class="calendar-nav" id="nextMonth">›</button>
+                        </div>
+                        <div class="calendar-days" id="calendarDays"></div>
+                    </div>
+                </div>
             </div>
             <button id="generateBtn" class="btn">生成学术速递</button>
             <button id="downloadBtn" class="btn btn-download">下载HTML报告</button>
@@ -300,6 +449,151 @@
         const hideStatus = () => {
             statusDiv.style.display = 'none';
         };
+
+        // Calendar functionality
+        let availableDates = new Set();
+        let currentCalendarDate = new Date();
+        let selectedDate = new Date();
+
+        const scanAvailableDates = async () => {
+            const dates = new Set();
+            const promises = [];
+            
+            // Scan for dates in the past 90 days and future 7 days
+            for (let i = -90; i <= 7; i++) {
+                const checkDate = new Date();
+                checkDate.setDate(checkDate.getDate() + i);
+                const dateString = checkDate.toISOString().slice(0, 10);
+                
+                promises.push(
+                    fetch(`academic-digest-${dateString}.html`, { method: 'HEAD', cache: 'no-cache' })
+                        .then(response => {
+                            if (response.ok || response.status === 304) {
+                                dates.add(dateString);
+                            }
+                        })
+                        .catch(() => {})
+                );
+            }
+            
+            await Promise.all(promises);
+            availableDates = dates;
+            renderCalendar();
+        };
+
+        const renderCalendar = () => {
+            const calendarDays = document.getElementById('calendarDays');
+            const currentMonthElement = document.getElementById('currentMonth');
+            
+            // Clear calendar
+            calendarDays.innerHTML = '';
+            
+            // Set month/year display
+            const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            currentMonthElement.textContent = `${currentCalendarDate.getFullYear()}年 ${monthNames[currentCalendarDate.getMonth()]}`;
+            
+            // Add day headers
+            const dayHeaders = ['日', '一', '二', '三', '四', '五', '六'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarDays.appendChild(header);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 1);
+            const lastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 0);
+            const prevLastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 0);
+            
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const today = new Date().toISOString().slice(0, 10);
+            const selectedDateString = reportDateInput.value || today;
+            
+            // Generate 42 days (6 weeks)
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = cellDate.getDate();
+                
+                const cellDateString = cellDate.toISOString().slice(0, 10);
+                
+                // Add classes
+                if (cellDate.getMonth() !== currentCalendarDate.getMonth()) {
+                    dayElement.classList.add('other-month');
+                }
+                if (cellDateString === today) {
+                    dayElement.classList.add('today');
+                }
+                if (cellDateString === selectedDateString) {
+                    dayElement.classList.add('selected');
+                }
+                if (availableDates.has(cellDateString)) {
+                    dayElement.classList.add('has-report');
+                }
+                
+                // Add click handler
+                dayElement.addEventListener('click', () => {
+                    reportDateInput.value = cellDateString;
+                    reportDateInput.dispatchEvent(new Event('change'));
+                    document.getElementById('calendarWidget').classList.remove('show');
+                });
+                
+                calendarDays.appendChild(dayElement);
+            }
+        };
+
+        // Calendar navigation
+        document.getElementById('prevMonth').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        // Show/hide calendar
+        reportDateInput.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('calendarWidget').classList.toggle('show');
+            if (reportDateInput.value) {
+                currentCalendarDate = new Date(reportDateInput.value);
+            }
+            renderCalendar();
+        });
+
+        // Also handle focus event for better mobile support
+        reportDateInput.addEventListener('focus', (e) => {
+            e.preventDefault();
+            document.getElementById('calendarWidget').classList.add('show');
+            if (reportDateInput.value) {
+                currentCalendarDate = new Date(reportDateInput.value);
+            }
+            renderCalendar();
+        });
+
+        // Hide calendar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.calendar-container')) {
+                document.getElementById('calendarWidget').classList.remove('show');
+            }
+        });
+
+        // Also handle touch events for mobile
+        document.addEventListener('touchstart', (e) => {
+            if (!e.target.closest('.calendar-container')) {
+                document.getElementById('calendarWidget').classList.remove('show');
+            }
+        });
         
         const fetchAndParseGoogleSheet = async (url) => {
             showStatus('1/4: 正在抓取 Google Sheet 数据...');
@@ -480,6 +774,9 @@ ${JSON.stringify(papers)}
             makeReportInteractive();
             hideStatus();
             downloadBtn.style.display = 'inline-block';
+            
+            // Refresh calendar to show new available date
+            scanAvailableDates();
         };
 
         const downloadReport = () => {
@@ -535,6 +832,10 @@ ${JSON.stringify(papers)}
 
         const initializePage = async () => {
             loadSettings(); // Load user settings from localStorage first
+            
+            // Scan for available dates for the calendar
+            scanAvailableDates();
+            
             showStatus('正在查找最新的学术速递报告...');
             const wasLoaded = await loadLatestReport(7); // Try loading for last 7 days
 
