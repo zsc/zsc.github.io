@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini CLI - AI 任务执行循环分析</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.7;
+            color: #333;
+            background-color: #f8f9fa;
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: #2c3e50;
+            line-height: 1.3;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5em;
+            margin-bottom: 1em;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 0.4em;
+            margin-top: 2em;
+            margin-bottom: 1em;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+
+        p {
+            margin-bottom: 1em;
+        }
+
+        blockquote {
+            border-left: 4px solid #7f8c8d;
+            padding: 0.5em 1.5em;
+            margin: 1.5em 0;
+            background-color: #f1f3f5;
+            color: #555;
+            border-radius: 0 5px 5px 0;
+        }
+
+        blockquote p {
+            margin: 0;
+        }
+        
+        ul, ol {
+            padding-left: 2em;
+        }
+
+        li {
+            margin-bottom: 0.5em;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #e9ecef;
+            padding: .2em .4em;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #f1f1f1;
+            padding: 1.2em;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #fdfdfd;
+        }
+        
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        details {
+            margin: 1.5em 0;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.8em 1.2em;
+            background-color: #f1f3f5;
+            outline: none;
+            list-style-type: '📋 ';
+            color: #34495e;
+        }
+
+        details[open] > summary {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .details-content {
+            padding: 1em 1.5em;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Gemini CLI - AI 任务执行循环分析</h1>
+
+    <blockquote>
+        <p><strong>注意</strong>: 本文档将始终以中文更新和维护</p>
+    </blockquote>
+
+    <h2>概述</h2>
+    <p>本文档分析 Gemini CLI 代码库中的主要 AI 任务执行循环（"游戏循环"）- 即 AI 审查、规划和执行用户任务的迭代循环。</p>
+
+    <h2>整体框架分析：名词-动词-引擎-点火钥匙</h2>
+    <p>按照"名词-动词-引擎-点火钥匙"的架构逻辑来理解 Gemini CLI 的核心执行框架：</p>
+
+    <h3>🏷️ 名词（核心数据结构）</h3>
+    <ul>
+        <li><strong>Turn</strong>: 单个对话轮次，包含请求、响应和工具调用信息</li>
+        <li><strong>ToolCall</strong>: 工具调用实体，具有完整的状态生命周期</li>
+        <li><strong>ServerGeminiStreamEvent</strong>: 统一的事件流数据格式</li>
+        <li><strong>HistoryItem</strong>: UI 层的对话历史记录单元</li>
+        <li><strong>GeminiChat</strong>: 聊天会话的封装对象</li>
+    </ul>
+
+    <h3>🎬 动词（核心操作）</h3>
+    <ul>
+        <li><strong>sendMessageStream()</strong>: 发送消息并处理流式响应的主要动作</li>
+        <li><strong>run()</strong>: Turn 执行单次对话轮次的动作</li>
+        <li><strong>schedule()</strong>: 工具调度器安排工具执行的动作</li>
+        <li><strong>checkNextSpeaker()</strong>: 判断下一发言者的决策动作</li>
+        <li><strong>addAndCheck()</strong>: 循环检测器的监控动作</li>
+    </ul>
+
+    <h3>⚙️ 引擎（核心执行组件）</h3>
+    <ol>
+        <li>
+            <p><strong>GeminiClient</strong>: 主控制引擎</p>
+            <ul>
+                <li>协调所有组件工作</li>
+                <li>管理递归消息循环</li>
+                <li>处理聊天历史压缩</li>
+            </ul>
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────┐
+│                    GeminiClient 主控制引擎                    │
+├─────────────────────────────────────────────────────────────┤
+│  用户输入                                                      │
+│      ↓                                                      │
+│  sendMessageStream() ──→ 检查循环 ──→ 压缩历史                  │
+│      ↓                      ↓            ↓                  │
+│  创建 Turn ──→ 执行 API 调用 ──→ 处理响应                        │
+│      ↓                                   ↓                  │
+│  工具调用? ──Yes──→ 调度工具 ──→ 等待完成                        │
+│      ↓No                          ↓                        │
+│  checkNextSpeaker() ──→ 继续? ──Yes──→ 递归调用                  │
+│                          ↓No                                │
+│                      返回给用户                               │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </li>
+        <li>
+            <p><strong>CoreToolScheduler</strong>: 工具执行引擎</p>
+            <ul>
+                <li>管理工具调用生命周期</li>
+                <li>处理异步执行和状态转换</li>
+                <li>支持用户确认流程</li>
+            </ul>
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────┐
+│                CoreToolScheduler 工具执行引擎                 │
+├─────────────────────────────────────────────────────────────┤
+│  ToolCallRequest                                            │
+│      ↓                                                      │
+│  Validating ──→ 验证参数 ──→ shouldConfirmExecute()            │
+│      ↓                           ↓                          │
+│  需要确认? ──Yes──→ WaitingApproval ──→ 用户批准?               │
+│      ↓No                           ↓Yes    ↓No              │
+│  Scheduled ──→ 加入执行队列 ──────────┘    Cancel             │
+│      ↓                                     ↓                │
+│  Executing ──→ 异步执行工具 ──→ 收集结果                        │
+│      ↓                          ↓                          │
+│  Success/Error ──→ 格式化响应 ──→ 返回结果                      │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </li>
+        <li>
+            <p><strong>LoopDetectionService</strong>: 安全防护引擎</p>
+            <ul>
+                <li>监控执行过程防止无限循环</li>
+                <li>多层检测机制保障稳定性</li>
+            </ul>
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────┐
+│              LoopDetectionService 安全防护引擎                │
+├─────────────────────────────────────────────────────────────┤
+│  每个事件输入                                                 │
+│      ↓                                                      │
+│  简单重复检测 ──→ 哈希对比 ──→ 超阈值? ──Yes──→ 触发循环警告      │
+│      ↓                          ↓No                        │
+│  轮次计数 > 30? ──No──→ 继续监控                               │
+│      ↓Yes                                                   │
+│  LLM 智能检测 ──→ 分析历史 ──→ 计算置信度                       │
+│      ↓                          ↓                          │
+│  调整检测间隔 ──→ 高置信度? ──Yes──→ 频繁检测                    │
+│      ↓              ↓No                                     │
+│  继续监控 ←────── 降低频率                                     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </li>
+        <li>
+            <p><strong>NextSpeakerChecker</strong>: 决策引擎</p>
+            <ul>
+                <li>智能判断执行流程控制</li>
+                <li>基于上下文的自动化决策</li>
+            </ul>
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────┐
+│              NextSpeakerChecker 决策引擎                     │
+├─────────────────────────────────────────────────────────────┤
+│  轮次结束触发                                                 │
+│      ↓                                                      │
+│  提取对话历史 ──→ 格式化上下文 ──→ 构建分析提示                  │
+│      ↓                                   ↓                  │
+│  调用 LLM 分析 ──→ 生成结构化输出                              │
+│      ↓                                                      │
+│  解析决策结果:                                               │
+│    - next_speaker: 'model'/'user'                          │
+│    - reasoning: 决策理由                                     │
+│      ↓                                                      │
+│  返回决策 ──→ 'model'? ──Yes──→ 继续执行                       │
+│                 ↓No                                        │
+│              等待用户输入                                     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+        </li>
+    </ol>
+
+    <h3>🔑 点火钥匙（启动和控制机制）</h3>
+    <ol>
+        <li><strong>用户输入触发</strong>: <code>submitQuery()</code> - 用户交互启动整个循环</li>
+        <li><strong>递归继续条件</strong>: <code>next_speaker === 'model'</code> - 自动继续的判断逻辑</li>
+        <li><strong>工具完成回调</strong>: <code>handleCompletedTools()</code> - 工具执行完成后的循环重启</li>
+        <li><strong>中止信号</strong>: <code>AbortSignal</code> - 用户随时可以终止执行的控制机制</li>
+    </ol>
+
+    <h3>🔄 整体运作逻辑</h3>
+    <pre><code class="language-text">用户输入(点火钥匙) → GeminiClient(主引擎) → Turn(名词) → sendMessageStream(动词) 
+    ↓
+API响应 → CoreToolScheduler(工具引擎) → ToolCall(名词) → schedule(动词)
+    ↓
+工具执行完成 → NextSpeakerChecker(决策引擎) → checkNextSpeaker(动词)
+    ↓
+判断继续 → 递归调用sendMessageStream(重新点火) 或 等待用户输入</code></pre>
+    <p>这种架构设计实现了一个自驱动的、可控的、安全的 AI 任务执行循环，每个组件职责明确，通过标准化的数据结构和操作接口实现松耦合协作。</p>
+
+    <h2>主要 AI 任务执行循环</h2>
+
+    <h3>主循环位置</h3>
+    <ul>
+        <li><strong>文件</strong>: <a href="packages/core/src/core/client.ts">packages/core/src/core/client.ts</a></li>
+        <li><strong>方法</strong>: <code>sendMessageStream()</code> (第 274-370 行)</li>
+        <li><strong>模式</strong>: 有界限的递归异步生成器</li>
+    </ul>
+
+    <h3>核心循环逻辑</h3>
+    <pre><code class="language-typescript">// 带边界检查的主递归循环
+const boundedTurns = Math.min(turns, this.MAX_TURNS); // MAX_TURNS = 100
+
+// 处理当前轮次
+const turn = new Turn(this.getChat(), prompt_id);
+const resultStream = turn.run(request, signal);
+
+// 如果模型应该继续发言则继续
+if (nextSpeakerCheck?.next_speaker === 'model') {
+  yield* this.sendMessageStream(
+    nextRequest,
+    signal, 
+    prompt_id,
+    boundedTurns - 1, // 递减轮次
+    initialModel,
+  );
+}</code></pre>
+
+    <h2>关键组件</h2>
+    <ol>
+        <li>
+            <p><strong>主控制器</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/core/src/core/client.ts">packages/core/src/core/client.ts</a></li>
+                <li><strong>方法</strong>: <code>sendMessageStream()</code> (第 274-370 行)</li>
+                <li><strong>功能</strong>: AI 任务执行循环的核心控制器</li>
+            </ul>
+            <details>
+                <summary>client.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: GeminiClient 是整个 AI 任务执行循环的核心控制器，负责管理与 Gemini API 的交互、聊天会话状态、循环检测和内容生成。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>递归消息流处理</strong>: <code>sendMessageStream()</code> 方法实现主循环，通过递归调用处理连续的 AI 响应</li>
+                        <li><strong>循环检测与防护</strong>: 集成 <code>LoopDetectionService</code>，防止无限循环，设置最大轮次限制（100轮）</li>
+                        <li><strong>聊天历史压缩</strong>: 当 token 数量超过阈值时自动压缩聊天历史，保持在模型限制内</li>
+                        <li><strong>模型切换与回退</strong>: 支持在配额错误时自动回退到 Flash 模型</li>
+                        <li><strong>环境上下文管理</strong>: 自动获取工作目录、文件结构、工具声明等环境信息</li>
+                        <li><strong>下一发言者判断</strong>: 通过 <code>checkNextSpeaker</code> 决定是否需要继续执行</li>
+                    </ul>
+                    <p><strong>核心流程</strong>:</p>
+                    <ol>
+                        <li>初始化聊天会话，设置系统提示和工具</li>
+                        <li>在 <code>sendMessageStream</code> 中开始消息循环</li>
+                        <li>检测并处理循环，必要时压缩聊天历史</li>
+                        <li>执行单次对话轮次（Turn）</li>
+                        <li>检查是否需要继续，如需要则递归调用</li>
+                    </ol>
+                    <p><strong>重要机制</strong>:</p>
+                    <ul>
+                        <li><strong>边界检查</strong>: 确保轮次数不超过 MAX_TURNS</li>
+                        <li><strong>状态管理</strong>: 跟踪会话轮次计数、模型切换状态</li>
+                        <li><strong>错误处理</strong>: 全面的错误报告和恢复机制</li>
+                        <li><strong>IDE 集成</strong>: 支持 IDE 模式，提供活动文件上下文</li>
+                    </ul>
+                    <p>这个文件是整个 AI 执行循环的"大脑"，协调所有其他组件的工作。</p>
+                </div>
+            </details>
+        </li>
+        <li>
+            <p><strong>轮次处理器</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/core/src/core/turn.ts">packages/core/src/core/turn.ts</a></li>
+                <li><strong>方法</strong>: <code>run()</code> (第 167-258 行)</li>
+                <li><strong>功能</strong>: 处理单个对话轮次和工具调用</li>
+            </ul>
+            <details>
+                <summary>turn.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: Turn 类代表单个对话轮次，是主循环中的基本执行单元，负责处理与 Gemini API 的单次交互，包括内容生成、工具调用请求的处理。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>流式响应处理</strong>: <code>run()</code> 方法作为异步生成器，实时处理 API 的流式响应</li>
+                        <li><strong>事件类型系统</strong>: 定义了完整的事件类型枚举（GeminiEventType），统一处理不同类型的响应</li>
+                        <li><strong>工具调用管理</strong>: 解析并处理 AI 模型请求的工具调用，生成 ToolCallRequestInfo</li>
+                        <li><strong>思维模式支持</strong>: 处理 Gemini 2.5 模型的思维（thought）输出，提取主题和描述</li>
+                        <li><strong>错误处理与报告</strong>: 全面的错误捕获、转换和报告机制</li>
+                    </ul>
+                    <p><strong>事件流处理</strong>:</p>
+                    <ol>
+                        <li><strong>内容事件</strong>: 处理 AI 生成的文本内容</li>
+                        <li><strong>思维事件</strong>: 解析并格式化模型的思维过程</li>
+                        <li><strong>工具调用请求</strong>: 将 API 返回的 FunctionCall 转换为 ToolCallRequestInfo</li>
+                        <li><strong>错误事件</strong>: 捕获并结构化错误信息</li>
+                        <li><strong>用户取消</strong>: 处理中止信号和用户取消操作</li>
+                    </ol>
+                    <p><strong>核心数据结构</strong>:</p>
+                    <ul>
+                        <li><strong>ServerGeminiStreamEvent</strong>: 统一的事件联合类型</li>
+                        <li><strong>ToolCallRequestInfo</strong>: 工具调用请求的标准化信息</li>
+                        <li><strong>ThoughtSummary</strong>: 思维过程的结构化表示</li>
+                        <li><strong>StructuredError</strong>: 标准化的错误信息格式</li>
+                    </ul>
+                    <p><strong>与主循环的关系</strong>: Turn 是 Client.sendMessageStream() 创建的执行单元，每次 AI 响应都通过 Turn 实例处理，其 pendingToolCalls 属性会被工具调度器进一步处理。</p>
+                    <p>这个文件是主循环中的"执行器"，将抽象的 AI 交互转换为具体的事件流。</p>
+                </div>
+            </details>
+        </li>
+        <li>
+            <p><strong>工具执行调度器</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/core/src/core/coreToolScheduler.ts">packages/core/src/core/coreToolScheduler.ts</a></li>
+                <li><strong>方法</strong>: <code>schedule()</code> 和 <code>attemptExecutionOfScheduledCalls()</code> (第 403-687 行)</li>
+                <li><strong>功能</strong>: 管理异步工具执行和确认</li>
+            </ul>
+            <details>
+                <summary>coreToolScheduler.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: CoreToolScheduler 是工具执行的核心调度器，管理从工具调用请求到执行完成的整个生命周期，包括验证、确认、执行和结果处理。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>状态机管理</strong>: 定义了完整的工具调用状态（validating → scheduled → executing → success/error/cancelled）</li>
+                        <li><strong>异步执行调度</strong>: 支持并发执行多个工具调用，使用 Promise.allSettled 批量处理</li>
+                        <li><strong>用户确认机制</strong>: 集成审批流程，支持不同的批准模式（auto、manual、smart）</li>
+                        <li><strong>可修改工具支持</strong>: 特殊处理可编辑的工具，支持用户修改工具参数</li>
+                        <li><strong>执行时间跟踪</strong>: 记录工具执行的开始时间和持续时间，用于性能监控</li>
+                        <li><strong>错误处理</strong>: 全面的错误捕获和状态管理</li>
+                    </ul>
+                    <p><strong>核心工作流程</strong>:</p>
+                    <ol>
+                        <li><strong>验证阶段</strong>: 检查工具调用参数的有效性，调用 shouldConfirmExecute</li>
+                        <li><strong>确认阶段</strong>: 根据确认详情决定是否需要用户批准</li>
+                        <li><strong>调度阶段</strong>: 将验证通过的工具调用加入执行队列</li>
+                        <li><strong>执行阶段</strong>: 异步执行工具，支持中止信号和实时输出</li>
+                        <li><strong>结果处理</strong>: 收集执行结果，格式化为 ToolCallResponseInfo</li>
+                    </ol>
+                    <p><strong>状态类型系统</strong>:</p>
+                    <ul>
+                        <li><strong>ValidatingToolCall</strong>: 正在验证中的工具调用</li>
+                        <li><strong>ScheduledToolCall</strong>: 已调度等待执行的工具调用</li>
+                        <li><strong>ExecutingToolCall</strong>: 正在执行中的工具调用</li>
+                        <li><strong>WaitingToolCall</strong>: 等待用户批准的工具调用</li>
+                        <li><strong>SuccessfulToolCall/ErroredToolCall/CancelledToolCall</strong>: 完成状态</li>
+                    </ul>
+                    <p><strong>与主循环的关系</strong>: 接收来自 Turn 的 ToolCallRequestInfo，通过状态机管理工具执行，最终返回结果给 UI 层继续主循环。</p>
+                    <p>这个文件是主循环中的"执行引擎"，将工具调用从请求转换为实际的系统操作。</p>
+                </div>
+            </details>
+        </li>
+        <li>
+            <p><strong>UI 集成循环</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/cli/src/ui/hooks/useGeminiStream.ts">packages/cli/src/ui/hooks/useGeminiStream.ts</a></li>
+                <li><strong>方法</strong>: <code>submitQuery()</code> 和 <code>handleCompletedTools()</code> (第 531-774 行)</li>
+                <li><strong>功能</strong>: 连接 UI 事件与核心执行循环</li>
+            </ul>
+            <details>
+                <summary>useGeminiStream.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: useGeminiStream 是 React Hook，作为前端 UI 与后端核心执行循环之间的桥梁，管理用户交互、流状态和工具执行的 UI 表现。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>流状态管理</strong>: 管理 streaming、waiting_for_tool_approval 等不同的 UI 状态</li>
+                        <li><strong>用户交互处理</strong>: 处理用户输入、快捷键、at 命令(@) 和 shell 命令</li>
+                        <li><strong>工具调度集成</strong>: 使用 useReactToolScheduler 管理工具调用的 UI 显示和用户确认</li>
+                        <li><strong>历史记录管理</strong>: 维护对话历史，支持编辑、重新运行等操作</li>
+                        <li><strong>错误处理与显示</strong>: 处理各种错误状态并以用户友好的方式显示</li>
+                        <li><strong>自动继续机制</strong>: 通过 handleCompletedTools 实现工具执行完成后的自动继续</li>
+                    </ul>
+                    <p><strong>核心循环实现</strong>:</p>
+                    <ol>
+                        <li><strong>submitQuery</strong>: 发起新的查询，启动主循环</li>
+                        <li><strong>事件处理</strong>: 监听来自 GeminiClient 的流事件</li>
+                        <li><strong>工具处理</strong>: 通过 ReactToolScheduler 处理工具调用</li>
+                        <li><strong>自动继续</strong>: handleCompletedTools 检查是否有完成的工具，提交结果继续循环</li>
+                    </ol>
+                    <p><strong>UI 状态管理</strong>:</p>
+                    <ul>
+                        <li><strong>StreamingState</strong>: 定义了完整的 UI 状态枚举</li>
+                        <li><strong>HistoryItem</strong>: 管理对话历史项目的结构</li>
+                        <li><strong>ToolCallStatus</strong>: 跟踪工具调用的 UI 状态</li>
+                    </ul>
+                    <p><strong>与主循环的关系</strong>: 这是主循环在 UI 层的体现，通过 submitQuery 触发后端的 sendMessageStream，通过 handleCompletedTools 实现循环的继续。</p>
+                    <p>这个文件是主循环的"用户界面"，将后端的抽象执行转换为用户可见的交互体验。</p>
+                </div>
+            </details>
+        </li>
+        <li>
+            <p><strong>循环检测服务</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/core/src/services/loopDetectionService.ts">packages/core/src/services/loopDetectionService.ts</a></li>
+                <li><strong>功能</strong>: 使用基于 LLM 的分析检测重复的工具调用和内容</li>
+            </ul>
+            <details>
+                <summary>loopDetectionService.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: LoopDetectionService 负责检测和防止 AI 执行过程中的无限循环，使用多种策略包括简单重复检测和基于 LLM 的智能分析。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>多层检测机制</strong>: 结合简单重复检测和 LLM 智能分析</li>
+                        <li><strong>工具调用循环检测</strong>: 监控重复的工具调用模式（阈值：5次）</li>
+                        <li><strong>内容循环检测</strong>: 检测重复的文本内容模式（阈值：10次）</li>
+                        <li><strong>LLM 辅助检测</strong>: 在超过 30 轮后启用基于 LLM 的复杂循环分析</li>
+                        <li><strong>动态检测间隔</strong>: 根据 LLM 置信度动态调整检测频率</li>
+                        <li><strong>哈希缓存优化</strong>: 使用 SHA-256 哈希缓存提高检测效率</li>
+                    </ul>
+                    <p><strong>检测策略</strong>:</p>
+                    <ol>
+                        <li><strong>简单重复检测</strong>: 使用哈希值快速识别完全相同的工具调用或内容</li>
+                        <li><strong>LLM 智能分析</strong>: 分析对话历史，识别语义上的循环模式</li>
+                        <li><strong>置信度调节</strong>: 根据 LLM 的循环置信度调整检测间隔（5-15轮）</li>
+                        <li><strong>累积计数</strong>: 跟踪重复模式的出现次数</li>
+                    </ol>
+                    <p><strong>防护机制</strong>:</p>
+                    <ul>
+                        <li><strong>轮次限制</strong>: 配合 Client 的 MAX_TURNS 限制</li>
+                        <li><strong>早期检测</strong>: 在循环形成前进行干预</li>
+                        <li><strong>智能阈值</strong>: 不同类型的循环使用不同的检测阈值</li>
+                    </ul>
+                    <p><strong>与主循环的关系</strong>: 在每个轮次开始时和事件处理时进行检测，一旦发现循环立即终止主循环执行。</p>
+                    <p>这个文件是主循环的"安全卫士"，防止执行陷入无限循环。</p>
+                </div>
+            </details>
+        </li>
+        <li>
+            <p><strong>下一发言者逻辑</strong></p>
+            <ul>
+                <li><strong>文件</strong>: <a href="packages/core/src/utils/nextSpeakerChecker.ts">packages/core/src/utils/nextSpeakerChecker.ts</a></li>
+                <li><strong>功能</strong>: 确定 AI 是否应该继续还是等待用户输入</li>
+            </ul>
+            <details>
+                <summary>nextSpeakerChecker.ts 文件详细分析</summary>
+                <div class="details-content">
+                    <p><strong>主要功能</strong>: nextSpeakerChecker 通过分析对话上下文来智能决定下一个发言者应该是 AI 模型还是用户，是主循环继续执行的关键判断逻辑。</p>
+                    <p><strong>关键特性</strong>:</p>
+                    <ul>
+                        <li><strong>LLM 辅助决策</strong>: 使用专门的提示让 AI 分析对话状态</li>
+                        <li><strong>结构化输出</strong>: 通过 JSON Schema 确保决策结果的一致性</li>
+                        <li><strong>上下文分析</strong>: 考虑最近的对话轮次、工具调用结果和任务完成状态</li>
+                        <li><strong>智能判断</strong>: 识别任务是否完成、是否需要更多信息、是否需要继续执行</li>
+                    </ul>
+                    <p><strong>决策逻辑</strong>:</p>
+                    <ol>
+                        <li><strong>分析对话历史</strong>: 检查最近的用户请求和 AI 响应</li>
+                        <li><strong>评估任务状态</strong>: 判断当前任务是否已完成或需要继续</li>
+                        <li><strong>考虑工具调用</strong>: 分析工具执行结果对任务进度的影响</li>
+                        <li><strong>生成决策</strong>: 返回 'model' 或 'user' 作为下一发言者</li>
+                    </ol>
+                    <p><strong>返回格式</strong>:</p>
+                    <pre><code class="language-typescript">{
+  next_speaker: 'model' | 'user',
+  reasoning: string  // 决策理由
+}</code></pre>
+                    <p><strong>与主循环的关系</strong>: 在每个轮次结束后被调用，其返回值决定是否继续递归调用 sendMessageStream，是主循环自动继续的核心判断机制。</p>
+                    <p>这个文件是主循环的"决策大脑"，智能判断何时继续执行，何时等待用户输入。</p>
+                </div>
+            </details>
+        </li>
+    </ol>
+    
+    <h2>执行流程</h2>
+    <ol>
+        <li><strong>初始请求处理</strong> (<a href="packages/core/src/core/client.ts#L274-L333">client.ts:274-333</a>):
+            <ul>
+                <li>为新提示重置循环检测器</li>
+                <li>检查会话轮次限制</li>
+                <li>如需要则压缩聊天记录</li>
+                <li>检测现有循环</li>
+            </ul>
+        </li>
+        <li><strong>轮次执行</strong> (<a href="packages/core/src/core/turn.ts#L167-L258">turn.ts:167-258</a>):
+            <ul>
+                <li>向 Gemini API 发送消息流</li>
+                <li>处理流式响应（内容、工具调用、思维）</li>
+                <li>处理工具调用请求</li>
+            </ul>
+        </li>
+        <li><strong>工具调度</strong> (<a href="packages/core/src/core/coreToolScheduler.ts#L403-L687">coreToolScheduler.ts:403-687</a>):
+            <ul>
+                <li>验证并调度工具调用</li>
+                <li>处理确认和批准</li>
+                <li>异步执行工具</li>
+                <li>将结果返回到对话中</li>
+            </ul>
+        </li>
+        <li><strong>继续逻辑</strong> (<a href="packages/core/src/core/client.ts#L342-L369">client.ts:342-369</a>):
+            <ul>
+                <li>检查模型是否应该继续发言</li>
+                <li>使用递减的轮次计数器进行递归调用</li>
+                <li>由 MAX_TURNS (100) 限制以防止无限循环</li>
+            </ul>
+        </li>
+        <li><strong>UI 工具完成</strong> (<a href="packages/cli/src/ui/hooks/useGeminiStream.ts#L644-L774">useGeminiStream.ts:644-774</a>):
+            <ul>
+                <li>处理已完成的工具结果</li>
+                <li>将工具响应提交回 AI</li>
+                <li>通过 <code>submitQuery()</code> 触发下一次迭代</li>
+            </ul>
+        </li>
+    </ol>
+    
+    <h2>循环控制机制</h2>
+    
+    <h3>轮次限制</h3>
+    <ul>
+        <li>每个对话最多 100 轮次 (<code>MAX_TURNS</code>)</li>
+        <li>会话轮次限制可配置</li>
+    </ul>
+    
+    <h3>循环检测</h3>
+    <ul>
+        <li>检测重复的工具调用和内容</li>
+        <li>使用基于 LLM 的分析处理复杂循环模式</li>
+        <li>防止无限循环</li>
+    </ul>
+    
+    <h3>下一发言者检查</h3>
+    <ul>
+        <li>确定 AI 是否应该继续还是等待用户</li>
+        <li>使用对话状态的结构化 LLM 分析</li>
+    </ul>
+    
+    <h3>中止信号</h3>
+    <ul>
+        <li>所有循环都遵循 <code>AbortController</code> 信号</li>
+        <li>用户可以随时取消</li>
+    </ul>
+    
+    <h2>关键入口点</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>组件</th>
+                <th>文件</th>
+                <th>行号</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>主循环入口</td>
+                <td><a href="packages/core/src/core/client.ts#L274">packages/core/src/core/client.ts</a></td>
+                <td>274</td>
+            </tr>
+            <tr>
+                <td>递归继续</td>
+                <td><a href="packages/core/src/core/client.ts#L360-L367">packages/core/src/core/client.ts</a></td>
+                <td>360-367</td>
+            </tr>
+            <tr>
+                <td>工具执行循环</td>
+                <td><a href="packages/core/src/core/coreToolScheduler.ts#L625-L686">packages/core/src/core/coreToolScheduler.ts</a></td>
+                <td>625-686</td>
+            </tr>
+            <tr>
+                <td>轮次处理</td>
+                <td><a href="packages/core/src/core/turn.ts#L167">packages/core/src/core/turn.ts</a></td>
+                <td>167</td>
+            </tr>
+            <tr>
+                <td>UI 继续</td>
+                <td><a href="packages/cli/src/ui/hooks/useGeminiStream.ts#L758-L764">packages/cli/src/ui/hooks/useGeminiStream.ts</a></td>
+                <td>758-764</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>架构总结</h2>
+    <p>Gemini CLI 实现了一个健壮的、有界的执行循环，能够处理复杂的多轮 AI 工作流。该架构提供：</p>
+    <ul>
+        <li><strong>递归任务执行</strong> 和自动继续</li>
+        <li><strong>工具集成</strong> 用于复杂操作</li>
+        <li><strong>循环预防</strong> 机制</li>
+        <li><strong>用户控制</strong> 和取消功能</li>
+        <li>跨轮次的 <strong>状态管理</strong></li>
+        <li>实时反馈的 <strong>UI 集成</strong></li>
+    </ul>
+    <p>这种设计使 AI 能够迭代地处理复杂任务，使用工具并在多个轮次中进行推理，直到任务完成或用户干预。</p>
+
+</body>
+</html>
