@@ -343,6 +343,43 @@
         let unreadCount = 0;
         let activeTabId = null; // 【新增】为每个 paper 增加状态 { ..., incrementImages }
         let genAI = null;
+        
+        // --- Tab缓存管理 ---
+        const TABS_STORAGE_KEY = 'arxiv_tabs_cache';
+        
+        function saveTabs() {
+            try {
+                const dataToSave = {
+                    papers: papers,
+                    unreadCount: unreadCount,
+                    activeTabId: activeTabId
+                };
+                localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify(dataToSave));
+            } catch (e) {
+                console.error('Failed to save tabs:', e);
+                if (e.name === 'QuotaExceededError') {
+                    statusBar.textContent = '警告：本地存储空间已满，无法保存标签页';
+                }
+            }
+        }
+        
+        function loadTabs() {
+            try {
+                const savedData = localStorage.getItem(TABS_STORAGE_KEY);
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    papers = parsed.papers || {};
+                    unreadCount = parsed.unreadCount || 0;
+                    activeTabId = parsed.activeTabId || null;
+                    updateFavicon();
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                console.error('Failed to load tabs from cache:', e);
+                return false;
+            }
+        }
 
         // --- 初始化设置 ---
         const PROMPT_STORAGE_KEY = 'selectedPromptIndex';
@@ -369,6 +406,12 @@
             const apiKeyFromUrl = urlParams.get('apiKey');
             if (apiKeyFromUrl) {
                 apiKeyInput.value = apiKeyFromUrl;
+            }
+
+            // 加载缓存的标签页
+            const hasLoadedTabs = loadTabs();
+            if (hasLoadedTabs) {
+                statusBar.textContent = '已恢复之前的标签页';
             }
 
             render();
@@ -484,6 +527,7 @@
                         checkbox.checked = paper.incrementImages;
                         checkbox.onchange = () => {
                             papers[id].incrementImages = checkbox.checked;
+                            saveTabs();
                             render(); // 状态改变后重渲染
                         };
                         const label = document.createElement('label');
@@ -554,6 +598,7 @@
                 unreadCount--;
                 updateFavicon();
             }
+            saveTabs();
             render();
         }
 
@@ -589,6 +634,7 @@
                     activeTabId = remainingIds[newIndex];
                 }
             }
+            saveTabs();
             render();
         }
 
@@ -717,6 +763,7 @@
                 updateFavicon();
             }
             papers[id] = { status: 'loading', summary: '', error: null, isUnread: true, incrementImages: false };
+            saveTabs();
             render(); // Render immediately to show the loading state.
 
             try {
@@ -753,12 +800,14 @@
 
                 papers[id].status = 'success';
                 papers[id].summary = summaryText;
+                saveTabs();
                 statusBar.textContent = `[${id}] 摘要生成成功！`;
 
             } catch (e) {
                 console.error(e);
                 papers[id].status = 'error';
                 papers[id].error = e.message;
+                saveTabs();
                 statusBar.textContent = `[${id}] 处理失败: ${e.message}`;
             } finally {
                 // The button is no longer disabled globally. Just render the final state.
