@@ -35,6 +35,15 @@
         }
         .calendar-input {
             cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
         }
         .calendar-widget {
             position: absolute;
@@ -213,7 +222,7 @@
              <div class="form-group">
                 <label for="reportDate">报告日期 (Report Date)</label>
                 <div class="calendar-container">
-                    <input type="date" id="reportDate" class="calendar-input">
+                    <input type="date" id="reportDate" class="calendar-input" readonly>
                     <div id="calendarWidget" class="calendar-widget">
                         <div class="calendar-header">
                             <button class="calendar-nav" id="prevMonth">‹</button>
@@ -634,24 +643,23 @@
             renderCalendar();
         });
 
-        // Show/hide calendar
-        reportDateInput.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('calendarWidget').classList.toggle('show');
-            if (reportDateInput.value) {
-                currentCalendarDate = parseDateString(reportDateInput.value);
+        // Show calendar on focus (handles both click and tab)
+        reportDateInput.addEventListener('focus', (e) => {
+            const calendarWidget = document.getElementById('calendarWidget');
+            if (!calendarWidget.classList.contains('show')) {
+                if (reportDateInput.value) {
+                    currentCalendarDate = parseDateString(reportDateInput.value);
+                }
+                calendarWidget.classList.add('show');
+                renderCalendar();
             }
-            renderCalendar();
         });
 
-        // Also handle focus event for better mobile support
-        reportDateInput.addEventListener('focus', (e) => {
+        // Prevent default date picker on click
+        reportDateInput.addEventListener('click', (e) => {
             e.preventDefault();
-            document.getElementById('calendarWidget').classList.add('show');
-            if (reportDateInput.value) {
-                currentCalendarDate = parseDateString(reportDateInput.value);
-            }
-            renderCalendar();
+            reportDateInput.blur(); // Remove focus to prevent native date picker
+            reportDateInput.focus(); // Re-focus to show our calendar
         });
 
         // Hide calendar when clicking outside
