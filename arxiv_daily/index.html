@@ -131,6 +131,14 @@
             configDetails.style.display = configDetails.style.display === 'none' ? 'block' : 'none';
         });
 
+        // Add listener for date changes to auto-load closest report
+        reportDateInput.addEventListener('change', async () => {
+            const selectedDate = reportDateInput.value;
+            if (selectedDate) {
+                await loadClosestReport(selectedDate);
+            }
+        });
+
         // --- Core Logic ---
         const showStatus = (message, isError = false) => {
             statusDiv.style.display = 'block';
@@ -197,6 +205,96 @@
                 }
             }
             return false; // Not found
+        };
+
+        const loadClosestReport = async (targetDate, searchRange = 30) => {
+            const targetTime = new Date(targetDate).getTime();
+            
+            // Try exact date first
+            const exactUrl = `academic-digest-${targetDate}.html`;
+            showStatus(`正在查找 ${targetDate} 的报告...`);
+            try {
+                const response = await fetch(exactUrl, { cache: 'no-cache' });
+                if (response.ok || response.status === 304) {
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const loadedReportWrapper = doc.getElementById('report-container-wrapper');
+
+                    if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
+                        reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
+                        showStatus(`已成功加载 ${targetDate} 的报告。`, false);
+                        downloadBtn.style.display = 'inline-block';
+                        makeReportInteractive();
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.warn(`无法加载报告 ${exactUrl}:`, error);
+            }
+
+            // Search for closest date within range
+            showStatus(`未找到 ${targetDate} 的报告，正在搜索最近的报告...`);
+            let closestDate = null;
+            let closestDiff = Infinity;
+
+            // Check dates before and after the target date
+            for (let i = 1; i <= searchRange; i++) {
+                // Check date before
+                const dateBefore = new Date(targetTime);
+                dateBefore.setDate(dateBefore.getDate() - i);
+                const dateBeforeString = dateBefore.toISOString().slice(0, 10);
+                
+                // Check date after
+                const dateAfter = new Date(targetTime);
+                dateAfter.setDate(dateAfter.getDate() + i);
+                const dateAfterString = dateAfter.toISOString().slice(0, 10);
+
+                // Try both dates
+                for (const [dateString, date] of [[dateBeforeString, dateBefore], [dateAfterString, dateAfter]]) {
+                    const url = `academic-digest-${dateString}.html`;
+                    try {
+                        const response = await fetch(url, { cache: 'no-cache' });
+                        if (response.ok || response.status === 304) {
+                            const diff = Math.abs(date.getTime() - targetTime);
+                            if (diff < closestDiff) {
+                                closestDiff = diff;
+                                closestDate = dateString;
+                            }
+                        }
+                    } catch (error) {
+                        // Continue searching
+                    }
+                }
+            }
+
+            // Load the closest report found
+            if (closestDate) {
+                const url = `academic-digest-${closestDate}.html`;
+                try {
+                    const response = await fetch(url, { cache: 'no-cache' });
+                    if (response.ok || response.status === 304) {
+                        const htmlText = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(htmlText, 'text/html');
+                        const loadedReportWrapper = doc.getElementById('report-container-wrapper');
+
+                        if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
+                            reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
+                            const daysDiff = Math.round(closestDiff / (1000 * 60 * 60 * 24));
+                            showStatus(`未找到 ${targetDate} 的报告，已加载最接近的报告 (${closestDate}，相差 ${daysDiff} 天)。`, false);
+                            downloadBtn.style.display = 'inline-block';
+                            makeReportInteractive();
+                            return true;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`无法加载报告 ${url}:`, error);
+                }
+            }
+
+            showStatus(`未找到 ${targetDate} 附近的任何报告。请尝试生成新报告。`, true);
+            return false;
         };
 
         const hideStatus = () => {
