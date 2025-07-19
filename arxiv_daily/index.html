@@ -268,7 +268,12 @@
             if (savedInterest) {
                 interestInput.value = savedInterest;
             }
-            reportDateInput.value = new Date().toISOString().slice(0, 10);
+            const today = new Date();
+            reportDateInput.value = createDateString(
+                today.getFullYear(),
+                today.getMonth() + 1,
+                today.getDate()
+            );
         };
 
         const saveSettings = () => {
@@ -322,15 +327,50 @@
         };
 
         const loadLatestReport = async (maxDays = 7) => {
-            for (let i = 0; i < maxDays; i++) {
+            // First try today's date since new reports come in the middle of the day
+            const today = new Date();
+            const todayString = createDateString(
+                today.getFullYear(),
+                today.getMonth() + 1,
+                today.getDate()
+            );
+            
+            // Try loading today's report first
+            const todayUrl = `academic-digest-${todayString}.html`;
+            showStatus(`正在查找今日报告 (${todayString})...`);
+            try {
+                const response = await fetch(todayUrl, { cache: 'no-cache' });
+                if (response.ok || response.status === 304) {
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const loadedReportWrapper = doc.getElementById('report-container-wrapper');
+
+                    if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
+                        reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
+                        showStatus(`已成功加载今日报告 (${todayString})。`, false);
+                        downloadBtn.style.display = 'inline-block';
+                        makeReportInteractive();
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.warn(`无法加载今日报告 ${todayUrl}:`, error);
+            }
+
+            // If today's report not found, search backwards
+            for (let i = 1; i <= maxDays; i++) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateString = date.toISOString().slice(0, 10);
+                const dateString = createDateString(
+                    date.getFullYear(),
+                    date.getMonth() + 1,
+                    date.getDate()
+                );
                 const url = `academic-digest-${dateString}.html`;
 
                 showStatus(`正在查找报告 (${dateString})...`);
                 try {
-                    // Use "no-cache" to ensure we don't get a stale 404 response from the browser cache
                     const response = await fetch(url, { cache: 'no-cache' });
                     if (response.ok || response.status === 304) {
                         const htmlText = await response.text();
@@ -341,19 +381,16 @@
                         if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
                             reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
                             showStatus(`已成功加载 ${dateString} 的报告。`, false);
-                            // The download button is part of the generator, but we can enable it
-                            // to allow re-downloading of the loaded report.
                             downloadBtn.style.display = 'inline-block';
                             makeReportInteractive();
-                            return true; // Found and loaded
+                            return true;
                         }
                     }
                 } catch (error) {
                     console.warn(`无法加载或解析报告 ${url}:`, error);
-                    // Continue to next day
                 }
             }
-            return false; // Not found
+            return false;
         };
 
         const loadClosestReport = async (targetDate, searchRange = 30) => {
@@ -455,6 +492,12 @@
         let currentCalendarDate = new Date();
         let selectedDate = new Date();
 
+        // Helper function to create date string consistently
+        const createDateString = (year, month, day) => {
+            const padZero = (num) => String(num).padStart(2, '0');
+            return `${year}-${padZero(month)}-${padZero(day)}`;
+        };
+
         const scanAvailableDates = async () => {
             const dates = new Set();
             const promises = [];
@@ -463,7 +506,11 @@
             for (let i = -90; i <= 7; i++) {
                 const checkDate = new Date();
                 checkDate.setDate(checkDate.getDate() + i);
-                const dateString = checkDate.toISOString().slice(0, 10);
+                const dateString = createDateString(
+                    checkDate.getFullYear(),
+                    checkDate.getMonth() + 1,
+                    checkDate.getDate()
+                );
                 
                 promises.push(
                     fetch(`academic-digest-${dateString}.html`, { method: 'HEAD', cache: 'no-cache' })
@@ -509,7 +556,12 @@
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
             
-            const today = new Date().toISOString().slice(0, 10);
+            const todayDate = new Date();
+            const today = createDateString(
+                todayDate.getFullYear(),
+                todayDate.getMonth() + 1,
+                todayDate.getDate()
+            );
             const selectedDateString = reportDateInput.value || today;
             
             // Generate 42 days (6 weeks)
@@ -521,7 +573,12 @@
                 dayElement.className = 'calendar-day';
                 dayElement.textContent = cellDate.getDate();
                 
-                const cellDateString = cellDate.toISOString().slice(0, 10);
+                // Use consistent date string creation to avoid timezone issues
+                const cellDateString = createDateString(
+                    cellDate.getFullYear(),
+                    cellDate.getMonth() + 1,
+                    cellDate.getDate()
+                );
                 
                 // Add classes
                 if (cellDate.getMonth() !== currentCalendarDate.getMonth()) {
