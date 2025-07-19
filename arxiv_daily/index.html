@@ -335,40 +335,12 @@
             });
         };
 
-        const loadLatestReport = async (maxDays = 7) => {
-            // First try today's date since new reports come in the middle of the day
+        const loadLatestReport = async (maxDays = 5) => {
             const today = new Date();
-            const todayString = createDateString(
-                today.getFullYear(),
-                today.getMonth() + 1,
-                today.getDate()
-            );
+            showStatus(`正在查找最新报告...`);
             
-            // Try loading today's report first
-            const todayUrl = `academic-digest-${todayString}.html`;
-            showStatus(`正在查找今日报告 (${todayString})...`);
-            try {
-                const response = await fetch(todayUrl, { cache: 'no-cache' });
-                if (response.ok || response.status === 304) {
-                    const htmlText = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, 'text/html');
-                    const loadedReportWrapper = doc.getElementById('report-container-wrapper');
-
-                    if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
-                        reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
-                        showStatus(`已成功加载今日报告 (${todayString})。`, false);
-                        downloadBtn.style.display = 'inline-block';
-                        makeReportInteractive();
-                        return true;
-                    }
-                }
-            } catch (error) {
-                console.warn(`无法加载今日报告 ${todayUrl}:`, error);
-            }
-
-            // If today's report not found, search backwards
-            for (let i = 1; i <= maxDays; i++) {
+            // Check recent dates sequentially (today, yesterday, etc.)
+            for (let i = 0; i < maxDays; i++) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 const dateString = createDateString(
@@ -377,26 +349,37 @@
                     date.getDate()
                 );
                 const url = `academic-digest-${dateString}.html`;
-
-                showStatus(`正在查找报告 (${dateString})...`);
+                
                 try {
-                    const response = await fetch(url, { cache: 'no-cache' });
-                    if (response.ok || response.status === 304) {
-                        const htmlText = await response.text();
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(htmlText, 'text/html');
-                        const loadedReportWrapper = doc.getElementById('report-container-wrapper');
+                    // Fast HEAD request to check existence first
+                    const headResponse = await fetch(url, { method: 'HEAD' });
+                    if (headResponse.ok) {
+                        // File exists, now load the content
+                        // Use cache-busting only when generating new reports
+                        const cacheOption = isGeneratingReport ? 'no-cache' : 'default';
+                        const response = await fetch(url, { cache: cacheOption });
+                        if (response.ok) {
+                            const htmlText = await response.text();
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(htmlText, 'text/html');
+                            const loadedReportWrapper = doc.getElementById('report-container-wrapper');
 
-                        if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
-                            reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
-                            showStatus(`已成功加载 ${dateString} 的报告。`, false);
-                            downloadBtn.style.display = 'inline-block';
-                            makeReportInteractive();
-                            return true;
+                            if (loadedReportWrapper && loadedReportWrapper.innerHTML.trim() !== '') {
+                                reportWrapper.innerHTML = loadedReportWrapper.innerHTML;
+                                const dayLabel = i === 0 ? '今日' : i === 1 ? '昨日' : `${i}天前`;
+                                showStatus(`已成功加载${dayLabel}报告 (${dateString})。`, false);
+                                downloadBtn.style.display = 'inline-block';
+                                makeReportInteractive();
+                                
+                                // Update date input to reflect loaded report
+                                reportDateInput.value = dateString;
+                                
+                                return true;
+                            }
                         }
                     }
                 } catch (error) {
-                    console.warn(`无法加载或解析报告 ${url}:`, error);
+                    console.warn(`无法加载报告 ${url}:`, error);
                 }
             }
             return false;
@@ -410,7 +393,8 @@
             const exactUrl = `academic-digest-${targetDate}.html`;
             showStatus(`正在查找 ${targetDate} 的报告...`);
             try {
-                const response = await fetch(exactUrl, { cache: 'no-cache' });
+                const cacheOption = isGeneratingReport ? 'no-cache' : 'default';
+                const response = await fetch(exactUrl, { cache: cacheOption });
                 if (response.ok || response.status === 304) {
                     const htmlText = await response.text();
                     const parser = new DOMParser();
@@ -476,7 +460,8 @@
             if (closestDate) {
                 const url = `academic-digest-${closestDate}.html`;
                 try {
-                    const response = await fetch(url, { cache: 'no-cache' });
+                    const cacheOption = isGeneratingReport ? 'no-cache' : 'default';
+                    const response = await fetch(url, { cache: cacheOption });
                     if (response.ok || response.status === 304) {
                         const htmlText = await response.text();
                         const parser = new DOMParser();
@@ -509,6 +494,7 @@
         let availableDates = new Set();
         let currentCalendarDate = new Date();
         let selectedDate = new Date();
+        let isGeneratingReport = false; // Track when generating new reports
 
         // Helper function to create date string consistently
         const createDateString = (year, month, day) => {
@@ -527,10 +513,10 @@
             const dates = new Set();
             const promises = [];
             
-            // Scan for dates in the past 90 days and future 7 days
-            for (let i = -90; i <= 7; i++) {
+            // Reduced scope: scan only past 14 days for background prefetch
+            for (let i = 0; i <= 14; i++) {
                 const checkDate = new Date();
-                checkDate.setDate(checkDate.getDate() + i);
+                checkDate.setDate(checkDate.getDate() - i);
                 const dateString = createDateString(
                     checkDate.getFullYear(),
                     checkDate.getMonth() + 1,
@@ -538,7 +524,7 @@
                 );
                 
                 promises.push(
-                    fetch(`academic-digest-${dateString}.html`, { method: 'HEAD', cache: 'no-cache' })
+                    fetch(`academic-digest-${dateString}.html`, { method: 'HEAD' })
                         .then(response => {
                             if (response.ok || response.status === 304) {
                                 dates.add(dateString);
@@ -550,7 +536,12 @@
             
             await Promise.all(promises);
             availableDates = dates;
-            renderCalendar();
+            
+            // Only re-render calendar if it's currently visible
+            const calendarWidget = document.getElementById('calendarWidget');
+            if (calendarWidget && calendarWidget.classList.contains('show')) {
+                renderCalendar();
+            }
         };
 
         const renderCalendar = () => {
@@ -914,16 +905,19 @@ ${JSON.stringify(papers)}
         const initializePage = async () => {
             loadSettings(); // Load user settings from localStorage first
             
-            // Scan for available dates for the calendar
-            scanAvailableDates();
-            
+            // Priority: Load latest report first for immediate display
             showStatus('正在查找最新的学术速递报告...');
-            const wasLoaded = await loadLatestReport(7); // Try loading for last 7 days
+            const wasLoaded = await loadLatestReport(5); // Try loading for last 5 days
 
             if (!wasLoaded) {
                 // Keep the status message, but make it an "error" style to be more prominent
                 showStatus('未找到近期报告。请配置并生成新报告。', true);
             }
+            
+            // Background: Scan for available dates for the calendar (non-blocking)
+            setTimeout(() => {
+                scanAvailableDates();
+            }, 100);
         };
 
         // --- Main Event Handler ---
@@ -944,6 +938,9 @@ ${JSON.stringify(papers)}
             }
             saveSettings();
             generateBtn.disabled = true;
+            
+            // Set generation flag to bypass cache for new reports
+            isGeneratingReport = true;
 
             const rawPapers = await fetchAndParseGoogleSheet(sheetUrl);
             if (rawPapers) {
@@ -953,6 +950,8 @@ ${JSON.stringify(papers)}
                 }
             }
             
+            // Reset generation flag
+            isGeneratingReport = false;
             generateBtn.disabled = false;
         });
 
