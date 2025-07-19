@@ -394,7 +394,8 @@
         };
 
         const loadClosestReport = async (targetDate, searchRange = 30) => {
-            const targetTime = new Date(targetDate).getTime();
+            const targetDateObj = parseDateString(targetDate);
+            const targetTime = targetDateObj.getTime();
             
             // Try exact date first
             const exactUrl = `academic-digest-${targetDate}.html`;
@@ -429,12 +430,20 @@
                 // Check date before
                 const dateBefore = new Date(targetTime);
                 dateBefore.setDate(dateBefore.getDate() - i);
-                const dateBeforeString = dateBefore.toISOString().slice(0, 10);
+                const dateBeforeString = createDateString(
+                    dateBefore.getFullYear(),
+                    dateBefore.getMonth() + 1,
+                    dateBefore.getDate()
+                );
                 
                 // Check date after
                 const dateAfter = new Date(targetTime);
                 dateAfter.setDate(dateAfter.getDate() + i);
-                const dateAfterString = dateAfter.toISOString().slice(0, 10);
+                const dateAfterString = createDateString(
+                    dateAfter.getFullYear(),
+                    dateAfter.getMonth() + 1,
+                    dateAfter.getDate()
+                );
 
                 // Try both dates
                 for (const [dateString, date] of [[dateBeforeString, dateBefore], [dateAfterString, dateAfter]]) {
@@ -496,6 +505,13 @@
         const createDateString = (year, month, day) => {
             const padZero = (num) => String(num).padStart(2, '0');
             return `${year}-${padZero(month)}-${padZero(day)}`;
+        };
+
+        // Helper function to parse date string to local date
+        const parseDateString = (dateString) => {
+            if (!dateString) return new Date();
+            const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+            return new Date(year, month - 1, day);
         };
 
         const scanAvailableDates = async () => {
@@ -623,7 +639,7 @@
             e.preventDefault();
             document.getElementById('calendarWidget').classList.toggle('show');
             if (reportDateInput.value) {
-                currentCalendarDate = new Date(reportDateInput.value);
+                currentCalendarDate = parseDateString(reportDateInput.value);
             }
             renderCalendar();
         });
@@ -633,7 +649,7 @@
             e.preventDefault();
             document.getElementById('calendarWidget').classList.add('show');
             if (reportDateInput.value) {
-                currentCalendarDate = new Date(reportDateInput.value);
+                currentCalendarDate = parseDateString(reportDateInput.value);
             }
             renderCalendar();
         });
