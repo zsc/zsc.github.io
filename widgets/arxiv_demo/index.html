@@ -218,6 +218,22 @@
             background-color: var(--primary-color);
             color: #fff;
         }
+        .retry-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .retry-btn:hover {
+            background-color: #357abd;
+        }
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
@@ -369,6 +385,15 @@
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
                     papers = parsed.papers || {};
+                    
+                    // Fix any stale loading states
+                    Object.keys(papers).forEach(id => {
+                        if (papers[id].status === 'loading') {
+                            papers[id].status = 'error';
+                            papers[id].error = '页面关闭导致处理中断';
+                        }
+                    });
+                    
                     unreadCount = parsed.unreadCount || 0;
                     activeTabId = parsed.activeTabId || null;
                     updateFavicon();
@@ -584,6 +609,11 @@
                         break;
                     case 'error':
                         content.innerHTML = `<div class="error-message"><strong>发生错误:</strong><br><pre>${paper.error}</pre></div>`;
+                        const retryBtn = document.createElement('button');
+                        retryBtn.className = 'retry-btn';
+                        retryBtn.textContent = '重试';
+                        retryBtn.onclick = () => retryPaper(id);
+                        content.appendChild(retryBtn);
                         break;
                 }
                 tabsContent.appendChild(content);
@@ -636,6 +666,12 @@
             }
             saveTabs();
             render();
+        }
+
+        function retryPaper(id) {
+            // Simply trigger the summarize process again for this specific paper
+            arxivInput.value = id;
+            summarizeBtn.click();
         }
 
         // --- 【新增】核心逻辑：处理图片文件名递增 ---
