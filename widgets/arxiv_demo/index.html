@@ -570,6 +570,14 @@
             const allIds = Object.keys(papers);
             const closedIndex = allIds.indexOf(idToClose);
 
+            // Clean up any references to the paper data
+            const contentElement = document.getElementById(`content-${idToClose}`);
+            if (contentElement) {
+                // Remove all event listeners by replacing with clone
+                const clone = contentElement.cloneNode(false);
+                contentElement.parentNode.replaceChild(clone, contentElement);
+            }
+
             delete papers[idToClose];
             
             if (activeTabId === idToClose) {
@@ -717,11 +725,11 @@
                 statusBar.textContent = `[${id}] 正在从 arXiv 下载 PDF...`;
                 
                 const pdfResp = await fetchWithRetry(pdfUrl);
-                const pdfArrayBuffer = await pdfResp.arrayBuffer();
+                let pdfArrayBuffer = await pdfResp.arrayBuffer();
 
                 statusBar.textContent = `[${id}] PDF 下载完成，正在进行 Base64 编码...`;
                 const pdfSize = (pdfArrayBuffer.byteLength / 1024 / 1024).toFixed(2); // in MB
-                const pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
+                let pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
                 
                 statusBar.textContent = `[${id}] PDF（${pdfSize} MB）正在发送至 Gemini API (${selectedModel}) 进行摘要...`;
                 const model = genAI.getGenerativeModel({ model: selectedModel });
@@ -735,6 +743,10 @@
                         }
                     }
                 ]);
+
+                // Clear the PDF data after sending to API
+                pdfArrayBuffer = null;
+                pdfBase64 = null;
 
                 const response = result.response;
                 const summaryText = response.text();
