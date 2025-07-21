@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-21</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-21)</h1>
+                    <p id="intro">为您找到日期 2025-07-21 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>多模态基础模型与对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">苹果智能基础语言模型：2025年技术报告</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13575&amp;sa=D&amp;source=editors&amp;ust=1753095306661266&amp;usg=AOvVaw3AttPgszA-pxTdw5JtkLBX" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13575 - Apple Intelligence Foundation Language Models: Tech Report 2025</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hanzhi Zhou, Erik Hornberger, Pengsheng Guo, Xiyou Zhou, Saiwen Wang, Xin Wang, Yifei He, Xuankai Chang, Rene Rauch, Louis D'hauwe, John Peebles, Alec Doane, Kohen Chia, Jenna Thibodeau, Zi-Yi Dou, Yuanyang Zhang, Ruoming Pang, Reed Li, Zhifeng Chen, Jeremy Warner, Zhaoyang Xu, Sophy Lee, David Mizrahi, Ramsey Tantawi, Chris Chaney, Kelsey Peterson, Jun Qin, Alex Dombrowski, Mira Chiang, Aiswarya Raghavan, Gerard Casamayor, Qibin Chen, Aonan Zhang, Nathalie Tran, Jianyu Wang, Hang Su, Thomas Voice, Alessandro Pappalardo, Brycen Wershing, Prasanth Yadla, Rui Li, Priyal Chhatrapati, Ismael Fernandez, Yusuf Goren, Xin Zheng, Forrest Huang, Tao Lei, Eray Yildiz, Alper Kokmen, Gokul Santhanam, Areeba Kamal, Kaan Elgin, Dian Ang Yap, Jeremy Liu, Peter Gray, Howard Xing, Kieran Liu, Matteo Ronchi, Moritz Schwarzer-Becker, Yun Zhu, Mandana Saebi, Jeremy Snow, David Griffiths, Guillaume Tartavel, Erin Feldman, Simon Lehnerer, Fernando Bermúdez-Medina, Hans Han, Joe Zhou, Xiaoyi Ren, Sujeeth Reddy, Zirui Wang, Tom Gunter, Albert Antony, Yuanzhi Li, John Dennison, Tony Sun, Yena Han, Yi Qin, Sam Davarnia, Jeffrey Bigham, Wayne Shan, Hannah Gillis Coleman, Guillaume Klein, Peng Liu, Muyang Yu, Jack Cackler, Yuan Gao, Crystal Xiao, Binazir Karimzadeh, Zhengdong Zhang, Felix Bai, Albin Madappally Jose, Feng Nan, Nazir Kamaldin, Dong Yin, Hans Hao, Yanchao Sun, Yi Hua, Charles Maalouf</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍两款为苹果设备和服务中的苹果智能功能提供支持的多语言、多模态基础语言模型：i) 一款30亿参数的设备端模型，通过KV缓存共享和2比特量化感知训练等架构创新，为苹果芯片进行了优化；ii) 一款可扩展的服务器模型，基于新颖的并行轨道混合专家（PT-MoE）Transformer构建，该架构结合了轨道并行、混合专家稀疏计算以及交错的全局-局部注意力机制，在苹果的私有云计算（Private Cloud Compute）平台上以具有竞争力的成本提供高质量服务。这两款模型都在大规模多语言和多模态数据集上进行了训练，这些数据通过负责任的网络爬取、授权语料库和高质量合成数据获得，然后在一个新的异步平台上通过监督微调和强化学习进一步优化。最终的模型在理解图像和执行工具调用的同时，支持多种额外语言。在公开基准测试和人类评估中，服务器模型和设备端模型都达到或超过了同等规模的开源基线模型。一个新的以Swift为中心的基础模型框架提供了引导式生成、受约束的工具调用和LoRA适配器微调功能，允许开发者用几行代码集成这些能力。苹果智能模型的最新进展植根于我们负责任的AI方法，包括内容过滤和特定地区的评估等保障措施，以及我们通过私有云计算等创新来保护用户隐私的承诺。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13575&amp;sa=D&amp;source=editors&amp;ust=1753095306661148&amp;usg=AOvVaw1JYRhzXK7h7PLALhy8fKEb" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">当视觉压倒认知：解耦视觉语言模型中的知识冲突</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13868&amp;sa=D&amp;source=editors&amp;ust=1753095306645682&amp;usg=AOvVaw2Xg2N4wtnb74TMt8HqIV2x" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13868 - When Seeing Overrides Knowing: Disentangling Knowledge Conflicts in Vision-Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Francesco Ortu, Zhijing Jin, Diego Doimo, Alberto Cazzaniga</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视觉语言模型（VLM）越来越多地利用不同的知识来源来处理复杂任务，但常会遇到其内部参数化知识与外部信息之间的冲突。知识冲突可能导致幻觉和不可靠的响应，但控制此类交互的机制仍然未知。为了解决这一差距，我们通过引入一个多模态反事实查询数据集来分析VLM解决跨模态冲突的机制，该数据集故意与内部常识知识相矛盾。我们通过logit检查定位到一小组控制冲突的注意力头。此外，通过修改这些注意力头，我们可以引导模型倾向于其内部知识或视觉输入。最后，我们展示了这些注意力头的注意力图能够精确定位驱动视觉压倒认知的局部图像区域，其精确度优于基于梯度的归因方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13868&amp;sa=D&amp;source=editors&amp;ust=1753095306645591&amp;usg=AOvVaw3ZugDylvq7CiKxx39s5keP" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过思维链提示和强化学习增强视觉语言模型的空间推理能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13362&amp;sa=D&amp;source=editors&amp;ust=1753095306681889&amp;usg=AOvVaw3vH9sxAG5n1BWZLaE331VS" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13362 - Enhancing Spatial Reasoning in Vision-Language Models via Chain-of-Thought Prompting and Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Binbin Ji, Siddharth Agrawal, Qiance Tang, Yvonne Wu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本研究通过思维链（CoT）提示和强化学习来探讨视觉语言模型（VLM）的空间推理能力。我们首先评估了不同提示策略的影响，发现简单的CoT格式（即模型在给出答案前生成一个推理步骤）不仅没有帮助，甚至可能损害模型的原始性能。相比之下，基于场景图的结构化多阶段提示（SceneGraph CoT）显著提高了空间推理的准确性。此外，为提升空间推理能力，我们使用组相对策略优化（GRPO）在SAT数据集上对模型进行微调，并在CVBench上评估其性能。与监督微调（SFT）相比，GRPO在Pass@1评估中取得了更高的准确率，并在分布外（OOD）条件下表现出更强的鲁棒性。特别是，我们发现SFT会过拟合于表面的语言模式，当测试时的措辞发生变化（例如，从“更接近”变为“更远离”）时，性能可能会下降。而GRPO则能更可靠地泛化，并在此类变化下保持稳定的性能。我们的研究结果为如何通过强化学习和结构化提示来提高现代VLM的空间推理能力和泛化行为提供了见解。所有代码均已开源。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13362&amp;sa=D&amp;source=editors&amp;ust=1753095306681797&amp;usg=AOvVaw0KvI6eK9TEyI8yg8XjV_Jw" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过强化学习微调的摘要来学习多元用户偏好</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13579&amp;sa=D&amp;source=editors&amp;ust=1753095306660523&amp;usg=AOvVaw0h8ikQ9fZYdqilEkYM_Zlx" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13579 - Learning Pluralistic User Preferences through Reinforcement Learning Fine-tuned Summaries</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hyunji Nam, Yanming Wan, Mickel Liu, Jianxun Lian, Natasha Jaques</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着大型语言模型（LLM）AI助手的日常用例不断扩展，个性化响应以适应不同用户的偏好和目标变得越来越重要。虽然来自人类反馈的强化学习（RLHF）在提升LLM的普适性和流畅性方面很有效，但它并未考虑用户间的差异性，因为它用单一的奖励模型来建模整个用户群体。我们提出了一个新颖的框架——使用摘要进行偏好学习（PLUS），该框架学习关于每个用户偏好、特征和过去对话的基于文本的摘要。这些摘要为奖励模型提供条件，使其能够对每个用户看重的响应类型进行个性化预测。我们使用强化学习训练用户摘要模型，并同时更新奖励模型，形成一个在线协同适应的循环。我们表明，与先前的个性化RLHF技术或使用上下文学习用户信息的方法相比，PLUS生成的摘要能够捕捉到用户偏好的有意义的方面。在不同的多元用户数据集上，我们证明了我们的方法对新用户和多样的对话主题具有鲁棒性。此外，我们展示了为用户生成的文本摘要可以迁移用于对更强大的专有模型（如GPT-4）进行零样本个性化。由此产生的用户摘要不仅简洁便携，而且易于用户理解和修改，从而在LLM对齐中实现了更高的透明度和用户控制。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13579&amp;sa=D&amp;source=editors&amp;ust=1753095306660435&amp;usg=AOvVaw3zxxFulDKutvlImgDVxwB-" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">PrefPalette: 基于潜在属性的个性化偏好建模</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13541&amp;sa=D&amp;source=editors&amp;ust=1753095306629608&amp;usg=AOvVaw25Q7RP2vvW8DB33HxD8S9z" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13541 - PrefPalette: Personalized Preference Modeling with Latent Attributes</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shuyue Stella Li, Melanie Sclar, Hunter Lang, Ansong Ni, Jacqueline He, Puxin Xu, Andrew Cohen, Chan Young Park, Yulia Tsvetkov, Asli Celikyilmaz</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">个性化AI系统不仅需要理解用户喜欢什么，还需要理解这些偏好背后的原因——然而，当前的偏好模型通常将人类判断视为一个黑箱。我们引入了PrefPalette框架，该框架将偏好分解为属性维度，并以一种人类可解释的方式，将其偏好预测与不同社交群体的价值观相匹配。PrefPalette通过两种方式实现了认知科学中的多属性决策原则：（1）一个可扩展的反事实属性合成步骤，该步骤涉及生成合成训练数据以分离单个属性（如正式性、幽默感、文化价值观）的影响；（2）一个基于注意力的偏好建模，该模型学习不同社交群体如何动态地权衡这些属性。这种方法超越了聚合偏好建模，以捕捉驱动人类判断的多样化评估框架。在对在线平台Reddit的45个社交群体进行评估时，PrefPalette在平均预测准确率上比GPT-4o高出46.6%。除了原始预测性能的提升，PrefPalette还揭示了直观的、特定于群体的画像：学术群体优先考虑详细性和启发性，冲突导向的群体看重讽刺和直接性，而支持型群体则强调同理心。通过对人类判断的属性中介结构进行建模，PrefPalette既提供了卓越的偏好建模能力，又提供了透明、可解释的见解，为更值得信赖、价值感知的个性化应用迈出了第一步。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13541&amp;sa=D&amp;source=editors&amp;ust=1753095306629507&amp;usg=AOvVaw1iNt4vDjZWuwCpZ7k9MjuK" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">谁的安全观？一个用于文生图模型多元化对齐的深度DIVE数据集</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13383&amp;sa=D&amp;source=editors&amp;ust=1753095306676336&amp;usg=AOvVaw16MdQvkK4ctAudEcS465NR" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13383 - Whose View of Safety? A Deep DIVE Dataset for Pluralistic Alignment of Text-to-Image Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Charvi Rastogi, Tian Huey Teh, Pushkar Mishra, Roma Patel, Ding Wang, Mark Díaz, Alicia Parrish, Aida Mostafazadeh Davani, Zoe Ashwood, Michela Paganini, Vinodkumar Prabhakaran, Verena Rieser, Lora Aroyo</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">当前的文生图（T2I）模型常常未能考虑到多样化的人类经验，导致系统对齐不当。我们倡导多元化对齐，即AI能够理解并可被引导以适应多样化且常常相互冲突的人类价值观。我们的工作为此目标在T2I模型中提供了三项核心贡献。首先，我们引入了一个新颖的“多样化交叉性视觉评估”（DIVE）数据集——这是首个用于多元化对齐的多模态数据集。它通过一个庞大的、人口统计学上交叉的人类评分员库，对1000个提示进行了广泛反馈和高度重复的评估，捕捉了细微的安全感知，从而实现了与多样化安全视角的深度对齐。其次，我们通过经验证明，人口统计学是该领域多样化观点的一个关键代理变量，揭示了在伤害感知方面存在显著的、依赖于上下文的差异，这与传统评估方法不同。最后，我们讨论了构建对齐的T2I模型的启示，包括高效的数据收集策略、LLM的判断能力以及模型对多样化观点的可引导性。这项研究为构建更公平、更对齐的T2I系统提供了基础工具。内容警告：本文包含可能有害的敏感内容。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13383&amp;sa=D&amp;source=editors&amp;ust=1753095306676236&amp;usg=AOvVaw0_7EbsHIUCdC3CmwXd5irL" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>生成式AI：视频、运动与场景</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过潜在扩散模型利用冻结视频模型进行通用预测</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13942&amp;sa=D&amp;source=editors&amp;ust=1753095306641355&amp;usg=AOvVaw1dPkEoSNR8P9o9pwJdnjyH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13942 - Generalist Forecasting with Frozen Video Models via Latent Diffusion</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jacob C Walker, Pedro Vélez, Luisa Polania Cabrera, Guangyao Zhou, Rishabh Kabra, Carl Doersch, Maks Ovsjanikov, João Carreira, Shiry Ginosar</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">预测接下来会发生什么是通用系统在不同抽象层次上进行规划或行动的一项关键技能。在本文中，我们发现视觉模型的感知能力与其在短时间范围内的通用预测性能之间存在很强的相关性。这一趋势在多种多样的预训练模型中（包括生成式训练的模型）以及多个抽象层次上（从原始像素到深度、点轨迹和物体运动）都成立。这一结果的实现得益于一个新颖的通用预测框架，该框架可作用于任何冻结的视觉骨干网络：我们训练潜在扩散模型来预测冻结表示空间中的未来特征，然后通过轻量级的、特定于任务的读出模块进行解码。为了在不同任务间实现一致的评估，我们引入了分布度量，直接在下游任务的空间中比较分布属性，并将此框架应用于九个模型和四个任务。我们的结果凸显了在以时间为基础的视频理解中，连接表示学习和生成建模的价值。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13942&amp;sa=D&amp;source=editors&amp;ust=1753095306641264&amp;usg=AOvVaw24PLWVeqzp9K-Y-Jfsubrm" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过基础视频扩散模型实现通用双臂操控</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.12898&amp;sa=D&amp;source=editors&amp;ust=1753095306684007&amp;usg=AOvVaw2YxSLkWHRK4wCsFim4I8JB" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.12898 - Generalist Bimanual Manipulation via Foundation Video Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yao Feng, Hengkai Tan, Xinyi Mao, Guodong Liu, Shuhe Huang, Chendong Xiang, Hang Su, Jun Zhu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">双臂机器人操控涉及两个机械臂的协调控制，是解决挑战性任务的基础。尽管最近在通用操控方面取得了进展，但数据稀缺性和机器人本体的异构性仍然是双臂操控场景下进一步扩展的严重障碍。在本文中，我们引入了VIDAR（用于动作推理的视频扩散）框架，这是一个两阶段框架，利用了大规模的、基于扩散的视频预训练和一个新颖的掩码逆动力学模型进行动作预测。我们在来自三个真实世界双臂机器人平台的75万个多视角视频上预训练视频扩散模型，使用一个统一的观察空间，该空间编码了机器人、相机、任务和场景的上下文。我们的掩码逆动力学模型学习掩码以从生成的轨迹中提取与动作相关的信息，而无需像素级标签，并且这些掩码可以有效地泛化到未见过的背景。我们的实验表明，仅需在未见过的机器人平台上进行20分钟的人类演示（仅为典型数据需求的1%），VIDAR就能以强大的语义理解能力泛化到未见过的任务和背景，超越了最先进的方法。我们的发现凸显了视频基础模型结合掩码动作预测在多样化真实世界环境中实现可扩展和可泛化机器人操控的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.12898&amp;sa=D&amp;source=editors&amp;ust=1753095306683920&amp;usg=AOvVaw3HgeABmzio3B2ZOUR5Rfan" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">“PhyWorldBench”：对文生视频模型中物理真实性的综合评估</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13428&amp;sa=D&amp;source=editors&amp;ust=1753095306668361&amp;usg=AOvVaw3mIezHeG_VvFroa4Q3g-gl" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13428 - "PhyWorldBench": A Comprehensive Evaluation of Physical Realism in Text-to-Video Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jing Gu, Xian Liu, Yu Zeng, Ashwin Nagarajan, Fangrui Zhu, Daniel Hong, Yue Fan, Qianqi Yan, Kaiwen Zhou, Ming-Yu Liu, Xin Eric Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视频生成模型在创造高质量、逼真的内容方面取得了显著进展。然而，它们准确模拟物理现象的能力仍然是一个关键且未解决的挑战。本文提出了PhyWorldBench，一个旨在根据视频生成模型对物理定律的遵守情况进行评估的综合基准。该基准涵盖了多个层次的物理现象，从物体运动和能量守恒等基本原理到涉及刚体相互作用以及人类或动物运动的更复杂场景。此外，我们引入了一个新颖的“反物理”类别，其中的提示故意违反现实世界的物理规律，从而能够评估模型是否能在保持逻辑一致性的同时遵循此类指令。除了大规模的人工评估，我们还设计了一种简单而有效的方法，可以利用现有的多模态大模型以零样本方式评估物理真实性。我们评估了12个最先进的文生视频生成模型，包括5个开源模型和5个专有模型，并进行了详细的比较和分析。我们识别出模型在遵守现实世界物理规律方面面临的关键挑战。通过系统性地测试它们在1050个精心策划的提示（涵盖基础、复合和反物理场景）上的输出，我们识别出这些模型在遵守现实物理规律方面面临的关键挑战。然后，我们严格检查了它们在不同提示类型下对多种物理现象的性能，并为制作能增强物理原则保真度的提示提出了有针对性的建议。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13428&amp;sa=D&amp;source=editors&amp;ust=1753095306668273&amp;usg=AOvVaw3O8pd88f7xwfNO2w6v-crE" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">生成式AI驱动的高保真度人体运动仿真</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.14097&amp;sa=D&amp;source=editors&amp;ust=1753095306621321&amp;usg=AOvVaw3MYIEqgePZ5C8K3SdX1sbH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14097 - Generative AI-Driven High-Fidelity Human Motion Simulation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hari Iyer, Neel Macwan, Atharva Jitendra Hude, Heejin Jeong, Shenghan Guo</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">人体运动仿真（HMS）支持对工业任务中工人的行为、安全性和生产力进行成本效益高的评估。然而，现有方法通常存在运动保真度低的问题。本研究介绍了生成式AI赋能的HMS（G-AI-HMS），它集成了文本到文本和文本到运动模型，以提高物理任务的仿真质量。G-AI-HMS解决了两个关键挑战：（1）使用与MotionGPT训练词汇对齐的大型语言模型将任务描述翻译成运动感知语言，以及（2）使用计算机视觉验证AI增强的运动与真实人体运动的一致性。姿态估计算法被应用于实时视频以提取关节地标，并使用运动相似性度量将它们与AI增强的序列进行比较。在一个涉及八个任务的案例研究中，AI增强的运动在大多数情况下显示出比人类创建的描述更低的误差，在六个任务中基于空间准确性表现更好，在四个任务中基于姿态归一化后的对齐表现更好，在七个任务中基于整体时间相似性表现更好。统计分析表明，AI增强的提示显著（p &lt; 0.0001）减少了关节误差和时间错位，同时保持了相当的姿态准确性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.14097&amp;sa=D&amp;source=editors&amp;ust=1753095306621233&amp;usg=AOvVaw08ikRlGwSBBNz2rgApzcdF" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">更近一步：创造未来以增强单目语义场景补全</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13801&amp;sa=D&amp;source=editors&amp;ust=1753095306649436&amp;usg=AOvVaw3DS9It88Yg2ScH0r9FPssv" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13801 - One Step Closer: Creating the Future to Boost Monocular Semantic Scene Completion</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Haoang Lu, Yuanqi Su, Xiaoning Zhang, Hao Hu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近年来，视觉3D语义场景补全（SSC）已成为自动驾驶领域的一项关键感知任务，因为它能够从单张2D图像中推断出完整的3D场景布局和语义。然而，在真实的交通场景中，大部分场景被遮挡或在相机视场之外——这是现有单目SSC方法未能充分解决的一个根本性挑战。为了克服这些限制，我们提出了“创造未来SSC”（CF-SSC），这是一个新颖的时序SSC框架，它利用伪未来帧预测来扩展模型的有效感知范围。我们的方法结合姿态和深度来建立准确的3D对应关系，从而能够在3D空间中对过去、现在和预测的未来帧进行几何一致的融合。与依赖简单特征堆叠的传统方法不同，我们的3D感知架构通过显式建模时空关系，实现了更鲁棒的场景补全。在SemanticKITTI和SSCBench-KITTI-360基准上的综合实验展示了最先进的性能，验证了我们方法的有效性，并突显了我们的方法在提高遮挡推理和3D场景补全准确性方面的能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13801&amp;sa=D&amp;source=editors&amp;ust=1753095306649337&amp;usg=AOvVaw3tKcgH_wjJ85d8x9MGPPZr" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">AGENTS-LLM: 使用智能体LLM框架增强生成挑战性交通场景</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13729&amp;sa=D&amp;source=editors&amp;ust=1753095306652803&amp;usg=AOvVaw0b_uvS7ZMJ9C2D89x5tkLT" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13729 - AGENTS-LLM: Augmentative GENeration of Challenging Traffic Scenarios with an Agentic LLM Framework</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yu Yao, Salil Bhatnagar, Markus Mazzola, Vasileios Belagiannis, Igor Gilitschenski, Luigi Palmieri, Simon Razniewski, Marcel Hallgarten</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">罕见但关键的场景对测试和评估自动驾驶规划器构成了重大挑战。仅仅依赖真实世界的驾驶场景需要收集大量数据集才能捕捉到这些场景。虽然自动生成交通场景看起来很有前景，但数据驱动的模型需要大量的训练数据，并且通常缺乏对输出的精细控制。此外，从头开始生成新颖的场景可能会引入与原始训练场景的分布偏移，这会削弱评估的有效性，尤其是对于基于学习的规划器。为避免这种情况，最近的工作提出通过增强测试集中的原始场景来生成挑战性场景。然而，这涉及到领域专家手动增强场景，这种方法无法满足自动驾驶系统评估中对规模的需求。因此，本文引入了一种新颖的基于LLM智能体的框架，用于使用自然语言描述来增强真实世界的交通场景，解决了现有方法的局限性。一个关键创新是使用了智能体设计，实现了对输出的精细控制，并且即使使用更小、更具成本效益的LLM也能保持高性能。广泛的人类专家评估表明，我们的框架能够准确地遵循用户意图，生成与手动创建的场景质量相当的高质量增强场景。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13729&amp;sa=D&amp;source=editors&amp;ust=1753095306652715&amp;usg=AOvVaw2VOA9wbpulARjQwsldQA6G" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">单兵作战：通过模型协同解决复杂视频问答</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13820&amp;sa=D&amp;source=editors&amp;ust=1753095306648098&amp;usg=AOvVaw2nl2Q0yOJuIok8elPv8-Bu" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13820 - Team of One: Cracking Complex Video QA with Model Synergy</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jun Xie, Zhaoran Zhao, Xiongjun Guan, Yingjian Zhu, Hongzhu Yi, Xinming Wang, Feng Chen, Zhepeng Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了一个用于开放式视频问答的新颖框架，该框架在复杂的真实世界场景中增强了推理深度和鲁棒性，并在CVRR-ES数据集上进行了基准测试。现有的视频-大型多模态模型（Video-LMMs）通常在上下文理解、时序建模以及对模糊或组合式查询的泛化方面表现有限。为了应对这些挑战，我们引入了一种提示与响应集成机制，通过结构化的思维链协调多个异构的视频-语言模型（VLMs），每个模型都针对不同的推理路径进行定制。一个外部的大型语言模型（LLM）作为评估器和集成器，选择并融合最可靠的响应。广泛的实验表明，我们的方法在所有评估指标上均显著优于现有基线，展现了卓越的泛化能力和鲁棒性。我们的方法为推进多模态推理提供了一种轻量级、可扩展的策略，无需重新训练模型，为未来Video-LMM的发展奠定了坚实的基础。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13820&amp;sa=D&amp;source=editors&amp;ust=1753095306647982&amp;usg=AOvVaw0yPmXOr4q7j87XVSJgYrTY" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>模型优化与高效计算</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">CUDA-L1：通过对比强化学习改进CUDA优化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.14111&amp;sa=D&amp;source=editors&amp;ust=1753095306620147&amp;usg=AOvVaw3kM_LYOISexK7Tkdal-4DK" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14111 - CUDA-L1: Improving CUDA Optimization via Contrastive Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xiaoya Li, Xiaofei Sun, Albert Wang, Jiwei Li, Chris Shum</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">摘要：在大型语言模型快速发展的推动下，对GPU计算资源的需求呈指数级增长，这迫切需要自动化的CUDA优化策略。虽然LLM在代码生成方面取得了最新进展并显示出潜力，但当前SOTA模型（如R1, o1）在提升CUDA速度方面的成功率很低。在本文中，我们介绍了CUDA-L1，一个用于CUDA优化的自动化强化学习框架。CUDA-L1在CUDA优化任务上取得了性能提升：在NVIDIA A100上训练后，它在KernelBench的所有250个CUDA核上实现了平均17.7倍的加速，峰值加速达到449倍。此外，该模型在不同GPU架构上也表现出优异的可移植性，尽管是专门为A100优化的，但在H100上实现了平均17.8倍、RTX 3090上19.0倍、L40上16.5倍、H800上14.7倍和H20上13.9倍的加速。除了这些基准测试结果，CUDA-L1还展现了几个显著特性：1) 发现了多种CUDA优化技术，并学会策略性地组合它们以实现最佳性能；2) 揭示了CUDA优化的基本原则；3) 识别出不明显的性能瓶颈，并拒绝那些看似有益但实际损害性能的优化。CUDA-L1的能力表明，仅通过基于加速的奖励信号，强化学习就可以将一个最初性能不佳的LLM转变为一个有效的CUDA优化器，而无需人类专业知识或领域知识。更重要的是，训练好的RL模型将获得的推理能力扩展到新的内核上。这种范式为CUDA操作的自动化优化开辟了可能性，并有望大幅提升GPU效率，缓解日益增长的GPU计算资源压力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.14111&amp;sa=D&amp;source=editors&amp;ust=1753095306620044&amp;usg=AOvVaw1lk03e5oQox0t9Uhr515XK" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">生物医学本体对齐中的搜索优化量化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13742&amp;sa=D&amp;source=editors&amp;ust=1753095306650993&amp;usg=AOvVaw0xqIuF_l2iDtotokXBKHuU" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13742 - Search-Optimized Quantization in Biomedical Ontology Alignment</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Oussama Bouaggad, Natalia Grabar</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在快速发展的AI世界中，随着组织和研究人员开发出更先进的模型，他们因模型的巨大规模和计算需求而面临挑战。在边缘设备或资源受限的环境中部署此类模型，进一步增加了与能耗、内存使用和延迟相关的挑战。为了应对这些挑战，新兴趋势正在塑造高效模型优化技术的未来。基于此，本研究采用基于监督的最先进的Transformer模型，介绍了一种用于本体对齐的系统方法，该方法基于生物医学通俗词汇与统一医学语言系统（UMLS）元叙词库之间的余弦语义相似度。它利用Microsoft Olive在使用ONNX Runtime后端的不同执行提供商（EP）中搜索目标优化，然后采用Intel神经压缩器和IPEX（Intel PyTorch扩展）进行动态量化的组合过程。通过我们的优化过程，我们对DEFT 2020评估活动的两项任务进行了广泛评估，在这两项任务中均达到了新的技术水平。我们保持了性能指标不变，同时实现了平均20倍的推理速度提升，并将内存使用减少了约70%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13742&amp;sa=D&amp;source=editors&amp;ust=1753095306650906&amp;usg=AOvVaw3me9UQFCkN4y3pg1pyFRHh" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LoopServe：一个用于多轮对话的自适应双阶段LLM推理加速系统</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13681&amp;sa=D&amp;source=editors&amp;ust=1753095306654621&amp;usg=AOvVaw1-S_-gIb3bPY7xjX_W-OcQ" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13681 - LoopServe: An Adaptive Dual-phase LLM Inference Acceleration System for Multi-Turn Dialogues</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Haoyang Li, Zhanchao Xu, Yiming Li, Xuejia Chen, Darian Li, Anxin Tian, Qingfa Xiao, Cheng Deng, Jun Wang, Qing Li, Lei Chen, Mingxuan Yuan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多轮对话在大型语言模型的许多实际应用中至关重要，例如聊天机器人和虚拟助手。随着对话历史变长，现有的大型语言模型面临着越来越大的计算和内存挑战，这妨碍了它们提供高效和响应迅速的交互。大多数当前的加速方法要么压缩上下文，要么优化键值缓存，但它们通常依赖于固定的或基于位置的启发式方法，这些方法不能很好地适应实际多轮对话中发现的动态和不可预测的模式。在本文中，我们提出了LoopServe，一个用于多轮对话中大型语言模型的自适应双阶段推理加速框架。LoopServe引入了两个主要创新。首先，它在预填充阶段执行在线稀疏化，通过为每个新输入动态选择注意力矩阵的最重要部分。其次，它在解码期间使用渐进式键值压缩，通过根据最新生成的输出令牌自适应地维护一个相关且高效的缓存。我们还提出了一个包含十一个多轮数据集的新基准，这些数据集反映了现实的查询位置和对话依赖性。广泛的实验表明，与现有基线相比，LoopServe始终取得更优越的有效性，并在各种长上下文对话任务中显著加速LLM推理。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13681&amp;sa=D&amp;source=editors&amp;ust=1753095306654525&amp;usg=AOvVaw2XqSSam2qjdjojWI0VO4Xn" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于AI加速器的光子织物平台</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.14000&amp;sa=D&amp;source=editors&amp;ust=1753095306637577&amp;usg=AOvVaw0tETa9fwzHxozw2M_Yxxz_" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14000 - Photonic Fabric Platform for AI Accelerators</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jing Ding, Trung Diep</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文介绍了光子织物（Photonic Fabric™）和光子织物设备（Photonic Fabric Appliance™，PFA），这是一个基于光子的交换机和内存子系统，提供低延迟、高带宽和低单位比特能耗。通过在一个2.5D电光系统级封装中集成高带宽HBM3E内存、一个模块上光子交换机和外部DDR5，PFA可提供高达32TB的共享内存以及115 Tbps的全连接数字交换能力。光子织物™使得分布式AI训练和推理能够更有效地执行并行策略。光子织物消除了硅滩约束，该约束限制了几乎所有当前XPU加速器设计中观察到的固定内存与计算比率。用一个连接到光子织物的芯粒替换XPU上的本地HBM堆栈，增加了其内存容量和相应的内存带宽，为超越封装上HBM限制的扩展提供了灵活的途径。我们引入了CelestiSim，一个在NVIDIA H100和H200系统上验证过的轻量级分析模拟器。它用于评估PFA上LLM参考的性能和能耗节省，而无需对GPU核心设计进行任何重大更改。模拟结果显示，使用PFA，在405B参数的LLM推理中，吞吐量提升高达3.66倍，延迟改善高达1.40倍；在1T参数时，吞吐量提升高达7.04倍，延迟改善高达1.41倍；并且在所有LLM训练场景的重度集体操作中，数据移动能耗节省60-90%。虽然这些结果是针对NVIDIA GPU展示的，但它们同样可以应用于其他共享相同固定内存与计算比率限制的AI加速器设计（XPU）。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.14000&amp;sa=D&amp;source=editors&amp;ust=1753095306637488&amp;usg=AOvVaw0VypyNiWq1RGYTrJJLWoNi" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>前沿视觉生成方法</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">CSD-VAR：视觉自回归模型中的内容-风格分解</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13984&amp;sa=D&amp;source=editors&amp;ust=1753095306638692&amp;usg=AOvVaw1cjMweRLD3562DjrJetsZZ" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13984 - CSD-VAR: Content-Style Decomposition in Visual Autoregressive Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Quang-Binh Nguyen, Minh Luu, Quang Nguyen, Anh Tran, Khoi Nguyen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">从单张图像中解耦内容和风格，即内容-风格分解（CSD），能够实现对提取内容的重新情境化和对提取风格的风格化，为视觉合成提供了更大的创作灵活性。尽管最近的个性化方法探索了显式内容风格的分解，但它们仍然是为扩散模型量身定制的。与此同时，视觉自回归建模（VAR）已成为一种有前途的替代方案，其采用下一尺度预测范式，实现了与扩散模型相当的性能。在本文中，我们探索将VAR作为CSD的生成框架，利用其逐尺度的生成过程来改善解耦效果。为此，我们提出了CSD-VAR，一种引入了三项关键创新的新方法：（1）一种尺度感知的交替优化策略，将内容和风格表示与其各自的尺度对齐以增强分离；（2）一种基于SVD的校正方法，以减轻内容泄漏到风格表示中；以及（3）一种增强的键-值（K-V）记忆机制，以增强内容身份的保留。为了对该任务进行基准测试，我们引入了CSD-100，一个专门为内容-风格分解设计的数据集，其中包含以各种艺术风格呈现的多样化主题。实验表明，CSD-VAR优于以往的方法，在内容保留和风格化保真度方面取得了更优越的性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13984&amp;sa=D&amp;source=editors&amp;ust=1753095306638602&amp;usg=AOvVaw1Io2n8EHrNR9oZhoIihz1n" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">无需人类：自主高质量图像编辑三元组挖掘</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.14119&amp;sa=D&amp;source=editors&amp;ust=1753095306631887&amp;usg=AOvVaw3VEm4WIJ7ZZLYunh-ErBJC" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14119 - NoHumansRequired: Autonomous High-Quality Image Editing Triplet Mining</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Maksim Kuprashevich, Grigorii Alekseenko, Irina Tolstykh, Georgii Fedorov, Bulat Suleimanov, Vladimir Dokholyan, Aleksandr Gordeev</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">生成模型的最新进展使得图像编辑助手能够遵循自然语言指令，无需额外的用户输入。它们的监督训练需要数百万个三元组：原始图像、指令、编辑后的图像。然而，挖掘像素级准确的样本很困难。每次编辑必须只影响指令指定的区域，保持风格一致性，尊重物理合理性，并保留视觉吸引力。缺乏鲁棒的自动化编辑质量度量标准，阻碍了大规模的可靠自动化。我们提出了一个自动化的模块化流程，可以在不同领域、分辨率、指令复杂度和风格之间挖掘高保真度的三元组。我们的系统基于公开的生成模型，无需人工干预即可运行，使用一个为任务调整的Gemini验证器直接对指令遵循度和美学进行评分，从而无需任何分割或定位模型。反转和组合自举（compositional bootstrapping）将挖掘到的数据集扩大了约2.2倍，实现了大规模高保真度训练数据。通过自动化最重复的标注步骤，该方法实现了新规模的训练，而无需人工标注工作。为了推动这个资源密集型领域的研究民主化，我们发布了NHR-Edit：一个包含35.8万个高质量三元组的开放数据集。在最大规模的跨数据集评估中，它超越了所有公开的替代方案。我们还发布了Bagel-NHR-Edit，一个开源的微调Bagel模型，在我们的实验中取得了最先进的指标。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.14119&amp;sa=D&amp;source=editors&amp;ust=1753095306631787&amp;usg=AOvVaw2hfJHXEGcFNqZeY-rwlEPJ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">规范流模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.13414&amp;sa=D&amp;source=editors&amp;ust=1753095306672187&amp;usg=AOvVaw0Wn5oIS937d8QV-o2ic5lr" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.13414 - Gauge Flow Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Alexander Strunk, Roland Assam</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文介绍了一种新颖的生成流模型类别——规范流模型（Gauge Flow Models）。这些模型在流常微分方程（Flow ODE）中集成了一个可学习的规范场（Gauge Field）。论文提供了这些模型的全面数学框架，详细描述了它们的构造和性质。使用流匹配（Flow Matching）在混合高斯模型上的实验表明，规范流模型比同等甚至更大规模的传统流模型表现出显著更优的性能。此外，未发表的研究表明，该模型在更广泛的生成任务中具有提升性能的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.13414&amp;sa=D&amp;source=editors&amp;ust=1753095306672098&amp;usg=AOvVaw3o1b2K9BfRR1i3SGt6l_me" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
