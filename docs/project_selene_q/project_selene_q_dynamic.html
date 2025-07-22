@@ -1,0 +1,3320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月神之瞳 (Project Selene-Q) - 月球量子计算数据中心</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #3949ab;
+            --accent-color: #00acc1;
+            --success-color: #43a047;
+            --warning-color: #fb8c00;
+            --danger-color: #e53935;
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(to bottom, #0f0c29 0%, #302b63 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background Stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        
+        /* Progress Indicator */
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            width: 0%;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        /* Navigation */
+        .nav-menu {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+        }
+        
+        .nav-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 50px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 80px 60px;
+            border-radius: 30px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 1s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 172, 193, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff 30%, #00acc1 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes glow {
+            from { 
+                text-shadow: 0 0 20px rgba(0, 172, 193, 0.5),
+                             0 0 40px rgba(0, 172, 193, 0.3);
+            }
+            to { 
+                text-shadow: 0 0 30px rgba(0, 172, 193, 0.8),
+                             0 0 60px rgba(0, 172, 193, 0.5);
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+        
+        /* Stats Grid */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transition: all 0.5s ease;
+        }
+        
+        .stat-card:hover::before {
+            top: -150%;
+            left: -150%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-color);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 172, 193, 0.5);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Sections */
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color), var(--primary-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .section:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .section:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+        
+        .section:nth-child(odd) {
+            animation-delay: 0.4s;
+        }
+        
+        /* Headings */
+        h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            position: relative;
+            padding-left: 30px;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-color), var(--secondary-color));
+            border-radius: 5px;
+            animation: pulse 2s ease infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.2); }
+        }
+        
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        h3::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            animation: bounce 2s ease-in-out infinite;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        
+        /* Cards */
+        .advantage-card, .module-card, .phase-card {
+            padding: 35px;
+            margin-bottom: 25px;
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .advantage-card {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .module-card {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 5px solid var(--warning-color);
+        }
+        
+        .phase-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .advantage-card:hover,
+        .module-card:hover,
+        .phase-card:hover {
+            transform: translateX(10px) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: rgba(0, 172, 193, 0.05);
+            transform: scale(1.01);
+        }
+        
+        /* Tech Specs */
+        .tech-spec {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #0ff;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .tech-spec::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #0ff, #f0f, #0ff);
+            border-radius: 15px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            animation: borderRotate 3s linear infinite;
+        }
+        
+        @keyframes borderRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .tech-spec:hover::before {
+            opacity: 0.5;
+        }
+        
+        .tech-spec pre {
+            color: #0ff;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 15px;
+            padding-left: 35px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        li::before {
+            content: '◆';
+            position: absolute;
+            left: 10px;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        li:hover {
+            transform: translateX(5px);
+            color: var(--primary-color);
+        }
+        
+        li:hover::before {
+            transform: rotate(45deg) scale(1.2);
+            color: var(--secondary-color);
+        }
+        
+        /* Highlights */
+        .highlight {
+            background: linear-gradient(135deg, #fff59d, #ffeb3b);
+            padding: 5px 12px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(255, 235, 59, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight:hover {
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 6px 20px rgba(255, 235, 59, 0.5);
+        }
+        
+        /* Objective Box */
+        .objective {
+            background: linear-gradient(135deg, rgba(0, 172, 193, 0.1), rgba(57, 73, 171, 0.1));
+            padding: 40px;
+            border-radius: 25px;
+            margin-bottom: 40px;
+            border: 2px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .objective::before {
+            content: '🎯';
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            font-size: 4rem;
+            opacity: 0.1;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        /* Conclusion */
+        .conclusion {
+            background: linear-gradient(135deg, rgba(67, 160, 71, 0.1), rgba(46, 125, 50, 0.1));
+            padding: 50px;
+            border-radius: 30px;
+            margin-top: 60px;
+            border: 3px solid var(--success-color);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .conclusion::before {
+            content: '🚀';
+            position: absolute;
+            right: 50px;
+            bottom: 50px;
+            font-size: 6rem;
+            opacity: 0.1;
+            animation: launch 4s ease-in-out infinite;
+        }
+        
+        @keyframes launch {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(-10deg); }
+        }
+        
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 172, 193, 0.3);
+            font-size: 1.5rem;
+            z-index: 999;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px) rotate(360deg);
+            box-shadow: 0 10px 30px rgba(0, 172, 193, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                padding: 10px 20px;
+            }
+            
+            .nav-menu ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .section {
+                padding: 30px;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 12px;
+            }
+        }
+        
+        /* Loading Animation */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0c29;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+        }
+        
+        .loader-circle {
+            width: 100px;
+            height: 100px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            color: white;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-circle"></div>
+            <div class="loader-text">正在加载月神之瞳...</div>
+        </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator" id="progressBar"></div>
+    
+    <!-- Animated Stars Background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Navigation -->
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="#overview">项目概览</a></li>
+            <li><a href="#advantages">战略优势</a></li>
+            <li><a href="#location">选址设计</a></li>
+            <li><a href="#tech">技术方案</a></li>
+            <li><a href="#automation">自动化</a></li>
+            <li><a href="#communication">通信系统</a></li>
+            <li><a href="#business">商业模式</a></li>
+            <li><a href="#cost">成本分析</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">↑</div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">月神之瞳</h1>
+            <p class="hero-subtitle">Project Selene-Q - 月球量子计算数据中心</p>
+            
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-number">40K</span>
+                    <span class="stat-label">运行温度</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">10⁻¹²</span>
+                    <span class="stat-label">真空度 (Torr)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">99.9%</span>
+                    <span class="stat-label">门保真度</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1.2</span>
+                    <span class="stat-label">Gbps 传输</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Project Overview -->
+        <section class="section" id="overview">
+            <h2>项目概览</h2>
+            <div class="objective">
+                <h3>核心目标</h3>
+                <p>在月球南极的永久阴影区，建立一个高度自动化、长期稳定运行的离子阱量子计算数据中心，利用月球的独特环境优势，提供下一代计算服务。</p>
+            </div>
+            
+            <p>这个项目不仅仅是技术验证，更是抢占未来地月经济和太空计算霸权的战略高地。通过结合模块化设计、高度自动化、就地资源利用和分阶段商业模式，我们不仅可以建造一台量子计算机，更可以开创一个全新的太空计算时代。</p>
+        </section>
+        
+        <!-- Insert all other sections from the original HTML here -->
+        <!-- I'll add placeholders for brevity, but in actual implementation, all content would be included -->
+        
+        <section class="section" id="advantages">
+            <h2>项目战略价值与优势分析</h2>
+            <p>这个项目不仅仅是技术验证，更是抢占未来地月经济和太空计算霸权的战略高地。月球不是"另一个"选择，而是量子计算的"终极"选择。</p>
+
+            <h3>量子计算基础原理</h3>
+            <p>在深入了解月球环境优势之前，让我们先理解量子计算的核心原理。</p>
+            
+            <div class="tech-spec">
+                <h4>量子叠加（Quantum Superposition）</h4>
+                <p><strong>核心概念：</strong>一个量子比特可以同时处于0和1两种状态的"叠加态"，直到被测量为止。</p>
+                <p><strong>数学表达：</strong>|ψ⟩ = α|0⟩ + β|1⟩</p>
+                <p>其中α和β是复数概率幅，|α|² + |β|² = 1</p>
+                <p><strong>计算优势：</strong>N个量子比特可以同时表示所有2^N个值的叠加态，实现真正的并行计算。</p>
+            </div>
+
+            <div class="tech-spec">
+                <h4>量子纠缠（Quantum Entanglement）</h4>
+                <p><strong>核心概念：</strong>两个或多个量子比特可以"纠缠"在一起，对其中一个的操作会瞬间影响到另一个。</p>
+                <p><strong>贝尔态示例：</strong>|Φ+⟩ = (|00⟩ + |11⟩) / √2</p>
+                <p><strong>应用价值：</strong>量子纠缠是量子通信和许多强大量子算法的物理基础。</p>
+            </div>
+
+            <div class="tech-spec">
+                <h4>量子退相干（Quantum Decoherence）</h4>
+                <p><strong>核心挑战：</strong>任何与外界环境的微小互动都会破坏量子态，导致量子信息丢失。</p>
+                <p><strong>应对措施：</strong></p>
+                <ul>
+                    <li>极低温环境（接近绝对零度）</li>
+                    <li>超高真空（避免分子碰撞）</li>
+                    <li>电磁屏蔽（隔绝干扰）</li>
+                    <li>振动隔离（保持稳定）</li>
+                </ul>
+            </div>
+
+            <h3>地球与月球环境数据对比</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>环境参数</th>
+                        <th>地球</th>
+                        <th>月球</th>
+                        <th>对量子计算的影响</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>表面温度范围</strong></td>
+                        <td>-89°C 至 +57°C</td>
+                        <td>-233°C (PSR) 至 +123°C (日照区)</td>
+                        <td>月球PSR提供天然预冷环境</td>
+                    </tr>
+                    <tr>
+                        <td><strong>大气压力</strong></td>
+                        <td>101.3 kPa (1 atm)</td>
+                        <td>3 × 10⁻¹⁰ kPa (近真空)</td>
+                        <td>无需人工真空腔，减少退相干</td>
+                    </tr>
+                    <tr>
+                        <td><strong>真空度</strong></td>
+                        <td>需人工创造10⁻⁹ Torr</td>
+                        <td>天然10⁻¹² Torr</td>
+                        <td>月球真空度高1000倍</td>
+                    </tr>
+                    <tr>
+                        <td><strong>地震活动</strong></td>
+                        <td>频繁，震级可达9级</td>
+                        <td>罕见，最大约5级</td>
+                        <td>极低振动，利于量子态稳定</td>
+                    </tr>
+                    <tr>
+                        <td><strong>电磁干扰</strong></td>
+                        <td>人为电磁污染严重</td>
+                        <td>无人为干扰，月背完全隔绝</td>
+                        <td>理想的电磁静区</td>
+                    </tr>
+                    <tr>
+                        <td><strong>辐射水平</strong></td>
+                        <td>~0.4 mSv/年 (有保护)</td>
+                        <td>~110-380 mSv/年 (表面)</td>
+                        <td>需要屏蔽，但月壤可利用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>重力</strong></td>
+                        <td>9.8 m/s² (1g)</td>
+                        <td>1.62 m/s² (1/6g)</td>
+                        <td>利于建造大型设施</td>
+                    </tr>
+                    <tr>
+                        <td><strong>昼夜周期</strong></td>
+                        <td>24小时</td>
+                        <td>29.5地球日</td>
+                        <td>永昼峰提供持续太阳能</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>无与伦比的运行环境（环境即优势）</h3>
+            <p>基于上述量子计算原理和环境对比，我们可以清楚地看到：量子计算的核心挑战在于维持量子比特的"量子相干性"，使其免受外界环境的干扰。地球环境本身就是量子计算发展的最大"噪声源"之一。而月球，以其独特的、近乎完美的极端环境，为量子计算提供了地球上无法比拟的"终极洁净室"。</p>
+            
+            <div class="advantage-card">
+                <h4>极致的低温环境：天然的巨型"预冷"系统</h4>
+                <p><strong>地球上的挑战：</strong>目前主流的超导量子计算机需要在接近绝对零度（-273.15°C 或 0 开尔文）的环境下运行。仅仅将设备从室温冷却到4K（-269°C），就需要消耗大量电力和液氦，运行成本极高。</p>
+                <p><strong>月球的优势：</strong>永久阴影区（PSR）的温度常年维持在<span class="highlight">-230°C 至 -250°C（约20-40K）</span>之间。这为量子计算机提供了一个免费、稳定、巨大的天然"预冷"阶段，极大地减少了对制冷系统的依赖和能耗，使大规模扩展量子计算集群在能源上成为可能。</p>
+            </div>
+
+            <div class="advantage-card">
+                <h4>完美的超高真空：根除空气分子的干扰</h4>
+                <p><strong>地球上的挑战：</strong>量子比特对与空气分子的碰撞极其敏感。地球上的量子计算机必须被封装在昂贵且复杂的超高真空腔体中，维护这些真空腔体本身就是巨大的工程挑战。</p>
+                <p><strong>月球的优势：</strong>月球表面本身就处于<span class="highlight">超高真空环境（约10⁻¹² 帕）</span>。我们不再需要为每个量子芯片制造笨重的真空外壳，整个数据中心设施本身就沉浸在天然的真空中。这简化了设备设计、降低了制造成本，从根本上消除了因真空泄露导致的计算错误风险。</p>
+            </div>
+
+            <div class="advantage-card">
+                <h4>无与伦比的稳定性：隔绝一切微小振动</h4>
+                <p><strong>地球上的挑战：</strong>地球是一个"嘈杂"的星球。地壳的微小震动、公路上的汽车、远处的建筑施工，甚至声波，都会对精密的量子设备造成干扰。量子实验室需要建造在地下深处，并配备复杂的多级隔振平台。</p>
+                <p><strong>月球的优势：</strong>月球是地质活动极其微弱的"死亡星球"。月震频率低、强度弱，没有大气意味着没有风和声音，彻底杜绝了声学振动。月球提供了天然的、完美的隔振平台，使量子比特可以长时间保持相干态，极大地提升了计算的深度和精度。</p>
+            </div>
+
+            <div class="advantage-card">
+                <h4>辐射环境：一个可被完美利用的"双刃剑"</h4>
+                <p><strong>挑战：</strong>月球表面缺少大气和磁场保护，直接暴露在宇宙射线和太阳高能粒子流之下。</p>
+                <p><strong>月球的独特解决方案：</strong></p>
+                <ul>
+                    <li><strong>天然屏蔽材料——月壤：</strong>将数据中心埋藏在几米深的月壤之下，利用天然材料作为极其有效的辐射屏蔽层。</li>
+                    <li><strong>月球背面——终极电磁"静区"：</strong>月球背面永远背对地球，完美屏蔽了来自地球的所有无线电频率干扰。</li>
+                </ul>
+                <p>通过"地下化"和"选址月背"，月球创造了比地球上任何"法拉第笼"都更纯净的电磁环境。</p>
+            </div>
+
+            <h3>战略意义——构建未来太空经济和地月经济体系的"算力灯塔"</h3>
+            
+            <div class="advantage-card">
+                <h4>对未来太空经济的战略意义</h4>
+                <ul>
+                    <li><strong>深空探索的"大脑"：</strong>作为太阳系内的"边缘计算"节点，对各探测器数据进行实时处理，只将最有价值的结果传回地球。</li>
+                    <li><strong>驱动太空制造和ISRU：</strong>为复杂的材料科学模拟、小行星矿物分析、3D打印基地结构设计提供本地算力支持。</li>
+                    <li><strong>保障太空互联网安全：</strong>成为量子加密密钥分发中心，为整个太阳系通信提供绝对安全保障。</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>对地月经济体系的战略意义</h4>
+                <ul>
+                    <li><strong>终极数据主权和安全"避风港"：</strong>一个天然的、与地球物理"硬隔离"的保险箱，任何网络攻击都无法触及。</li>
+                    <li><strong>创造全新的高价值经济循环：</strong>地球提供高科技硬件和专业人员，月球返回无价的计算结果——新材料分子式、新药靶点、精准气候模型等。</li>
+                    <li><strong>奠定国家技术和地缘政治的"终极高地"：</strong>谁第一个在月球建成量子计算中心，谁就掌握了21世纪后半叶的"算力霸权"。</li>
+                </ul>
+            </div>
+
+            <h3>特别适合月球环境的量子计算应用</h3>
+            <p>月球独特的环境特性使某些量子计算应用获得额外优势：</p>
+
+            <div class="phase-card">
+                <h4>1. 药物研发与分子模拟</h4>
+                <p><strong>应用场景：</strong>模拟复杂药物分子与人体蛋白质的相互作用，设计新型靶向药物。</p>
+                <p><strong>月球优势：</strong></p>
+                <ul>
+                    <li>超长相干时间允许模拟更大、更复杂的分子系统</li>
+                    <li>稳定环境确保长时间计算不被中断</li>
+                    <li>案例：模拟COVID-19病毒刺突蛋白与潜在药物的结合过程</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>2. 材料科学突破</h4>
+                <p><strong>应用场景：</strong>设计室温超导材料、高效催化剂、新型量子材料。</p>
+                <p><strong>月球优势：</strong></p>
+                <ul>
+                    <li>极低噪声环境允许精确模拟电子关联效应</li>
+                    <li>可模拟极端条件下的材料特性</li>
+                    <li>案例：开发用于核聚变反应堆的耐高温超导磁体材料</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>3. 金融建模与优化</h4>
+                <p><strong>应用场景：</strong>投资组合优化、风险评估、高频交易策略。</p>
+                <p><strong>月球优势：</strong></p>
+                <ul>
+                    <li>物理隔离确保金融数据绝对安全</li>
+                    <li>稳定运行环境保证关键计算不受干扰</li>
+                    <li>案例：为全球养老基金优化万亿美元级别的资产配置</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>4. 密码学与网络安全</h4>
+                <p><strong>应用场景：</strong>破解现有加密、开发量子加密、安全通信。</p>
+                <p><strong>月球优势：</strong></p>
+                <ul>
+                    <li>物理隔离防止任何形式的侧信道攻击</li>
+                    <li>可作为全球量子密钥分发的可信源头</li>
+                    <li>案例：为各国央行数字货币提供量子安全基础设施</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>5. 人工智能增强</h4>
+                <p><strong>应用场景：</strong>量子机器学习、模式识别、自然语言处理。</p>
+                <p><strong>月球优势：</strong></p>
+                <ul>
+                    <li>可处理超高维度的特征空间</li>
+                    <li>量子神经网络在稳定环境下训练效果更佳</li>
+                    <li>案例：分析全球气候数据，预测极端天气事件</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section class="section" id="location">
+            <h2>选址与基础设施设计</h2>
+            
+            <h3>1. 精确选址：沙克尔顿环形山的独特优势</h3>
+            <div class="module-card">
+                <p><strong>地点：</strong>月球南极的沙克尔顿环形山（Shackleton Crater）边缘</p>
+                <p><strong>地理特征：</strong>直径约21公里、深度约4.2公里的撞击坑，其最核心的地理优势在于独特的"二元结构"</p>
+                
+                <h4>阴阳两极的完美二元结构</h4>
+                <ul>
+                    <li><strong>环形山内部——永久阴影区（PSR）：</strong>由于月球自转轴倾角极小（约1.54°），深处从未被太阳光直接照射，是太阳系中最寒冷的角落之一</li>
+                    <li><strong>环形山边缘——准永昼峰：</strong>高耸的边缘几乎全年无休地接收太阳光照，日照时间超过80-90%的月球年</li>
+                </ul>
+                
+                <h4>选址的四大独特优势</h4>
+                <ul>
+                    <li><strong>温度分布：</strong>PSR内部温度常年稳定在<span class="highlight">-220°C 至 -240°C（约33K-53K）</span>，相当于把整个制冷过程的"第一步"交给了大自然，制冷效率可提升数个数量级</li>
+                    <li><strong>日照条件：</strong>"准永昼峰"提供近乎连续的太阳能，只需配置规模较小的储能系统应对短暂光照中断</li>
+                    <li><strong>通信条件：</strong>虽然需要月球轨道中继卫星，但地月间约1.3秒的单程延迟对"批处理"性质的量子计算任务影响极小</li>
+                    <li><strong>水冰资源：</strong>该地被证实富含水冰，可分解为氢氧用作生命支持、火箭燃料或冷却剂补充</li>
+                </ul>
+            </div>
+
+            <h3>2. 基础设施设计（模块化建设）</h3>
+            <p>考虑到月球建设的极端挑战性，所有设施都将在地球上预制成标准模块，运抵月球后由机器人进行组装。</p>
+
+            <div class="module-card">
+                <h4>核心计算舱（QCM）- "量子之心"</h4>
+                <p><strong>部署位置：</strong>沉降于沙克尔顿环形山内部PSR最深、最平坦的区域</p>
+                
+                <h5>设计要点</h5>
+                <ul>
+                    <li><strong>多层辐射屏蔽：</strong>
+                        <ul>
+                            <li>外层：覆盖厚厚的月壤，极佳的天然辐射屏蔽材料</li>
+                            <li>中层：高强度合金外壳（钛合金或铝合金），保证结构强度和真空密封</li>
+                            <li>内层：富含氢的材料（如聚乙烯）或水冰夹层，有效吸收高能中子</li>
+                        </ul>
+                    </li>
+                    <li><strong>真空与密封：</strong>舱体达到超高真空标准，辅助稀释制冷机工作，必须防止月尘侵入</li>
+                    <li><strong>振动隔离：</strong>配备主动和被动式振动隔离平台，隔绝月震或机器人活动影响</li>
+                    <li><strong>内部布局：</strong>专为机器人维护设计，所有组件采用模块化、易插拔接口，内部轨道系统供维修机器人移动</li>
+                </ul>
+            </div>
+
+            <h3>详细工程参数设计</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>参数类别</th>
+                        <th>规格范围</th>
+                        <th>设计依据</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>核心舱尺寸</strong></td>
+                        <td>长度：8-15米<br>直径：4-6米</td>
+                        <td>需容纳量子计算系统、制冷设备、支持电子设备和维护机器人操作空间</td>
+                    </tr>
+                    <tr>
+                        <td><strong>质量预算</strong></td>
+                        <td>空舱：10-15吨<br>满载：20-25吨</td>
+                        <td>包含结构、辐射屏蔽、热控系统和所有内部设备</td>
+                    </tr>
+                    <tr>
+                        <td><strong>结构材料</strong></td>
+                        <td>主体：铝锂合金(Al-Li)<br>增强：碳纤维复合材料</td>
+                        <td>铝锂合金密度低、强度高、耐低温；碳纤维用于高应力区域</td>
+                    </tr>
+                    <tr>
+                        <td><strong>辐射防护层</strong></td>
+                        <td>Whipple防护层<br>3-5cm含硼聚乙烯<br>2-3cm铝/钽复合板</td>
+                        <td>多层防护体系：防微陨石、宇宙射线、太阳粒子事件</td>
+                    </tr>
+                    <tr>
+                        <td><strong>内部压力</strong></td>
+                        <td>10⁻⁹ - 10⁻¹⁰ Pa</td>
+                        <td>超高真空环境，减少量子退相干</td>
+                    </tr>
+                    <tr>
+                        <td><strong>温度控制</strong></td>
+                        <td>外壳：40-50K<br>核心区：<4K</td>
+                        <td>利用PSR环境预冷，多级制冷系统</td>
+                    </tr>
+                    <tr>
+                        <td><strong>电力需求</strong></td>
+                        <td>峰值：50-100kW<br>平均：30-50kW</td>
+                        <td>主要用于制冷系统、激光器、控制电子</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>建设时间表与里程碑</h3>
+            <div class="phase-card">
+                <h4>第一阶段：技术验证期 (2025-2030)</h4>
+                <ul>
+                    <li><strong>2025-2026：</strong>地面模拟环境建设，建立月球环境模拟舱</li>
+                    <li><strong>2026-2028：</strong>关键技术攻关
+                        <ul>
+                            <li>超低温制冷系统空间环境适应性改造</li>
+                            <li>离子阱芯片辐射加固设计与测试</li>
+                            <li>AI自主运维系统开发</li>
+                        </ul>
+                    </li>
+                    <li><strong>2028-2030：</strong>搭载验证
+                        <ul>
+                            <li>小型技术验证载荷搭载嫦娥后续任务</li>
+                            <li>测试地月激光通信链路</li>
+                            <li>验证月壤散热技术可行性</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>第二阶段：基础设施部署 (2030-2035)</h4>
+                <ul>
+                    <li><strong>2030-2031：</strong>沙克尔顿环形山详细勘察
+                        <ul>
+                            <li>高精度地形测绘（分辨率<1米）</li>
+                            <li>地质结构探测，确定最佳建设点</li>
+                            <li>月壤成分分析，评估ISRU潜力</li>
+                        </ul>
+                    </li>
+                    <li><strong>2032-2033：</strong>首批"砸"任务
+                        <ul>
+                            <li>投送建筑材料、太阳能板基材</li>
+                            <li>散热系统组件硬着陆</li>
+                            <li>月面3D打印设备投送</li>
+                        </ul>
+                    </li>
+                    <li><strong>2034-2035：</strong>能源与通信系统建设
+                        <ul>
+                            <li>永昼峰太阳能电站部署（10MW级）</li>
+                            <li>超导电缆铺设（永昼峰至PSR）</li>
+                            <li>激光通信终端安装调试</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>第三阶段：核心系统安装 (2035-2040)</h4>
+                <ul>
+                    <li><strong>2035-2036：</strong>核心舱精密投送
+                        <ul>
+                            <li>量子计算核心舱软着陆</li>
+                            <li>机器人系统部署与激活</li>
+                            <li>舱体就位与连接</li>
+                        </ul>
+                    </li>
+                    <li><strong>2037-2038：</strong>系统集成
+                        <ul>
+                            <li>制冷系统安装与测试</li>
+                            <li>量子处理器初始化</li>
+                            <li>地月数据链路全面测试</li>
+                        </ul>
+                    </li>
+                    <li><strong>2039-2040：</strong>试运行
+                        <ul>
+                            <li>量子随机数生成服务测试</li>
+                            <li>系统稳定性验证（>99.9%可用性）</li>
+                            <li>首批商业客户试用</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>第四阶段：商业运营 (2040-2045+)</h4>
+                <ul>
+                    <li><strong>2040-2042：</strong>规模化服务
+                        <ul>
+                            <li>物流优化计算服务全面上线</li>
+                            <li>金融建模服务启动</li>
+                            <li>客户数量达到100+</li>
+                        </ul>
+                    </li>
+                    <li><strong>2043-2045：</strong>平台化发展
+                        <ul>
+                            <li>开放量子云计算平台</li>
+                            <li>支持自定义量子算法</li>
+                            <li>年收入突破100亿人民币</li>
+                        </ul>
+                    </li>
+                    <li><strong>2045+：</strong>下一代升级
+                        <ul>
+                            <li>第二代量子处理器（1000+逻辑比特）</li>
+                            <li>扩建第二个计算舱</li>
+                            <li>成为地月经济核心基础设施</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>关键技术挑战与解决方案</h3>
+            <div class="advantage-card">
+                <h4>1. 电力供应挑战</h4>
+                <p><strong>问题：</strong>永久阴影区无法使用太阳能，需要从永昼峰长距离输电（约5-10公里）</p>
+                <p><strong>解决方案：</strong></p>
+                <ul>
+                    <li><strong>高温超导电缆：</strong>利用月球低温环境，使用YBCO或MgB₂超导材料，传输损耗<5%</li>
+                    <li><strong>冗余设计：</strong>双路供电，任一路故障不影响运行</li>
+                    <li><strong>储能系统：</strong>大容量锂硫电池组（能量密度>500Wh/kg），应对短期功率峰值</li>
+                    <li><strong>核电备份：</strong>小型核同位素电源（如RTG）作为应急电源</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>2. 月尘威胁</h4>
+                <p><strong>问题：</strong>月尘带静电、黏附性强、磨蚀性大，威胁光学系统和机械部件</p>
+                <p><strong>解决方案：</strong></p>
+                <ul>
+                    <li><strong>静电除尘系统：</strong>在关键表面施加交变电场，主动排斥月尘</li>
+                    <li><strong>表面涂层：</strong>使用疏尘涂层（如氟化物涂层），减少黏附</li>
+                    <li><strong>正压防护：</strong>关键区域维持微正压，防止月尘进入</li>
+                    <li><strong>定期维护：</strong>机器人配备专用清洁工具，定期清理</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>3. 辐射损伤</h4>
+                <p><strong>问题：</strong>高能粒子导致电子器件单粒子翻转（SEU）和总剂量损伤</p>
+                <p><strong>解决方案：</strong></p>
+                <ul>
+                    <li><strong>三模冗余（TMR）：</strong>关键系统采用三重冗余，投票机制纠错</li>
+                    <li><strong>辐射加固芯片：</strong>使用SOI工艺、加固版FPGA</li>
+                    <li><strong>软件纠错：</strong>ECC内存、定期校验和恢复</li>
+                    <li><strong>屏蔽优化：</strong>利用月壤覆盖，等效3米厚度可降低辐射99%</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>4. 热管理系统</h4>
+                <p><strong>问题：</strong>真空环境只能通过辐射散热，效率受限</p>
+                <p><strong>解决方案：</strong></p>
+                <ul>
+                    <li><strong>地壳热沉：</strong>钻孔10-20米深，利用月球地壳作为巨大散热体</li>
+                    <li><strong>热管网络：</strong>高效热管将热量从设备传导至散热器</li>
+                    <li><strong>相变材料：</strong>使用相变材料缓冲热负荷波动</li>
+                    <li><strong>智能调控：</strong>AI根据计算负载动态调整散热策略</li>
+                </ul>
+            </div>
+
+            <h3>月壤资源利用（ISRU）技术路线</h3>
+            <div class="module-card">
+                <h4>月壤在项目中的多重应用</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>应用领域</th>
+                            <th>技术方法</th>
+                            <th>预期效益</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>3D打印建材</strong></td>
+                            <td>激光烧结月壤制砖<br>微波烧结成型</td>
+                            <td>减少地球运输90%建材<br>就地制造防护墙、基础</td>
+                        </tr>
+                        <tr>
+                            <td><strong>辐射屏蔽</strong></td>
+                            <td>直接堆积月壤<br>烧结成高密度砖块</td>
+                            <td>3米厚度可阻挡99%辐射<br>成本几乎为零</td>
+                        </tr>
+                        <tr>
+                            <td><strong>氦-3提取</strong></td>
+                            <td>700°C加热释放<br>低温分离提纯</td>
+                            <td>每百万吨提取10-20kg He-3<br>满足稀释制冷需求</td>
+                        </tr>
+                        <tr>
+                            <td><strong>氧气生产</strong></td>
+                            <td>熔盐电解法<br>氢还原法</td>
+                            <td>为未来载人任务储备<br>可作应急推进剂</td>
+                        </tr>
+                        <tr>
+                            <td><strong>金属提取</strong></td>
+                            <td>碳热还原<br>熔盐电解</td>
+                            <td>铁、铝、钛用于结构件<br>减少备件运输需求</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>机器人建造与维护系统</h3>
+            <div class="module-card">
+                <h4>多机器人协同作业体系</h4>
+                <ul>
+                    <li><strong>建造机器人群：</strong>
+                        <ul>
+                            <li>推土机器人：场地平整、挖掘基坑</li>
+                            <li>3D打印机器人：使用月壤打印结构件</li>
+                            <li>吊装机器人：精密设备就位</li>
+                            <li>焊接机器人：金属结构连接</li>
+                        </ul>
+                    </li>
+                    <li><strong>维护机器人：</strong>
+                        <ul>
+                            <li>巡检机器人：24/7自主巡检</li>
+                            <li>维修机械臂：模块更换、故障修复</li>
+                            <li>清洁机器人：月尘清理、表面维护</li>
+                            <li>应急机器人：处理突发状况</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><strong>AI群体智能：</strong>基于强化学习的多机器人协同算法，自主规划任务、分配资源、处理异常</p>
+            </div>
+        </section>
+        
+        <section class="section" id="tech">
+            <h2>核心技术方案 - 离子阱量子计算机</h2>
+            
+            <h3>为什么选择离子阱技术？</h3>
+            <p>离子阱量子计算机是利用囚禁在电磁场中的带电原子（离子）作为量子比特的先进计算设备。它以其<strong>最高的保真度、最长的相干时间和全连接性</strong>而著称，被认为是实现容错量子计算的最有希望的物理平台之一。</p>
+            
+            <div class="tech-spec">
+                <h4>核心优势对比</h4>
+                <table style="width: 100%; margin: 15px 0;">
+                    <tr>
+                        <th>特性</th>
+                        <th>离子阱</th>
+                        <th>超导</th>
+                        <th>光量子</th>
+                    </tr>
+                    <tr>
+                        <td>相干时间</td>
+                        <td><strong>极长 (秒~分钟)</strong></td>
+                        <td>短 (微秒~毫秒)</td>
+                        <td>无限</td>
+                    </tr>
+                    <tr>
+                        <td>门保真度</td>
+                        <td><strong>最高 (>99.9%)</strong></td>
+                        <td>高 (>99%)</td>
+                        <td>中等</td>
+                    </tr>
+                    <tr>
+                        <td>连接性</td>
+                        <td><strong>全连接</strong></td>
+                        <td>近邻连接</td>
+                        <td>灵活</td>
+                    </tr>
+                </table>
+                <p>选择离子阱，是因为它在质量（保真度、相干时间、连接性）上占据绝对优势。虽然速度较慢，但对于构建需要极高精度的容错通用量子计算机而言，质量远比速度更为关键。</p>
+            </div>
+
+            <h3>离子阱量子计算原理</h3>
+            <div class="tech-spec">
+                <h4>量子比特的物理实现</h4>
+                <ul>
+                    <li><strong>选择离子：</strong>通常选择镱(¹⁷¹Yb⁺)、钙(⁴⁰Ca⁺)、钡(¹³⁸Ba⁺)等碱土金属离子</li>
+                    <li><strong>编码方式：</strong>
+                        <ul>
+                            <li>超精细能级比特：利用原子核自旋和电子总角动量相互作用，相干时间可达分钟级</li>
+                            <li>光频比特：利用基态和亚稳态激发能级，可用光学频率激光直接驱动</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h4>离子的囚禁与操控</h4>
+                <ul>
+                    <li><strong>保罗阱(Paul Trap)：</strong>利用交变射频电场和静态直流电场的组合，将离子稳定囚禁成一维线性"晶体"</li>
+                    <li><strong>单比特门：</strong>通过精确调谐的激光脉冲，实现任意单比特旋转操作（拉比振荡）</li>
+                    <li><strong>双比特门：</strong>利用离子链的集体振动模式（声子）作为"量子总线"，通过Mølmer-Sørensen门实现纠缠</li>
+                    <li><strong>读出：</strong>状态依赖的荧光探测，发光点对应|1⟩态，黑暗点对应|0⟩态</li>
+                </ul>
+            </div>
+
+            <h3>离子阱芯片设计</h3>
+            <div class="tech-spec">
+                <h4>微型化芯片阱(Chip Trap)</h4>
+                <p>为克服传统大型真空和光学系统的扩展瓶颈，现代离子阱转向微型化芯片设计。</p>
+                
+                <h5>设计要点</h5>
+                <ul>
+                    <li><strong>表面电极阱：</strong>将所有RF和DC电极制作在同一平坦基板上，离子悬浮在芯片表面上方几十到几百微米处</li>
+                    <li><strong>材料选择：</strong>
+                        <ul>
+                            <li>基底：蓝宝石或氮化铝，具备优秀的低射频损耗和高热导率</li>
+                            <li>电极：经过辐射加固的金或铝，抗月球环境辐射</li>
+                        </ul>
+                    </li>
+                    <li><strong>电极功能分区：</strong>
+                        <ul>
+                            <li>RF电极：施加高压(~100-300V)、高频(~20-80MHz)信号，产生径向囚禁势</li>
+                            <li>DC电极：提供静态囚禁势，精确控制离子位置</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>三级冷却系统方案</h3>
+            <div class="tech-spec">
+                <h4>利用月球环境的创新冷却设计</h4>
+                <p>充分利用月球PSR的天然低温，构建高效的三级冷却系统。</p>
+                
+                <ul>
+                    <li><strong>第一级 (被动+主动，300K → 4K)：</strong>
+                        <ul>
+                            <li>利用PSR的40K环境作为免费"预冷"</li>
+                            <li>舱体外壳热量通过热管直接传导至月壤</li>
+                            <li>内部使用脉冲管制冷机或G-M制冷机</li>
+                            <li>无液氦消耗，可靠性高，能效提升数个数量级</li>
+                        </ul>
+                    </li>
+                    <li><strong>第二级 (高级制冷，4K → mK)：</strong>
+                        <ul>
+                            <li>使用闭环稀释制冷机</li>
+                            <li>He-4从地球运输，He-3由ISRU模块就地补给</li>
+                            <li>形成可持续的冷却循环</li>
+                        </ul>
+                    </li>
+                    <li><strong>第三级 (散热设计)：</strong>
+                        <ul>
+                            <li>向月球地壳传导散热，利用30-40K的月壤和基岩作为天然散热体</li>
+                            <li>通过钻孔部署的地热交换循环系统</li>
+                            <li>可处理几千瓦到十几千瓦的废热</li>
+                            <li>比传统辐射散热板更紧凑、坚固、可靠</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>适合离子阱的量子算法</h3>
+            <div class="tech-spec">
+                <h4>1. 变分量子本征求解器（VQE）</h4>
+                <ul>
+                    <li><strong>核心优势：</strong>充分利用离子阱的全连接特性，无需SWAP门开销</li>
+                    <li><strong>硬件高效拟设：</strong>交替单比特旋转Ry(θ)和Mølmer-Sørensen纠缠门</li>
+                    <li><strong>应用场景：</strong>
+                        <ul>
+                            <li>量子化学：LiH、H₂O、BeH₂等分子基态能量计算</li>
+                            <li>材料科学：高温超导材料的电子结构模拟</li>
+                            <li>药物设计：蛋白质折叠能量景观优化</li>
+                        </ul>
+                    </li>
+                    <li><strong>月球优势：</strong>超长相干时间允许更深的变分电路，提高精度</li>
+                </ul>
+            </div>
+
+            <div class="tech-spec">
+                <h4>2. 量子近似优化算法（QAOA）</h4>
+                <ul>
+                    <li><strong>算法结构：</strong>
+                        <ul>
+                            <li>成本哈密顿量：exp(-iγ Z_i Z_j) 直接由MS门合成</li>
+                            <li>混合哈密顿量：并行Rx(2β)门作用于所有量子比特</li>
+                        </ul>
+                    </li>
+                    <li><strong>优化问题：</strong>
+                        <ul>
+                            <li>最大割问题（Max-Cut）</li>
+                            <li>旅行商问题（TSP）</li>
+                            <li>投资组合优化</li>
+                            <li>供应链路径规划</li>
+                        </ul>
+                    </li>
+                    <li><strong>性能优势：</strong>无需额外SWAP门，电路深度降低50%以上</li>
+                </ul>
+            </div>
+
+            <div class="tech-spec">
+                <h4>3. 量子模拟算法</h4>
+                <ul>
+                    <li><strong>天然优势：</strong>离子链本身就是一个多体量子系统</li>
+                    <li><strong>可模拟系统：</strong>
+                        <ul>
+                            <li>长程相互作用系统（1/r^α）</li>
+                            <li>自旋玻璃和量子磁性</li>
+                            <li>强关联电子系统</li>
+                            <li>非平衡量子动力学</li>
+                        </ul>
+                    </li>
+                    <li><strong>实验验证：</strong>已成功模拟50+自旋的量子伊辛模型</li>
+                </ul>
+            </div>
+
+            <div class="tech-spec">
+                <h4>4. 量子傅里叶变换（QFT）</h4>
+                <ul>
+                    <li><strong>实现优势：</strong>全连接性使得QFT电路深度仅为O(n)而非O(n²)</li>
+                    <li><strong>应用：</strong>Shor算法、相位估计、量子信号处理</li>
+                    <li><strong>月球环境加成：</strong>稳定环境确保高精度相位操作</li>
+                </ul>
+            </div>
+
+            <h3>性能基准对比</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>性能指标</th>
+                        <th>离子阱</th>
+                        <th>超导</th>
+                        <th>中性原子</th>
+                        <th>光量子</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>单比特门保真度</strong></td>
+                        <td><span class="highlight">>99.99%</span></td>
+                        <td>99.9%</td>
+                        <td>99.5%</td>
+                        <td>99%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>双比特门保真度</strong></td>
+                        <td><span class="highlight">99.9%</span></td>
+                        <td>99.0-99.5%</td>
+                        <td>97-98%</td>
+                        <td>90-95%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>相干时间T₂</strong></td>
+                        <td><span class="highlight">1-100秒</span></td>
+                        <td>100-300微秒</td>
+                        <td>1-10秒</td>
+                        <td>无限(光子)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>门操作速度</strong></td>
+                        <td>10-100微秒</td>
+                        <td><span class="highlight">10-100纳秒</span></td>
+                        <td>0.1-1微秒</td>
+                        <td>纳秒级</td>
+                    </tr>
+                    <tr>
+                        <td><strong>连接性</strong></td>
+                        <td><span class="highlight">全连接</span></td>
+                        <td>近邻</td>
+                        <td>可重构</td>
+                        <td>灵活</td>
+                    </tr>
+                    <tr>
+                        <td><strong>量子体积记录</strong></td>
+                        <td><span class="highlight">65,536</span></td>
+                        <td>1,024</td>
+                        <td>256</td>
+                        <td>N/A</td>
+                    </tr>
+                    <tr>
+                        <td><strong>工作温度</strong></td>
+                        <td>室温(离子μK)</td>
+                        <td>10-20mK</td>
+                        <td>μK-nK</td>
+                        <td>室温</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>量子纠错实现方案</h3>
+            <div class="module-card">
+                <h4>表面码（Surface Code）</h4>
+                <ul>
+                    <li><strong>编码参数：</strong>距离d的表面码需要d²个数据比特 + (d²-1)个辅助比特</li>
+                    <li><strong>错误阈值：</strong>约0.5-1%的物理错误率</li>
+                    <li><strong>资源开销：</strong>
+                        <ul>
+                            <li>d=3：13个物理比特编码1个逻辑比特</li>
+                            <li>d=5：41个物理比特编码1个逻辑比特</li>
+                            <li>d=7：85个物理比特编码1个逻辑比特</li>
+                        </ul>
+                    </li>
+                    <li><strong>月球优势：</strong>稳定环境减少校准频率，提高纠错效率</li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>颜色码（Color Code）</h4>
+                <ul>
+                    <li><strong>独特优势：</strong>支持横向Clifford门（H、S、CNOT）</li>
+                    <li><strong>离子阱适配：</strong>可利用全局激光脉冲实现并行操作</li>
+                    <li><strong>效率提升：</strong>相比表面码，逻辑门实现更高效</li>
+                    <li><strong>实验进展：</strong>已在7量子比特系统演示基本操作</li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>玻色码（Bosonic Code）</h4>
+                <ul>
+                    <li><strong>编码方式：</strong>利用离子的振动模式（声子）编码量子信息</li>
+                    <li><strong>类型：</strong>猫态码、二项式码、GKP码</li>
+                    <li><strong>硬件效率：</strong>单个物理离子可编码多个逻辑比特</li>
+                    <li><strong>挑战：</strong>需要复杂的非线性控制</li>
+                </ul>
+            </div>
+
+            <h3>技术发展路线图</h3>
+            <div class="phase-card">
+                <h4>当前阶段（2024-2025）</h4>
+                <ul>
+                    <li><strong>量子比特规模：</strong>20-50个全连接物理比特</li>
+                    <li><strong>门保真度：</strong>双比特门99.5-99.9%</li>
+                    <li><strong>商业系统：</strong>
+                        <ul>
+                            <li>Quantinuum H2/H3系列</li>
+                            <li>IonQ Forte</li>
+                            <li>Alpine Quantum Technologies</li>
+                        </ul>
+                    </li>
+                    <li><strong>应用：</strong>NISQ算法验证、小分子模拟</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>近期目标（2025-2027）</h4>
+                <ul>
+                    <li><strong>扩展规模：</strong>50-100个物理比特</li>
+                    <li><strong>提升保真度：</strong>双比特门稳定>99.9%</li>
+                    <li><strong>架构创新：</strong>
+                        <ul>
+                            <li>量子电荷耦合器件（QCCD）架构</li>
+                            <li>光子互联多阱系统</li>
+                            <li>中电路测量与重置</li>
+                        </ul>
+                    </li>
+                    <li><strong>早期纠错：</strong>演示单逻辑比特纠错</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>中期发展（2027-2030）</h4>
+                <ul>
+                    <li><strong>规模突破：</strong>100-1000个物理比特</li>
+                    <li><strong>逻辑比特：</strong>10-50个纠错逻辑比特</li>
+                    <li><strong>应用拓展：</strong>
+                        <ul>
+                            <li>大分子药物设计</li>
+                            <li>新材料发现</li>
+                            <li>金融衍生品定价</li>
+                        </ul>
+                    </li>
+                    <li><strong>月球部署：</strong>第一代系统运抵月球</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>长期愿景（2030+）</h4>
+                <ul>
+                    <li><strong>容错计算：</strong>1000+逻辑比特</li>
+                    <li><strong>量子优势：</strong>在多个领域展现决定性优势</li>
+                    <li><strong>网络化：</strong>多个月球节点量子互联</li>
+                    <li><strong>新算法：</strong>专为月球环境优化的量子算法</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section class="section" id="automation">
+            <h2>自动化与远程运维</h2>
+            <p><strong>核心理念：绝对自治，远程监督，分层干预</strong></p>
+            <p>由于地月之间2.6秒的往返延迟和带宽限制，整个系统必须以"自治优先"为核心。地球控制中心主要作为"监督者"和"决策者"，而非"操作员"。</p>
+
+            <h3>三位一体的无人值守系统架构</h3>
+            <div class="module-card">
+                <ol>
+                    <li><strong>月球数据中心本体(LDC)：</strong>包括量子计算机、低温系统、能源系统、机器人维护系统和本地AI控制核心</li>
+                    <li><strong>地球控制与研究中心(ECRC)：</strong>负责接收遥测数据、长期趋势分析、下达高级指令、处理异常</li>
+                    <li><strong>地月通信链路：</strong>高带宽激光通信与射频通信相结合的冗余链路</li>
+                </ol>
+                <p>LDC的本地AI控制核心拥有最高级别自主权，负责99.9%以上的日常运维、故障诊断和自我修复。</p>
+            </div>
+
+            <h3>日常维护的自动化技术</h3>
+            
+            <div class="module-card">
+                <h4>全域环境感知与智能控制</h4>
+                <ul>
+                    <li><strong>传感器网络：</strong>数以万计的传感器实时监测温度、压力、辐射剂量、微振动、真空度、月尘浓度等</li>
+                    <li><strong>AI环境控制器：</strong>
+                        <ul>
+                            <li>调整散热器朝向和效率，应对月昼(~120°C)和月夜(~-170°C)的极端温差</li>
+                            <li>预测太阳耀斑时激活主动式电磁屏蔽</li>
+                            <li>通过静电除尘、超声波振动定期清理月尘</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>数字孪生与预测性维护</h4>
+                <ul>
+                    <li><strong>高保真模型：</strong>运行与物理数据中心完全同步的数字孪生模型</li>
+                    <li><strong>状态注入：</strong>所有遥测数据实时注入模型（如低温泵振动频率、量子比特退相干时间）</li>
+                    <li><strong>预测性维护：</strong>AI可在设备失效数周前预测故障，自动生成维护任务</li>
+                </ul>
+            </div>
+
+            <h3>硬件故障诊断与恢复</h3>
+            <p>遵循"检测-诊断-隔离-恢复"(Detect-Diagnose-Isolate-Recover)原则</p>
+            
+            <div class="module-card">
+                <h4>故障处理流程</h4>
+                <ol>
+                    <li><strong>故障检测：</strong>AI通过监督学习和无监督学习模型，检测任何偏离正常基线的行为</li>
+                    <li><strong>根本原因分析(RCA)：</strong>利用数字孪生进行"what-if"模拟，定位故障源</li>
+                    <li><strong>自动隔离：</strong>立即断开故障模块供电或从计算资源池移除</li>
+                    <li><strong>恢复策略：</strong>
+                        <ul>
+                            <li>热切换：激活备用组件，对上层任务透明</li>
+                            <li>机器人干预：物理更换故障部件</li>
+                            <li>优雅降级：调整至性能较低但可用的"降级模式"</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>自动校准系统</h3>
+            <div class="module-card">
+                <h4>闭环校准流程</h4>
+                <ol>
+                    <li><strong>触发机制：</strong>定时触发或性能驱动触发（如相干时间下降超过阈值）</li>
+                    <li><strong>自动化序列：</strong>运行预设量子电路（Ramsey实验、SPAM保真度测试等）</li>
+                    <li><strong>AI优化：</strong>使用贝叶斯优化自动调整控制脉冲参数</li>
+                    <li><strong>验证与应用：</strong>确认性能提升后应用新参数，全程无需人工干预</li>
+                </ol>
+            </div>
+
+            <h3>冗余设计原则</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>N+M冗余：</strong>关键子系统需要N个单元工作，实际配备N+M个</li>
+                    <li><strong>双活/多活冗余：</strong>
+                        <ul>
+                            <li>多个独立QPU并行处理，故障时无缝接管</li>
+                            <li>AI控制核心双活或三活冗余，实时同步状态</li>
+                        </ul>
+                    </li>
+                    <li><strong>资源池化：</strong>所有计算、存储、网络资源虚拟化，故障时自动迁移</li>
+                </ul>
+            </div>
+
+            <h3>机器人维护系统设计</h3>
+            <div class="module-card">
+                <h4>系统构成</h4>
+                <ul>
+                    <li><strong>移动平台：</strong>轨道+爬壁结合，主通道精密导轨，垂直面磁力或吸盘爬壁</li>
+                    <li><strong>机械臂：</strong>至少两台7自由度以上机械臂，可协同作业</li>
+                    <li><strong>末端执行器工具库：</strong>
+                        <ul>
+                            <li>精密夹爪：插拔线缆、更换模块</li>
+                            <li>力矩扳手：带力反馈的螺丝操作</li>
+                            <li>光纤熔接头：修复连接光纤</li>
+                            <li>诊断探针：电学测量</li>
+                            <li>清洁工具：清除月尘</li>
+                        </ul>
+                    </li>
+                    <li><strong>感知系统：</strong>全局高清摄像头+机器人本体3D相机、激光雷达</li>
+                </ul>
+                
+                <h4>设计核心：机器人友好的可更换单元(RRU)</h4>
+                <ul>
+                    <li><strong>统一接口：</strong>标准化的机械和电气接口</li>
+                    <li><strong>热插拔设计：</strong>支持系统运行时插拔</li>
+                    <li><strong>视觉识别码：</strong>唯一二维码或AR标记</li>
+                    <li><strong>无缆化设计：</strong>背板和盲插连接器</li>
+                </ul>
+            </div>
+
+            <h3>典型故障场景与自动响应</h3>
+            <div class="module-card">
+                <h4>1. 量子退相干故障</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>故障表现</th>
+                            <th>检测方法</th>
+                            <th>自动响应</th>
+                            <th>响应时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>相干时间下降>20%</td>
+                            <td>Ramsey实验自动测试</td>
+                            <td>调整激光功率和频率<br>重新校准磁场补偿</td>
+                            <td><1.1微秒</td>
+                        </tr>
+                        <tr>
+                            <td>门保真度<99.5%</td>
+                            <td>过程层析成像</td>
+                            <td>激活量子纠错协议<br>切换到备用量子处理器</td>
+                            <td><10毫秒</td>
+                        </tr>
+                        <tr>
+                            <td>环境噪声增加</td>
+                            <td>实时光谱分析</td>
+                            <td>调整主动噪声抑制<br>增强磁屏蔽</td>
+                            <td><1秒</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="module-card">
+                <h4>2. 制冷系统故障</h4>
+                <ul>
+                    <li><strong>脉冲管效率下降：</strong>
+                        <ul>
+                            <li>检测：连续监测冷却功率vs温度曲线</li>
+                            <li>响应：自动切换到备用制冷机（N+1冗余）</li>
+                            <li>维护：机器人更换故障单元，系统不中断</li>
+                        </ul>
+                    </li>
+                    <li><strong>稀释制冷机He-3泄漏：</strong>
+                        <ul>
+                            <li>检测：压力传感器和质谱仪</li>
+                            <li>响应：隔离泄漏回路，激活备用循环</li>
+                            <li>补充：从ISRU储备自动补充He-3</li>
+                        </ul>
+                    </li>
+                    <li><strong>温度波动超标：</strong>
+                        <ul>
+                            <li>检测：分布式温度传感器网络</li>
+                            <li>响应：PID控制器自动调节，AI预测性补偿</li>
+                            <li>缓冲：相变材料吸收瞬态热负荷</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>3. 激光系统故障</h4>
+                <ul>
+                    <li><strong>波长漂移：</strong>自动波长计监测，压电调谐腔长</li>
+                    <li><strong>功率衰减：</strong>反馈控制调整泵浦电流，超限时切换备用激光器</li>
+                    <li><strong>光束指向偏移：</strong>四象限探测器+压电镜架实时校正</li>
+                    <li><strong>模式质量退化：</strong>空间光调制器自适应整形</li>
+                </ul>
+            </div>
+
+            <h3>AI驱动的决策树系统</h3>
+            <div class="tech-spec">
+                <h4>分层决策架构</h4>
+                <pre>
+┌─────────────────────────┐
+│   顶层：任务规划器     │ ← 接收地球高级指令
+├─────────────────────────┤
+│  中层：系统协调器      │ ← 协调各子系统
+├─────────────────────────┤
+│  底层：反射控制器      │ ← 毫秒级快速响应
+└─────────────────────────┘
+                </pre>
+                
+                <h4>决策树示例：量子计算任务异常</h4>
+                <pre>
+异常检测
+├─ 保真度下降?
+│   ├─ 是 → 环境因素?
+│   │   ├─ 是 → 调整环境控制
+│   │   └─ 否 → 硬件故障?
+│   │       ├─ 是 → 切换备用硬件
+│   │       └─ 否 → 重新校准
+│   └─ 否 → 继续监测
+└─ 计算超时?
+    ├─ 是 → 资源不足?
+    │   ├─ 是 → 任务重调度
+    │   └─ 否 → 算法优化
+    └─ 否 → 正常运行
+                </pre>
+            </div>
+
+            <h3>维护周期与预防性维护</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>组件类别</th>
+                        <th>检查周期</th>
+                        <th>预防性维护</th>
+                        <th>使用寿命</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>离子阱芯片</strong></td>
+                        <td>每日自检</td>
+                        <td>每月深度诊断</td>
+                        <td>5-10年</td>
+                    </tr>
+                    <tr>
+                        <td><strong>激光系统</strong></td>
+                        <td>连续监测</td>
+                        <td>每周自动校准</td>
+                        <td>3-5年</td>
+                    </tr>
+                    <tr>
+                        <td><strong>制冷系统</strong></td>
+                        <td>实时监测</td>
+                        <td>每年冷头维护</td>
+                        <td>1-3年连续运行</td>
+                    </tr>
+                    <tr>
+                        <td><strong>控制电子</strong></td>
+                        <td>健康遥测</td>
+                        <td>基于MTBF更换</td>
+                        <td>5-7年</td>
+                    </tr>
+                    <tr>
+                        <td><strong>真空系统</strong></td>
+                        <td>压力监测</td>
+                        <td>离子泵再生</td>
+                        <td>10+年</td>
+                    </tr>
+                    <tr>
+                        <td><strong>机器人系统</strong></td>
+                        <td>每次使用后</td>
+                        <td>关节润滑、校准</td>
+                        <td>7-10年</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>远程诊断与遥测系统</h3>
+            <div class="module-card">
+                <h4>遥测数据架构</h4>
+                <ul>
+                    <li><strong>第一级 - 关键参数（实时）：</strong>
+                        <ul>
+                            <li>量子比特状态和保真度</li>
+                            <li>系统温度和压力</li>
+                            <li>功率消耗和状态</li>
+                            <li>带宽需求：~10 Mbps</li>
+                        </ul>
+                    </li>
+                    <li><strong>第二级 - 性能指标（每小时）：</strong>
+                        <ul>
+                            <li>详细错误率统计</li>
+                            <li>资源利用率</li>
+                            <li>任务完成状态</li>
+                            <li>带宽需求：~100 Mbps</li>
+                        </ul>
+                    </li>
+                    <li><strong>第三级 - 诊断数据（按需）：</strong>
+                        <ul>
+                            <li>完整系统日志</li>
+                            <li>高分辨率传感器数据</li>
+                            <li>故障分析报告</li>
+                            <li>带宽需求：~1 Gbps</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>机器学习增强的故障诊断</h4>
+                <ul>
+                    <li><strong>异常检测算法：</strong>
+                        <ul>
+                            <li>K-means聚类识别异常模式</li>
+                            <li>t-SNE降维可视化系统状态</li>
+                            <li>LSTM预测时序异常</li>
+                        </ul>
+                    </li>
+                    <li><strong>根因分析：</strong>
+                        <ul>
+                            <li>决策树自动生成故障树</li>
+                            <li>贝叶斯网络推断故障概率</li>
+                            <li>强化学习优化修复策略</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>自修复系统示例</h3>
+            <div class="advantage-card">
+                <h4>案例1：量子处理器性能退化</h4>
+                <ul>
+                    <li><strong>检测：</strong>基准测试显示门保真度从99.9%降至99.7%</li>
+                    <li><strong>诊断：</strong>AI分析确定为激光功率漂移和离子加热</li>
+                    <li><strong>自动响应：</strong>
+                        <ol>
+                            <li>激活备用QPU，任务无缝迁移</li>
+                            <li>问题QPU进入维护模式</li>
+                            <li>自动运行校准序列</li>
+                            <li>优化激光参数和陷阱电压</li>
+                            <li>验证性能恢复后重新上线</li>
+                        </ol>
+                    </li>
+                    <li><strong>结果：</strong>15分钟内完成修复，零任务中断</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>案例2：太阳耀斑事件响应</h4>
+                <ul>
+                    <li><strong>预警：</strong>接收来自地球的太阳活动预警（提前8分钟）</li>
+                    <li><strong>准备：</strong>
+                        <ol>
+                            <li>保存当前量子态快照</li>
+                            <li>将关键任务迁移到屏蔽更好的备用舱</li>
+                            <li>提高辐射监测频率</li>
+                        </ol>
+                    </li>
+                    <li><strong>应对：</strong>
+                        <ol>
+                            <li>激活额外的电磁屏蔽</li>
+                            <li>降低非关键系统功率</li>
+                            <li>增强纠错码强度</li>
+                        </ol>
+                    </li>
+                    <li><strong>恢复：</strong>事件过后自动评估损伤，修复受影响组件</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section class="section" id="communication">
+            <h2>地月通信系统</h2>
+            <p><strong>混合式地月通信链路：超大带宽与绝对可靠的双重保障</strong></p>
+            <p>月球量子计算数据中心需要双重通信需求：一方面是超大带宽用于传输计算结果，另一方面是绝对可靠用于传输指令和遥测。</p>
+
+            <h3>系统总体架构</h3>
+            <div class="module-card">
+                <ol>
+                    <li><strong>主干道 - 激光通信(FSO)：</strong>作为数据传输的"超级高速公路"，目标实现Tbps级别传输速率</li>
+                    <li><strong>保障通道 - Ka波段射频通信：</strong>全天候高可靠性的"保障生命线"，作为激光链路的备份</li>
+                </ol>
+            </div>
+
+            <h3>激光通信技术细节</h3>
+            <div class="tech-spec">
+                <h4>核心参数</h4>
+                <ul>
+                    <li><strong>波长选择：</strong><span class="highlight">1550纳米(1.55μm)</span>
+                        <ul>
+                            <li>人眼安全</li>
+                            <li>大气窗口衰减小</li>
+                            <li>技术成熟，可借鉴地面光纤通信</li>
+                        </ul>
+                    </li>
+                    <li><strong>调制方式：</strong>
+                        <ul>
+                            <li>双偏振正交相移键控(DP-QPSK)：每符号4比特</li>
+                            <li>更高阶QAM(16/64-QAM)：更高频谱效率</li>
+                        </ul>
+                    </li>
+                    <li><strong>终端配置：</strong>
+                        <ul>
+                            <li>月球端：20-50厘米口径光学望远镜</li>
+                            <li>地球端：1米以上大型地面光学天线</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h4>PAT技术(指向、捕获和跟踪)</h4>
+                <ul>
+                    <li><strong>指向精度：</strong>微弧度级别，相当于从北京向上海打光束命中硬币</li>
+                    <li><strong>捕获过程：</strong>信标光引导，双方互相扫描建立连接</li>
+                    <li><strong>跟踪维持：</strong>快速反射镜(FSM)实时补偿，纳弧度精度闭环控制</li>
+                </ul>
+                
+                <h4>自适应光学系统</h4>
+                <p>地面站必备技术，实时补偿大气湍流造成的波前畸变</p>
+            </div>
+
+            <h3>Ka波段射频通信技术</h3>
+            <div class="tech-spec">
+                <h4>技术优势</h4>
+                <ul>
+                    <li><strong>频率范围：</strong>27-40 GHz，可分配带宽达500MHz或更高</li>
+                    <li><strong>天线系统：</strong>
+                        <ul>
+                            <li>月球端：相控阵天线，无机械部件，可靠性高</li>
+                            <li>地球端：34-70米巨型抛物面天线(深空网络DSN)</li>
+                        </ul>
+                    </li>
+                    <li><strong>自适应调制编码(AMC)：</strong>根据信道条件自动调整，晴天高速率，恶劣天气保连接</li>
+                    <li><strong>信道编码：</strong>LDPC码或Turbo码，接近香农极限</li>
+                </ul>
+            </div>
+
+            <h3>带宽计算与性能</h3>
+            <div class="module-card">
+                <h4>激光通信带宽</h4>
+                <ul>
+                    <li><strong>单通道：</strong>20 Gbaud × 4 bits/symbol = 80 Gbps</li>
+                    <li><strong>波分复用(16通道)：</strong>80 Gbps × 16 = <span class="highlight">1.28 Tbps</span></li>
+                    <li><strong>净数据速率：</strong>考虑FEC开销后约<span class="highlight">1.0 Tbps</span></li>
+                </ul>
+                
+                <h4>Ka波段带宽</h4>
+                <ul>
+                    <li><strong>频谱带宽：</strong>500 MHz</li>
+                    <li><strong>频谱效率：</strong>3.0 bits/s/Hz (16-QAM)</li>
+                    <li><strong>净数据速率：</strong>约<span class="highlight">1.2 Gbps</span></li>
+                </ul>
+                <p>激光通信带宽是Ka波段的数百倍！</p>
+            </div>
+
+            <h3>延迟处理与协议设计</h3>
+            <div class="module-card">
+                <h4>延迟参数</h4>
+                <ul>
+                    <li><strong>地月距离：</strong>384,400公里</li>
+                    <li><strong>单向延迟：</strong><span class="highlight">1.28秒</span></li>
+                    <li><strong>往返延迟(RTT)：</strong><span class="highlight">2.56秒</span></li>
+                </ul>
+                
+                <h4>延迟容忍网络(DTN)</h4>
+                <ul>
+                    <li><strong>Bundle Protocol(BP)：</strong>存储-转发机制，数据打包成大"束"</li>
+                    <li><strong>Licklider传输协议(LTP)：</strong>专为空间通信设计，比TCP更适应长延迟</li>
+                    <li><strong>不依赖持续连接：</strong>允许链路中断时数据"幸存"</li>
+                </ul>
+            </div>
+
+            <h3>高可靠性保障措施</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>系统级冗余：</strong>激光(主) + Ka波段(备)异构链路备份</li>
+                    <li><strong>地域级冗余：</strong>全球至少3个地面站(西班牙、美国、澳大利亚)，24/7连续通信</li>
+                    <li><strong>硬件级冗余：</strong>月球端和地球端均配备冗余收发设备</li>
+                    <li><strong>链路级鲁棒性：</strong>
+                        <ul>
+                            <li>自适应光学提升激光通信性能</li>
+                            <li>AMC动态调整传输参数</li>
+                            <li>强大的FEC确保极低信噪比下正确解码</li>
+                        </ul>
+                    </li>
+                    <li><strong>协议级弹性：</strong>DTN确保即使长时间中断，数据仍能最终送达</li>
+                </ul>
+            </div>
+
+            <h3>深空通信协议栈详解</h3>
+            <div class="tech-spec">
+                <h4>DTN协议栈架构</h4>
+                <pre>
+┌─────────────────────────────────┐
+│        应用层协议               │
+│  (量子计算API、遥测、控制)     │
+├─────────────────────────────────┤
+│    Bundle Protocol (BP)         │
+│  · Bundle生命周期: 30天        │
+│  · 最大Bundle大小: 50MB        │
+│  · 保管转发机制               │
+├─────────────────────────────────┤
+│ Licklider Transmission Protocol │
+│  · 红/绿数据分区              │
+│  · 检查点/重传机制            │
+│  · 会话挂起/恢复              │
+├─────────────────────────────────┤
+│  Convergence Layer Adapters     │
+│  · TCP-CLA (地面测试)          │
+│  · UDP-CLA (低延迟需求)        │
+│  · LTP-over-UDP (深空链路)     │
+└─────────────────────────────────┘
+                </pre>
+                
+                <h4>关键参数配置</h4>
+                <ul>
+                    <li><strong>Bundle TTL：</strong>30天（考虑月球背面通信中断）</li>
+                    <li><strong>LTP段大小：</strong>1400字节（避免IP分片）</li>
+                    <li><strong>检查点间隔：</strong>100个数据段</li>
+                    <li><strong>重传计时器：</strong>RTT × 1.5 = 3.9秒</li>
+                    <li><strong>最大重传次数：</strong>8次</li>
+                </ul>
+            </div>
+
+            <h3>链路预算详细计算</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>参数</th>
+                        <th>激光链路</th>
+                        <th>Ka波段链路</th>
+                        <th>单位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" style="background-color: #e8f4fd; font-weight: bold;">发射端参数</td>
+                    </tr>
+                    <tr>
+                        <td>发射功率</td>
+                        <td>5</td>
+                        <td>100</td>
+                        <td>W</td>
+                    </tr>
+                    <tr>
+                        <td>发射功率(dBm)</td>
+                        <td>37</td>
+                        <td>50</td>
+                        <td>dBm</td>
+                    </tr>
+                    <tr>
+                        <td>发射天线增益</td>
+                        <td>105</td>
+                        <td>48</td>
+                        <td>dBi</td>
+                    </tr>
+                    <tr>
+                        <td>发射损耗</td>
+                        <td>-2</td>
+                        <td>-1</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="background-color: #e8f4fd; font-weight: bold;">传播损耗</td>
+                    </tr>
+                    <tr>
+                        <td>自由空间损耗</td>
+                        <td>-289.7</td>
+                        <td>-222.6</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td>大气损耗</td>
+                        <td>-0.5</td>
+                        <td>-0.8</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td>指向损耗</td>
+                        <td>-1</td>
+                        <td>-0.5</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="background-color: #e8f4fd; font-weight: bold;">接收端参数</td>
+                    </tr>
+                    <tr>
+                        <td>接收天线增益</td>
+                        <td>115</td>
+                        <td>61</td>
+                        <td>dBi</td>
+                    </tr>
+                    <tr>
+                        <td>接收损耗</td>
+                        <td>-2</td>
+                        <td>-1</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td>接收功率</td>
+                        <td>-37.2</td>
+                        <td>-64.4</td>
+                        <td>dBm</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="background-color: #e8f4fd; font-weight: bold;">系统性能</td>
+                    </tr>
+                    <tr>
+                        <td>系统噪声温度</td>
+                        <td>300</td>
+                        <td>150</td>
+                        <td>K</td>
+                    </tr>
+                    <tr>
+                        <td>所需Eb/N0</td>
+                        <td>6</td>
+                        <td>4.5</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td>链路余量</td>
+                        <td>3</td>
+                        <td>3</td>
+                        <td>dB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>可达数据率</strong></td>
+                        <td><strong>1.2</strong></td>
+                        <td><strong>0.5</strong></td>
+                        <td><strong>Gbps</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>数据压缩与优先级管理</h3>
+            <div class="module-card">
+                <h4>量子计算结果压缩管道</h4>
+                <pre>
+原始量子态数据 (2^n × 2^n 密度矩阵)
+    ↓ 稀疏化 (仅保留>ε的元素)
+稀疏矩阵 (CSR格式)
+    ↓ 量化 (16位定点数)
+量化数据
+    ↓ 熵编码 (算术编码)
+压缩数据流
+    ↓ 分块 (50MB Bundles)
+DTN传输单元
+                </pre>
+                
+                <h4>综合压缩效果</h4>
+                <ul>
+                    <li><strong>稀疏化：</strong>100:1 (对于0.1%非零元素)</li>
+                    <li><strong>量化：</strong>4:1 (64位→16位)</li>
+                    <li><strong>熵编码：</strong>2:1</li>
+                    <li><strong>总压缩比：</strong>~800:1</li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>数据优先级队列</h4>
+                <table>
+                    <tr>
+                        <th>优先级</th>
+                        <th>数据类型</th>
+                        <th>最大延迟</th>
+                        <th>带宽分配</th>
+                    </tr>
+                    <tr>
+                        <td>P0-紧急</td>
+                        <td>系统故障、安全警报</td>
+                        <td>立即</td>
+                        <td>100%抢占</td>
+                    </tr>
+                    <tr>
+                        <td>P1-高</td>
+                        <td>控制指令、状态更新</td>
+                        <td>5分钟</td>
+                        <td>30%保证</td>
+                    </tr>
+                    <tr>
+                        <td>P2-中</td>
+                        <td>计算结果、科学数据</td>
+                        <td>1小时</td>
+                        <td>50%</td>
+                    </tr>
+                    <tr>
+                        <td>P3-低</td>
+                        <td>日志、诊断数据</td>
+                        <td>24小时</td>
+                        <td>20%</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>应急通信方案</h3>
+            <div class="advantage-card">
+                <h4>场景1：地球端恶劣天气</h4>
+                <ul>
+                    <li><strong>触发条件：</strong>云层遮挡导致激光链路中断</li>
+                    <li><strong>应对措施：</strong>
+                        <ol>
+                            <li>自动切换至Ka波段备份链路</li>
+                            <li>降低数据传输速率，优先传输P0/P1级数据</li>
+                            <li>启动地理分集，切换至晴朗地区的备用站</li>
+                        </ol>
+                    </li>
+                    <li><strong>恢复时间：</strong><5分钟</li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>场景2：太阳日凌中断</h4>
+                <ul>
+                    <li><strong>现象：</strong>太阳-地球-月球三点一线，强烈太阳噪声淹没信号</li>
+                    <li><strong>持续时间：</strong>每年2次，每次约4-6天</li>
+                    <li><strong>应对策略：</strong>
+                        <ol>
+                            <li>提前预测并缓存关键任务数据</li>
+                            <li>月球本地AI全权接管运维</li>
+                            <li>仅通过S波段应急信标传输最简健康状态</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="advantage-card">
+                <h4>场景3：月球背面通信中断</h4>
+                <ul>
+                    <li><strong>原因：</strong>月球自转导致数据中心进入背面</li>
+                    <li><strong>解决方案：</strong>
+                        <ol>
+                            <li>部署月球轨道中继卫星(如鹊桥系列)</li>
+                            <li>利用DTN协议的存储转发能力</li>
+                            <li>预缓存14天的自主运行指令</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>量子通信未来扩展</h3>
+            <div class="phase-card">
+                <h4>量子密钥分发(QKD)增强</h4>
+                <ul>
+                    <li><strong>技术路线：</strong>基于单光子的BB84协议</li>
+                    <li><strong>预期性能：</strong>
+                        <ul>
+                            <li>密钥生成速率：>1 kbps</li>
+                            <li>量子误码率(QBER)：<5%</li>
+                            <li>安全距离：地月全程</li>
+                        </ul>
+                    </li>
+                    <li><strong>应用价值：</strong>为地月通信提供信息论安全保障</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h4>量子中继网络</h4>
+                <ul>
+                    <li><strong>拉格朗日点L1中继站：</strong>距地球150万公里</li>
+                    <li><strong>量子存储器：</strong>基于稀土离子的固态量子存储</li>
+                    <li><strong>纠缠分发：</strong>建立地-L1-月三节点量子网络</li>
+                    <li><strong>终极目标：</strong>构建地月量子互联网基础设施</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section class="section" id="business">
+            <h2>分阶段服务模型与商业应用</h2>
+            <p>月球量子计算数据中心的服务模型是从"提供信任"到"解决优化"再到"赋能创造"的演进路径。</p>
+
+            <div class="phase-card">
+                <h3>第一阶段：量子随机数服务(QRNS) - "宇宙级信任即服务"</h3>
+                <p><strong>时间线：</strong>T+0 ~ 6个月</p>
+                
+                <h4>技术实现</h4>
+                <ul>
+                    <li><strong>核心原理：</strong>利用量子力学的内禀随机性，基于量子态测量产生真随机数</li>
+                    <li><strong>随机源方案：</strong>光子计数法
+                        <ul>
+                            <li>弱激光源发射单光子</li>
+                            <li>50/50分束器将光子随机分配</li>
+                            <li>探测器A响应记为"0"，探测器B响应记为"1"</li>
+                        </ul>
+                    </li>
+                    <li><strong>月球环境优势：</strong>低温和真空极大降低探测器"暗计数"噪声，提高随机数纯度</li>
+                </ul>
+                
+                <h4>市场价值与目标客户</h4>
+                <ul>
+                    <li><strong>核心卖点：</strong>终极的、不可辩驳的物理隔离保证</li>
+                    <li><strong>国家安全与国防：</strong>生成"一次性密码本"，理论上无法破解</li>
+                    <li><strong>金融业：</strong>
+                        <ul>
+                            <li>加密货币与区块链的创世块随机种子</li>
+                            <li>金融建模中的蒙特卡洛模拟</li>
+                        </ul>
+                    </li>
+                    <li><strong>科学研究：</strong>物理模拟、统计抽样、临床试验的黄金标准随机源</li>
+                    <li><strong>博彩与游戏业：</strong>绝对公平、可公开验证的随机数源</li>
+                </ul>
+                
+                <h4>商业模式</h4>
+                <ul>
+                    <li><strong>订阅制(SaaS)：</strong>按随机数速率(比特/秒)和认证级别收费</li>
+                    <li><strong>按量付费：</strong>按获取的随机数据量(GB/TB)计费</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>第二阶段：物流配送优化服务 - "解决NP-Hard难题"</h3>
+                <p><strong>时间线：</strong>T+6 ~ 24个月</p>
+                <p>特点：<strong>"战略规划"而非"实时导航"</strong>，完美规避地月延迟</p>
+                
+                <h4>具体应用场景</h4>
+                
+                <h5>1. 全球海运船队航线规划</h5>
+                <ul>
+                    <li><strong>客户：</strong>马士基、中远海运等大型航运公司</li>
+                    <li><strong>优化变量：</strong>数千港口、数万集装箱、燃油价格、碳排放税、天气预报、港口拥堵等</li>
+                    <li><strong>价值：</strong>节省数百万至上亿美元燃油成本，减少碳排放</li>
+                </ul>
+                
+                <h5>2. 洲际航空货运网络优化</h5>
+                <ul>
+                    <li><strong>客户：</strong>FedEx、DHL等国际快递公司</li>
+                    <li><strong>问题：</strong>数百万包裹如何分配到数千架次航班</li>
+                    <li><strong>价值：</strong>提高飞机利用率，降低空载率，缩短配送时间</li>
+                </ul>
+                
+                <h5>3. 大型卫星星座管理</h5>
+                <ul>
+                    <li><strong>客户：</strong>Starlink、OneWeb等巨型星座运营商</li>
+                    <li><strong>优化：</strong>轨道位置、通信路由、能源管理</li>
+                    <li><strong>价值：</strong>最大化覆盖和带宽，延长星座寿命</li>
+                </ul>
+                
+                <h5>4. 地月空间物流(未来场景)</h5>
+                <ul>
+                    <li><strong>应用：</strong>成为地月系统的"中央调度大脑"</li>
+                    <li><strong>优化：</strong>低能量转移轨道、补给时间窗口、载荷分配</li>
+                </ul>
+                
+                <h4>商业模式</h4>
+                <ul>
+                    <li><strong>按日/按次计费：</strong>客户提交数据，月球计算后返回最优方案</li>
+                    <li><strong>年度合约：</strong>为大客户提供专属计算时段</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>第三阶段："计算风洞"模式 - "革命性流体模拟"</h3>
+                <p><strong>时间线：</strong>T+24个月以后</p>
+                
+                <h4>核心价值</h4>
+                <p>量子计算机可通过量子算法直接求解纳维-斯托克斯方程，实现对湍流等复杂流动现象的<strong>"全保真"直接数值模拟(DNS)</strong></p>
+                
+                <h4>工作流程</h4>
+                <ol>
+                    <li><strong>客户上传：</strong>波音、空客、SpaceX、F1车队上传3D模型和边界条件</li>
+                    <li><strong>月球计算：</strong>大规模高精度流场模拟(数小时至数天)</li>
+                    <li><strong>结果下行：</strong>压缩后的流场数据传回地球</li>
+                    <li><strong>客户分析：</strong>工程师可视化分析，评估设计性能</li>
+                </ol>
+                
+                <h4>颠覆性价值</h4>
+                <ul>
+                    <li><strong>设计周期指数级缩短：</strong>极高精度模拟极端条件，减少物理风洞测试</li>
+                    <li><strong>前所未有的洞察力：</strong>精确理解湍流本质，催生全新设计</li>
+                    <li><strong>赋能全新设计范式：</strong>快速迭代激进、仿生设计</li>
+                </ul>
+                
+                <h4>商业模式</h4>
+                <ul>
+                    <li><strong>云平台模式：</strong>类似AWS Braket，全球用户通过API提交任务</li>
+                    <li><strong>计费方式：</strong>按计算时间、量子比特使用量、任务优先级</li>
+                    <li><strong>会员制：</strong>为航空航天巨头提供专属计算资源</li>
+                </ul>
+            </div>
+
+            <h3>量子计算市场分析与预测</h3>
+            <div class="module-card">
+                <h4>全球市场规模预测（2024-2035）</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>年份</th>
+                            <th>市场规模</th>
+                            <th>年增长率</th>
+                            <th>关键驱动因素</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2024</td>
+                            <td>14.2亿美元</td>
+                            <td>-</td>
+                            <td>NISQ时代开启</td>
+                        </tr>
+                        <tr>
+                            <td>2025</td>
+                            <td>18亿美元</td>
+                            <td>26.8%</td>
+                            <td>云服务普及</td>
+                        </tr>
+                        <tr>
+                            <td>2029</td>
+                            <td>53亿美元</td>
+                            <td>32.7% CAGR</td>
+                            <td>容错计算突破</td>
+                        </tr>
+                        <tr>
+                            <td>2035</td>
+                            <td>280-720亿美元</td>
+                            <td>-</td>
+                            <td>大规模商用</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>关键洞察：</strong>QCaaS（量子计算即服务）将占据40%以上市场份额，总经济影响达1万亿美元</p>
+            </div>
+
+            <div class="module-card">
+                <h4>竞争格局分析</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>公司</th>
+                            <th>技术路线</th>
+                            <th>2024进展</th>
+                            <th>相对月球项目的劣势</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>IBM</strong></td>
+                            <td>超导</td>
+                            <td>127量子比特<br>210+研究机构</td>
+                            <td>需要昂贵制冷设备<br>相干时间短</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google</strong></td>
+                            <td>超导</td>
+                            <td>量子AI重点<br>Sycamore处理器</td>
+                            <td>地球环境噪声<br>扩展性受限</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IonQ</strong></td>
+                            <td>离子阱</td>
+                            <td>4310万美元收入<br>云服务整合</td>
+                            <td>地球振动干扰<br>真空维护成本高</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rigetti</strong></td>
+                            <td>超导</td>
+                            <td>99.5%门保真度<br>自有晶圆厂</td>
+                            <td>运营成本高<br>环境要求苛刻</td>
+                        </tr>
+                        <tr>
+                            <td><strong>月神之瞳</strong></td>
+                            <td>离子阱</td>
+                            <td>规划中</td>
+                            <td><span class="highlight">天然环境优势<br>运营成本极低</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>收益模型与财务预测</h3>
+            <div class="module-card">
+                <h4>分阶段收入预测（单位：亿元人民币）</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>年份</th>
+                            <th>服务阶段</th>
+                            <th>年收入</th>
+                            <th>累计收入</th>
+                            <th>主要客户</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2040</td>
+                            <td>量子随机数</td>
+                            <td>0.5-1.0</td>
+                            <td>0.5-1.0</td>
+                            <td>金融、密码机构</td>
+                        </tr>
+                        <tr>
+                            <td>2041</td>
+                            <td>物流优化试点</td>
+                            <td>2.0-3.0</td>
+                            <td>2.5-4.0</td>
+                            <td>顺丰、京东</td>
+                        </tr>
+                        <tr>
+                            <td>2042</td>
+                            <td>物流优化扩展</td>
+                            <td>5.0-8.0</td>
+                            <td>7.5-12.0</td>
+                            <td>FedEx、DHL</td>
+                        </tr>
+                        <tr>
+                            <td>2043</td>
+                            <td>QCaaS平台</td>
+                            <td>10.0-15.0</td>
+                            <td>17.5-27.0</td>
+                            <td>全球企业</td>
+                        </tr>
+                        <tr>
+                            <td>2044+</td>
+                            <td>规模化运营</td>
+                            <td>20.0-30.0</td>
+                            <td>持续增长</td>
+                            <td>政府、研究机构</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="module-card">
+                <h4>定价策略对比</h4>
+                <ul>
+                    <li><strong>行业标准：</strong>1,000-2,000美元/小时（7,000-14,000元/小时）</li>
+                    <li><strong>月球优势定价：</strong>
+                        <ul>
+                            <li>基础服务：5,000元/小时（利用成本优势）</li>
+                            <li>专属资源：50,000元/小时（高保真度任务）</li>
+                            <li>年度会员：1,000万元起（保证计算时间）</li>
+                        </ul>
+                    </li>
+                    <li><strong>对比优势：</strong>相同价格下提供10倍相干时间，错误率降低100倍</li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>投资回报分析</h4>
+                <ul>
+                    <li><strong>总投资：</strong>57.5亿元（不含量子计算机核心）</li>
+                    <li><strong>回收期：</strong>6-8年</li>
+                    <li><strong>内部收益率（IRR）：</strong>15-20%</li>
+                    <li><strong>净现值（NPV@10%）：</strong>约100亿元</li>
+                    <li><strong>战略价值：</strong>
+                        <ul>
+                            <li>太空量子计算先发优势</li>
+                            <li>技术制高点占领</li>
+                            <li>带动相关产业链发展</li>
+                            <li>国家战略安全保障</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>特定市场机会：物流优化</h3>
+            <div class="module-card">
+                <h4>车辆路径问题（VRP）市场潜力</h4>
+                <ul>
+                    <li><strong>市场痛点：</strong>
+                        <ul>
+                            <li>传统算法在大规模问题上计算时间呈指数增长</li>
+                            <li>供应链成本占总成本的10-20%</li>
+                            <li>实时动态调整需求日益增长</li>
+                        </ul>
+                    </li>
+                    <li><strong>量子优势：</strong>
+                        <ul>
+                            <li>QAOA算法可将计算时间从小时降至秒级</li>
+                            <li>可处理1000+配送点的复杂网络</li>
+                            <li>动态优化考虑实时交通、天气等因素</li>
+                        </ul>
+                    </li>
+                    <li><strong>目标客户价值：</strong>
+                        <ul>
+                            <li>大型物流公司：年节省成本10-20%</li>
+                            <li>电商平台：提升配送效率30%</li>
+                            <li>城市交通：减少拥堵15%</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h4>具体应用案例</h4>
+                <table>
+                    <tr>
+                        <th>客户类型</th>
+                        <th>问题规模</th>
+                        <th>传统方法</th>
+                        <th>量子方法</th>
+                        <th>价值创造</th>
+                    </tr>
+                    <tr>
+                        <td>城市快递</td>
+                        <td>500配送点</td>
+                        <td>2小时计算</td>
+                        <td>30秒</td>
+                        <td>节省5%成本</td>
+                    </tr>
+                    <tr>
+                        <td>跨省物流</td>
+                        <td>2000节点</td>
+                        <td>24小时</td>
+                        <td>5分钟</td>
+                        <td>节省15%</td>
+                    </tr>
+                    <tr>
+                        <td>全球航运</td>
+                        <td>10000港口</td>
+                        <td>不可行</td>
+                        <td>1小时</td>
+                        <td>开创新模式</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="module-card">
+                <h4>附录：同步轨道卫星算力支持</h4>
+                <p>在月球朝向地球的面上取一个点A，从这个点往地球看，地球同步轨道卫星构成一个环，计算可得环上有<span class="highlight">94.64%</span>百分比和月面站有激光通讯可能性。所以这个月面站初期可以先按传统计算中心运转，为同步轨道卫星（和一半时间的低轨卫星）提供算力支持。</p>
+            </div>
+        </section>
+        
+        <section class="section" id="cost">
+            <h2>项目启动成本估算</h2>
+            <p><strong>估算前提：</strong>不计量子计算机本身研发，不搞ISRU（He-3就地提取），散热剂用He-4全从地球运输，按中国航天成本体系</p>
+            
+            <h3>"砸"和"送"分离投送方案的成本优势</h3>
+            <div class="module-card">
+                <h4>为何采用这种创新方案？</h4>
+                <p>基于<strong>成本效益最大化</strong>和<strong>风险管理最优化</strong>的策略，体现中国航天"多快好省"原则。</p>
+                
+                <h5>"砸"——高通量、低成本货运（硬着陆）</h5>
+                <ul>
+                    <li><strong>投送对象：</strong>月壤烧结设备、太阳能基板、电缆、散热器、建筑材料等皮实物资</li>
+                    <li><strong>优势：</strong>
+                        <ul>
+                            <li>省去末端减速燃料，单次投送能力提升30%-50%</li>
+                            <li>简化GNC系统，降低研制成本</li>
+                            <li>失败风险可接受，损失的是低价值建材</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h5>"送"——高精度、高可靠"客运"（软着陆）</h5>
+                <ul>
+                    <li><strong>投送对象：</strong>量子计算核心模块、稀释制冷机、精密机器人等高价值设备</li>
+                    <li><strong>优势：</strong>
+                        <ul>
+                            <li>确保价值连城设备免受冲击损害</li>
+                            <li>实现米级落点精度，便于后续组装</li>
+                            <li>将高风险过程与高价值载荷绑定，优化风险管理</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>详细成本分解（基于中国航天成本体系）</h3>
+            <table class="cost-table">
+                <thead>
+                    <tr>
+                        <th>成本类别</th>
+                        <th>估算金额（人民币）</th>
+                        <th>详细说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3" style="background-color: rgba(255, 255, 255, 0.1); font-weight: bold;">一、地月运输成本（占总成本50%-60%）</td>
+                    </tr>
+                    <tr>
+                        <td>运载工具</td>
+                        <td></td>
+                        <td>长征九号，TLI运力50吨，单次发射100-150亿</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>总质量需求（月面）</strong></td>
+                    </tr>
+                    <tr>
+                        <td>基础设施（"砸"）</td>
+                        <td></td>
+                        <td>能源系统40吨、建筑材料30吨、散热系统20吨、机器人底盘10吨=100吨</td>
+                    </tr>
+                    <tr>
+                        <td>核心设备（"送"）</td>
+                        <td></td>
+                        <td>量子计算核心10吨、控制通信5吨、精密机器人5吨=20吨</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>发射次数计算</strong></td>
+                    </tr>
+                    <tr>
+                        <td>"砸"任务</td>
+                        <td>32亿（4次×8亿/次）</td>
+                        <td>100吨÷30吨/次≈4次，简易着陆器</td>
+                    </tr>
+                    <tr>
+                        <td>"送"任务</td>
+                        <td>42亿（2次×21亿/次）</td>
+                        <td>20吨÷15吨/次≈2次，嫦娥级着陆器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>地月运输总计</strong></td>
+                        <td><strong>74亿</strong></td>
+                        <td>6次长征九号发射</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="3" style="background-color: rgba(255, 255, 255, 0.1); font-weight: bold;">二、硬件研制成本（最昂贵、不确定性最高）</td>
+                    </tr>
+                    <tr>
+                        <td>量子计算核心系统</td>
+                        <td>8-15亿</td>
+                        <td>空间环境适应性改造，包括芯片、深低温系统、测控电子</td>
+                    </tr>
+                    <tr>
+                        <td>月面支撑平台系统</td>
+                        <td>4-6亿</td>
+                        <td>能源、热控、月面机器人建造与维护系统</td>
+                    </tr>
+                    <tr>
+                        <td>着陆器研制</td>
+                        <td>2-3亿</td>
+                        <td>"货运型"和"客运型"两种专用着陆器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>硬件研制总计</strong></td>
+                        <td><strong>14-24亿</strong></td>
+                        <td></td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="3" style="background-color: rgba(255, 255, 255, 0.1); font-weight: bold;">三、地面段与运控成本</td>
+                    </tr>
+                    <tr>
+                        <td>深空测控网升级</td>
+                        <td>5-8亿</td>
+                        <td>新建2-3座60-100米级深空天线</td>
+                    </tr>
+                    <tr>
+                        <td>任务运控中心</td>
+                        <td>2-3亿</td>
+                        <td>长期管理、遥操作、监控设施</td>
+                    </tr>
+                    <tr>
+                        <td>科学数据中心</td>
+                        <td>3-5亿</td>
+                        <td>超算集群，处理月球传回数据</td>
+                    </tr>
+                    <tr>
+                        <td><strong>地面段总计</strong></td>
+                        <td><strong>10-16亿</strong></td>
+                        <td></td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="3" style="background-color: rgba(255, 255, 255, 0.1); font-weight: bold;">四、项目管理与系统集成</td>
+                    </tr>
+                    <tr>
+                        <td>AIT（总装集成测试）</td>
+                        <td>7-10亿</td>
+                        <td>约占硬件成本100%</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="3" style="background-color: rgba(255, 255, 255, 0.1); font-weight: bold;">五、运维成本（年度）</td>
+                    </tr>
+                    <tr>
+                        <td>地面人员与设施</td>
+                        <td>1.5-2.5亿/年</td>
+                        <td>数百名人员薪酬及设施运行</td>
+                    </tr>
+                    <tr>
+                        <td>月球补给任务</td>
+                        <td>10-20亿/年</td>
+                        <td>备件、消耗品的定期补给</td>
+                    </tr>
+                    
+                    <tr style="font-weight: bold; background-color: rgba(255, 255, 0, 0.1);">
+                        <td>项目启动总投入</td>
+                        <td>105-124亿</td>
+                        <td>不含量子计算机核心和年度运维</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>风险储备金（20%）</td>
+                        <td>21-25亿</td>
+                        <td>应对技术难题和意外</td>
+                    </tr>
+                    
+                    <tr class="total-row">
+                        <td>总计估算</td>
+                        <td>~126-149亿</td>
+                        <td>约合18-21亿美元</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>成本对比与结论</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>对比NASA成本：</strong>中国航天成本约为NASA的1/3至1/5</li>
+                    <li><strong>最大成本项：</strong>地月运输占50%-60%，体现了太空物流的高昂代价</li>
+                    <li><strong>"砸送分离"效益：</strong>相比全部软着陆，可节省约30-40亿运输成本</li>
+                    <li><strong>项目量级：</strong>符合国家级旗舰型深空探测项目规模（参考天问一号）</li>
+                </ul>
+            </div>
+
+            <h3>供应链分析</h3>
+            <div class="module-card">
+                <h4>关键组件供应商矩阵</h4>
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>组件类别</th>
+                            <th>主要供应商</th>
+                            <th>备选供应商</th>
+                            <th>供应风险</th>
+                            <th>缓解策略</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>离子阱芯片</strong></td>
+                            <td>中科院精密测量院</td>
+                            <td>清华大学<br>华为海思</td>
+                            <td>中等</td>
+                            <td>多源采购<br>技术储备</td>
+                        </tr>
+                        <tr>
+                            <td><strong>制冷系统</strong></td>
+                            <td>Oxford Instruments</td>
+                            <td>Bluefors<br>Janis</td>
+                            <td>高</td>
+                            <td>关键部件国产化<br>长期供货协议</td>
+                        </tr>
+                        <tr>
+                            <td><strong>激光系统</strong></td>
+                            <td>Toptica</td>
+                            <td>Coherent<br>国产替代</td>
+                            <td>中等</td>
+                            <td>模块化设计<br>兼容多品牌</td>
+                        </tr>
+                        <tr>
+                            <td><strong>控制电子</strong></td>
+                            <td>Zurich Instruments</td>
+                            <td>国产FPGA方案</td>
+                            <td>低</td>
+                            <td>自主研发能力</td>
+                        </tr>
+                        <tr>
+                            <td><strong>He-3/He-4</strong></td>
+                            <td>美国DOE</td>
+                            <td>俄罗斯<br>月球ISRU</td>
+                            <td>极高</td>
+                            <td>战略储备<br>ISRU开发</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="module-card">
+                <h4>供应链韧性设计</h4>
+                <ul>
+                    <li><strong>冗余供应商策略：</strong>每个关键组件至少2-3个合格供应商</li>
+                    <li><strong>战略库存管理：</strong>
+                        <ul>
+                            <li>地球仓库：6个月用量</li>
+                            <li>月球现场：12个月备件</li>
+                            <li>在途库存：3个月缓冲</li>
+                        </ul>
+                    </li>
+                    <li><strong>国产化路线图：</strong>
+                        <ul>
+                            <li>第一阶段（2025-2030）：30%国产化率</li>
+                            <li>第二阶段（2030-2035）：60%国产化率</li>
+                            <li>第三阶段（2035+）：90%国产化率</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>项目风险评估矩阵</h3>
+            <div class="module-card">
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>风险类别</th>
+                            <th>具体风险</th>
+                            <th>概率</th>
+                            <th>影响</th>
+                            <th>风险等级</th>
+                            <th>应对措施</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: rgba(255, 0, 0, 0.1);">
+                            <td><strong>技术风险</strong></td>
+                            <td>量子相干时间不达标</td>
+                            <td>中</td>
+                            <td>极高</td>
+                            <td><span style="color: #ff4444;">高</span></td>
+                            <td>材料优化<br>环境控制升级</td>
+                        </tr>
+                        <tr style="background-color: rgba(255, 0, 0, 0.1);">
+                            <td><strong>运输风险</strong></td>
+                            <td>发射失败</td>
+                            <td>低</td>
+                            <td>极高</td>
+                            <td><span style="color: #ff4444;">高</span></td>
+                            <td>关键载荷保险<br>分批发射</td>
+                        </tr>
+                        <tr style="background-color: rgba(255, 165, 0, 0.1);">
+                            <td><strong>环境风险</strong></td>
+                            <td>月震损坏设备</td>
+                            <td>低</td>
+                            <td>高</td>
+                            <td><span style="color: #ff9500;">中</span></td>
+                            <td>抗震设计<br>隔振系统</td>
+                        </tr>
+                        <tr style="background-color: rgba(255, 165, 0, 0.1);">
+                            <td><strong>供应链风险</strong></td>
+                            <td>He-3供应中断</td>
+                            <td>中</td>
+                            <td>高</td>
+                            <td><span style="color: #ff9500;">中</span></td>
+                            <td>ISRU加速<br>战略储备</td>
+                        </tr>
+                        <tr style="background-color: rgba(0, 255, 0, 0.1);">
+                            <td><strong>市场风险</strong></td>
+                            <td>需求不及预期</td>
+                            <td>中</td>
+                            <td>中</td>
+                            <td><span style="color: #00d26a;">低</span></td>
+                            <td>多元化应用<br>政府支持</td>
+                        </tr>
+                        <tr style="background-color: rgba(255, 165, 0, 0.1);">
+                            <td><strong>政策风险</strong></td>
+                            <td>国际合作受限</td>
+                            <td>中</td>
+                            <td>中</td>
+                            <td><span style="color: #ff9500;">中</span></td>
+                            <td>自主技术<br>多边合作</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>投资回报敏感性分析</h3>
+            <div class="module-card">
+                <h4>关键参数敏感性</h4>
+                <table>
+                    <tr>
+                        <th>参数变化</th>
+                        <th>对IRR的影响</th>
+                        <th>对回收期的影响</th>
+                        <th>风险等级</th>
+                    </tr>
+                    <tr>
+                        <td>发射成本+50%</td>
+                        <td>-3%</td>
+                        <td>+1.5年</td>
+                        <td>中</td>
+                    </tr>
+                    <tr>
+                        <td>量子计算服务价格-30%</td>
+                        <td>-5%</td>
+                        <td>+2.5年</td>
+                        <td>高</td>
+                    </tr>
+                    <tr>
+                        <td>设备故障率+100%</td>
+                        <td>-2%</td>
+                        <td>+1年</td>
+                        <td>中</td>
+                    </tr>
+                    <tr>
+                        <td>市场需求-50%</td>
+                        <td>-8%</td>
+                        <td>+4年</td>
+                        <td>高</td>
+                    </tr>
+                    <tr>
+                        <td>运营成本+30%</td>
+                        <td>-1.5%</td>
+                        <td>+0.8年</td>
+                        <td>低</td>
+                    </tr>
+                </table>
+                
+                <h4>情景分析</h4>
+                <ul>
+                    <li><strong>乐观情景（30%概率）：</strong>
+                        <ul>
+                            <li>IRR: 25-30%</li>
+                            <li>回收期: 4-5年</li>
+                            <li>NPV: 200亿元</li>
+                        </ul>
+                    </li>
+                    <li><strong>基准情景（50%概率）：</strong>
+                        <ul>
+                            <li>IRR: 15-20%</li>
+                            <li>回收期: 6-8年</li>
+                            <li>NPV: 100亿元</li>
+                        </ul>
+                    </li>
+                    <li><strong>悲观情景（20%概率）：</strong>
+                        <ul>
+                            <li>IRR: 8-12%</li>
+                            <li>回收期: 10-12年</li>
+                            <li>NPV: 30亿元</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>关键成功因素与缓解策略</h3>
+            <div class="module-card">
+                <h4>技术成熟度评估（TRL）</h4>
+                <table>
+                    <tr>
+                        <th>技术领域</th>
+                        <th>当前TRL</th>
+                        <th>目标TRL</th>
+                        <th>达标时间</th>
+                        <th>关键里程碑</th>
+                    </tr>
+                    <tr>
+                        <td>离子阱量子计算</td>
+                        <td>7</td>
+                        <td>9</td>
+                        <td>2030</td>
+                        <td>100+比特演示</td>
+                    </tr>
+                    <tr>
+                        <td>空间级制冷系统</td>
+                        <td>6</td>
+                        <td>9</td>
+                        <td>2028</td>
+                        <td>地面长期测试</td>
+                    </tr>
+                    <tr>
+                        <td>月面ISRU</td>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>2035</td>
+                        <td>He-3提取演示</td>
+                    </tr>
+                    <tr>
+                        <td>自主运维AI</td>
+                        <td>5</td>
+                        <td>9</td>
+                        <td>2032</td>
+                        <td>无人值守测试</td>
+                    </tr>
+                    <tr>
+                        <td>地月激光通信</td>
+                        <td>8</td>
+                        <td>9</td>
+                        <td>2026</td>
+                        <td>10Gbps演示</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="module-card">
+                <h4>成功要素清单</h4>
+                <ol>
+                    <li><strong>技术突破：</strong>
+                        <ul>
+                            <li>离子阱相干时间>10分钟</li>
+                            <li>门保真度>99.9%</li>
+                            <li>自动校准精度<0.1%</li>
+                        </ul>
+                    </li>
+                    <li><strong>运营可靠性：</strong>
+                        <ul>
+                            <li>系统可用性>99.5%</li>
+                            <li>无人干预运行>30天</li>
+                            <li>故障恢复时间<2小时</li>
+                        </ul>
+                    </li>
+                    <li><strong>商业可行性：</strong>
+                        <ul>
+                            <li>客户获取成本<100万元</li>
+                            <li>客户保留率>90%</li>
+                            <li>毛利率>60%</li>
+                        </ul>
+                    </li>
+                    <li><strong>战略支持：</strong>
+                        <ul>
+                            <li>国家政策明确支持</li>
+                            <li>国际合作框架建立</li>
+                            <li>产业生态系统形成</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </section>
+        
+        <!-- Conclusion -->
+        <div class="conclusion">
+            <h2>结论</h2>
+            <p>"月神之瞳"项目将月球的极端环境从一个工程挑战，转变为一个实现下一代计算的无价资产。通过结合模块化设计、高度自动化、就地资源利用和分阶段商业模式，我们不仅可以建造一台量子计算机，更可以开创一个全新的太空计算时代。</p>
+            
+            <p style="margin-top: 20px;">在排除了量子计算机核心研发和ISRU模块后，"月神之瞳"项目的启动成本预计约为<strong>57.5亿元人民币</strong>。这个数字符合一个国家级、旗舰型深空科学探测项目的量级（例如，中国的首次火星探测任务"天问一号"的总投资据估计也在这个范围内）。成本的大头是两次重型运载火箭的发射和高可靠性地月转移、着陆平台的研制。"砸"和"送"分离的投送方案，确实能在保证核心设备安全的前提下，有效降低重型、非精密部件的投送成本，是一个非常务实且有创意的工程思路。</p>
+            
+            <p style="margin-top: 30px; font-size: 1.2rem; font-weight: 600;">这个位于月球环形山深处的数据中心，将成为凝视宇宙、赋能地球的"月神之瞳"。</p>
+        </div>
+    </div>
+    
+    <script>
+        // Generate stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 200;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Scroll progress indicator
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+        
+        // Back to top functionality
+        function handleBackToTop() {
+            const backToTopBtn = document.getElementById('backToTop');
+            
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        }
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        document.getElementById('backToTop').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            // Hide loader
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1500);
+            
+            // Create stars
+            createStars();
+            
+            // Observe sections
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+        
+        // Scroll events
+        window.addEventListener('scroll', () => {
+            updateProgressBar();
+            handleBackToTop();
+        });
+        
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-section');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
