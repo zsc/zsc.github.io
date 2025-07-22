@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-22</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-22)</h1>
+                    <p id="intro">为您找到日期 2025-07-22 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>大语言模型的强化学习与对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">AlphaAlign：通过极简强化学习激励安全对齐</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14987" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14987 - AlphaAlign: Incentivizing Safety Alignment with Extremely Simplified Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yi Zhang, An Zhang, XiuYu Zhang, Leheng Sheng, Yuxin Chen, Zhenkai Liang, Xiang Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）尽管从其海量的预训练数据中获得了潜在的安全理解能力，但仍然容易生成有害内容，并在安全对齐后表现出过度拒绝和效用下降等问题。当前的安全对齐方法通常导致肤浅的拒绝捷径，或依赖于密集的监督来进行基于推理的方法，未能充分利用模型固有的安全自我意识。我们提出了AlphaAlign，一个简单而有效的纯强化学习（RL）框架，其具有可验证的安全奖励，旨在通过主动的安全推理来激励这种潜在的安全意识。AlphaAlign采用双重奖励系统：一个可验证的安全奖励鼓励对有害查询进行格式正确且有明确理由的拒绝，同时惩罚过度拒绝；一个标准化的有用性奖励则指导对良性输入的高质量响应。这使得模型能够在不依赖于监督式安全特定推理数据的情况下，发展出主动的安全推理能力。AlphaAlign展示了三个关键优势：（1）简单高效，仅需二元提示安全标签和最少的RL步骤即可实现显著改进。（2）打破安全-效用权衡，通过增强对有害内容的拒绝和减少过度拒绝，同时保持甚至提高通用任务性能和对未见越狱攻击的鲁棒性。（3）深度对齐，培养主动的安全推理，生成明确的安全理由，而不是依赖于浅层的拒绝模式。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14987" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">无形之缰：为何带可验证奖励的强化学习可能无法摆脱其初始局限</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14843" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14843 - The Invisible Leash: Why RLVR May Not Escape Its Origin</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Fang Wu, Weihao Xuan, Ximing Lu, Zaid Harchaoui, Yejin Choi</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近期大型推理模型的进展凸显了带可验证奖励的强化学习（RLVR）作为一种有前途的方法，用于增强人工智能的能力，特别是在解决复杂逻辑任务方面。然而，目前尚不清楚RLVR是真正扩展了模型的推理边界，还是仅仅放大了基础模型已知的高奖励输出以提高精度。本研究提出了一项理论和实证调查，为RLVR的潜在局限性提供了新的见解。首先，我们提供了一个新的理论视角，即RLVR受限于基础模型的支持范围——无法采样初始概率为零的解——并且作为一种保守的重加权机制运作，可能限制发现全新的解。我们还发现了一个熵-奖励权衡：虽然RLVR可靠地提高了精度，但它可能逐渐缩小探索范围，并可能忽略正确但代表性不足的解。广泛的实证实验验证了，虽然RLVR始终能提高pass@1的成功率，但在更大的采样预算下，实证支持范围的收缩通常超过其扩张，未能恢复基础模型先前可以访问的正确答案。有趣的是，我们还观察到，虽然RLVR有时会增加词元级别的熵，导致每个生成步骤的不确定性增加，但答案级别的熵却下降了，这表明这些看似更不确定的路径最终会收敛到一小组不同的答案上。总而言之，这些发现揭示了RLVR在扩展推理视野方面的潜在局限性。要打破这根无形之缰，未来的算法创新可能需要明确的探索机制或混合策略，将概率质量注入到代表性不足的解空间中。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14843" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于人类反馈强化学习的离策略校正奖励建模</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15507" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15507 - Off-Policy Corrected Reward Modeling for Reinforcement Learning from Human Feedback</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Johannes Ackermann, Takashi Ishida, Masashi Sugiyama</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">来自人类反馈的强化学习（RLHF）使我们能够训练模型，如语言模型（LM），以遵循复杂的人类偏好。在用于LM的RLHF中，我们首先使用监督微调训练一个LM，采样成对的响应，获取人类反馈，并使用生成的数据训练一个奖励模型（RM）。然后使用RL方法训练LM以最大化RM给出的奖励。随着训练的进行，LM生成的响应不再类似于RM在训练期间看到的响应，导致RM变得不准确。RM给出的分数不断增加，但学到的行为不再符合人类的偏好。这个问题被称为过度优化。我们从分布偏移的角度研究过度优化，并表明这种偏移导致RM参数的估计不一致，进而导致策略梯度的估计不一致。我们提出了离策略校正奖励建模（OCRM），该方法使用重要性加权迭代地对RM进行离策略校正，而无需新的标签或样本。这会产生一个更准确的RM，经验证明这会带来一个改进的最终策略。我们在摘要和聊天机器人数据集的实验中验证了我们的方法，并表明它的性能显著优于标准的RLHF方法和基线。我们的实现可在此 https URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15507" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于自适应推理的分层预算策略优化</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15844" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15844 - Hierarchical Budget Policy Optimization for Adaptive Reasoning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shangke Lyu, Linjuan Wu, Yuchen Yan, Xingyu Wu, Hao Li, Yongliang Shen, Peisheng Jiang, Weiming Lu, Jun Xiao, Yueting Zhuang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型推理模型通过广泛的思维链生成取得了卓越的性能，但由于不考虑问题复杂性而采用统一的推理策略，导致计算效率低下。我们提出了分层预算策略优化（HBPO），这是一个强化学习框架，使模型能够学习针对特定问题的推理深度，而不牺牲能力。HBPO解决了以效率为导向的训练中探索空间崩溃的基本挑战，即对长输出的惩罚会系统性地使模型偏离必要的长推理路径。通过分层预算探索，我们的方法将滚动样本划分为具有不同词元预算的多个子组，旨在实现高效的资源分配，同时防止能力下降。我们引入了差异化的奖励机制，创建了与问题复杂性相符的预算感知激励，使模型能够发现任务要求与计算量之间的自然对应关系。广泛的实验表明，HBPO在四个推理基准上平均将词元使用量减少了高达60.6%，同时准确率提高了3.14%。与施加外部约束或依赖离散模式选择的现有方法不同，HBPO表现出涌现的自适应行为，模型会根据问题复杂性自动调整推理深度。我们的结果表明，推理效率和能力并非天生冲突，可以通过适当结构化的分层训练同时进行优化，从而保持探索的多样性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15844" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LAPO：通过长度自适应策略优化内化推理效率</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15758" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15758 - LAPO: Internalizing Reasoning Efficiency via Length-Adaptive Policy Optimization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xingyu Wu, Yuchen Yan, Shangke Lyu, Linjuan Wu, Yiwen Qiu, Yongliang Shen, Weiming Lu, Jian Shao, Jun Xiao, Yueting Zhuang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型推理模型通过扩展的思维链序列取得了卓越的性能，但这种计算自由度即使对于简单问题也导致了过度的词元生成。我们提出了长度自适应策略优化（LAPO），这是一个新颖的框架，将推理长度控制从外部约束转变为模型内在的能力。与现有施加严格限制或依赖事后干预的方法不同，LAPO通过一个两阶段的强化学习过程，使模型能够内化对适当推理深度的理解。在第一阶段，模型通过发现成功解决方案长度的统计分布来学习自然的推理模式。第二阶段利用这些模式作为元认知指导，将它们直接嵌入到模型的推理上下文中，以确保推理时的灵活性。在数学推理基准上的实验表明，LAPO将词元使用量减少了高达40.9%，同时准确率提高了2.3%。我们的分析揭示，经过LAPO训练的模型发展出了根据问题复杂性分配计算资源的新兴能力，在不牺牲质量的情况下实现了高效的推理。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15758" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">学习非线性因果规约以解释强化学习策略</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14901" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14901 - Learning Nonlinear Causal Reductions to Explain Reinforcement Learning Policies</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Armin Kekić, Jan Schneider, Dieter Büchler, Bernhard Schölkopf, Michel Besserve</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">为什么强化学习（RL）策略会失败或成功？这是一个具有挑战性的问题，因为智能体与环境的交互具有复杂、高维的特性。在这项工作中，我们从因果角度来解释RL策略的行为，将状态、动作和奖励视为低层因果模型中的变量。我们在执行过程中对策略动作引入随机扰动，并观察它们对累积奖励的影响，从而学习一个简化的、解释这些关系的高层因果模型。为此，我们开发了一个非线性因果模型规约框架，该框架确保了近似的干预一致性，即简化的高层模型对干预的响应方式与原始复杂系统相似。我们证明，对于一类非线性因果模型，存在一个唯一的解可以实现精确的干预一致性，确保学到的解释反映了有意义的因果模式。在合成因果模型和实际RL任务（包括钟摆控制和机器人乒乓球）上的实验表明，我们的方法可以揭示训练好的RL策略中重要的行为模式、偏见和失败模式。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14901" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">强化学习的统计与算法基础</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14444" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14444 - Statistical and Algorithmic Foundations of Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuejie Chi, Yuxin Chen, Yuting Wei</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">作为在未知环境中进行序贯决策的范式，强化学习（RL）近年来受到了广泛关注。然而，在新兴应用中模型复杂性的爆炸式增长以及非凸性的存在，加剧了在样本匮乏情况下实现高效RL的挑战，在这种情况下，数据收集成本高昂、耗时，甚至风险高（例如，在临床试验、自主系统和在线广告中）。因此，如何理解和提高RL算法的样本和计算效率引起了极大的兴趣。在本教程中，我们旨在介绍RL中几个重要的算法和理论发展，突出新思想与经典主题之间的联系。我们以马尔可夫决策过程为核心数学模型，涵盖了几个独特的RL场景（即，带模拟器的RL、在线RL、离线RL、鲁棒RL以及带人类反馈的RL），并介绍了几种主流的RL方法（即，基于模型的方法、基于值的方法和策略优化）。我们的讨论围绕样本复杂性、计算效率以及算法依赖和信息论的下界等问题展开，并采用非渐近的视角。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14444" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>生成式AI：从2D到3D与音频</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">在数据受限场景下，扩散模型优于自回归模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15857" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15857 - Diffusion Beats Autoregressive in Data-Constrained Settings</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Mihir Prabhudesai, Menging Wu, Amir Zadeh, Katerina Fragkiadaki, Deepak Pathak</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">自回归（AR）模型长期以来一直主导着大型语言模型的领域，推动了各种任务的进展。最近，基于扩散的语言模型作为一种有前途的替代方案出现，但其相对于自回归模型的优势仍有待探索。在本文中，我们系统地研究了数据受限环境下的掩码扩散模型——即训练涉及对有限数据进行重复遍历——并发现在计算资源充足但数据稀缺时，它们显著优于自回归模型。扩散模型能更好地利用重复数据，实现更低的验证损失和更优越的下游任务性能。我们将这一优势解释为隐式数据增强：掩码扩散使模型接触到多样化的词元排序和预测任务分布，这与自回归模型固定的从左到右分解方式不同。我们发现了扩散模型的新缩放定律，并推导出了一个封闭形式的表达式，用于确定扩散模型开始优于自回归模型的关键计算阈值。这些结果表明，当数据而非计算成为瓶颈时，扩散模型为标准自回归范式提供了一个引人注目的替代方案。我们的代码已在此 https URL 公开。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15857" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ObjectGS：通过高斯溅射实现物体感知的场景重建与场景理解</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15454" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15454 - ObjectGS: Object-aware Scene Reconstruction and Scene Understanding via Gaussian Splatting</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ruijie Zhu, Mulin Yu, Linning Xu, Lihan Jiang, Yixuan Li, Tianzhu Zhang, Jiangmiao Pang, Bo Dai</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">3D高斯溅射（3D Gaussian Splatting）以其高保真重建和实时新视角合成而闻名，但其缺乏语义理解能力，限制了物体级别的感知。在这项工作中，我们提出了ObjectGS，一个物体感知的框架，它将3D场景重建与语义理解统一起来。ObjectGS不将场景视为一个统一的整体，而是将单个物体建模为生成神经高斯函数并共享物体ID的局部锚点，从而实现精确的物体级别重建。在训练过程中，我们动态地增加或修剪这些锚点并优化它们的特征，同时使用带有分类损失的独热ID编码来施加清晰的语义约束。通过大量实验，我们证明了ObjectGS不仅在开放词汇和全景分割任务上优于最先进的方法，而且还能无缝集成到网格提取和场景编辑等应用中。项目页面位于此 https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15454" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">A2TTS：面向低资源印度语言的文本转语音技术</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15272" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15272 - A2TTS: TTS for Low Resource Indian Languages</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ayush Singh Bhadoriya, Abhishek Nikunj Shinde, Isha Pandey, Ganesh Ramakrishnan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了一个说话人条件化的文本转语音（TTS）系统，旨在解决为未见过的说话人生成语音以及支持多样化印度语言所面临的挑战。我们的方法利用了基于扩散的TTS架构，其中说话人编码器从短参考音频样本中提取嵌入，以对DDPM解码器进行条件化，从而实现多说话人生成。为了进一步增强韵律和自然度，我们采用了一种基于交叉注意力的时长预测机制，该机制利用参考音频，从而实现更准确和与说话人一致的时序。这使得生成的语音能够与目标说话人紧密相似，同时改进了时长建模和整体表现力。此外，为了改善零样本生成，我们采用了无分类器指导，使系统能够为未知说话人生成更接近的语音。我们使用这种方法，训练了针对多种印度语言（如孟加拉语、古吉拉特语、印地语、马拉地语、马拉雅拉姆语、旁遮普语和泰米尔语）的特定语言、说话人条件化的模型，并使用了IndicSUPERB数据集。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15272" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于高效视频压缩的条件式视频生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15269" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15269 - Conditional Video Generation for High-Efficiency Video Compression</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Fangqiu Yi, Jingyu Xu, Jiawei Shao, Chi Zhang, Xuelong Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">感知研究表明，条件扩散模型在重建与人类视觉感知一致的视频内容方面表现出色。基于这一见解，我们提出了一个视频压缩框架，该框架利用条件扩散模型进行感知优化的重建。具体来说，我们将视频压缩重新定义为一个条件生成任务，其中生成模型从稀疏但信息丰富的信号中合成视频。我们的方法引入了三个关键模块：（1）多粒度条件化，捕捉静态场景结构和动态时空线索；（2）紧凑表示，专为高效传输而设计，同时不牺牲语义丰富性；（3）多条件训练，采用模态丢弃和角色感知嵌入，以防止对任何单一模态的过度依赖并增强鲁棒性。大量实验表明，我们的方法在感知质量指标（如Fréchet视频距离（FVD）和LPIPS）上显著优于传统和神经编解码器，尤其是在高压缩比下。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15269" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">使用扩散引导的扩散模型进行成对图像生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14833" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14833 - Paired Image Generation with Diffusion-Guided Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Haoxuan Zhang, Wenju Cui, Yuzhu Cao, Tao Tan, Jie Liu, Yunsong Peng, Jian Zheng</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">数字乳腺断层合成（DBT）图像中肿块病灶的分割对于乳腺癌的早期筛查至关重要。然而，高密度乳腺组织常导致肿块病灶高度隐藏，这使得手动标注变得困难且耗时。因此，用于模型训练的标注数据不足。扩散模型通常用于数据增强，但现有方法面临两个挑战。首先，由于病灶的高度隐藏性，模型难以学习病灶区域的特征。这导致病灶区域的生成质量较低，从而限制了生成图像的质量。其次，现有方法只能生成图像，不能生成相应的标注，这限制了生成图像在监督训练中的可用性。在这项工作中，我们提出了一种成对图像生成方法。该方法不需要外部条件，通过为条件扩散模型训练一个额外的扩散引导器，即可实现成对图像的生成。在实验阶段，我们生成了成对的DBT切片和肿块病灶掩码。然后，我们将它们纳入肿块病灶分割任务的监督训练过程中。实验结果表明，我们的方法可以在没有外部条件的情况下提高生成质量。此外，它有助于缓解标注数据不足的问题，从而提升下游任务的性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14833" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>形式化推理与AI辅助科学</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过分解和迭代反思解决形式化数学问题</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15225" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15225 - Solving Formal Math Problems by Decomposition and Iterative Reflection</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yichi Zhou, Jianqiu Zhao, Yongxin Zhang, Bohan Wang, Siran Wang, Luoxin Chen, Jiahui Wang, Haowei Chen, Allan Jie, Xinbo Zhang, Haocheng Wang, Luong Trung, Rong Ye, Phan Nhat Hoang, Huishuai Zhang, Peng Sun, Hang Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">通用大型语言模型（LLM）在智能方面取得了显著成功，在编码和数学推理等复杂推理任务上表现可与人类专家相媲美。然而，在像Lean 4这样的专门语言中生成形式化证明仍然是这些模型的一个重大挑战，限制了它们在复杂定理证明和自动验证中的应用。当前的方法通常需要通过在专用的形式化语料库上进行微调来特化模型，这在数据收集和训练方面成本高昂。在这项工作中，我们引入了Delta Prover，一个基于智能体的框架，它协调了通用LLM与Lean 4证明环境之间的交互。Delta Prover利用通用LLM的反思和推理能力，以交互方式在Lean 4中构建形式化证明，从而避免了模型特化的需要。其核心是，该智能体集成了两个新颖且相互依赖的组件：一个用于反思性分解和迭代式证明修复的算法框架，以及一个基于Lean 4构建的、用于简化子问题管理的自定义领域特定语言（DSL）。Delta Prover在miniF2F-test基准测试中实现了95.9%的最新成功率，超过了所有现有方法，包括那些需要模型特化的方法。此外，与标准的Best-of-N证明策略相比，Delta Prover表现出明显更强的测试时扩展定律。至关重要的是，我们的发现表明，在有效的智能体结构指导下，通用LLM拥有巨大的、尚未开发的定理证明能力。这为在形式化环境中进行稳健的自动推理提供了一种计算效率高的替代方案，以替代专门模型。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15225" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ProofCompass：利用大语言模型指导增强专用证明器</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14335" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14335 - ProofCompass: Enhancing Specialized Provers with LLM Guidance</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Nicolas Wischermann, Claudio Mayrink Verdun, Gabriel Poesia, Francesco Noseda</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">语言模型已成为形式化数学推理中日益强大的工具。然而，大多数现有方法要么完全依赖于大型通用模型，要么依赖于较小的专用模型，每种方法都有其明显的局限性，而训练专用的大型模型仍然需要大量的计算资源。本文介绍了ProofCompass，一种新颖的混合方法，通过策略性地指导现有的专用证明器方法，如DeepSeek-Prover-v1.5-RL (DSP-v1.5)，并使用大型语言模型（LLM）而无需额外的模型训练，从而实现了卓越的计算效率。LLM提供自然语言的证明策略并分析失败的尝试以选择中间引理，从而实现有效的问题分解。在miniF2F基准测试中，ProofCompass展示了显著的资源效率：它超越了DSP-v1.5（从54.9%提高到55.3%），同时使用的尝试次数减少了25倍（从3200次减少到128次）。我们的协同方法为在形式化定理证明中同时提高计算效率和准确性铺平了道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14335" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LeanTree：在Lean 4中通过分解状态加速白盒证明搜索</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14722" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14722 - LeanTree: Accelerating White-Box Proof Search with Factorized States in Lean 4</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Matěj Kripner, Michal Šustr, Milan Straka</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">自动定理证明（ATP）自其诞生以来一直是人工智能中的一个经典问题，但由于其巨大的状态和动作空间，至今仍然具有挑战性。大型语言模型（LLM）最近已成为ATP的一种有前途的启发式方法，但它们缺乏正确性保证，因此需要与证明验证器进行交互。这种交互通常遵循两种方法之一：黑盒交互，不利用中间证明状态；或白盒方法，允许增量式证明构建和检查中间状态。虽然黑盒方法直接受益于最近的LLM进展，但白盒方法相对滞后。在本文中，我们通过引入LeanTree来解决这一差距，它包括（i）一个在Lean 4语言中构建的工具，该工具将复杂的证明状态分解为更简单、独立的分支，以及（ii）一个包含这些分解后中间状态的数据集。我们的白盒工具与黑盒方法相比具有几个优势：它简化了评估，减少了必要的上下文，生成了更丰富的训练数据，实现了跨多个状态的并行搜索，支持状态的高效重用，并在出错时提供反馈。我们的初步结果暗示，在某些设置下，白盒方法优于黑盒替代方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14722" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>高效、多模态与可编辑的大模型</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">真正的多模态上下文学习需要关注视觉上下文</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15807" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15807 - True Multimodal In-Context Learning Needs Attention to the Visual Context</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shuo Chen, Jianzhe Liu, Zhen Han, Yan Xia, Daniel Cremers, Philip Torr, Volker Tresp, Jindong Gu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">基于强大语言骨干模型构建的多模态大型语言模型（MLLM）实现了多模态上下文学习（MICL），即通过少量由图像、问题和答案组成的多模态示例来适应新任务。尽管在标准视觉语言数据集上表现出显著提升，但当前的MLLM在利用示例中的视觉信息方面仍然存在困难。具体来说，它们倾向于忽略视觉线索，过度依赖文本模式，导致仅仅是文本模仿而非真正的多模态适应。这种行为使得MICL本质上仍然是单模态的，并极大地限制了其实际应用价值。更重要的是，这一局限性常常被那些不需要理解视觉上下文的任务上的性能提升所掩盖。因此，如何有效增强MICL能力并可靠地评估其性能仍是未被充分探索的问题。为解决这些问题，我们首先引入了动态注意力重分配（DARA），这是一种高效的微调策略，通过重新平衡视觉和文本标记之间的注意力来鼓励模型关注视觉上下文。此外，我们提出了TrueMICL，这是一个专为MICL设计的包含支持集和测试集的数据集，它明确要求整合多模态信息——特别是视觉内容——才能正确完成任务。大量实验证明了我们整体解决方案的有效性，展示了在真正的多模态上下文学习能力上的显著提升。代码和数据集可在此 https URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15807" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SegQuant：一种用于扩散模型的语义感知且可泛化的量化框架</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14811" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14811 - SegQuant: A Semantics-Aware and Generalizable Quantization Framework for Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jiaji Zhang, Ruichao Sun, Hailiang Zhao, Jiaju Wu, Peng Chen, Hao Li, Xinkui Zhao, Kingsum Chow, Gang Xiong, Lin Ye, Shuiguang Deng</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">扩散模型展示了卓越的生成能力，但计算密集，这给在资源受限或延迟敏感环境中的部署带来了重大挑战。量化提供了一种有效的方法来减小模型大小和计算成本，其中训练后量化（PTQ）因其与预训练模型的兼容性而特别有吸引力，无需重新训练或训练数据。然而，现有的扩散模型PTQ方法通常依赖于特定于架构的启发式方法，这限制了它们的可泛化性，并阻碍了与工业部署流程的集成。为了解决这些限制，我们提出了SegQuant，一个统一的量化框架，它自适应地结合了互补技术以增强跨模型的通用性。SegQuant由一个分段感知、基于图的量化策略（SegLinear）和一个双尺度量化方案（DualScale）组成。SegLinear捕捉结构语义和空间异质性，而DualScale保留极性不对称的激活，这对于在生成输出中保持视觉保真度至关重要。SegQuant广泛适用于基于Transformer的扩散模型之外的模型，在实现强大性能的同时，确保了与主流部署工具的无缝兼容。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14811" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">DFQ-ViT：无需微调的视觉Transformer数据无关量化</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14481" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14481 - DFQ-ViT: Data-Free Quantization for Vision Transformers without Fine-tuning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yujia Tong, Jingling Yuan, Tian Zhang, Jianquan Liu, Chuang Hu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">数据无关量化（DFQ）能够在无需访问数据的情况下对视觉Transformer（ViT）进行量化，从而允许在资源有限的设备上部署ViT。在DFQ中，量化模型必须使用合成样本进行校准，因此这些合成样本的质量至关重要。现有方法未能充分捕捉和平衡样本中的全局和局部特征，导致合成数据质量有限。此外，我们发现，在推理过程中，量化模型和全精度模型的中间层激活分布存在显著差异。这些问题导致量化模型的性能严重下降。为了解决这些问题，我们提出了一个用于视觉Transformer的数据无关量化流程（DFQ-ViT）。具体来说，我们按难度递增的顺序合成样本，有效提升了合成数据的质量。在校准和推理阶段，我们为量化模型引入了激活校正矩阵，以使其各中间层激活与全精度模型对齐。大量实验表明，DFQ-ViT在性能上显著优于现有的DFQ方法，并且其性能与使用真实数据量化的模型相当。例如，DeiT-T模型在3比特权重下的量化性能比最先进的方法高出4.29%。我们的方法无需微调，这不仅减少了计算开销，还降低了在边缘设备上部署的门槛。这一特性符合绿色学习的原则，提高了能源效率，并促进了在资源受限环境中的实际应用。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14481" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LaCache：用于大型语言模型高效长上下文建模的阶梯形键值缓存</div>
+                                <div><a href="https://arxiv.org/pdf/2507.14204" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.14204 - LaCache: Ladder-Shaped KV Caching for Efficient Long-Context Modeling of Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Dachuan Shi, Yonggan Fu, Xiangchi Yuan, Zhongzhi Yu, Haoran You, Sixu Li, Xin Dong, Jan Kautz, Pavlo Molchanov, Yingyan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）的最新进展激发了人们对需要强大长距离能力的众多应用的兴趣，这对于处理大量输入上下文和持续生成扩展输出至关重要。随着序列长度的增加，LLM中的键值（KV）对数量激增，造成了显著的效率瓶颈。在本文中，我们提出了一种新的KV缓存优化范式，名为LaCache，这是一种无需训练的方法，用于LLM的高效准确生成式推理。LaCache使LLM能够同时解决长距离建模中的两个关键挑战：强大的长距离能力和在不耗尽内存（OOM）的情况下持续生成。具体而言，LaCache集成了两个关键创新：（1）一种阶梯形KV缓存模式，不仅按顺序存储KV对（在每层内从左到右），而且跨层存储（从浅层到深层），在固定的存储预算下为捕捉长距离依赖关系提供了扩展的跨度，从而增强了长距离能力；（2）一种迭代压缩机制，逐步压缩旧的缓存，在固定的缓存大小内为新词元释放空间。这种基于词元距离的动态压缩使得在受限的缓存预算下能够更有效地进行持续生成。在各种任务、基准和LLM模型上的实验一致验证了LaCache在增强LLM长距离能力方面的有效性。我们的代码可在此 https URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.14204" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">新的大语言模型瓶颈：从系统角度看潜在注意力和专家混合模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.15465" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15465 - The New LLM Bottleneck: A Systems Perspective on Latent Attention and Mixture-of-Experts</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Sungmin Yun, Seonyong Park, Hwayong Nam, Younjoo Lee, Gunjun Lee, Kwanhee Kyung, Sangpyo Kim, Nam Sung Kim, Jongmin Kim, Hyungyo Kim, Juhwan Cho, Seungmin Baek, Jung Ho Ahn</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">构成传统Transformer模型的计算工作负载被明显地分为两类。多头注意力（MHA）是内存受限的，算术强度低，而前馈层是计算受限的。这种二分法长期以来一直推动着对专用硬件的研究，以缓解MHA瓶颈。本文认为，最近的架构转变，即多头潜在注意力（MLA）和专家混合模型（MoE），挑战了专用注意力硬件的前提。我们有两个关键观察。首先，MLA的算术强度比MHA高出两个数量级以上，使其接近于非常适合现代加速器（如GPU）的计算受限区域。其次，通过在一组加速器中分配MoE专家，可以通过批处理调整其算术强度，使其与密集层相匹配，从而创造一个更平衡的计算配置。这些发现揭示了对专用注意力硬件的需求正在减少。下一代Transformer的核心挑战不再是加速单个内存受限层。相反，重点必须转移到设计具有足够计算能力、内存容量、内存带宽和高带宽互连的平衡系统，以管理大规模模型的不同需求。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.15465" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
