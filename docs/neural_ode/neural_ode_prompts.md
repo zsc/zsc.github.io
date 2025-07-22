@@ -1,0 +1,15 @@
+- 阅读 CLAUDE.md 并就地优化
+- 创建一个 CLAUDE.html，它是 CLAUDE.md 经由 LaTeX 渲染后的 HTML 版本
+- 接下来我们专注于改进 CLAUDE.html。它现在不错但太简略了，逐个修订每个部分，添加更多细节以帮助理解。我们可以用英语交流，但 HTML 内容始终是中文（在文档开头注明这一点）
+- 可以用 `echo "细说 neural ode 里的 adjoint state method"|llm -m gemini-2.5-pro` 获得更多相关信息。用这个方法加强一下 section 1
+- 可以用 `echo "细说 XXX"|llm -m gemini-2.5-pro` 获得更多相关信息。用这个方法加强一下 section 1
+- 始终使用 gemini-2.5-pro 模型，不要使用其他模型
+- 重试
+- 将 llm 超时增加到 5 分钟左右，然后继续优化其他部分。不间断地执行这些操作，直到完成整篇文章。
+- 现在向 gemini-2.5-pro 询问关于文档可读性的批判性意见，然后进行改进
+- 提交此版本，然后向 gemini-2.5-pro 询问关于文档可读性的批判性意见，并据此改进
+- 提交此版本，然后向 gemini-2.5-pro 询问关于文档可读性的批判性意见，并据此改进
+- 将一些非必要部分（如先决条件）设为可折叠
+- 将一些非必要部分（如先决条件）设为可折叠（并默认折叠）
+- 将这些见解整合到多个合适的章节中：“neural ode 之所以不用存中间步的 activation， 是不是因为它是个shared-weight 的 resnet，因为只有一份 weight，所以对 weight 的梯度只要累加起来就行，所以就没有保存各步 activation 从而来算出对 weight 的梯度的需求了？这个伴随法，就是 transformer/resnet 这些多层网络里常用的 checkpoint & recompute 的极端形式吧”。可以请求 gemini-2.5-pro 进行详细阐述。首先概述需要更新的章节，然后逐个章节进行更新。
+- 提交此版本，然后向 gemini-2.5-pro 询问关于文档可读性的批判性意见，并据此改进
