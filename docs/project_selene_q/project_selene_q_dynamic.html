@@ -395,7 +395,7 @@
             border-collapse: separate;
             border-spacing: 0;
             margin: 30px 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -416,6 +416,13 @@
             padding: 18px 20px;
             border-bottom: 1px solid #eee;
             transition: all 0.3s ease;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        td strong {
+            color: var(--accent-color);
+            font-weight: 700;
         }
         
         tr:last-child td {
@@ -423,8 +430,9 @@
         }
         
         tr:hover td {
-            background-color: rgba(0, 172, 193, 0.05);
+            background-color: rgba(0, 172, 193, 0.08);
             transform: scale(1.01);
+            color: #000;
         }
         
         /* Tech Specs */
@@ -559,6 +567,20 @@
             position: relative;
             overflow: hidden;
             text-align: center;
+            color: white;
+        }
+        
+        .conclusion h2 {
+            color: white;
+        }
+        
+        .conclusion p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .conclusion strong {
+            color: var(--success-color);
+            text-shadow: 0 0 10px rgba(67, 160, 71, 0.5);
         }
         
         .conclusion::before {
@@ -619,13 +641,22 @@
             }
             
             .nav-menu {
-                padding: 10px 20px;
+                width: 95%;
+                left: 2.5%;
+                transform: none;
+                padding: 10px 15px;
+                border-radius: 20px;
             }
             
             .nav-menu ul {
-                gap: 15px;
+                gap: 8px;
                 flex-wrap: wrap;
                 justify-content: center;
+            }
+            
+            .nav-menu a {
+                font-size: 0.75rem;
+                padding: 5px 8px;
             }
             
             .section {
@@ -637,11 +668,27 @@
             }
             
             table {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
             }
             
             th, td {
-                padding: 12px;
+                padding: 8px;
+                min-width: 100px;
+            }
+            
+            .container {
+                padding: 80px 15px 50px;
+            }
+            
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
             }
         }
         
