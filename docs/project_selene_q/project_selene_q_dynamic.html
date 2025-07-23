@@ -633,7 +633,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero-section {
-                padding-top: 100px; /* Add space for fixed navigation */
+                padding-top: 70px; /* Reduced since nav auto-hides */
             }
             
             .hero-title {
@@ -3364,6 +3364,44 @@ DTN传输单元
             const hero = document.querySelector('.hero-section');
             if (hero) {
                 hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+        });
+        
+        // Smart hide navigation on mobile
+        let lastScrollTop = 0;
+        let scrollThreshold = 5;
+        const navMenu = document.querySelector('.nav-menu');
+        
+        function handleNavVisibility() {
+            // Only apply on mobile devices
+            if (window.innerWidth > 768) {
+                navMenu.style.transform = 'translateX(-50%)';
+                return;
+            }
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Ignore small scroll movements
+            if (Math.abs(scrollTop - lastScrollTop) <= scrollThreshold) return;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide navigation
+                navMenu.style.transform = 'translateX(-50%) translateY(-120%)';
+            } else {
+                // Scrolling up - show navigation
+                navMenu.style.transform = 'translateX(-50%) translateY(0)';
+            }
+            
+            lastScrollTop = scrollTop;
+        }
+        
+        // Add scroll event listener for smart hide
+        window.addEventListener('scroll', handleNavVisibility);
+        
+        // Reset on resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                navMenu.style.transform = 'translateX(-50%)';
             }
         });
     </script>
