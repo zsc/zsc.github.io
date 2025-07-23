@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高中物理受力分析进阶教程</title>
+    <link rel="stylesheet" href="modern-styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>高中物理受力分析进阶教程</h1>
+            <p class="subtitle">从中坚到巅峰 - 掌握中难题解题精髓</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <nav>
+            <h2>目录</h2>
+            <ul>
+                <li><a href="#chapter1">第一章：基础回顾与思想升华</a></li>
+                <li><a href="#chapter2">第二章：核心分析方法论</a></li>
+                <li><a href="#chapter3">第三章：中难题核心模型突破</a></li>
+                <li><a href="#chapter4">第四章：弹簧弹力专题深度解析</a></li>
+                <li><a href="#chapter5">第五章：综合应用与解题策略升维</a></li>
+            </ul>
+        </nav>
+        
+        <div class="important">
+            <h4>核心理念</h4>
+            <p>受力分析不是"看图说话"，而是遵循"程序、逻辑、模型"的严谨科学。本教程旨在打破学生"凭感觉"分析的瓶颈，建立一套系统化、模型化的解题思维体系。</p>
+        </div>
+        
+        <!-- 第一章：基础回顾与思想升华 -->
+        <div class="chapter" id="chapter1">
+            <h2 data-chapter="1">第一章：基础回顾与思想升华（地基篇）</h2>
+            
+            <div class="tip">
+                <h4>目标</h4>
+                <p>纠正不良习惯，建立"程序化"分析思维，确保基础分不失。</p>
+            </div>
+            
+            <h3>1.1 受力分析的"金科玉律"</h3>
+            
+            <h4>力的科学分类方法</h4>
+            <p>为了系统地进行受力分析，我们需要对力进行科学的分类。这里介绍两种并行使用的分类方法：</p>
+            
+            <div class="example">
+                <h5>按力的性质分类</h5>
+                <p>这是最基本、最科学的分类方法，帮助我们理解每种力的来源和特点：</p>
+                <ul>
+                    <li><strong>重力 (G)</strong>：地球对物体的吸引力，G = mg，方向永远竖直向下</li>
+                    <li><strong>弹力 (N)</strong>：物体发生弹性形变时产生的力，包括支持力、压力、拉力等</li>
+                    <li><strong>摩擦力 (f)</strong>：两个接触面间阻碍相对运动或相对运动趋势的力</li>
+                    <li><strong>电场力 (F<sub>e</sub>)</strong>：带电体在电场中受到的力，F<sub>e</sub> = qE</li>
+                    <li><strong>磁场力 (F<sub>B</sub>)</strong>：运动电荷或通电导线在磁场中受到的力</li>
+                </ul>
+            </div>
+            
+            <div class="example">
+                <h5>按是否接触分类</h5>
+                <p>这种分类方法有助于建立清晰的分析步骤：</p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">类型</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">特点</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">常见力</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">分析要点</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>非接触力（场力）</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">不需要接触即可产生</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">重力、电场力、磁场力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">只要在场中就存在</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>接触力</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">必须接触才能产生</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">弹力、摩擦力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">检查所有接触点</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="tip">
+                <h5>分析顺序口诀</h5>
+                <p><strong>"先画重力，再找接触；有接触，就可能有弹力和摩擦力。"</strong></p>
+                <p>这个顺序既科学又实用，能有效避免遗漏力的情况。</p>
+            </div>
+            
+            <h4>力的矢量性</h4>
+            <div class="important">
+                <p><strong>核心概念：</strong>力是矢量，既有大小又有方向。画受力图的过程，本质上就是在确定作用在物体上的所有矢量。</p>
+                <p>在受力分析中，我们必须同时关注：</p>
+                <ul>
+                    <li>力的大小（用箭头长短表示）</li>
+                    <li>力的方向（用箭头指向表示）</li>
+                    <li>力的作用点（虽然常简化到质心）</li>
+                </ul>
+            </div>
+            
+            <h4>受力图（FBD）的"洁癖"原则</h4>
+            
+            <div class="important">
+                <h5>黄金三步法 + 一个核心原则</h5>
+                <p><strong>核心原则：隔离物体（Isolate the Body）</strong></p>
+                <p>在分析任何一个物体的受力时，必须先把它从周围的环境中"隔离"出来，只分析<strong>其他物体对它</strong>的力。</p>
+            </div>
+            
+            <div class="tip">
+                <h5>画受力图的完整步骤</h5>
+                <ol>
+                    <li><strong>明确对象，画隔离体</strong>
+                        <p>选定研究对象，想象把它从周围环境中"抠"出来，单独分析。</p>
+                    </li>
+                    <li><strong>先画场力，再找接触</strong>
+                        <ul>
+                            <li>画出重力 G（竖直向下，作用在重心）</li>
+                            <li>检查是否有其他场力（电场力、磁场力）</li>
+                            <li>沿对象边界"走一圈"，检查所有接触点/面</li>
+                        </ul>
+                    </li>
+                    <li><strong>分析接触，判断弹摩</strong>
+                        <p>对每个接触点：</p>
+                        <ul>
+                            <li><strong>判断弹力：</strong>有挤压？→ 有弹力N，垂直于接触面指向被研究对象</li>
+                            <li><strong>判断摩擦力：</strong>
+                                <ul>
+                                    <li>三个条件：①接触面粗糙 ②有正压力 ③有相对运动（趋势）</li>
+                                    <li>方向：与相对运动（趋势）方向相反</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>检查其他已知力</strong>
+                        <p>如绳子的拉力T、人为施加的推力F等</p>
+                    </li>
+                    <li><strong>规范标注与最终校验</strong>
+                        <ul>
+                            <li>为每个力标上标准符号（G、N、f、T、F等）</li>
+                            <li>检查：每个力都能找到施力物体吗？</li>
+                            <li>提醒：只画"别人给我的力"，不画"我给别人的力"</li>
+                            <li>禁忌：不画分力、合力、"惯性力"、"向心力"</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="important">
+                <h5>牛顿第三定律的提醒</h5>
+                <p>记住：你画的每一个力，都有一个等大反向的反作用力作用在施力物体上。虽然在受力图中不画反作用力，但这个意识对理解力的本质和解决连接体问题至关重要。</p>
+                <p><strong>作用力与反作用力 vs 平衡力：</strong></p>
+                <ul>
+                    <li>作用力与反作用力：作用在<strong>不同物体</strong>上，性质相同</li>
+                    <li>平衡力：作用在<strong>同一物体</strong>上，合力为零</li>
+                </ul>
+            </div>
+            
+            <h3>1.2 弹力与摩擦力的再认识</h3>
+            
+            <div class="example">
+                <h5>例子1：静止在水平桌面上的木块</h5>
+                <div class="physics-diagram">
+                    <svg width="300" height="200" viewBox="0 0 300 200">
+                        <!-- 桌面 -->
+                        <rect x="50" y="140" width="200" height="10" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                        <!-- 木块 -->
+                        <rect x="100" y="90" width="100" height="50" fill="#DEB887" stroke="#A0522D" stroke-width="2"/>
+                        <!-- 重力 -->
+                        <line x1="150" y1="115" x2="150" y2="165" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred)"/>
+                        <text x="160" y="145" fill="#FF0000" font-size="16" font-weight="bold">G</text>
+                        <!-- 支持力 -->
+                        <line x1="150" y1="115" x2="150" y2="65" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue)"/>
+                        <text x="160" y="80" fill="#0000FF" font-size="16" font-weight="bold">N</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p><strong>分析过程：</strong></p>
+                <ol>
+                    <li>隔离物体：木块</li>
+                    <li>主动力：重力 G（竖直向下）</li>
+                    <li>被动力：支持力 N（垂直接触面向上），无摩擦力（无相对运动趋势）</li>
+                    <li>检查：G（地球施加），N（桌面施加）✓</li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>例子2：静止在粗糙斜面上的木块</h5>
+                <div class="physics-diagram">
+                    <svg width="350" height="250" viewBox="0 0 350 250">
+                        <!-- 斜面 -->
+                        <polygon points="50,200 250,200 250,100" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                        <!-- 木块 -->
+                        <rect x="130" y="120" width="60" height="60" fill="#DEB887" stroke="#A0522D" stroke-width="2" transform="rotate(-30 160 150)"/>
+                        <!-- 重力（竖直向下） -->
+                        <line x1="160" y1="135" x2="160" y2="195" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred2)"/>
+                        <text x="170" y="170" fill="#FF0000" font-size="16" font-weight="bold">G</text>
+                        <!-- 支持力（垂直斜面向上） -->
+                        <line x1="160" y1="135" x2="120" y2="90" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue2)"/>
+                        <text x="95" y="85" fill="#0000FF" font-size="16" font-weight="bold">N</text>
+                        <!-- 摩擦力（沿斜面向上） -->
+                        <line x1="160" y1="135" x2="105" y2="165" stroke="#00AA00" stroke-width="3" marker-end="url(#arrowgreen)"/>
+                        <text x="80" y="160" fill="#00AA00" font-size="16" font-weight="bold">f</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                            <marker id="arrowgreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p><strong>分析过程：</strong></p>
+                <ol>
+                    <li>隔离物体：木块</li>
+                    <li>主动力：重力 G（<strong>永远竖直向下</strong>！）</li>
+                    <li>被动力：
+                        <ul>
+                            <li>支持力 N（垂直斜面向上）</li>
+                            <li>静摩擦力 f（沿斜面向上，阻止下滑趋势）</li>
+                        </ul>
+                    </li>
+                    <li>检查：G（地球），N（斜面），f（斜面）✓</li>
+                </ol>
+                <div class="important">
+                    <p><strong>特别提醒：</strong>重力方向永远是竖直向下，不要画成垂直斜面向下！</p>
+                </div>
+            </div>
+            
+            <div class="quiz">
+                <h5>思考题</h5>
+                <p>一个木块放在水平传送带上，传送带以恒定速度向右运动。当木块刚放上去时（初速度为0），它受到的摩擦力方向是？</p>
+                <details>
+                    <summary>查看答案</summary>
+                    <p>摩擦力方向向右。因为木块相对于传送带向左运动（木块速度小于传送带速度），所以受到向右的滑动摩擦力，使木块加速。</p>
+                </details>
+            </div>
+            
+            <h3>1.3 挑战性例题：破除思维定势</h3>
+            
+            <div class="example">
+                <h5>例子3：支持力不等于重力的情况</h5>
+                <p>一个质量为m的物体放在水平地面上，用一个斜向下的力F（与水平方向成θ角）压住物体，物体保持静止。</p>
+                <div class="physics-diagram">
+                    <svg width="350" height="250" viewBox="0 0 350 250">
+                        <!-- 地面 -->
+                        <rect x="50" y="180" width="250" height="10" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                        <!-- 物体 -->
+                        <rect x="125" y="130" width="100" height="50" fill="#DEB887" stroke="#A0522D" stroke-width="2"/>
+                        <!-- 重力 -->
+                        <line x1="175" y1="155" x2="175" y2="205" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred3)"/>
+                        <text x="185" y="185" fill="#FF0000" font-size="16" font-weight="bold">mg</text>
+                        <!-- 外力F -->
+                        <line x1="175" y1="155" x2="225" y2="185" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple)"/>
+                        <text x="230" y="180" fill="#9932CC" font-size="16" font-weight="bold">F</text>
+                        <!-- 角度标注 -->
+                        <path d="M 195 155 A 20 20 0 0 1 205 165" stroke="#666" stroke-width="1.5" fill="none"/>
+                        <text x="210" y="160" fill="#666" font-size="14">θ</text>
+                        <!-- 支持力 -->
+                        <line x1="175" y1="155" x2="175" y2="105" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue3)"/>
+                        <text x="185" y="120" fill="#0000FF" font-size="16" font-weight="bold">N</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                            <marker id="arrowpurple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="important">
+                    <p><strong>关键认识：</strong>支持力 N ≠ mg！</p>
+                    <p>竖直方向受力平衡：N = mg + Fsinθ</p>
+                    <p>支持力大于重力，因为外力F有向下的分量。</p>
+                </div>
+            </div>
+            
+            <div class="example">
+                <h5>例子4：静摩擦力方向的判断</h5>
+                <p>一个物体靠在竖直墙壁上，用水平力F压住它使其静止。分析物体的受力情况。</p>
+                <div class="physics-diagram">
+                    <svg width="300" height="300" viewBox="0 0 300 300">
+                        <!-- 墙壁 -->
+                        <rect x="40" y="50" width="10" height="200" fill="#A9A9A9" stroke="#696969" stroke-width="2"/>
+                        <!-- 物体 -->
+                        <rect x="50" y="120" width="80" height="80" fill="#DEB887" stroke="#A0522D" stroke-width="2"/>
+                        <!-- 重力 -->
+                        <line x1="90" y1="160" x2="90" y2="220" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred4)"/>
+                        <text x="100" y="195" fill="#FF0000" font-size="16" font-weight="bold">mg</text>
+                        <!-- 推力F -->
+                        <line x1="130" y1="160" x2="190" y2="160" stroke="#9932CC" stroke-width="3" marker-start="url(#arrowpurple2)"/>
+                        <text x="200" y="165" fill="#9932CC" font-size="16" font-weight="bold">F</text>
+                        <!-- 支持力（墙对物体） -->
+                        <line x1="90" y1="160" x2="30" y2="160" stroke="#0000FF" stroke-width="3" marker-start="url(#arrowblue4)"/>
+                        <text x="5" y="165" fill="#0000FF" font-size="16" font-weight="bold">N</text>
+                        <!-- 摩擦力（向上） -->
+                        <line x1="90" y1="160" x2="90" y2="100" stroke="#00AA00" stroke-width="3" marker-end="url(#arrowgreen2)"/>
+                        <text x="100" y="115" fill="#00AA00" font-size="16" font-weight="bold">f</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue4" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M9,0 L9,6 L0,3 z" fill="#0000FF" />
+                            </marker>
+                            <marker id="arrowgreen2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                            <marker id="arrowpurple2" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M9,0 L9,6 L0,3 z" fill="#9932CC" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p><strong>分析要点：</strong></p>
+                <ul>
+                    <li>水平方向：N = F（墙对物体的支持力等于推力）</li>
+                    <li>竖直方向：f = mg（摩擦力竖直向上，平衡重力）</li>
+                    <li><strong>思维突破：</strong>摩擦力不一定在水平方向！这里摩擦力是竖直向上的。</li>
+                </ul>
+            </div>
+            
+            <div class="quiz">
+                <h5>综合思考题</h5>
+                <p>传送带以速度v向右匀速运动，一个木块以速度2v向右滑上传送带。问：</p>
+                <ol>
+                    <li>木块刚滑上传送带时，受到的摩擦力方向？</li>
+                    <li>当木块速度减小到v时，摩擦力如何？</li>
+                    <li>如果传送带足够长，最终木块的运动状态？</li>
+                </ol>
+                <details>
+                    <summary>查看答案</summary>
+                    <ol>
+                        <li>摩擦力向左。木块相对传送带向右运动（2v-v=v），受到向左的滑动摩擦力。</li>
+                        <li>摩擦力变为0。木块与传送带速度相同，无相对运动，无摩擦力。</li>
+                        <li>木块与传送带一起以速度v向右匀速运动，无摩擦力。</li>
+                    </ol>
+                </details>
+            </div>
+            
+            <div class="interactive-demo">
+                <h5>小结：受力分析口诀</h5>
+                <p style="font-size: 1.2em; line-height: 2;">
+                    一隔离，二重力<br>
+                    三找接触判弹力<br>
+                    四看运动判摩擦<br>
+                    五查施力不臆造
+                </p>
+            </div>
+            
+            <div class="tip">
+                <h5>建模思想</h5>
+                <p>受力分析本身就是一个<strong>物理建模</strong>的过程。我们将实际的物体简化为<strong>质点</strong>，将复杂的表面相互作用简化为明确的<strong>弹力</strong>和<strong>摩擦力</strong>。这种简化让我们能用数学工具来描述和预测物理现象。</p>
+            </div>
+        </div>
+        
+        <!-- 第二章：核心分析方法论 -->
+        <div class="chapter" id="chapter2">
+            <h2 data-chapter="2">第二章：核心分析方法论（武器篇）</h2>
+            
+            <div class="tip">
+                <h4>目标</h4>
+                <p>熟练掌握处理复杂系统和多力问题的两大核心方法：正交分解法和整体法与隔离法。</p>
+            </div>
+            
+            <h3>2.1 正交分解法——"化整为零"的艺术</h3>
+            
+            <div class="important">
+                <h5>核心思想</h5>
+                <p>将一个矢量（通常是力或加速度）分解到两个相互垂直的坐标轴上，把复杂的二维平面问题转化为两个独立的一维直线问题。</p>
+                <div class="formula">
+                    x轴方向：F<sub>合x</sub> = ma<sub>x</sub><br>
+                    y轴方向：F<sub>合y</sub> = ma<sub>y</sub>
+                </div>
+            </div>
+            
+            <h4>如何选择坐标轴？【核心技巧】</h4>
+            
+            <div class="example">
+                <h5>坐标轴选择的黄金原则</h5>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">原则</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">适用情况</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">优势</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>原则一（首选）</strong><br>沿加速度方向建轴</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">物体有明确的加速度方向</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">一个方向变为平衡方程<br>F<sub>合⊥</sub> = 0</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>原则二（备选）</strong><br>让更多力落在轴上</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">静止或匀速直线运动<br>（a = 0）</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">减少力的分解<br>降低计算复杂度</td>
+                    </tr>
+                </table>
+                <div class="tip" style="margin-top: 15px;">
+                    <p><strong>口诀：有加速度，就沿加速度方向建轴；无加速度，就让尽量多的力免于分解。</strong></p>
+                </div>
+            </div>
+            
+            <div class="example">
+                <h5>典型例题：斜面上的加速物块</h5>
+                <p><strong>题目：</strong>质量m = 2kg的物块，在与水平方向成θ = 37°角的恒力F = 20N作用下，沿粗糙水平地面向右做匀加速直线运动。物块与地面间的动摩擦因数μ = 0.5。求物块的加速度a和地面对物块的支持力N。</p>
+                <p>（g = 10 m/s²，sin37° = 0.6，cos37° = 0.8）</p>
+                
+                <div class="physics-diagram">
+                    <svg width="400" height="250" viewBox="0 0 400 250">
+                        <!-- 地面 -->
+                        <rect x="50" y="180" width="300" height="10" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+                        <!-- 物块 -->
+                        <rect x="150" y="130" width="80" height="50" fill="#DEB887" stroke="#A0522D" stroke-width="2"/>
+                        <!-- 重力 -->
+                        <line x1="190" y1="155" x2="190" y2="215" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred5)"/>
+                        <text x="200" y="195" fill="#FF0000" font-size="14" font-weight="bold">mg</text>
+                        <!-- 支持力 -->
+                        <line x1="190" y1="155" x2="190" y2="95" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue5)"/>
+                        <text x="200" y="110" fill="#0000FF" font-size="14" font-weight="bold">N</text>
+                        <!-- 拉力F -->
+                        <line x1="190" y1="155" x2="260" y2="115" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple3)"/>
+                        <text x="265" y="115" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        <!-- 摩擦力 -->
+                        <line x1="190" y1="155" x2="130" y2="155" stroke="#00AA00" stroke-width="3" marker-end="url(#arrowgreen3)"/>
+                        <text x="105" y="160" fill="#00AA00" font-size="14" font-weight="bold">f</text>
+                        <!-- 坐标轴 -->
+                        <line x1="190" y1="155" x2="320" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="5,5" marker-end="url(#arrowblack)"/>
+                        <text x="325" y="160" fill="#333" font-size="12">x</text>
+                        <line x1="190" y1="155" x2="190" y2="50" stroke="#333" stroke-width="1" stroke-dasharray="5,5" marker-end="url(#arrowblack)"/>
+                        <text x="195" y="45" fill="#333" font-size="12">y</text>
+                        <!-- 角度标注 -->
+                        <path d="M 210 155 A 20 20 0 0 0 220 140" stroke="#666" stroke-width="1.5" fill="none"/>
+                        <text x="225" y="150" fill="#666" font-size="12">37°</text>
+                        <!-- 加速度方向 -->
+                        <line x1="260" y1="190" x2="310" y2="190" stroke="#FF6347" stroke-width="4" marker-end="url(#arroworange)"/>
+                        <text x="315" y="195" fill="#FF6347" font-size="14" font-weight="bold">a</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                            <marker id="arrowgreen3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                            <marker id="arrowpurple3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                            <marker id="arrowblack" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#333" />
+                            </marker>
+                            <marker id="arroworange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF6347" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <h6>解题步骤：</h6>
+                <ol>
+                    <li><strong>受力分析</strong>
+                        <ul>
+                            <li>重力 G = mg = 20N（竖直向下）</li>
+                            <li>支持力 N（竖直向上）</li>
+                            <li>拉力 F = 20N（与水平成37°角）</li>
+                            <li>滑动摩擦力 f = μN（水平向左）</li>
+                        </ul>
+                    </li>
+                    <li><strong>选择坐标轴</strong>
+                        <p>加速度方向明确：水平向右。根据原则一，建立水平x轴（向右为正）和竖直y轴（向上为正）。</p>
+                    </li>
+                    <li><strong>正交分解</strong>
+                        <ul>
+                            <li>F<sub>x</sub> = Fcos37° = 20 × 0.8 = 16N</li>
+                            <li>F<sub>y</sub> = Fsin37° = 20 × 0.6 = 12N</li>
+                        </ul>
+                    </li>
+                    <li><strong>列方程求解</strong>
+                        <div class="formula">
+                            y方向（平衡）：N + F<sub>y</sub> - mg = 0<br>
+                            N + 12 - 20 = 0<br>
+                            <strong>N = 8N</strong>
+                        </div>
+                        <div class="formula">
+                            x方向（加速）：F<sub>x</sub> - f = ma<br>
+                            其中 f = μN = 0.5 × 8 = 4N<br>
+                            16 - 4 = 2a<br>
+                            <strong>a = 6 m/s²</strong>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            
+            <h3>2.2 整体法与隔离法——"宏观与微观"的切换</h3>
+            
+            <div class="example">
+                <h5>方法对比</h5>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">方法</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">核心思想</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">优点</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">缺点</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>整体法</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">将系统看作一个整体<br>忽略内力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">求系统加速度最快<br>方程简单</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">无法求内力</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>隔离法</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">分析单个物体<br>考虑所有作用力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">可以求内力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">方程较多<br>计算复杂</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="important">
+                <h5>使用策略【黄金法则】</h5>
+                <ol>
+                    <li><strong>判断能否用整体法</strong>
+                        <p>唯一条件：系统内所有物体的<strong>加速度大小和方向必须完全相同</strong></p>
+                    </li>
+                    <li><strong>根据所求选择方法</strong>
+                        <ul>
+                            <li>只求系统加速度 → 优先用<strong>整体法</strong></li>
+                            <li>要求内力（拉力、压力等） → 必须用<strong>隔离法</strong></li>
+                            <li>既求加速度又求内力 → 先整体后隔离</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>典型例题：连接体问题</h5>
+                <p><strong>题目：</strong>光滑水平面上，质量m<sub>A</sub> = 2kg和m<sub>B</sub> = 3kg的两物体用轻绳连接。用水平力F = 10N拉物体B，求：</p>
+                <ol>
+                    <li>系统的加速度a</li>
+                    <li>绳子的拉力T</li>
+                </ol>
+                
+                <div class="physics-diagram">
+                    <svg width="450" height="200" viewBox="0 0 450 200">
+                        <!-- 地面 -->
+                        <line x1="50" y1="150" x2="400" y2="150" stroke="#666" stroke-width="2"/>
+                        <!-- 物体A -->
+                        <rect x="100" y="100" width="80" height="50" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <text x="130" y="130" fill="#333" font-size="16" font-weight="bold">A</text>
+                        <text x="115" y="170" fill="#333" font-size="14">2kg</text>
+                        <!-- 物体B -->
+                        <rect x="220" y="100" width="80" height="50" fill="#FFB6C1" stroke="#DC143C" stroke-width="2"/>
+                        <text x="250" y="130" fill="#333" font-size="16" font-weight="bold">B</text>
+                        <text x="235" y="170" fill="#333" font-size="14">3kg</text>
+                        <!-- 绳子 -->
+                        <line x1="180" y1="125" x2="220" y2="125" stroke="#8B4513" stroke-width="3"/>
+                        <!-- 拉力F -->
+                        <line x1="300" y1="125" x2="360" y2="125" stroke="#9932CC" stroke-width="4" marker-end="url(#arrowpurple4)"/>
+                        <text x="365" y="130" fill="#9932CC" font-size="16" font-weight="bold">F = 10N</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowpurple4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <h6>解题过程：</h6>
+                
+                <div class="tip">
+                    <p><strong>(1) 求系统加速度a——使用整体法</strong></p>
+                    <ul>
+                        <li>A和B加速度相同，可用整体法</li>
+                        <li>整体质量：M = m<sub>A</sub> + m<sub>B</sub> = 5kg</li>
+                        <li>整体受力：只有外力F = 10N</li>
+                        <li>由F = Ma得：a = F/M = 10/5 = <strong>2 m/s²</strong></li>
+                    </ul>
+                </div>
+                
+                <div class="tip">
+                    <p><strong>(2) 求绳子拉力T——使用隔离法</strong></p>
+                    <p>隔离物体A（受力较简单）：</p>
+                    <ul>
+                        <li>A只受绳子拉力T（水平向右）</li>
+                        <li>对A应用牛顿第二定律：T = m<sub>A</sub>·a</li>
+                        <li>T = 2 × 2 = <strong>4N</strong></li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>验证：</strong>隔离物体B</p>
+                    <ul>
+                        <li>B受拉力F（向右）和绳子拉力T（向左）</li>
+                        <li>F - T = m<sub>B</sub>·a</li>
+                        <li>10 - T = 3 × 2</li>
+                        <li>T = 4N ✓</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="quiz">
+                <h5>思考题</h5>
+                <p>三个相同的物块A、B、C叠放在光滑水平面上，用水平力F拉最下面的C。问：</p>
+                <ol>
+                    <li>能否用整体法求系统加速度？</li>
+                    <li>如何求A和B之间的摩擦力？</li>
+                    <li>如果C与地面有摩擦，分析方法有何改变？</li>
+                </ol>
+                <details>
+                    <summary>查看提示</summary>
+                    <p>1. 可以，因为三个物体一起运动，加速度相同</p>
+                    <p>2. 隔离A，A受到的摩擦力提供其加速度</p>
+                    <p>3. 仍可用整体法，但要考虑地面摩擦力这个外力</p>
+                </details>
+            </div>
+            
+            <div class="interactive-demo">
+                <h5>方法选择流程图</h5>
+                <p style="text-align: center; font-size: 1.1em; line-height: 2;">
+                    系统内加速度相同？<br>
+                    ↓ 是　　　　↓ 否<br>
+                    求什么？　　必须隔离法<br>
+                    ↓ 加速度　　↓ 内力<br>
+                    整体法　　　隔离法<br>
+                    　　　　　　↓<br>
+                    　　　先整体后隔离
+                </p>
+            </div>
+        </div>
+        
+        <!-- 第三章：中难题核心模型突破 -->
+        <div class="chapter" id="chapter3">
+            <h2 data-chapter="3">第三章：中难题核心模型突破（模型篇）</h2>
+            
+            <div class="tip">
+                <h4>目标</h4>
+                <p>将繁杂的问题归纳为有限的物理模型，学会识别并套用。重点掌握临界与极值问题、瞬时问题的分析方法。</p>
+            </div>
+            
+            <h3>3.1 临界与极值问题——"恰好"状态的数学表达</h3>
+            
+            <div class="important">
+                <h5>核心思想</h5>
+                <p>临界问题的本质是分析一个物理过程的<strong>转折点</strong>。当某个物理量变化时，物体的运动状态也随之变化。临界状态就是这两种状态的分界点。</p>
+                <p><strong>关键词识别：</strong>"刚好"、"恰好"、"至多"、"至少"、"最大"、"最小"</p>
+            </div>
+            
+            <h4>临界条件总结</h4>
+            <div class="example">
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">临界状态</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">临界条件</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">数学表达</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">即将滑动</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">静摩擦力达到最大值</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">f<sub>s</sub> = μ<sub>s</sub>N</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">即将脱离接触</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">接触面弹力为零</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">N = 0</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">绳子即将断裂</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">拉力达到最大值</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">T = T<sub>max</sub></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">圆周运动最高点</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">仅重力提供向心力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">mg = mv²/r</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="example">
+                <h5>例题1：斜面上物体的临界滑动</h5>
+                <p><strong>题目：</strong>质量m = 2kg的物体放在倾角θ = 37°的斜面上，静摩擦因数μ<sub>s</sub> = 0.5。用平行于斜面向上的力F拉物体，求：</p>
+                <ol>
+                    <li>使物体保持静止，F的取值范围</li>
+                    <li>若F = 25N，物体的加速度（动摩擦因数μ<sub>k</sub> = 0.3）</li>
+                </ol>
+                <p>（g = 10m/s²，sin37° = 0.6，cos37° = 0.8）</p>
+                
+                <div class="physics-diagram">
+                    <svg width="400" height="300" viewBox="0 0 400 300">
+                        <!-- 斜面 -->
+                        <polygon points="50,250 350,250 350,100" fill="#D2B48C" stroke="#8B4513" stroke-width="2"/>
+                        <!-- 物体 -->
+                        <rect x="180" y="140" width="60" height="60" fill="#87CEEB" stroke="#4682B4" stroke-width="2" transform="rotate(-37 210 170)"/>
+                        <!-- 力的箭头 -->
+                        <!-- 重力 -->
+                        <line x1="210" y1="170" x2="210" y2="230" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred6)"/>
+                        <text x="220" y="210" fill="#FF0000" font-size="14" font-weight="bold">mg</text>
+                        <!-- 支持力 -->
+                        <line x1="210" y1="170" x2="170" y2="120" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue6)"/>
+                        <text x="145" y="115" fill="#0000FF" font-size="14" font-weight="bold">N</text>
+                        <!-- 拉力F -->
+                        <line x1="210" y1="170" x2="270" y2="130" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple5)"/>
+                        <text x="275" y="130" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        <!-- 摩擦力（两种情况） -->
+                        <line x1="210" y1="170" x2="150" y2="210" stroke="#00AA00" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowgreen4)"/>
+                        <text x="125" y="205" fill="#00AA00" font-size="12">f<sub>向上</sub></text>
+                        <line x1="210" y1="170" x2="270" y2="210" stroke="#00AA00" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowgreen5)"/>
+                        <text x="275" y="215" fill="#00AA00" font-size="12">f<sub>向下</sub></text>
+                        <!-- 角度标注 -->
+                        <path d="M 320 250 A 30 30 0 0 0 345 230" stroke="#666" stroke-width="1.5" fill="none"/>
+                        <text x="340" y="245" fill="#666" font-size="12">37°</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowred6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                            <marker id="arrowpurple5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                            <marker id="arrowgreen4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                            <marker id="arrowgreen5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <h6>解答：</h6>
+                <p><strong>(1) 静止时F的范围</strong></p>
+                <ul>
+                    <li>垂直斜面：N = mgcosθ = 2×10×0.8 = 16N</li>
+                    <li>最大静摩擦力：f<sub>max</sub> = μ<sub>s</sub>N = 0.5×16 = 8N</li>
+                    <li>重力沿斜面分量：mgsinθ = 2×10×0.6 = 12N</li>
+                </ul>
+                
+                <div class="tip">
+                    <p><strong>临界状态一：即将下滑（F最小）</strong></p>
+                    <p>摩擦力沿斜面向上，达到最大值</p>
+                    <div class="formula">
+                        F<sub>min</sub> + f<sub>max</sub> = mgsinθ<br>
+                        F<sub>min</sub> + 8 = 12<br>
+                        F<sub>min</sub> = 4N
+                    </div>
+                </div>
+                
+                <div class="tip">
+                    <p><strong>临界状态二：即将上滑（F最大）</strong></p>
+                    <p>摩擦力沿斜面向下，达到最大值</p>
+                    <div class="formula">
+                        F<sub>max</sub> = mgsinθ + f<sub>max</sub><br>
+                        F<sub>max</sub> = 12 + 8<br>
+                        F<sub>max</sub> = 20N
+                    </div>
+                </div>
+                
+                <p><strong>答案：4N ≤ F ≤ 20N</strong></p>
+                
+                <p><strong>(2) F = 25N时的加速度</strong></p>
+                <p>F > F<sub>max</sub>，物体向上滑动，受滑动摩擦力</p>
+                <div class="formula">
+                    f<sub>k</sub> = μ<sub>k</sub>N = 0.3×16 = 4.8N<br>
+                    F - mgsinθ - f<sub>k</sub> = ma<br>
+                    25 - 12 - 4.8 = 2a<br>
+                    a = 4.1 m/s²（沿斜面向上）
+                </div>
+            </div>
+            
+            <h3>3.2 瞬时问题——抓住"不变"与"突变"</h3>
+            
+            <div class="important">
+                <h5>瞬时问题的黄金法则</h5>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #fff5f5;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">力的类型</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">瞬时变化特性</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">原因</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;"><strong>弹簧弹力</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; color: #d32f2f;"><strong>不突变</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">形变量不能瞬时改变</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">绳子拉力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; color: #1976d2;">可突变</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">约束条件改变</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">接触面弹力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; color: #1976d2;">可突变</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">接触状态改变</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">摩擦力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px; color: #1976d2;">可突变</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">随正压力突变</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="tip">
+                <h5>解题三步曲</h5>
+                <ol>
+                    <li><strong>分析变化前：</strong>求出各力大小，特别是弹簧弹力</li>
+                    <li><strong>分析变化后瞬间：</strong>哪些力消失/突变，哪些力保持不变</li>
+                    <li><strong>应用牛顿第二定律：</strong>求瞬时加速度</li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>例题2：竖直悬挂系统的瞬时问题</h5>
+                <p><strong>题目：</strong>两个质量分别为m<sub>A</sub> = 1kg和m<sub>B</sub> = 2kg的物块，用轻质弹簧连接后用细绳悬挂，系统静止。剪断细绳瞬间，求A、B的加速度。</p>
+                
+                <div class="physics-diagram">
+                    <svg width="300" height="400" viewBox="0 0 300 400">
+                        <!-- 天花板 -->
+                        <line x1="50" y1="50" x2="250" y2="50" stroke="#666" stroke-width="3"/>
+                        <!-- 细绳 -->
+                        <line x1="150" y1="50" x2="150" y2="100" stroke="#8B4513" stroke-width="2"/>
+                        <!-- 物块A -->
+                        <circle cx="150" cy="120" r="20" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <text x="145" y="125" fill="#333" font-size="14" font-weight="bold">A</text>
+                        <text x="170" y="125" fill="#333" font-size="12">1kg</text>
+                        <!-- 弹簧 -->
+                        <path d="M 150 140 Q 140 150 150 160 Q 160 170 150 180 Q 140 190 150 200 Q 160 210 150 220" 
+                              stroke="#666" stroke-width="2" fill="none"/>
+                        <!-- 物块B -->
+                        <circle cx="150" cy="250" r="30" fill="#FFB6C1" stroke="#DC143C" stroke-width="2"/>
+                        <text x="145" y="255" fill="#333" font-size="14" font-weight="bold">B</text>
+                        <text x="170" y="255" fill="#333" font-size="12">2kg</text>
+                        
+                        <!-- 剪刀符号 -->
+                        <text x="170" y="80" fill="#FF0000" font-size="20">✂</text>
+                        
+                        <!-- 力的标注（剪断前） -->
+                        <text x="20" y="30" fill="#333" font-size="14" font-weight="bold">剪断前：</text>
+                        <text x="20" y="120" fill="#666" font-size="12">绳：T = 30N</text>
+                        <text x="20" y="190" fill="#666" font-size="12">弹簧：F = 20N</text>
+                        <text x="20" y="260" fill="#666" font-size="12">B重力：20N</text>
+                    </svg>
+                </div>
+                
+                <h6>解答：</h6>
+                <p><strong>第一步：分析剪断前（平衡态）</strong></p>
+                <ul>
+                    <li>对B：F<sub>弹簧</sub> = m<sub>B</sub>g = 2×10 = 20N（向上）</li>
+                    <li>对整体：T = (m<sub>A</sub> + m<sub>B</sub>)g = 3×10 = 30N</li>
+                </ul>
+                
+                <p><strong>第二步：剪断瞬间的受力变化</strong></p>
+                <ul>
+                    <li>绳子拉力T：30N → 0（突变）</li>
+                    <li>弹簧弹力F<sub>弹簧</sub>：20N（<strong style="color: #d32f2f;">保持不变</strong>）</li>
+                </ul>
+                
+                <p><strong>第三步：求瞬时加速度</strong></p>
+                <div class="formula">
+                    对A：F<sub>合A</sub> = m<sub>A</sub>g + F<sub>弹簧</sub> = 10 + 20 = 30N（向下）<br>
+                    a<sub>A</sub> = F<sub>合A</sub>/m<sub>A</sub> = 30/1 = 30 m/s²（向下）<br><br>
+                    对B：F<sub>合B</sub> = m<sub>B</sub>g - F<sub>弹簧</sub> = 20 - 20 = 0<br>
+                    a<sub>B</sub> = 0
+                </div>
+            </div>
+            
+            <div class="example">
+                <h5>对比：剪断弹簧的情况</h5>
+                <p>若剪断的是弹簧而非细绳，结果完全不同：</p>
+                <ul>
+                    <li>弹簧被剪断，弹力立即消失（弹簧不存在了）</li>
+                    <li>A：仍被绳拉住，a<sub>A</sub> = 0</li>
+                    <li>B：自由落体，a<sub>B</sub> = g = 10 m/s²</li>
+                </ul>
+            </div>
+            
+            <div class="quiz">
+                <h5>思考题</h5>
+                <p>如图，小车在光滑水平面上，车厢内用细绳和弹簧悬挂两个小球。剪断细绳瞬间：</p>
+                <ol>
+                    <li>左边小球的加速度是多少？</li>
+                    <li>右边小球的加速度是多少？</li>
+                    <li>小车会向哪边加速？</li>
+                </ol>
+                <div style="text-align: center; margin: 20px 0;">
+                    <svg width="250" height="150" viewBox="0 0 250 150">
+                        <rect x="50" y="80" width="150" height="60" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+                        <circle cx="75" cy="50" r="15" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <line x1="75" y1="80" x2="75" y2="65" stroke="#8B4513" stroke-width="2"/>
+                        <circle cx="175" cy="50" r="15" fill="#FFB6C1" stroke="#DC143C" stroke-width="2"/>
+                        <path d="M 175 80 Q 170 75 175 70 Q 180 65 175 60" stroke="#666" stroke-width="2" fill="none"/>
+                        <text x="65" y="55" fill="#333" font-size="12">绳</text>
+                        <text x="160" y="55" fill="#333" font-size="12">弹簧</text>
+                    </svg>
+                </div>
+                <details>
+                    <summary>查看答案</summary>
+                    <ol>
+                        <li>绳被剪断，拉力消失，左球只受重力，a = g（向下）</li>
+                        <li>弹簧弹力不突变，若原来平衡，则a = 0</li>
+                        <li>系统水平方向动量守恒，左球向下运动，小车不会水平加速</li>
+                    </ol>
+                </details>
+            </div>
+            
+            <div class="interactive-demo">
+                <h5>瞬时问题分析流程</h5>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+                    <p style="font-size: 1.1em; line-height: 2;">
+                        剪断前平衡分析<br>
+                        ↓<br>
+                        <span style="color: #d32f2f;">弹簧弹力 = ?（记住此值）</span><br>
+                        ↓<br>
+                        剪断后受力分析<br>
+                        ↓<br>
+                        <span style="color: #d32f2f;">弹簧弹力不变</span> + <span style="color: #1976d2;">其他力突变</span><br>
+                        ↓<br>
+                        F = ma 求加速度
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 第四章：弹簧弹力专题深度解析 -->
+        <div class="chapter" id="chapter4">
+            <h2 data-chapter="4">第四章：弹簧弹力专题深度解析（专题突破）</h2>
+            
+            <div class="tip">
+                <h4>目标</h4>
+                <p>彻底攻克所有与弹簧相关的难题，建立对弹簧模型的深刻理解。从基本特性到复杂应用，从静力学到动力学，全方位掌握弹簧问题。</p>
+            </div>
+            
+            <h3>4.1 弹簧的核心特性再深化</h3>
+            
+            <div class="important">
+                <h5>胡克定律的本质理解</h5>
+                <div class="formula">F = kx</div>
+                <ul>
+                    <li><strong>F</strong>：弹簧的弹力（N）</li>
+                    <li><strong>k</strong>：弹簧的劲度系数（N/m），反映弹簧的"软硬"程度</li>
+                    <li><strong>x</strong>：弹簧的形变量（m），<strong style="color: #d32f2f;">不是弹簧长度！</strong></li>
+                </ul>
+                <p><strong>记住：</strong>x = |L - L₀|，其中L₀是弹簧原长</p>
+            </div>
+            
+            <div class="tip">
+                <h5>弹簧的瞬时特性（再次强调）</h5>
+                <p style="font-size: 1.2em; color: #d32f2f; text-align: center;">
+                    弹簧两端连接物体的加速度可以突变<br>
+                    但弹簧自身的弹力（由形变量决定）不能突变
+                </p>
+            </div>
+            
+            <h3>4.2 弹簧的串并联</h3>
+            
+            <div class="example">
+                <h5>串联弹簧系统</h5>
+                <div class="physics-diagram">
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <!-- 固定端 -->
+                        <rect x="50" y="80" width="10" height="40" fill="#666"/>
+                        <!-- 弹簧1 -->
+                        <path d="M 60 100 Q 70 90 80 100 Q 90 110 100 100 Q 110 90 120 100 Q 130 110 140 100" 
+                              stroke="#FF6347" stroke-width="3" fill="none"/>
+                        <text x="95" y="130" fill="#FF6347" font-size="14">k₁</text>
+                        <!-- 连接块 -->
+                        <circle cx="150" cy="100" r="10" fill="#999"/>
+                        <!-- 弹簧2 -->
+                        <path d="M 160 100 Q 170 90 180 100 Q 190 110 200 100 Q 210 90 220 100 Q 230 110 240 100" 
+                              stroke="#4169E1" stroke-width="3" fill="none"/>
+                        <text x="195" y="130" fill="#4169E1" font-size="14">k₂</text>
+                        <!-- 物块 -->
+                        <rect x="240" y="85" width="30" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <!-- 拉力 -->
+                        <line x1="270" y1="100" x2="320" y2="100" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple6)"/>
+                        <text x="325" y="105" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        
+                        <!-- 等效图示 -->
+                        <text x="200" y="50" fill="#333" font-size="16" font-weight="bold">等效于</text>
+                        <!-- 固定端 -->
+                        <rect x="50" y="180" width="10" height="40" fill="#666"/>
+                        <!-- 等效弹簧 -->
+                        <path d="M 60 200 Q 80 185 100 200 Q 120 215 140 200 Q 160 185 180 200 Q 200 215 220 200 Q 240 185 260 200" 
+                              stroke="#00AA00" stroke-width="3" fill="none"/>
+                        <text x="145" y="230" fill="#00AA00" font-size="14">k<sub>eq</sub></text>
+                        <!-- 物块 -->
+                        <rect x="260" y="185" width="30" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <!-- 拉力 -->
+                        <line x1="290" y1="200" x2="340" y2="200" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple7)"/>
+                        <text x="345" y="205" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowpurple6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                            <marker id="arrowpurple7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <h6>串联特点：</h6>
+                <ul>
+                    <li><strong>受力特点：</strong>各弹簧受力相等，F₁ = F₂ = F</li>
+                    <li><strong>形变特点：</strong>总形变量等于各弹簧形变量之和，x<sub>total</sub> = x₁ + x₂</li>
+                </ul>
+                
+                <h6>等效劲度系数推导：</h6>
+                <div class="formula">
+                    由 F = k₁x₁ 得：x₁ = F/k₁<br>
+                    由 F = k₂x₂ 得：x₂ = F/k₂<br>
+                    总形变：x<sub>total</sub> = x₁ + x₂ = F/k₁ + F/k₂ = F(1/k₁ + 1/k₂)<br>
+                    等效弹簧：F = k<sub>eq</sub>·x<sub>total</sub><br>
+                    因此：<strong style="color: #d32f2f;">1/k<sub>eq</sub> = 1/k₁ + 1/k₂</strong>
+                </div>
+                <p><strong>结论：</strong>串联后系统变"软"，k<sub>eq</sub> < min(k₁, k₂)</p>
+            </div>
+            
+            <div class="example">
+                <h5>并联弹簧系统</h5>
+                <div class="physics-diagram">
+                    <svg width="400" height="250" viewBox="0 0 400 250">
+                        <!-- 固定端 -->
+                        <rect x="50" y="50" width="10" height="150" fill="#666"/>
+                        <!-- 弹簧1（上） -->
+                        <path d="M 60 80 Q 70 70 80 80 Q 90 90 100 80 Q 110 70 120 80 Q 130 90 140 80" 
+                              stroke="#FF6347" stroke-width="3" fill="none"/>
+                        <text x="95" y="60" fill="#FF6347" font-size="14">k₁</text>
+                        <!-- 弹簧2（下） -->
+                        <path d="M 60 170 Q 70 160 80 170 Q 90 180 100 170 Q 110 160 120 170 Q 130 180 140 170" 
+                              stroke="#4169E1" stroke-width="3" fill="none"/>
+                        <text x="95" y="200" fill="#4169E1" font-size="14">k₂</text>
+                        <!-- 连接板 -->
+                        <rect x="140" y="70" width="10" height="110" fill="#999"/>
+                        <!-- 物块 -->
+                        <rect x="150" y="110" width="40" height="40" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <!-- 拉力 -->
+                        <line x1="190" y1="130" x2="240" y2="130" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple8)"/>
+                        <text x="245" y="135" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        
+                        <!-- 等效图示 -->
+                        <text x="280" y="125" fill="#333" font-size="16">⇒</text>
+                        <!-- 固定端 -->
+                        <rect x="320" y="110" width="10" height="40" fill="#666"/>
+                        <!-- 等效弹簧 -->
+                        <path d="M 330 130 Q 340 120 350 130 Q 360 140 370 130" 
+                              stroke="#00AA00" stroke-width="4" fill="none"/>
+                        <text x="340" y="160" fill="#00AA00" font-size="14">k<sub>eq</sub></text>
+                        
+                        <defs>
+                            <marker id="arrowpurple8" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <h6>并联特点：</h6>
+                <ul>
+                    <li><strong>形变特点：</strong>各弹簧形变量相等，x₁ = x₂ = x</li>
+                    <li><strong>受力特点：</strong>总拉力等于各弹簧弹力之和，F<sub>total</sub> = F₁ + F₂</li>
+                </ul>
+                
+                <h6>等效劲度系数推导：</h6>
+                <div class="formula">
+                    F₁ = k₁x，F₂ = k₂x<br>
+                    总拉力：F<sub>total</sub> = F₁ + F₂ = k₁x + k₂x = (k₁ + k₂)x<br>
+                    等效弹簧：F<sub>total</sub> = k<sub>eq</sub>·x<br>
+                    因此：<strong style="color: #d32f2f;">k<sub>eq</sub> = k₁ + k₂</strong>
+                </div>
+                <p><strong>结论：</strong>并联后系统变"硬"，k<sub>eq</sub> > max(k₁, k₂)</p>
+            </div>
+            
+            <h3>4.3 弹簧振子模型</h3>
+            
+            <div class="important">
+                <h5>简谐运动的条件</h5>
+                <p>回复力F与位移x成正比，且方向相反：<strong>F = -kx</strong></p>
+                <p>加速度：a = F/m = -(k/m)x</p>
+                <p>这是简谐运动的动力学特征</p>
+            </div>
+            
+            <div class="example">
+                <h5>水平弹簧振子</h5>
+                <div class="physics-diagram">
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <!-- 平衡位置标记 -->
+                        <line x1="250" y1="50" x2="250" y2="150" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                        <text x="240" y="40" fill="#999" font-size="12">O</text>
+                        
+                        <!-- 固定端 -->
+                        <rect x="50" y="80" width="10" height="40" fill="#666"/>
+                        
+                        <!-- 位置1：压缩状态 -->
+                        <g opacity="0.5">
+                            <path d="M 60 100 Q 90 85 120 100 Q 150 115 180 100" 
+                                  stroke="#FF6347" stroke-width="2" fill="none"/>
+                            <rect x="180" y="85" width="30" height="30" fill="#FFB6C1" stroke="#DC143C" stroke-width="2"/>
+                            <text x="185" y="135" fill="#DC143C" font-size="12">-A</text>
+                        </g>
+                        
+                        <!-- 位置2：平衡位置 -->
+                        <path d="M 60 100 Q 80 90 100 100 Q 120 110 140 100 Q 160 90 180 100 Q 200 110 220 100 Q 240 90 260 100" 
+                              stroke="#666" stroke-width="3" fill="none"/>
+                        <rect x="235" y="85" width="30" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        
+                        <!-- 位置3：拉伸状态 -->
+                        <g opacity="0.5">
+                            <path d="M 60 100 Q 70 95 80 100 Q 90 105 100 100 Q 110 95 120 100 Q 130 105 140 100 Q 150 95 160 100 Q 170 105 180 100 Q 190 95 200 100 Q 210 105 220 100 Q 230 95 240 100 Q 250 105 260 100 Q 270 95 280 100 Q 290 105 300 100 Q 310 95 320 100" 
+                                  stroke="#4169E1" stroke-width="2" fill="none"/>
+                            <rect x="320" y="85" width="30" height="30" fill="#B0E0E6" stroke="#1E90FF" stroke-width="2"/>
+                            <text x="325" y="135" fill="#1E90FF" font-size="12">+A</text>
+                        </g>
+                        
+                        <!-- 速度和加速度标注 -->
+                        <text x="100" y="180" fill="#333" font-size="14">v = 0, a = max</text>
+                        <text x="220" y="180" fill="#333" font-size="14">v = max, a = 0</text>
+                        <text x="320" y="180" fill="#333" font-size="14">v = 0, a = max</text>
+                    </svg>
+                </div>
+                
+                <h6>周期公式：</h6>
+                <div class="formula">
+                    T = 2π√(m/k)
+                </div>
+                <p><strong>注意：</strong>周期只与m和k有关，与振幅A无关！</p>
+            </div>
+            
+            <h3>4.4 弹簧与复杂情景的组合</h3>
+            
+            <div class="example">
+                <h5>例题：弹簧-斜面系统</h5>
+                <p>质量m = 1kg的物块通过劲度系数k = 100N/m的弹簧连接在光滑斜面底部。斜面倾角θ = 30°。将物块从弹簧原长位置静止释放，求：</p>
+                <ol>
+                    <li>物块的平衡位置</li>
+                    <li>物块的最大速度</li>
+                    <li>振动的振幅</li>
+                </ol>
+                
+                <div class="physics-diagram">
+                    <svg width="400" height="300" viewBox="0 0 400 300">
+                        <!-- 斜面 -->
+                        <polygon points="50,250 350,250 350,100" fill="#D2B48C" stroke="#8B4513" stroke-width="2"/>
+                        <!-- 弹簧（原长） -->
+                        <path d="M 80 230 Q 90 220 100 230 Q 110 240 120 230 Q 130 220 140 230" 
+                              stroke="#666" stroke-width="2" fill="none"/>
+                        <!-- 物块（不同位置） -->
+                        <!-- 原长位置 -->
+                        <rect x="140" y="200" width="40" height="40" fill="#87CEEB" stroke="#4682B4" stroke-width="2" transform="rotate(-30 160 220)" opacity="0.3"/>
+                        <text x="190" y="215" fill="#666" font-size="12">原长</text>
+                        <!-- 平衡位置 -->
+                        <rect x="180" y="170" width="40" height="40" fill="#87CEEB" stroke="#4682B4" stroke-width="2" transform="rotate(-30 200 190)"/>
+                        <text x="230" y="185" fill="#333" font-size="12">平衡</text>
+                        <!-- 最低位置 -->
+                        <rect x="220" y="140" width="40" height="40" fill="#87CEEB" stroke="#4682B4" stroke-width="2" transform="rotate(-30 240 160)" opacity="0.3"/>
+                        <text x="270" y="155" fill="#666" font-size="12">最低</text>
+                        
+                        <!-- 标注 -->
+                        <line x1="160" y1="220" x2="200" y2="190" stroke="#FF0000" stroke-width="1" stroke-dasharray="3,3"/>
+                        <text x="175" y="210" fill="#FF0000" font-size="12">x₀</text>
+                        <line x1="200" y1="190" x2="240" y2="160" stroke="#0000FF" stroke-width="1" stroke-dasharray="3,3"/>
+                        <text x="215" y="180" fill="#0000FF" font-size="12">A</text>
+                    </svg>
+                </div>
+                
+                <h6>解答：</h6>
+                <p><strong>(1) 平衡位置</strong></p>
+                <p>在平衡位置，弹簧弹力等于重力沿斜面的分量：</p>
+                <div class="formula">
+                    kx₀ = mgsinθ<br>
+                    x₀ = mgsinθ/k = 1×10×0.5/100 = 0.05m = 5cm
+                </div>
+                
+                <p><strong>(2) 最大速度</strong></p>
+                <p>最大速度出现在平衡位置。从原长到平衡位置，由能量守恒：</p>
+                <div class="formula">
+                    mgx₀sinθ = ½kx₀² + ½mv<sub>max</sub>²<br>
+                    v<sub>max</sub> = x₀√(g·sinθ/x₀ - k/2m)<br>
+                    v<sub>max</sub> = 0.05√(100 - 50) = 0.35 m/s
+                </div>
+                
+                <p><strong>(3) 振幅</strong></p>
+                <p>从原长释放，振幅A = x₀ = 5cm</p>
+            </div>
+            
+            <div class="quiz">
+                <h5>挑战题</h5>
+                <p>两个相同的弹簧（k = 200N/m）和两个相同的物块（m = 0.5kg）按下图连接。整个系统竖直悬挂，求：</p>
+                <ol>
+                    <li>两弹簧的伸长量</li>
+                    <li>剪断连接两物块的绳子瞬间，各物块的加速度</li>
+                </ol>
+                <div style="text-align: center;">
+                    <svg width="200" height="300" viewBox="0 0 200 300">
+                        <line x1="100" y1="20" x2="100" y2="50" stroke="#666" stroke-width="2"/>
+                        <path d="M 100 50 Q 90 60 100 70 Q 110 80 100 90" stroke="#FF6347" stroke-width="3" fill="none"/>
+                        <circle cx="100" cy="110" r="20" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <line x1="100" y1="130" x2="100" y2="150" stroke="#8B4513" stroke-width="2"/>
+                        <path d="M 100 150 Q 90 160 100 170 Q 110 180 100 190" stroke="#FF6347" stroke-width="3" fill="none"/>
+                        <circle cx="100" cy="210" r="20" fill="#FFB6C1" stroke="#DC143C" stroke-width="2"/>
+                        <text x="120" y="115" fill="#333" font-size="14">A</text>
+                        <text x="120" y="215" fill="#333" font-size="14">B</text>
+                    </svg>
+                </div>
+                <details>
+                    <summary>查看答案</summary>
+                    <p><strong>(1) 伸长量：</strong></p>
+                    <ul>
+                        <li>下弹簧：只承受B的重力，Δx₂ = mg/k = 0.5×10/200 = 0.025m = 2.5cm</li>
+                        <li>上弹簧：承受A和B的总重力，Δx₁ = 2mg/k = 2×0.5×10/200 = 0.05m = 5cm</li>
+                    </ul>
+                    <p><strong>(2) 剪断瞬间：</strong></p>
+                    <ul>
+                        <li>弹簧弹力不突变！</li>
+                        <li>A：F = mg + kΔx₂ = 5 + 5 = 10N，a<sub>A</sub> = 20m/s²（向下）</li>
+                        <li>B：F = mg - kΔx₂ = 5 - 5 = 0，a<sub>B</sub> = 0</li>
+                    </ul>
+                </details>
+            </div>
+            
+            <h3>4.5 弹簧的能量问题</h3>
+            
+            <div class="important">
+                <h5>弹性势能</h5>
+                <div class="formula">
+                    E<sub>p</sub> = ½kx²
+                </div>
+                <p><strong>特点：</strong></p>
+                <ul>
+                    <li>只与形变量的平方有关，与拉伸或压缩无关</li>
+                    <li>弹力做正功，弹性势能减少</li>
+                    <li>弹力做负功，弹性势能增加</li>
+                </ul>
+            </div>
+            
+            <div class="interactive-demo">
+                <h5>弹簧问题解题策略总结</h5>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">问题类型</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">关键步骤</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">注意事项</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">静力平衡</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">F = kx = 其他力的合力</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">注意原长位置</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">瞬时问题</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">弹簧弹力不突变</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">其他力可突变</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">振动问题</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">找平衡位置，用T = 2π√(m/k)</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">振幅与初始条件有关</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">能量问题</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">机械能守恒或能量守恒</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">E<sub>弹</sub> = ½kx²</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 第五章：综合应用与解题策略升维 -->
+        <div class="chapter" id="chapter5">
+            <h2 data-chapter="5">第五章：综合应用与解题策略升维（巅峰篇）</h2>
+            
+            <div class="tip">
+                <h4>目标</h4>
+                <p>融合所有知识，应对信息复杂、多过程的综合性大题。掌握动态平衡、传送带、图像分析等高考热点模型。</p>
+            </div>
+            
+            <h3>5.1 动态平衡问题</h3>
+            
+            <div class="important">
+                <h5>动态平衡的特征</h5>
+                <p><strong>核心：</strong>物体始终处于平衡状态（F<sub>合</sub> = 0），但某些力的大小或方向在缓慢变化</p>
+                <p><strong>关键：</strong>过程是动态的，但每一瞬间都满足平衡条件</p>
+            </div>
+            
+            <h4>分析方法</h4>
+            
+            <div class="example">
+                <h5>方法一：解析法（正交分解）</h5>
+                <p>最通用、最稳妥的方法，适用于三个或更多力的情况。</p>
+                <ol>
+                    <li>建立坐标系</li>
+                    <li>正交分解各力</li>
+                    <li>列平衡方程：ΣF<sub>x</sub> = 0，ΣF<sub>y</sub> = 0</li>
+                    <li>分析变化过程中各力的关系</li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>方法二：矢量三角形法</h5>
+                <p>当物体受三个共点力平衡时，这三个力构成封闭的矢量三角形。</p>
+                
+                <div class="physics-diagram">
+                    <svg width="500" height="300" viewBox="0 0 500 300">
+                        <!-- 示意图：动态平衡问题 -->
+                        <!-- 左侧：装置图 -->
+                        <text x="100" y="30" fill="#333" font-size="16" font-weight="bold">装置图</text>
+                        <!-- 墙壁 -->
+                        <line x1="50" y1="50" x2="50" y2="200" stroke="#666" stroke-width="3"/>
+                        <!-- 绳子AC -->
+                        <line x1="50" y1="100" x2="150" y2="150" stroke="#8B4513" stroke-width="2"/>
+                        <text x="80" y="120" fill="#8B4513" font-size="12">AC</text>
+                        <!-- 绳子BC -->
+                        <line x1="150" y1="150" x2="150" y2="220" stroke="#8B4513" stroke-width="2"/>
+                        <text x="160" y="185" fill="#8B4513" font-size="12">BC</text>
+                        <!-- 点标注 -->
+                        <circle cx="50" cy="100" r="3" fill="#333"/>
+                        <text x="35" y="95" fill="#333" font-size="12">A</text>
+                        <circle cx="150" cy="150" r="5" fill="#FF0000"/>
+                        <text x="160" y="155" fill="#FF0000" font-size="14" font-weight="bold">C</text>
+                        <circle cx="150" cy="220" r="3" fill="#333"/>
+                        <text x="160" y="225" fill="#333" font-size="12">B</text>
+                        <!-- 重物 -->
+                        <rect x="135" y="220" width="30" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                        <text x="145" y="240" fill="#333" font-size="12">G</text>
+                        <!-- 拉力F -->
+                        <line x1="150" y1="150" x2="220" y2="150" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple9)"/>
+                        <text x="225" y="155" fill="#9932CC" font-size="14" font-weight="bold">F</text>
+                        
+                        <!-- 右侧：矢量三角形 -->
+                        <text x="350" y="30" fill="#333" font-size="16" font-weight="bold">矢量三角形</text>
+                        <!-- 动态变化的三角形 -->
+                        <g opacity="0.3">
+                            <polygon points="350,100 400,150 350,150" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="3,3"/>
+                        </g>
+                        <polygon points="350,100 450,200 350,200" fill="none" stroke="#333" stroke-width="2"/>
+                        <!-- 力的标注 -->
+                        <line x1="350" y1="200" x2="350" y2="100" stroke="#FF0000" stroke-width="3" marker-end="url(#arrowred7)"/>
+                        <text x="325" y="150" fill="#FF0000" font-size="14">G</text>
+                        <line x1="350" y1="200" x2="450" y2="200" stroke="#9932CC" stroke-width="3" marker-end="url(#arrowpurple10)"/>
+                        <text x="390" y="220" fill="#9932CC" font-size="14">F</text>
+                        <line x1="450" y1="200" x2="350" y2="100" stroke="#0000FF" stroke-width="3" marker-end="url(#arrowblue7)"/>
+                        <text x="400" y="140" fill="#0000FF" font-size="14">F<sub>AC</sub></text>
+                        <!-- 角度标注 -->
+                        <path d="M 350 180 A 20 20 0 0 0 370 200" stroke="#666" stroke-width="1.5" fill="none"/>
+                        <text x="360" y="195" fill="#666" font-size="12">θ</text>
+                        
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowpurple9" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                            <marker id="arrowpurple10" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#9932CC" />
+                            </marker>
+                            <marker id="arrowred7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#FF0000" />
+                            </marker>
+                            <marker id="arrowblue7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#0000FF" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <p><strong>分析：</strong>当C点向右移动时，θ增大</p>
+                <div class="formula">
+                    F = G·tanθ（θ增大，F增大）<br>
+                    F<sub>AC</sub> = G/cosθ（θ增大，F<sub>AC</sub>增大）
+                </div>
+            </div>
+            
+            <h3>5.2 含传送带的受力分析</h3>
+            
+            <div class="important">
+                <h5>传送带问题三步法</h5>
+                <ol>
+                    <li><strong>判断相对运动：</strong>比较v<sub>物</sub>与v<sub>带</sub></li>
+                    <li><strong>确定摩擦力方向：</strong>与相对运动（趋势）方向相反</li>
+                    <li><strong>分段分析：</strong>找出速度相等的时刻作为分界点</li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>水平传送带典型过程</h5>
+                <div class="physics-diagram">
+                    <svg width="500" height="250" viewBox="0 0 500 250">
+                        <!-- 传送带 -->
+                        <rect x="50" y="150" width="400" height="20" fill="#D3D3D3" stroke="#666" stroke-width="2"/>
+                        <!-- 传送带运动方向 -->
+                        <text x="220" y="190" fill="#666" font-size="14">v<sub>带</sub> →</text>
+                        
+                        <!-- 阶段1：加速 -->
+                        <g transform="translate(0, -50)">
+                            <text x="50" y="80" fill="#333" font-size="14" font-weight="bold">阶段1：v<sub>物</sub> < v<sub>带</sub></text>
+                            <rect x="100" y="120" width="40" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                            <line x1="140" y1="135" x2="180" y2="135" stroke="#00AA00" stroke-width="3" marker-end="url(#arrowgreen6)"/>
+                            <text x="185" y="140" fill="#00AA00" font-size="12">f</text>
+                            <text x="105" y="115" fill="#333" font-size="12">v=0</text>
+                        </g>
+                        
+                        <!-- 阶段2：共速 -->
+                        <g transform="translate(200, -50)">
+                            <text x="50" y="80" fill="#333" font-size="14" font-weight="bold">阶段2：v<sub>物</sub> = v<sub>带</sub></text>
+                            <rect x="100" y="120" width="40" height="30" fill="#87CEEB" stroke="#4682B4" stroke-width="2"/>
+                            <text x="95" y="115" fill="#333" font-size="12">v=v<sub>带</sub></text>
+                            <text x="105" y="170" fill="#00AA00" font-size="12">f = 0</text>
+                        </g>
+                        
+                        <defs>
+                            <marker id="arrowgreen6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#00AA00" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="example">
+                <h5>倾斜传送带分析</h5>
+                <p>关键：判断μmgcosθ与mgsinθ的大小关系</p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f0f4ff;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">条件</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">运动情况</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">摩擦力</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">μ<sub>k</sub>cosθ > sinθ</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">能达到共速</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">先滑动后静摩擦</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">μ<sub>k</sub>cosθ < sinθ</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">不能达到共速</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">始终滑动摩擦</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3>5.3 图像信息题</h3>
+            
+            <div class="important">
+                <h5>图像分析"三看"原则</h5>
+                <ol>
+                    <li><strong>看坐标轴：</strong>明确物理量和单位</li>
+                    <li><strong>看特殊点：</strong>起点、交点、转折点</li>
+                    <li><strong>看斜率和面积：</strong>理解物理意义</li>
+                </ol>
+            </div>
+            
+            <div class="example">
+                <h5>常见图像的物理意义</h5>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #fff5f5;">
+                        <th style="border: 1px solid #ddd; padding: 12px;">图像类型</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">斜率含义</th>
+                        <th style="border: 1px solid #ddd; padding: 12px;">面积含义</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">v-t图</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">加速度a</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">位移x</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">a-t图</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">加速度变化率</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">速度变化量Δv</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">F-x图</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">力的变化率</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">功W</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">F-t图</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">力的变化率</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">冲量I</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="example">
+                <h5>例题：由v-t图推导受力</h5>
+                <div class="physics-diagram">
+                    <svg width="400" height="250" viewBox="0 0 400 250">
+                        <!-- 坐标轴 -->
+                        <line x1="50" y1="200" x2="350" y2="200" stroke="#333" stroke-width="2" marker-end="url(#arrowblack2)"/>
+                        <line x1="50" y1="200" x2="50" y2="50" stroke="#333" stroke-width="2" marker-end="url(#arrowblack2)"/>
+                        <text x="360" y="205" fill="#333" font-size="14">t/s</text>
+                        <text x="40" y="40" fill="#333" font-size="14">v/(m/s)</text>
+                        
+                        <!-- v-t图线 -->
+                        <polyline points="50,150 150,100 250,100 350,150" fill="none" stroke="#FF0000" stroke-width="3"/>
+                        
+                        <!-- 时间标注 -->
+                        <text x="45" y="220" fill="#333" font-size="12">0</text>
+                        <text x="145" y="220" fill="#333" font-size="12">2</text>
+                        <text x="245" y="220" fill="#333" font-size="12">4</text>
+                        <text x="345" y="220" fill="#333" font-size="12">6</text>
+                        
+                        <!-- 速度标注 -->
+                        <text x="25" y="155" fill="#333" font-size="12">5</text>
+                        <text x="25" y="105" fill="#333" font-size="12">10</text>
+                        
+                        <!-- 阶段标注 -->
+                        <text x="80" y="180" fill="#666" font-size="12">加速</text>
+                        <text x="180" y="120" fill="#666" font-size="12">匀速</text>
+                        <text x="280" y="180" fill="#666" font-size="12">减速</text>
+                        
+                        <defs>
+                            <marker id="arrowblack2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#333" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p><strong>分析过程：</strong></p>
+                <ol>
+                    <li>0-2s：a = 2.5 m/s²，F<sub>合</sub> = ma（向前）</li>
+                    <li>2-4s：a = 0，F<sub>合</sub> = 0（平衡）</li>
+                    <li>4-6s：a = -2.5 m/s²，F<sub>合</sub> = ma（向后）</li>
+                </ol>
+            </div>
+            
+            <h3>5.4 解题思想总结与检查清单</h3>
+            
+            <div class="important">
+                <h5>程序化解题流程</h5>
+                <ol>
+                    <li><strong>明确研究对象</strong>（单个物体或系统）</li>
+                    <li><strong>受力分析</strong>（按照科学分类方法）</li>
+                    <li><strong>画受力图</strong>（规范、完整）</li>
+                    <li><strong>建立坐标系</strong>（优化选择）</li>
+                    <li><strong>列方程</strong>（F<sub>合</sub> = 0 或 F<sub>合</sub> = ma）</li>
+                    <li><strong>求解验证</strong>（检查物理意义）</li>
+                </ol>
+            </div>
+            
+            <div class="tip">
+                <h5>模型化思考</h5>
+                <p>拿到题目先判断属于哪个模型：</p>
+                <ul>
+                    <li>临界问题？→ 找临界条件</li>
+                    <li>瞬时问题？→ 弹簧弹力不突变</li>
+                    <li>连接体？→ 整体法+隔离法</li>
+                    <li>传送带？→ 判断相对运动</li>
+                    <li>动态平衡？→ 矢量三角形或解析法</li>
+                </ul>
+            </div>
+            
+            <div class="quiz">
+                <h5>综合挑战题</h5>
+                <p>如图，质量m = 2kg的物块通过轻质弹簧连接在倾角θ = 30°的光滑斜面底部。现用平行斜面向上的力F缓慢拉动物块，使弹簧从压缩状态变为拉伸状态。已知弹簧劲度系数k = 200N/m。</p>
+                <ol>
+                    <li>画出F-x图像（x为物块位移）</li>
+                    <li>求F的最小值</li>
+                    <li>当F = 15N时，撤去F，求物块的瞬时加速度</li>
+                </ol>
+                <details>
+                    <summary>查看解题思路</summary>
+                    <ol>
+                        <li>建立坐标：以弹簧原长位置为原点</li>
+                        <li>受力平衡：F + kx = mgsinθ（x为代数值，压缩为负）</li>
+                        <li>F = mgsinθ - kx，这是一条斜率为-k的直线</li>
+                        <li>F<sub>min</sub> = 0（当弹簧压缩量最大时）</li>
+                        <li>撤去F瞬间，弹簧弹力不变，用F<sub>合</sub> = ma求解</li>
+                    </ol>
+                </details>
+            </div>
+            
+            <div class="interactive-demo">
+                <h5>极限思维训练</h5>
+                <p>对于不确定的情况，推到极端情况去思考：</p>
+                <ul>
+                    <li>摩擦角：当倾角达到摩擦角时，物体恰好能静止</li>
+                    <li>拉力无穷大：弹力、摩擦力会如何变化？</li>
+                    <li>质量趋于零：加速度会趋于无穷大吗？</li>
+                </ul>
+            </div>
+            
+            <div class="important" style="background: #f0f8ff; border-left-color: #1976d2;">
+                <h5>结语</h5>
+                <p>受力分析是物理学的基础，也是解决一切力学问题的钥匙。通过本教程的学习，你应该已经掌握了：</p>
+                <ul>
+                    <li>科学的力分类方法和规范的受力图画法</li>
+                    <li>正交分解法和整体隔离法两大核心方法</li>
+                    <li>临界问题和瞬时问题的分析技巧</li>
+                    <li>弹簧模型的全面理解</li>
+                    <li>综合问题的解题策略</li>
+                </ul>
+                <p style="text-align: center; font-size: 1.2em; margin-top: 20px;">
+                    <strong>记住：物理的美在于简洁的规律能解释复杂的现象</strong><br>
+                    <strong>祝你在物理学习的道路上越走越远！</strong>
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Back to top functionality
+        window.addEventListener('scroll', function() {
+            const backToTop = document.querySelector('.back-to-top');
+            if (backToTop && window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else if (backToTop) {
+                backToTop.classList.remove('show');
+            }
+            
+            // Update active navigation
+            const sections = document.querySelectorAll('.chapter');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            sections.forEach((section, index) => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 100 && rect.bottom >= 100) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    if (navLinks[index + 1]) { // +1 because first link is for intro
+                        navLinks[index + 1].classList.add('active');
+                    }
+                }
+            });
+        });
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+    
+    <!-- Back to top button -->
+    <button class="back-to-top" onclick="scrollToTop()" aria-label="回到顶部">↑</button>
+</body>
+</html>

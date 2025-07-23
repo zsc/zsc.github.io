@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高中物理受力分析进阶教程 - 现代版</title>
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --danger-color: #ef4444;
+            --danger-light: #fef2f2;
+            --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --info-color: #3b82f6;
+            --info-light: #dbeafe;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Layout containers */
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            padding: 1.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .logo-text .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Navigation */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-xl);
+            transition: left 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .nav-menu {
+            padding: 1rem;
+        }
+
+        .nav-menu h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            margin-bottom: 0.25rem;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background: var(--primary-color);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+            font-size: 0.875rem;
+        }
+
+        .progress-icon {
+            color: var(--success-color);
+        }
+
+        /* Hero section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            padding: 4rem 0;
+            color: white;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: white;
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Main content */
+        main {
+            flex: 1;
+            padding: 3rem 0;
+        }
+
+        .chapter {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .chapter:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chapter-number {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        /* Content blocks with semantic colors */
+        .content-block {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-block::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .block-concept {
+            background: var(--info-light);
+            border: 1px solid var(--info-color);
+        }
+
+        .block-concept::before {
+            background: var(--info-color);
+        }
+
+        .block-warning {
+            background: var(--danger-light);
+            border: 1px solid var(--danger-color);
+        }
+
+        .block-warning::before {
+            background: var(--danger-color);
+        }
+
+        .block-tip {
+            background: var(--success-light);
+            border: 1px solid var(--success-color);
+        }
+
+        .block-tip::before {
+            background: var(--success-color);
+        }
+
+        .block-example {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .block-example::before {
+            background: var(--text-light);
+        }
+
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .block-icon {
+            font-size: 1.25rem;
+        }
+
+        .block-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        /* Physics diagrams */
+        .physics-diagram {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .physics-diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .diagram-caption {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Interactive elements */
+        .quiz {
+            background: var(--warning-light);
+            border: 1px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .quiz-answer {
+            margin-top: 1rem;
+        }
+
+        .answer-toggle {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .answer-toggle:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .answer-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+        }
+
+        .answer-content.show {
+            display: block;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        li strong {
+            color: var(--text-primary);
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary-color);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 500;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--primary-dark);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.25rem;
+            }
+
+            .chapter {
+                padding: 1.5rem;
+            }
+
+            .content-block {
+                padding: 1rem;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            header, .sidebar, .back-to-top, footer {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .chapter {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Overlay for mobile menu */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 998;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">物</div>
+                        <div class="logo-text">
+                            <h1>高中物理受力分析</h1>
+                            <p class="subtitle">从基础到进阶的系统学习</p>
+                        </div>
+                    </div>
+                    <button class="nav-toggle" onclick="toggleSidebar()">☰</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <div class="overlay" onclick="toggleSidebar()"></div>
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>课程目录</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">×</button>
+            </div>
+            <div class="nav-menu">
+                <h3>学习进度</h3>
+                <div class="progress-bar-container" style="margin-bottom: 1.5rem;">
+                    <div class="progress-bar" style="width: 20%;"></div>
+                </div>
+                <p style="text-align: center; font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 2rem;">已完成 1/5 章节</p>
+                
+                <h3>章节导航</h3>
+                <a href="#chapter1" class="nav-item active">
+                    第一章：基础回顾与思想升华
+                    <span class="nav-progress"><span class="progress-icon">✓</span></span>
+                </a>
+                <a href="#chapter2" class="nav-item">
+                    第二章：瞬时性问题专项突破
+                </a>
+                <a href="#chapter3" class="nav-item">
+                    第三章：中难题核心模型突破
+                </a>
+                <a href="#chapter4" class="nav-item">
+                    第四章：弹簧弹力专题
+                </a>
+                <a href="#chapter5" class="nav-item">
+                    第五章：综合应用与提升
+                </a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>高中物理受力分析进阶教程</h1>
+                <p class="subtitle">系统掌握受力分析方法，突破物理学习难点</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 20%;"></div>
+                </div>
+                <p class="progress-text">总进度：20% 完成</p>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main>
+            <div class="container">
+                <div class="content-wrapper">
+                    <!-- Chapter 1 -->
+                    <section class="chapter" id="chapter1">
+                        <div class="chapter-header">
+                            <div class="chapter-number">1</div>
+                            <div>
+                                <h2>基础回顾与思想升华（地基篇）</h2>
+                                <p style="color: var(--text-secondary); margin: 0;">建立科学的受力分析思维体系</p>
+                            </div>
+                        </div>
+
+                        <div class="content-block block-concept">
+                            <div class="block-header">
+                                <span class="block-icon">💡</span>
+                                <h3 class="block-title">核心概念</h3>
+                            </div>
+                            <p>受力分析是<strong>根据物体的运动状态和周围环境</strong>，分析物体受到的所有力的过程。它是解决力学问题的第一步，也是最关键的一步。</p>
+                        </div>
+
+                        <div class="content-block block-tip">
+                            <div class="block-header">
+                                <span class="block-icon">✨</span>
+                                <h3 class="block-title">建模思想</h3>
+                            </div>
+                            <p>把复杂的实际问题简化为物理模型，是物理学的核心方法。受力分析的本质就是<strong>建立力学模型</strong>。</p>
+                        </div>
+
+                        <h3>1.1 受力分析的"金科玉律"</h3>
+                        
+                        <div class="content-block block-example">
+                            <div class="block-header">
+                                <span class="block-icon">📋</span>
+                                <h4 class="block-title">黄金三步法</h4>
+                            </div>
+                            <ol>
+                                <li><strong>明确研究对象</strong> - 确定要分析哪个物体</li>
+                                <li><strong>分析物体状态</strong> - 静止？匀速？加速？</li>
+                                <li><strong>寻找施力物体</strong> - 每个力都要找到"谁给的"</li>
+                            </ol>
+                        </div>
+
+                        <div class="physics-diagram">
+                            <svg width="400" height="300" viewBox="0 0 400 300">
+                                <!-- 地面 -->
+                                <line x1="50" y1="250" x2="350" y2="250" stroke="#666" stroke-width="2"/>
+                                <!-- 斜坡 -->
+                                <line x1="50" y1="250" x2="200" y2="100" stroke="#666" stroke-width="2"/>
+                                <!-- 物体 -->
+                                <rect x="120" y="140" width="40" height="40" fill="#4a90e2" stroke="#333" stroke-width="2" transform="rotate(-45 140 160)"/>
+                                <!-- 重力 -->
+                                <line x1="140" y1="160" x2="140" y2="220" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                <text x="145" y="195" font-size="14" fill="#e74c3c">G</text>
+                                <!-- 支持力 -->
+                                <line x1="140" y1="160" x2="100" y2="120" stroke="#27ae60" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                <text x="85" y="115" font-size="14" fill="#27ae60">N</text>
+                                <!-- 摩擦力 -->
+                                <line x1="140" y1="160" x2="180" y2="120" stroke="#f39c12" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                <text x="185" y="115" font-size="14" fill="#f39c12">f</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                            <p class="diagram-caption">图1：斜面上物体的受力分析示例</p>
+                        </div>
+
+                        <h3>1.2 力的分类体系</h3>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>分类依据</th>
+                                    <th>类型</th>
+                                    <th>特点</th>
+                                    <th>常见例子</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td rowspan="4"><strong>按性质分</strong></td>
+                                    <td>重力</td>
+                                    <td>始终竖直向下</td>
+                                    <td>G = mg</td>
+                                </tr>
+                                <tr>
+                                    <td>弹力</td>
+                                    <td>垂直于接触面</td>
+                                    <td>压力、支持力、拉力</td>
+                                </tr>
+                                <tr>
+                                    <td>摩擦力</td>
+                                    <td>平行于接触面</td>
+                                    <td>静摩擦、滑动摩擦</td>
+                                </tr>
+                                <tr>
+                                    <td>场力</td>
+                                    <td>不需要接触</td>
+                                    <td>电场力、磁场力</td>
+                                </tr>
+                                <tr>
+                                    <td rowspan="2"><strong>按接触分</strong></td>
+                                    <td>接触力</td>
+                                    <td>需要直接接触</td>
+                                    <td>弹力、摩擦力</td>
+                                </tr>
+                                <tr>
+                                    <td>非接触力</td>
+                                    <td>超距作用</td>
+                                    <td>重力、电磁力</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="content-block block-warning">
+                            <div class="block-header">
+                                <span class="block-icon">⚠️</span>
+                                <h3 class="block-title">特别提醒</h3>
+                            </div>
+                            <p>避免使用"主动力"、"被动力"这样不科学的分类。应该根据力的<strong>性质</strong>和<strong>产生条件</strong>来分类。</p>
+                        </div>
+
+                        <div class="quiz">
+                            <p class="quiz-question">🤔 思考题：一个静止在水平桌面上的木块，受到哪些力？每个力的施力物体是什么？</p>
+                            <div class="quiz-answer">
+                                <button class="answer-toggle" onclick="toggleAnswer(this)">
+                                    <span>查看答案</span>
+                                    <span>▼</span>
+                                </button>
+                                <div class="answer-content">
+                                    <p><strong>答案：</strong></p>
+                                    <ol>
+                                        <li><strong>重力 G</strong>：施力物体是地球，方向竖直向下</li>
+                                        <li><strong>支持力 N</strong>：施力物体是桌面，方向竖直向上</li>
+                                    </ol>
+                                    <p>因为木块静止，所以 G = N，二力平衡。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>1.3 画受力图的完整步骤</h3>
+
+                        <div class="content-block block-tip">
+                            <div class="block-header">
+                                <span class="block-icon">📐</span>
+                                <h3 class="block-title">标准作图流程</h3>
+                            </div>
+                            <ol>
+                                <li><strong>画出研究对象</strong>（用简单几何图形表示）</li>
+                                <li><strong>标出重力</strong>（从重心画起，竖直向下）</li>
+                                <li><strong>分析接触点</strong>，画出弹力（垂直接触面）</li>
+                                <li><strong>判断相对运动趋势</strong>，画出摩擦力（平行接触面）</li>
+                                <li><strong>检查其他场力</strong>（电场力、磁场力等）</li>
+                                <li><strong>标注力的符号</strong>（G、N、f、F等）</li>
+                            </ol>
+                        </div>
+
+                        <div class="content-block block-concept">
+                            <div class="block-header">
+                                <span class="block-icon">🎯</span>
+                                <h3 class="block-title">小结</h3>
+                            </div>
+                            <p>本章重点回顾了受力分析的基础知识，强调了<strong>系统化、规范化</strong>的分析方法。记住：好的开始是成功的一半，扎实的基础是解决复杂问题的前提。</p>
+                        </div>
+                    </section>
+
+                    <!-- Chapter 2 Preview -->
+                    <section class="chapter" id="chapter2">
+                        <div class="chapter-header">
+                            <div class="chapter-number">2</div>
+                            <div>
+                                <h2>瞬时性问题专项突破（思维篇）</h2>
+                                <p style="color: var(--text-secondary); margin: 0;">掌握力的突变分析技巧</p>
+                            </div>
+                        </div>
+                        <div class="content-block block-concept">
+                            <div class="block-header">
+                                <span class="block-icon">⏱️</span>
+                                <h3 class="block-title">章节预览</h3>
+                            </div>
+                            <p>本章将深入探讨绳断、撤力、碰撞等瞬时问题中力的突变规律...</p>
+                        </div>
+                    </section>
+
+                    <!-- Other chapters would follow the same pattern -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <p>&copy; 2024 高中物理受力分析教程 | 为更好的物理学习而设计</p>
+            </div>
+        </footer>
+
+        <!-- Back to top button -->
+        <div class="back-to-top" onclick="scrollToTop()">↑</div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Toggle answer visibility
+        function toggleAnswer(button) {
+            const content = button.nextElementSibling;
+            content.classList.toggle('show');
+            const arrow = button.querySelector('span:last-child');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        }
+
+        // Back to top functionality
+        window.addEventListener('scroll', function() {
+            const backToTop = document.querySelector('.back-to-top');
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+
+            // Update active navigation item
+            const sections = document.querySelectorAll('.chapter');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            sections.forEach((section, index) => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 100 && rect.bottom >= 100) {
+                    navItems.forEach(item => item.classList.remove('active'));
+                    if (navItems[index]) {
+                        navItems[index].classList.add('active');
+                    }
+                }
+            });
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    toggleSidebar(); // Close sidebar on mobile
+                }
+            });
+        });
+
+        // Update progress based on scroll
+        function updateProgress() {
+            const chapters = document.querySelectorAll('.chapter');
+            let completedChapters = 0;
+            
+            chapters.forEach(chapter => {
+                const rect = chapter.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.8) {
+                    completedChapters++;
+                }
+            });
+            
+            const progress = (completedChapters / chapters.length) * 100;
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                bar.style.width = progress + '%';
+            });
+        }
+
+        // Initialize
+        window.addEventListener('load', updateProgress);
+        window.addEventListener('scroll', updateProgress);
+    </script>
+</body>
+</html>
