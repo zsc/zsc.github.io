@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高中物理受力分析进阶教程</title>
+    <style>
+        /* Basic responsive design */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Back to top button */
+        #backToTop {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #backToTop:hover {
+            background-color: #0056b3;
+        }
+
+        nav {
+            background-color: #343a40;
+            padding: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav li {
+            margin: 0 10px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        section {
+            background: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #495057;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .chapter {
+            margin-bottom: 3rem;
+        }
+
+        .chapter-title {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+            margin-bottom: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .chapter-title:hover {
+            background-color: #d8d8d8;
+        }
+
+        .example {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Interactive elements */
+        .interactive-element {
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+        }
+
+        .interactive-element input, .interactive-element button {
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            padding: 0.5rem;
+        }
+
+        .interactive-element button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .interactive-element button:hover {
+            background-color: #0056b3;
+        }
+
+        .solution-content {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .solution-content h4 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .solution-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .solution-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        details summary {
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        details summary:hover {
+            text-decoration: underline;
+        }
+        
+        details[open] summary {
+            margin-bottom: 1rem;
+        }
+
+        .interactive-element:hover {
+            transform: translateX(5px);
+        }
+
+                .hint {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .explanation {
+            background-color: #e9ecef;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .common-mistakes {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .common-mistakes h4 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+
+        /* Force diagram styling */
+        .force-diagram {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Animation for force diagrams */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .animated-element {
+            animation: pulse 2s infinite;
+        }
+
+        /* Quiz styling */
+                .quiz-option {
+            display: block;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background-color: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quiz-option:hover {
+            background-color: #dde0e3;
+        }
+
+        .quiz-option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .quiz-option.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .quiz-feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .quiz-feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Detailed solution styling */
+        .solution {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .solution-title {
+            font-weight: bold;
+            color: #2e7d32;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .solution-content {
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav li {
+                margin: 5px 0;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            section {
+                padding: 1rem;
+            }
+            
+            .interactive-element input, .interactive-element button {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: #343a40;
+            color: white;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>高中物理受力分析进阶教程</h1>
+        <p>面向高考重点题型的深度解析</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#chapter1">基础回顾</a></li>
+            <li><a href="#chapter2">分析方法论</a></li>
+            <li><a href="#chapter3">核心模型突破</a></li>
+            <li><a href="#chapter4">弹簧弹力专题</a></li>
+            <li><a href="#chapter5">综合应用</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="chapter1" class="chapter">
+            <div class="chapter-title">
+                <h2>第一章：基础回顾与思想升华</h2>
+            </div>
+            <p>在深入复杂的受力分析之前，我们需要回顾力的基本概念和牛顿三定律，建立科学的力分类方法。</p>
+            
+            <h3>力的分类</h3>
+            <p>按性质分类：重力、弹力、摩擦力、电场力、磁场力等。</p>
+            <p>按接触方式分类：接触力与非接触力。</p>
+            
+            <div class="example">
+                <div class="example-title">例题1：基础受力分析</div>
+                <p>一个质量为m的物体静止在水平桌面上，分析物体的受力情况。</p>
+                <div class="hint">
+                    <strong>解题提示：</strong>先确定研究对象，再分析受力，注意平衡条件的应用。
+                </div>
+                <details>
+                    <summary>点击查看详细解答</summary>
+                    <div class="solution-content">
+                        <h4>解答步骤：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>水平桌面上的物体
+                                <div class="explanation">说明：明确研究对象是进行受力分析的第一步。</div>
+                            </li>
+                            <li><strong>受力分析：</strong>
+                                <ul>
+                                    <li>重力：竖直向下，大小为mg
+                                        <div class="explanation">说明：所有有质量的物体都受到重力作用。</div>
+                                    </li>
+                                    <li>支持力：竖直向上，大小为N
+                                        <div class="explanation">说明：桌面施加的支持力与重力方向相反。</div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><strong>建立坐标系：</strong>以物体为原点，竖直向上为正方向
+                                <div class="explanation">说明：合适的坐标系能简化计算过程。</div>
+                            </li>
+                            <li><strong>列出平衡方程：</strong>ΣF = N - mg = 0
+                                <div class="explanation">说明：物体静止，合外力为零。</div>
+                            </li>
+                            <li><strong>求解：</strong>N = mg
+                                <div class="explanation">说明：支持力与重力大小相等。</div>
+                            </li>
+                            <li><strong>物理意义：</strong>物体静止时，支持力与重力大小相等、方向相反
+                                <div class="explanation">说明：这是力学平衡的基本条件。</div>
+                            </li>
+                        </ol>
+                        <div class="common-mistakes">
+                            <h4>常见错误：</h4>
+                            <ul>
+                                <li>遗漏支持力或重力</li>
+                                <li>错误判断力的方向</li>
+                                <li>混淆平衡条件</li>
+                            </ul>
+                        </div>
+                        <div class="force-diagram">
+                            <svg width="100%" height="100%">
+                                <!-- 物体 -->
+                                <rect x="130" y="100" width="40" height="40" fill="#667eea" />
+                                <!-- 支持力 -->
+                                <line x1="150" y1="100" x2="150" y2="80" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="85" font-size="12" fill="blue">N</text>
+                                <!-- 重力 -->
+                                <line x1="150" y1="140" x2="150" y2="160" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="155" font-size="12" fill="green">mg</text>
+                                <!-- 坐标系 -->
+                                <line x1="100" y1="120" x2="200" y2="120" stroke="#999" stroke-width="1" />
+                                <line x1="150" y1="70" x2="150" y2="170" stroke="#999" stroke-width="1" />
+                                <text x="195" y="115" font-size="12" fill="#999">x</text>
+                                <text x="155" y="75" font-size="12" fill="#999">y</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>交互式力的分类练习</h3>
+                <p>下列哪种力属于非接触力？</p>
+                <div id="force-classification-quiz">
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">A. 摩擦力</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true)">B. 磁场力</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">C. 弹力</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false)">D. 支持力</div>
+                </div>
+                <div id="quiz-feedback" class="quiz-feedback"></div>
+            </div>
+        </section>
+
+        <section id="chapter2" class="chapter">
+            <div class="chapter-title">
+                <h2>第二章：核心分析方法论</h2>
+            </div>
+            <p>掌握正确的受力分析方法是解决物理问题的关键。</p>
+            
+            <h3>隔离法与整体法</h3>
+            <p>隔离法：将研究对象从系统中隔离出来，分析其受力。</p>
+            <p>整体法：将多个物体看作一个整体，分析整体的受力。</p>
+            
+            <div class="example">
+                <div class="example-title">例题2：连接体问题</div>
+                <p>两个质量分别为m₁和m₂的物体通过轻绳连接，放置在光滑水平面上，用水平力F拉m₁，求绳子的张力。</p>
+                <details>
+                    <summary>点击查看详细解答</summary>
+                    <div class="solution-content">
+                        <h4>解答步骤：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>m₁和m₂组成的系统</li>
+                            <li><strong>受力分析：</strong>
+                                <ul>
+                                    <li>系统受到水平向右的拉力F</li>
+                                    <li>水平面光滑，无摩擦力</li>
+                                </ul>
+                            </li>
+                            <li><strong>建立坐标系：</strong>以系统为原点，水平向右为正方向</li>
+                            <li><strong>列出牛顿第二定律方程：</strong>F = (m₁+m₂)a</li>
+                            <li><strong>求解加速度：</strong>a = F/(m₁+m₂)</li>
+                        </ol>
+                        <h4>隔离法求绳子张力：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>m₂</li>
+                            <li><strong>受力分析：</strong>
+                                <ul>
+                                    <li>水平方向只受绳子拉力T</li>
+                                </ul>
+                            </li>
+                            <li><strong>建立坐标系：</strong>以m₂为原点，水平向右为正方向</li>
+                            <li><strong>列出牛顿第二定律方程：</strong>T = m₂a</li>
+                            <li><strong>代入加速度求解：</strong>T = m₂F/(m₁+m₂)</li>
+                            <li><strong>物理意义：</strong>绳子张力使m₂产生与系统相同的加速度</li>
+                        </ol>
+                        <div class="force-diagram">
+                            <svg width="100%" height="100%">
+                                <!-- 地面 -->
+                                <line x1="0" y1="180" x2="100%" y2="180" stroke="#333" stroke-width="2" />
+                                <!-- 物体1 -->
+                                <rect x="100" y="140" width="40" height="40" fill="#667eea" />
+                                <text x="120" y="135" text-anchor="middle" font-size="12">m₁</text>
+                                <!-- 物体2 -->
+                                <rect x="160" y="140" width="40" height="40" fill="#764ba2" />
+                                <text x="180" y="135" text-anchor="middle" font-size="12">m₂</text>
+                                <!-- 绳子 -->
+                                <line x1="140" y1="160" x2="160" y2="160" stroke="#333" stroke-width="2" />
+                                <!-- 拉力 -->
+                                <line x1="80" y1="160" x2="100" y2="160" stroke="red" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="90" y="155" text-anchor="middle" font-size="12" fill="red">F</text>
+                                <!-- 支持力1 -->
+                                <line x1="120" y1="180" x2="120" y2="200" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="130" y="195" font-size="12" fill="blue">N₁</text>
+                                <!-- 支持力2 -->
+                                <line x1="180" y1="180" x2="180" y2="200" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="190" y="195" font-size="12" fill="blue">N₂</text>
+                                <!-- 重力1 -->
+                                <line x1="120" y1="140" x2="120" y2="120" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="130" y="125" font-size="12" fill="green">m₁g</text>
+                                <!-- 重力2 -->
+                                <line x1="180" y1="140" x2="180" y2="120" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="190" y="125" font-size="12" fill="green">m₂g</text>
+                                <!-- 绳子拉力 -->
+                                <line x1="160" y1="160" x2="170" y2="160" stroke="orange" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="165" y="155" text-anchor="middle" font-size="12" fill="orange">T</text>
+                                <!-- 坐标系 -->
+                                <line x1="70" y1="160" x2="220" y2="160" stroke="#999" stroke-width="1" />
+                                <line x1="120" y1="110" x2="120" y2="210" stroke="#999" stroke-width="1" />
+                                <text x="215" y="155" font-size="12" fill="#999">x</text>
+                                <text x="125" y="115" font-size="12" fill="#999">y</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>受力分析图示</h3>
+                <p>下面是一个简单的受力分析图示，帮助你理解隔离法和整体法：</p>
+                <div class="force-diagram" id="force-diagram-2">
+                    <svg width="100%" height="100%">
+                        <!-- 地面 -->
+                        <line x1="0" y1="180" x2="100%" y2="180" stroke="#333" stroke-width="2" />
+                        <!-- 物体1 -->
+                        <rect x="100" y="140" width="40" height="40" fill="#667eea" />
+                        <text x="120" y="135" text-anchor="middle" font-size="12">m₁</text>
+                        <!-- 物体2 -->
+                        <rect x="160" y="140" width="40" height="40" fill="#764ba2" />
+                        <text x="180" y="135" text-anchor="middle" font-size="12">m₂</text>
+                        <!-- 绳子 -->
+                        <line x1="140" y1="160" x2="160" y2="160" stroke="#333" stroke-width="2" />
+                        <!-- 拉力 -->
+                        <line x1="80" y1="160" x2="100" y2="160" stroke="red" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="90" y="155" text-anchor="middle" font-size="12" fill="red">F</text>
+                        <!-- 支持力1 -->
+                        <line x1="120" y1="180" x2="120" y2="200" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="130" y="195" font-size="12" fill="blue">N₁</text>
+                        <!-- 支持力2 -->
+                        <line x1="180" y1="180" x2="180" y2="200" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="190" y="195" font-size="12" fill="blue">N₂</text>
+                        <!-- 重力1 -->
+                        <line x1="120" y1="140" x2="120" y2="120" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="130" y="125" font-size="12" fill="green">m₁g</text>
+                        <!-- 重力2 -->
+                        <line x1="180" y1="140" x2="180" y2="120" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="190" y="125" font-size="12" fill="green">m₂g</text>
+                        <!-- 箭头定义 -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter3" class="chapter">
+            <div class="chapter-title">
+                <h2>第三章：中难题核心模型突破</h2>
+            </div>
+            <p>针对高考中的难点问题，我们重点分析临界问题和瞬时问题。</p>
+            
+            <h3>临界与极值问题</h3>
+            <p>临界状态是指物体运动状态发生突变的转折状态，通常涉及摩擦力、弹力等的极值。</p>
+            
+            <div class="example">
+                <div class="example-title">例题3：临界问题</div>
+                <p>一个物体放在倾斜角为θ的斜面上，物体与斜面间的动摩擦因数为μ，当θ为何值时物体刚好开始滑动？</p>
+                <details>
+                    <summary>点击查看详细解答</summary>
+                    <div class="solution-content">
+                        <h4>解答步骤：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>斜面上的物体</li>
+                            <li><strong>确定临界条件：</strong>物体刚好开始滑动时，静摩擦力达到最大值</li>
+                            <li><strong>建立坐标系：</strong>沿斜面方向和垂直于斜面方向</li>
+                            <li><strong>受力分析：</strong>
+                                <ul>
+                                    <li>重力mg，分解为mgsinθ（沿斜面向下）和mgcosθ（垂直于斜面向下）</li>
+                                    <li>支持力N，垂直于斜面向上</li>
+                                    <li>静摩擦力f，沿斜面向上，最大值为μN</li>
+                                </ul>
+                            </li>
+                            <li><strong>列出平衡方程：</strong>
+                                <ul>
+                                    <li>沿斜面方向：mgsinθ = f_max = μN</li>
+                                    <li>垂直于斜面方向：N = mgcosθ</li>
+                                </ul>
+                            </li>
+                            <li><strong>求解临界角：</strong>
+                                <ul>
+                                    <li>由以上两式得：mgsinθ = μmgcosθ</li>
+                                    <li>化简得：tanθ = μ</li>
+                                    <li>解得：θ = arctan(μ)</li>
+                                </ul>
+                            </li>
+                            <li><strong>物理意义：</strong>当斜面倾角θ = arctan(μ)时，物体刚好开始滑动</li>
+                        </ol>
+                        <div class="force-diagram">
+                            <svg width="100%" height="100%">
+                                <!-- 斜面 -->
+                                <polygon points="50,180 250,180 50,80" fill="#ddd" />
+                                <!-- 物体 -->
+                                <rect x="100" y="120" width="30" height="30" fill="#667eea" transform="rotate(-20 115 135)" />
+                                <!-- 重力 -->
+                                <line x1="115" y1="135" x2="115" y2="165" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="125" y="155" font-size="12" fill="green">mg</text>
+                                <!-- 支持力 -->
+                                <line x1="115" y1="135" x2="95" y2="115" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="85" y="110" font-size="12" fill="blue">N</text>
+                                <!-- 摩擦力 -->
+                                <line x1="115" y1="135" x2="135" y2="115" stroke="orange" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="140" y="110" font-size="12" fill="orange">f</text>
+                                <!-- 重力分解 -->
+                                <line x1="115" y1="165" x2="145" y2="165" stroke="green" stroke-width="2" stroke-dasharray="5,5" />
+                                <line x1="145" y1="165" x2="145" y2="135" stroke="green" stroke-width="2" stroke-dasharray="5,5" />
+                                <text x="130" y="180" font-size="12" fill="green">mgsinθ</text>
+                                <text x="150" y="150" font-size="12" fill="green">mgcosθ</text>
+                                <!-- 坐标系 -->
+                                <line x1="50" y1="180" x2="250" y2="180" stroke="#999" stroke-width="1" />
+                                <line x1="50" y1="80" x2="50" y2="180" stroke="#999" stroke-width="1" />
+                                <text x="245" y="175" font-size="12" fill="#999">x</text>
+                                <text x="55" y="85" font-size="12" fill="#999">y</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>临界角计算器</h3>
+                <p>输入动摩擦因数μ，计算临界角θ：</p>
+                <input type="number" id="friction-coefficient" placeholder="输入μ值" step="0.01" min="0">
+                <button onclick="calculateCriticalAngle()">计算</button>
+                <p id="critical-angle-result"></p>
+            </div>
+        </section>
+
+        <section id="chapter4" class="chapter">
+            <div class="chapter-title">
+                <h2>第四章：弹簧弹力专题深度解析</h2>
+            </div>
+            <p>弹簧弹力是高中物理中的重要模型，涉及胡克定律及其应用。</p>
+            
+            <h3>弹簧串联与并联</h3>
+            <p>串联弹簧：等效劲度系数的倒数等于各弹簧劲度系数倒数之和。</p>
+            <p>并联弹簧：等效劲度系数等于各弹簧劲度系数之和。</p>
+            
+            <div class="example">
+                <div class="example-title">例题4：弹簧连接体</div>
+                <p>两个劲度系数分别为k₁和k₂的弹簧串联后悬挂一个质量为m的物体，求系统的等效劲度系数和伸长量。</p>
+                <details>
+                    <summary>点击查看详细解答</summary>
+                    <div class="solution-content">
+                        <h4>解答步骤：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>两个弹簧和物体组成的系统</li>
+                            <li><strong>分析串联弹簧的特性：</strong>
+                                <ul>
+                                    <li>两弹簧的弹力相等，都等于物体的重力mg</li>
+                                    <li>总伸长量等于两弹簧伸长量之和</li>
+                                </ul>
+                            </li>
+                            <li><strong>建立坐标系：</strong>以悬挂点为原点，竖直向下为正方向</li>
+                            <li><strong>计算各弹簧伸长量：</strong>
+                                <ul>
+                                    <li>弹簧1的伸长量：x₁ = mg/k₁</li>
+                                    <li>弹簧2的伸长量：x₂ = mg/k₂</li>
+                                    <li>总伸长量：x = x₁ + x₂ = mg(1/k₁ + 1/k₂)</li>
+                                </ul>
+                            </li>
+                            <li><strong>求等效劲度系数：</strong>
+                                <ul>
+                                    <li>由胡克定律：mg = kx</li>
+                                    <li>代入x值得：mg = k·mg(1/k₁ + 1/k₂)</li>
+                                    <li>化简得：1/k = 1/k₁ + 1/k₂</li>
+                                    <li>解得等效劲度系数：k = (k₁k₂)/(k₁+k₂)</li>
+                                </ul>
+                            </li>
+                            <li><strong>最终结果：</strong>
+                                <ul>
+                                    <li>等效劲度系数：k = (k₁k₂)/(k₁+k₂)</li>
+                                    <li>总伸长量：x = mg/k = mg(k₁+k₂)/(k₁k₂)</li>
+                                </ul>
+                            </li>
+                            <li><strong>物理意义：</strong>串联弹簧的等效劲度系数小于任一弹簧的劲度系数</li>
+                        </ol>
+                        <div class="force-diagram">
+                            <svg width="100%" height="100%">
+                                <!-- 天花板 -->
+                                <rect x="0" y="0" width="100%" height="20" fill="#888" />
+                                <!-- 弹簧1 -->
+                                <path d="M 150 20 Q 140 40 150 60 Q 160 80 150 100" stroke="#333" stroke-width="3" fill="none" />
+                                <!-- 弹簧2 -->
+                                <path d="M 150 100 Q 140 120 150 140 Q 160 160 150 180" stroke="#333" stroke-width="3" fill="none" />
+                                <!-- 物体 -->
+                                <rect x="130" y="180" width="40" height="40" fill="#667eea" />
+                                <text x="150" y="230" text-anchor="middle" font-size="12">m</text>
+                                <!-- 重力 -->
+                                <line x1="150" y1="220" x2="150" y2="240" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="235" font-size="12" fill="green">mg</text>
+                                <!-- 弹力1 -->
+                                <line x1="150" y1="20" x2="150" y2="40" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="35" font-size="12" fill="blue">F₁</text>
+                                <!-- 弹力2 -->
+                                <line x1="150" y1="100" x2="150" y2="120" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="115" font-size="12" fill="blue">F₂</text>
+                                <!-- 伸长标记 -->
+                                <line x1="170" y1="20" x2="170" y2="100" stroke="red" stroke-width="2" stroke-dasharray="5,5" />
+                                <line x1="170" y1="100" x2="170" y2="180" stroke="red" stroke-width="2" stroke-dasharray="5,5" />
+                                <text x="180" y="60" font-size="12" fill="red">x₁</text>
+                                <text x="180" y="140" font-size="12" fill="red">x₂</text>
+                                <!-- 坐标系 -->
+                                <line x1="100" y1="20" x2="200" y2="20" stroke="#999" stroke-width="1" />
+                                <line x1="150" y1="0" x2="150" y2="250" stroke="#999" stroke-width="1" />
+                                <text x="195" y="15" font-size="12" fill="#999">x</text>
+                                <text x="155" y="10" font-size="12" fill="#999">y</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>弹簧组合计算器</h3>
+                <p>输入两个弹簧的劲度系数，计算串联和并联的等效劲度系数：</p>
+                <input type="number" id="spring-k1" placeholder="输入k₁值" step="0.1" min="0">
+                <input type="number" id="spring-k2" placeholder="输入k₂值" step="0.1" min="0">
+                <button onclick="calculateSpringCombination()">计算</button>
+                <p id="spring-combination-result"></p>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>弹簧振子示意图</h3>
+                <div class="force-diagram" id="spring-oscillator-diagram">
+                    <svg width="100%" height="100%">
+                        <!-- 天花板 -->
+                        <rect x="0" y="0" width="100%" height="20" fill="#888" />
+                        <!-- 弹簧 -->
+                        <path d="M 150 20 Q 140 40 150 60 Q 160 80 150 100 Q 140 120 150 140 Q 160 160 150 180" stroke="#333" stroke-width="3" fill="none" />
+                        <!-- 物体 -->
+                        <rect x="130" y="180" width="40" height="40" fill="#667eea" />
+                        <text x="150" y="230" text-anchor="middle" font-size="12">m</text>
+                        <!-- 位移标记 -->
+                        <line x1="150" y1="180" x2="150" y2="100" stroke="red" stroke-width="2" stroke-dasharray="5,5" />
+                        <text x="160" y="140" font-size="12" fill="red">x</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter5" class="chapter">
+            <div class="chapter-title">
+                <h2>第五章：综合应用与解题策略升维</h2>
+            </div>
+            <p>综合运用前面的知识解决复杂问题，提升解题能力。</p>
+            
+            <h3>动态平衡问题</h3>
+            <p>动态平衡是指物体处于运动状态但合外力为零的状态。</p>
+            
+            <div class="example">
+                <div class="example-title">例题5：动态平衡</div>
+                <p>一个物体在水平传送带上随传送带一起匀速运动，分析物体的受力情况。</p>
+                <details>
+                    <summary>点击查看详细解答</summary>
+                    <div class="solution-content">
+                        <h4>解答步骤：</h4>
+                        <ol>
+                            <li><strong>确定研究对象：</strong>传送带上的物体</li>
+                            <li><strong>明确运动状态：</strong>物体与传送带一起匀速运动</li>
+                            <li><strong>建立坐标系：</strong>以物体为原点，水平向右为正方向</li>
+                            <li><strong>受力分析：</strong>
+                                <ul>
+                                    <li>重力：竖直向下，大小为mg</li>
+                                    <li>支持力：竖直向上，大小为N</li>
+                                    <li>水平方向：物体与传送带无相对运动，也无相对运动趋势，故不受摩擦力</li>
+                                </ul>
+                            </li>
+                            <li><strong>列出平衡方程：</strong>
+                                <ul>
+                                    <li>竖直方向：N - mg = 0</li>
+                                    <li>水平方向：无外力作用</li>
+                                </ul>
+                            </li>
+                            <li><strong>求解：</strong>
+                                <ul>
+                                    <li>竖直方向：N = mg</li>
+                                    <li>水平方向：无外力作用</li>
+                                </ul>
+                            </li>
+                            <li><strong>物理意义：</strong>物体处于动态平衡状态，合外力为零</li>
+                        </ol>
+                        <div class="force-diagram">
+                            <svg width="100%" height="100%">
+                                <!-- 传送带 -->
+                                <rect x="50" y="150" width="200" height="20" fill="#ccc" />
+                                <line x1="50" y1="160" x2="250" y2="160" stroke="#999" stroke-width="1" />
+                                <!-- 物体 -->
+                                <rect x="120" y="110" width="40" height="40" fill="#764ba2" />
+                                <!-- 速度箭头 -->
+                                <line x1="140" y1="100" x2="180" y2="100" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="160" y="95" text-anchor="middle" font-size="12" fill="blue">v</text>
+                                <!-- 支持力 -->
+                                <line x1="140" y1="150" x2="140" y2="170" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="150" y="165" font-size="12" fill="blue">N</text>
+                                <!-- 重力 -->
+                                <line x1="140" y1="110" x2="140" y2="90" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                                <text x="150" y="95" font-size="12" fill="green">mg</text>
+                                <!-- 坐标系 -->
+                                <line x1="90" y1="150" x2="220" y2="150" stroke="#999" stroke-width="1" />
+                                <line x1="140" y1="80" x2="140" y2="190" stroke="#999" stroke-width="1" />
+                                <text x="215" y="145" font-size="12" fill="#999">x</text>
+                                <text x="145" y="85" font-size="12" fill="#999">y</text>
+                                <!-- 箭头定义 -->
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <div class="interactive-element">
+                <h3>传送带问题模拟</h3>
+                <p>下面是一个简单的传送带问题模拟，帮助你理解动态平衡：</p>
+                <div class="force-diagram" id="conveyor-belt-diagram">
+                    <svg width="100%" height="100%">
+                        <!-- 传送带 -->
+                        <rect x="50" y="150" width="200" height="20" fill="#ccc" />
+                        <line x1="50" y1="160" x2="250" y2="160" stroke="#999" stroke-width="1" />
+                        <!-- 物体 -->
+                        <rect x="120" y="110" width="40" height="40" fill="#764ba2" />
+                        <!-- 速度箭头 -->
+                        <line x1="140" y1="100" x2="180" y2="100" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="160" y="95" text-anchor="middle" font-size="12" fill="blue">v</text>
+                        <!-- 支持力 -->
+                        <line x1="140" y1="150" x2="140" y2="170" stroke="blue" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="150" y="165" font-size="12" fill="blue">N</text>
+                        <!-- 重力 -->
+                        <line x1="140" y1="110" x2="140" y2="90" stroke="green" stroke-width="3" marker-end="url(#arrowhead)" />
+                        <text x="150" y="95" font-size="12" fill="green">mg</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 高中物理受力分析进阶教程</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Simple interaction for mobile menu
+        const navLinks = document.querySelector('nav ul');
+        const toggleMenu = () => {
+            navLinks.classList.toggle('mobile-menu');
+        };
+
+        // Add mobile menu toggle for smaller screens
+        if (window.innerWidth <= 768) {
+            const menuToggle = document.createElement('div');
+            menuToggle.innerHTML = '☰';
+            menuToggle.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+                cursor: pointer;
+                color: white;
+                display: none;
+            `;
+            document.querySelector('nav').appendChild(menuToggle);
+            
+            menuToggle.addEventListener('click', toggleMenu);
+        }
+
+        // Calculator functions
+        function calculateCriticalAngle() {
+            const mu = parseFloat(document.getElementById('friction-coefficient').value);
+            if (isNaN(mu) || mu < 0) {
+                document.getElementById('critical-angle-result').innerText = '请输入有效的μ值';
+                return;
+            }
+            const theta = Math.atan(mu) * 180 / Math.PI;
+            document.getElementById('critical-angle-result').innerText = `临界角θ = ${theta.toFixed(2)}°`;
+            
+            // Add animation effect
+            const resultElement = document.getElementById('critical-angle-result');
+            resultElement.style.animation = 'pulse 1s';
+            setTimeout(() => {
+                resultElement.style.animation = '';
+            }, 1000);
+        }
+
+        function calculateSpringCombination() {
+            const k1 = parseFloat(document.getElementById('spring-k1').value);
+            const k2 = parseFloat(document.getElementById('spring-k2').value);
+            if (isNaN(k1) || isNaN(k2) || k1 <= 0 || k2 <= 0) {
+                document.getElementById('spring-combination-result').innerText = '请输入有效的k₁和k₂值';
+                return;
+            }
+            const kSeries = (k1 * k2) / (k1 + k2);
+            const kParallel = k1 + k2;
+            document.getElementById('spring-combination-result').innerText = 
+                `串联等效劲度系数: ${kSeries.toFixed(2)}\n并联等效劲度系数: ${kParallel.toFixed(2)}`;
+            
+            // Add animation effect
+            const resultElement = document.getElementById('spring-combination-result');
+            resultElement.style.animation = 'pulse 1s';
+            setTimeout(() => {
+                resultElement.style.animation = '';
+            }, 1000);
+        }
+
+        // Quiz function
+        function checkAnswer(element, isCorrect) {
+            // Reset all options
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => {
+                option.classList.remove('correct', 'incorrect');
+            });
+            
+            // Mark selected option
+            if (isCorrect) {
+                element.classList.add('correct');
+                // Add animation effect
+                element.style.animation = 'pulse 0.5s';
+                // Show feedback
+                document.getElementById('quiz-feedback').innerHTML = '正确！磁场力是一种非接触力。';
+                document.getElementById('quiz-feedback').className = 'quiz-feedback correct';
+            } else {
+                element.classList.add('incorrect');
+                // Add animation effect
+                element.style.animation = 'pulse 0.5s';
+                // Show feedback
+                document.getElementById('quiz-feedback').innerHTML = '不正确。请再思考一下，非接触力是指不需要直接接触就能产生的力。';
+                document.getElementById('quiz-feedback').className = 'quiz-feedback incorrect';
+            }
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 500);
+        }
+
+        // Back to top button
+        window.addEventListener('scroll', () => {
+            const backToTopButton = document.getElementById('back-to-top');
+            if (window.scrollY > 300) {
+                if (!backToTopButton) {
+                    const button = document.createElement('button');
+                    button.id = 'back-to-top';
+                    button.innerHTML = '↑';
+                    button.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 1000;
+                    `;
+                    button.addEventListener('click', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    document.body.appendChild(button);
+                }
+            } else if (backToTopButton) {
+                backToTopButton.remove();
+            }
+        });
+
+        // Sticky navigation highlight
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let currentSection = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.scrollY >= sectionTop - 100) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize SVG diagrams
+        document.addEventListener('DOMContentLoaded', () => {
+            // Force diagrams are already embedded in the HTML as SVG
+            // This is just a placeholder for any future dynamic SVG creation
+        });
+    </script>
+</body>
+</html>
