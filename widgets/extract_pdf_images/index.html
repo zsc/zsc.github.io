@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 图表提取工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+    }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #progress {
+            margin: 20px 0;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        #status {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e7f3ff;
+            border-radius: 4px;
+            display: none;
+        }
+        #results {
+            margin-top: 30px;
+            display: none;
+        }
+        .figure-item {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .figure-item img {
+            max-width: 300px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            display: block;
+        }
+        .metadata {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .github-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            color: #d32f2f;
+            margin: 10px 0;
+        }
+        .mock-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF 图表提取工具</h1>
+        
+        <div class="input-group">
+            <label for="pdfFile">选择 PDF 文件：</label>
+            <input type="file" id="pdfFile" accept=".pdf">
+        </div>
+        
+        <div class="input-group">
+            <label for="geminiKey">Gemini API Key：</label>
+            <input type="password" id="geminiKey" placeholder="输入您的 Gemini API Key">
+        </div>
+        
+        <div class="input-group">
+            <label>
+                <input type="checkbox" id="mockMode" checked> 模拟模式（不调用真实 Gemini API）
+            </label>
+            <small style="color: #666;">用于测试，将返回预定义的边界框</small>
+        </div>
+        
+        <div class="input-group">
+            <label for="githubToken">GitHub Personal Access Token（可选）：</label>
+            <input type="password" id="githubToken" placeholder="用于上传结果到 GitHub">
+        </div>
+        
+        <div class="input-group">
+            <label for="githubRepo">GitHub 仓库（格式: owner/repo）：</label>
+            <input type="text" id="githubRepo" placeholder="例如: username/pdf-figures">
+        </div>
+        
+        <button class="button" onclick="processPDF()">开始提取</button>
+        
+        <div id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div id="progressText">准备中...</div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div id="results">
+            <h2>提取结果</h2>
+            <div id="mockNotice" class="mock-notice" style="display: none;">
+                注意：当前使用模拟模式，边界框为预定义值
+            </div>
+            <div id="figuresList"></div>
+            <div class="metadata" id="metadataDisplay"></div>
+            
+            <div class="github-section" id="githubSection">
+                <h3>GitHub 上传</h3>
+                <button class="button" onclick="uploadToGitHub()">上传到 GitHub</button>
+                <div id="uploadStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+        
+        // 设置 PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        let extractedFigures = [];
+        let metadata = {};
+        
+        window.processPDF = async function() {
+            const fileInput = document.getElementById('pdfFile');
+            const geminiKey = document.getElementById('geminiKey').value;
+            const mockMode = document.getElementById('mockMode').checked;
+            
+            if (!fileInput.files[0]) {
+                alert('请选择 PDF 文件');
+                return;
+            }
+            
+            if (!mockMode && !geminiKey) {
+                alert('请输入 Gemini API Key 或启用模拟模式');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const startTime = Date.now();
+            
+            // 显示进度
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            try {
+                updateStatus('正在加载 PDF...');
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                // 步骤1: 扫描文本，找出包含图表的页面
+                updateStatus('步骤1：扫描 PDF 文本...');
+                const pageFigures = await scanPDFForFigures(pdf);
+                
+                if (Object.keys(pageFigures).length === 0) {
+                    updateStatus('未找到任何图表');
+                    return;
+                }
+                
+                updateStatus(`找到 ${Object.values(pageFigures).flat().length} 个图表分布在 ${Object.keys(pageFigures).length} 页中`);
+                
+                // 初始化 Gemini (如果不是模拟模式)
+                let model = null;
+                if (!mockMode) {
+                    const genAI = new GoogleGenerativeAI(geminiKey);
+                    model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                }
+                
+                extractedFigures = [];
+                let figureCounter = 1;
+                
+                // 步骤2-4: 处理每一页
+                const pageNumbers = Object.keys(pageFigures).map(Number).sort((a, b) => a - b);
+                
+                for (let i = 0; i < pageNumbers.length; i++) {
+                    const pageNum = pageNumbers[i];
+                    const figures = pageFigures[pageNum];
+                    
+                    updateProgress((i + 1) / pageNumbers.length * 100);
+                    updateStatus(`处理第 ${pageNum + 1} 页，包含：${figures.join(', ')}`);
+                    
+                    // 渲染页面为图像
+                    const page = await pdf.getPage(pageNum + 1);
+                    const viewport = page.getViewport({ scale: 2.0 }); // 相当于 ~150 DPI
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+                    
+                    // 转换为 blob
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    
+                    try {
+                        // 获取边界框
+                        const bboxes = await getFigureBoundingBoxes(model, blob, figures, mockMode, pageNum);
+                        
+                        // 裁剪并保存每个图表
+                        for (const [figureId, bbox] of Object.entries(bboxes)) {
+                            const croppedCanvas = cropImage(canvas, bbox);
+                            const croppedBlob = await new Promise(resolve => 
+                                croppedCanvas.toBlob(resolve, 'image/png')
+                            );
+                            
+                            extractedFigures.push({
+                                figure_id: figureId,
+                                page: pageNum + 1,
+                                bbox: bbox,
+                                output_file: `图${figureCounter}.png`,
+                                blob: croppedBlob,
+                                dataUrl: croppedCanvas.toDataURL('image/png')
+                            });
+                            
+                            figureCounter++;
+                        }
+                    } catch (error) {
+                        console.error(`处理第 ${pageNum + 1} 页时出错:`, error);
+                    }
+                }
+                
+                // 生成元数据
+                const endTime = Date.now();
+                metadata = {
+                    pdf_file: file.name,
+                    total_figures: extractedFigures.length,
+                    figures: extractedFigures.map(f => ({
+                        figure_id: f.figure_id,
+                        page: f.page,
+                        bbox: f.bbox,
+                        output_file: f.output_file
+                    })),
+                    processing_time: `${((endTime - startTime) / 1000).toFixed(1)}s`,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 显示结果
+                displayResults(mockMode);
+                updateStatus(`处理完成！提取了 ${extractedFigures.length} 个图表`);
+                
+            } catch (error) {
+                console.error('处理错误:', error);
+                updateStatus(`错误: ${error.message}`, true);
+            }
+        };
+        
+        async function scanPDFForFigures(pdf) {
+            const pageFigures = {};
+            const pattern = /\b(?:Figure|Fig\.)\s+(\d+)/gi;
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const text = textContent.items.map(item => item.str).join(' ');
+                
+                const matches = [...text.matchAll(pattern)];
+                if (matches.length > 0) {
+                    const uniqueFigures = [...new Set(matches.map(m => `Figure ${m[1]}`))];
+                    pageFigures[i - 1] = uniqueFigures;
+                }
+            }
+            
+            return pageFigures;
+        }
+        
+        async function getFigureBoundingBoxes(model, imageBlob, figureIds, mockMode, pageNum) {
+            if (mockMode) {
+                // 模拟模式：返回预定义的边界框
+                const mockBboxes = getMockBoundingBoxes(figureIds, pageNum);
+                return mockBboxes;
+            }
+            
+            const base64Image = await blobToBase64(imageBlob);
+            const figuresStr = figureIds.join('、');
+            
+            const prompt = `请识别并定位图像中的 ${figuresStr}。
+返回每个图表的边界框坐标，格式为 [ymin, xmin, ymax, xmax]，坐标系统：图像被标准化为1000x1000。
+
+重要：只返回实际存在的图表图像。如果某个Figure只是在文本中被提及，但并非实际的图表，请不要包含在结果中。
+
+返回JSON格式如下：
+{
+  "figures": {
+    "Figure X": {"ymin": 200, "xmin": 100, "ymax": 500, "xmax": 500},
+    "Figure Y": {"ymin": 550, "xmin": 100, "ymax": 900, "xmax": 500}
+  }
+}`;
+            
+            const result = await model.generateContent([
+                prompt,
+                {
+                    inlineData: {
+                        mimeType: "image/png",
+                        data: base64Image
+                    }
+                }
+            ]);
+            
+            const response = await result.response;
+            const text = response.text();
+            
+            // 提取 JSON
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                throw new Error('无法解析 Gemini 响应');
+            }
+            
+            const data = JSON.parse(jsonMatch[0]);
+            return data.figures || {};
+        }
+        
+        function getMockBoundingBoxes(figureIds, pageNum) {
+            // 预定义的模拟边界框，模拟不同页面的不同布局
+            const mockLayouts = {
+                0: { // 第1页通常只有文字引用，不返回边界框
+                    "Figure 1": null
+                },
+                1: { // 第2页
+                    "Figure 1": {"ymin": 100, "xmin": 180, "ymax": 300, "xmax": 820}
+                },
+                6: { // 第7页
+                    "Figure 2": {"ymin": 100, "xmin": 100, "ymax": 350, "xmax": 900}
+                },
+                7: { // 第8页有多个图
+                    "Figure 2": {"ymin": 100, "xmin": 50, "ymax": 320, "xmax": 950},
+                    "Figure 3": {"ymin": 340, "xmin": 50, "ymax": 610, "xmax": 500}
+                },
+                8: { // 第9页
+                    "Figure 4": {"ymin": 290, "xmin": 100, "ymax": 500, "xmax": 900}
+                },
+                17: { // 第18页
+                    "Figure 5": {"ymin": 820, "xmin": 340, "ymax": 840, "xmax": 400}
+                },
+                18: { // 第19页
+                    "Figure 5": {"ymin": 160, "xmin": 515, "ymax": 320, "xmax": 800}
+                },
+                19: { // 第20页
+                    "Figure 6": {"ymin": 470, "xmin": 170, "ymax": 630, "xmax": 680}
+                }
+            };
+            
+            const pageLayouts = mockLayouts[pageNum] || {};
+            const result = {};
+            
+            for (const figureId of figureIds) {
+                if (pageLayouts[figureId] !== undefined && pageLayouts[figureId] !== null) {
+                    result[figureId] = pageLayouts[figureId];
+                }
+            }
+            
+            return result;
+        }
+        
+        function cropImage(canvas, bbox) {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 转换标准化坐标到实际像素
+            const xmin = Math.floor(bbox.xmin * width / 1000);
+            const ymin = Math.floor(bbox.ymin * height / 1000);
+            const xmax = Math.ceil(bbox.xmax * width / 1000);
+            const ymax = Math.ceil(bbox.ymax * height / 1000);
+            
+            const cropWidth = xmax - xmin;
+            const cropHeight = ymax - ymin;
+            
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = cropWidth;
+            croppedCanvas.height = cropHeight;
+            
+            const ctx = croppedCanvas.getContext('2d');
+            ctx.drawImage(canvas, xmin, ymin, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+            
+            return croppedCanvas;
+        }
+        
+        function displayResults(mockMode) {
+            document.getElementById('results').style.display = 'block';
+            
+            if (mockMode) {
+                document.getElementById('mockNotice').style.display = 'block';
+            }
+            
+            const figuresList = document.getElementById('figuresList');
+            figuresList.innerHTML = '';
+            
+            extractedFigures.forEach(figure => {
+                const item = document.createElement('div');
+                item.className = 'figure-item';
+                item.innerHTML = `
+                    <h3>${figure.output_file} - ${figure.figure_id} (第 ${figure.page} 页)</h3>
+                    <img src="${figure.dataUrl}" alt="${figure.figure_id}">
+                    <p>边界框: [${figure.bbox.ymin}, ${figure.bbox.xmin}, ${figure.bbox.ymax}, ${figure.bbox.xmax}]</p>
+                `;
+                figuresList.appendChild(item);
+            });
+            
+            document.getElementById('metadataDisplay').textContent = JSON.stringify(metadata, null, 2);
+            
+            // 如果有 GitHub token，显示上传选项
+            if (document.getElementById('githubToken').value && document.getElementById('githubRepo').value) {
+                document.getElementById('githubSection').style.display = 'block';
+            }
+        }
+        
+        window.uploadToGitHub = async function() {
+            const token = document.getElementById('githubToken').value;
+            const repo = document.getElementById('githubRepo').value;
+            
+            if (!token || !repo) {
+                alert('请输入 GitHub Token 和仓库信息');
+                return;
+            }
+            
+            const [owner, repoName] = repo.split('/');
+            if (!owner || !repoName) {
+                alert('仓库格式错误，请使用 owner/repo 格式');
+                return;
+            }
+            
+            document.getElementById('uploadStatus').innerHTML = '正在上传...';
+            
+            try {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const folderName = `extraction-${timestamp}`;
+                
+                // 上传每个图片
+                for (const figure of extractedFigures) {
+                    const content = await blobToBase64(figure.blob);
+                    await uploadFile(
+                        token, owner, repoName,
+                        `${folderName}/${figure.output_file}`,
+                        content,
+                        `Upload ${figure.output_file}`
+                    );
+                }
+                
+                // 上传元数据
+                await uploadFile(
+                    token, owner, repoName,
+                    `${folderName}/metadata.json`,
+                    btoa(JSON.stringify(metadata, null, 2)),
+                    'Upload metadata.json'
+                );
+                
+                document.getElementById('uploadStatus').innerHTML = 
+                    `<div style="color: green;">上传成功！文件已保存 ${folderName} 文件夹</div>`;
+                    
+            } catch (error) {
+                console.error('上传错误:', error);
+                document.getElementById('uploadStatus').innerHTML = 
+                    `<div class="error">上传失败: ${error.message}</div>`;
+            }
+        };
+        
+        async function uploadFile(token, owner, repo, path, content, message) {
+            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    content: content
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'GitHub API 错误');
+            }
+            
+            return response.json();
+        }
+        
+        function blobToBase64(blob) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.readAsDataURL(blob);
+            });
+        }
+        
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.backgroundColor = isError ? '#ffebee' : '#e7f3ff';
+            status.style.color = isError ? '#d32f2f' : '#1976d2';
+        }
+        
+        function updateProgress(percentage) {
+            document.querySelector('.progress-fill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `进度: ${Math.round(percentage)}%`;
+        }
+    </script>
+</body>
+</html>
