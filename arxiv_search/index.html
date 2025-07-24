@@ -104,6 +104,10 @@
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Type to search..." disabled>
             <button id="download-btn" disabled>Download Results</button>
+            <label for="max-results" style="display: flex; align-items: center; gap: 5px;">
+                Max Results:
+                <input type="number" id="max-results" value="300" min="1" max="1000" style="width: 80px; padding: 12px 8px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px;">
+            </label>
         </div>
         <div id="status">Loading index files...</div>
         <ul id="results"></ul>
@@ -115,6 +119,7 @@
     const statusDiv = document.getElementById('status');
     const resultsUl = document.getElementById('results');
     const downloadBtn = document.getElementById('download-btn');
+    const maxResultsInput = document.getElementById('max-results');
     let currentSearchResults = []; // Store current search results for download
     let currentSearchQuery = ''; // Store current search query
 
@@ -208,8 +213,15 @@
         }
     });
 
-    // --- Event Listener ---
+    // --- Event Listeners ---
     searchInput.addEventListener('input', debounce(handleSearch, 200));
+    
+    // Re-run search when max results changes (if there's a current query)
+    maxResultsInput.addEventListener('change', () => {
+        if (currentSearchQuery.length >= 2) {
+            handleSearch();
+        }
+    });
 
     // --- Core Search Logic ---
 
@@ -364,7 +376,7 @@
             }
 
             const matches = new Set(); // Use a Set to store unique document indices
-            const maxResults = 300; // Limit results to prevent UI freezing
+            const maxResults = parseInt(maxResultsInput.value) || 300; // Get max results from input
             // Add a hard limit on locate() calls to prevent the browser from freezing on very common queries.
             const maxLocates = 5000;
             let locateCount = 0;
