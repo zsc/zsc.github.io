@@ -1,0 +1,610 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-24</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-24)</h1>
+                    <p id="intro">为您找到日期 2025-07-24 的数据。论文已为您整理成以下 3 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>三维与多媒体生成</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Ultra3D：基于部件注意力的经济高效高保真三维生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17745" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17745 - Ultra3D: Efficient and High-Fidelity 3D Generation with Part Attention</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yiwen Chen, Zhihao Li, Yikai Wang, Hu Zhang, Qin Li, Chi Zhang, Guosheng Lin</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近期稀疏体素表示的进展显著提升了三维内容生成的质量，实现了具有精细几何结构的高分辨率建模。然而，现有框架在其两阶段扩散流程中，由于注意力机制的二次复杂度，计算效率严重低下。在这项工作中，我们提出了Ultra3D，一个高效的三维生成框架，它在不牺牲质量的前提下显著加速了稀疏体素建模。我们的方法在第一阶段利用紧凑的VecSet表示来高效生成粗略的物体布局，减少了令牌数量并加速了体素坐标的预测。为了在第二阶段精化每个体素的潜在特征，我们引入了部件注意力（Part Attention），这是一种几何感知的局部化注意力机制，将注意力计算限制在语义一致的部件区域内。这种设计保留了结构的连续性，同时避免了不必要的全局注意力，在潜在特征生成方面实现了高达6.7倍的速度提升。为了支持这一机制，我们构建了一个可扩展的部件标注流水线，将原始网格转换为带部件标签的稀疏体素。广泛的实验表明，Ultra3D支持1024分辨率的高分辨率三维生成，并在视觉保真度和用户偏好方面均达到了最先进的性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17745" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Yume：一个交互式世界生成模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17744" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17744 - Yume: An Interactive World Generation Model</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xiaofeng Mao, Shaoheng Lin, Zhen Li, Chuanhao Li, Wenshuo Peng, Tong He, Jiangmiao Pang, Mingmin Chi, Yu Qiao, Kaipeng Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">Yume旨在利用图像、文本或视频创建一个可交互、真实且动态的世界，并允许使用外围设备或神经信号进行探索和控制。在本报告中，我们展示了Yume的一个预览版本，该版本可以从输入图像创建一个动态世界，并允许使用键盘操作进行探索。为了实现这种高保真度和交互式的视频世界生成，我们引入了一个精心设计的框架，该框架由四个主要部分组成，包括相机运动量化、视频生成架构、高级采样器和模型加速。首先，我们量化相机运动以实现稳定的训练和用户友好的键盘交互。然后，我们引入了带有记忆模块的掩码视频扩散变换器（MVDT），以自回归的方式实现无限视频生成。之后，我们将免训练的抗伪影机制（AAM）和基于随机微分方程的时间旅行采样（TTS-SDE）引入到采样器中，以获得更好的视觉质量和更精确的控制。此外，我们通过协同优化对抗性蒸馏和缓存机制来研究模型加速。我们使用高质量的世界探索数据集Sekai来训练Yume，它在多样化的场景和应用中取得了显著的成果。所有数据、代码库和模型权重均可在此https URL上获取。Yume将每月更新以实现其最初的目标。项目页面：此https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17744" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">StreamME：在直播流中简化三维高斯化身</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17029" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17029 - StreamME: Simplify 3D Gaussian Avatar within Live Stream</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Luchuan Song, Yang Zhou, Zhan Xu, Yi Zhou, Deepali Aneja, Chenliang Xu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了StreamME，一种专注于快速三维化身重建的方法。StreamME能够从实时视频流中同步记录和重建头部化身，无需任何预缓存数据，从而实现了重建外观与下游应用的无缝集成。这种我们称之为“即时训练”的极快训练策略是我们方法的核心。我们的方法建立在三维高斯溅射（3DGS）之上，消除了对可变形3DGS中MLP的依赖，并完全依赖于几何学，这显著提高了对脸部表情的适应速度。为了进一步确保即时训练的高效率，我们引入了一种基于主点的简化策略，该策略将点云更稀疏地分布在面部表面，优化了点的数量，同时保持了渲染质量。利用即时训练的能力，我们的方法在VR系统或在线会议中保护了面部隐私并减少了通信带宽。此外，它还可以直接应用于动画、卡通化和重照明等下游应用。更多详情请参阅我们的项目页面：此https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17029" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">CausalStep：一个用于视频中显式逐步因果推理的基准</div>
+                                <div><a href="https://arxiv.org/pdf/2507.16878" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16878 - CausalStep: A Benchmark for Explicit Stepwise Causal Reasoning in Videos</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xuchen Li, Xuzhao Li, Shiyu Hu, Kaiqi Huang, Wentao Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近年来，大型语言模型（LLM）的进步改善了文本和图像领域的推理能力，但实现稳健的视频推理仍然是一个重大挑战。现有的视频基准主要评估浅层理解和推理，并允许模型利用全局上下文，未能严格评估真正的因果和逐步推理。我们提出了CausalStep，一个专为视频中显式逐步因果推理设计的基准。CausalStep将视频分割成因果关联的单元，并强制执行严格的逐步问答（QA）协议，要求按顺序回答问题，防止走捷径的解决方案。每个问题都包含基于错误类型分类法精心构建的干扰项，以确保诊断价值。该基准包含六个类别的100个视频和1,852个多项选择QA对。我们引入了七个诊断指标进行全面评估，从而能够精确诊断因果推理能力。对领先的专有和开源模型以及人类基线的实验显示，当前模型与人类水平的逐步推理之间存在显著差距。CausalStep提供了一个严格的基准，以推动稳健和可解释的视频推理取得进展。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.16878" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">关于音频源分离中的时间引导与迭代优化</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17297" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17297 - On Temporal Guidance and Iterative Refinement in Audio Source Separation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tobias Morocutti, Jonathan Greif, Paul Primus, Florian Schmid, Gerhard Widmer</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">声音场景的空间语义分割（S5）涉及准确识别活动的声音类别，并从复杂的声学混合物中精确分离其声源。传统系统依赖于一个两阶段的流程——音频标注后接标签条件下的声源分离——但通常受限于缺乏对有效分离至关重要的细粒度时间信息。在这项工作中，我们通过引入一种新的S5方法来解决这一限制，该方法增强了事件检测和声源分离阶段之间的协同作用。我们的主要贡献有三方面。首先，我们微调一个预训练的Transformer来检测活动的声音类别。其次，我们利用这个微调后的Transformer的另一个实例来执行声音事件检测（SED），为分离模块提供详细的、随时间变化的引导。第三，我们实现了一个迭代优化机制，通过递归地重用前几轮迭代中分离器的输出来逐步提高分离质量。这些进步显著提高了音频标注和声源分离的性能，我们的系统在DCASE 2025挑战赛任务4中获得第二名的成绩证明了这一点。我们的实现和模型检查点可在我们的GitHub仓库中获取：此https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17297" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SplitMeanFlow：少步生成建模中的区间分裂一致性</div>
+                                <div><a href="https://arxiv.org/pdf/2507.16884" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16884 - SplitMeanFlow: Interval Splitting Consistency in Few-Step Generative Modeling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yi Guo, Wei Wang, Zhihang Yuan, Rong Cao, Kuan Chen, Zhengyang Chen, Yuanyuan Huo, Yang Zhang, Yuping Wang, Shouda Liu, Yuxuan Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">像流匹配（Flow Matching）这样的生成模型已经达到了最先进的性能，但通常受限于计算成本高昂的迭代采样过程。为了解决这个问题，最近的工作集中于通过学习直接将噪声映射到数据的平均速度场来实现少步或一步生成。MeanFlow是该领域的领先方法，它通过强制一个连接平均速度和瞬时速度的微分恒等式来学习这个场。在这项工作中，我们认为这种微分公式是一个更基本原理的限制性特例。我们回归到平均速度的第一性原理，并利用定积分的可加性。这引导我们推导出一个新颖的、纯代数的恒等式，我们称之为区间分裂一致性（Interval Splitting Consistency）。这个恒等式为不同时间区间上的平均速度场建立了一个自指关系，而无需借助任何微分算子。基于这一原理，我们引入了SplitMeanFlow，一个新的训练框架，它直接将这种代数一致性作为学习目标来强制执行。我们正式证明了MeanFlow核心的微分恒等式可以通过取我们代数一致性在区间分裂变得无穷小时的极限来恢复。这确立了SplitMeanFlow作为学习平均速度场的直接且更通用的基础。从实践角度看，我们的代数方法效率显著更高，因为它消除了对JVP计算的需求，从而简化了实现、提高了训练稳定性，并具有更广泛的硬件兼容性。一步和两步的SplitMeanFlow模型已成功部署在大型语音合成产品（如豆包）中，实现了20倍的加速。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.16884" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Ctx2TrajGen：使用生成对抗模仿学习的交通情境感知微观车辆轨迹生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17418" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17418 - Ctx2TrajGen: Traffic Context-Aware Microscale Vehicle Trajectories using Generative Adversarial Imitation Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Joobin Jin, Seokjun Hong, Gyeongseon Baek, Yeeun Kim, Byeongjoon Noh</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">精确的微观车辆轨迹建模对于交通行为分析和自动驾驶系统至关重要。我们提出了Ctx2TrajGen，一个情境感知的轨迹生成框架，它使用生成对抗模仿学习（GAIL）来合成真实的城市驾驶行为。我们的模型利用PPO和WGAN-GP，解决了微观环境中固有的非线性相互依赖和训练不稳定性问题。通过明确地以周围车辆和道路几何为条件，Ctx2TrajGen生成了与真实世界情境一致的交互感知轨迹。在无人机捕获的DRIFT数据集上的实验表明，在真实性、行为多样性和情境保真度方面，我们的模型优于现有方法，为解决数据稀缺和领域偏移问题提供了一个无需仿真的稳健解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17418" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">PRIX：从原始像素学习端到端自动驾驶规划</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17596" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17596 - PRIX: Learning to Plan from Raw Pixels for End-to-End Autonomous Driving</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Maciej K. Wozniak, Lianhang Liu, Yixi Cai, Patric Jensfelt</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管端到端自动驾驶模型显示出令人鼓舞的结果，但它们的实际部署常常受到模型尺寸大、依赖昂贵的激光雷达传感器以及计算密集的鸟瞰图（BEV）特征表示的阻碍。这限制了它们的可扩展性，特别是对于仅配备摄像头的量产车辆。为了应对这些挑战，我们提出了PRIX（从原始像素规划）。我们新颖且高效的端到端驾驶架构仅使用摄像头数据，无需明确的BEV表示，也无需激光雷达。PRIX利用一个视觉特征提取器与一个生成式规划头相结合，直接从原始像素输入预测安全轨迹。我们架构的一个核心组件是情境感知重校准变换器（CaRT），这是一个新颖的模块，旨在有效增强多层次视觉特征，以实现更稳健的规划。我们通过全面的实验证明，PRIX在NavSim和nuScenes基准测试中达到了最先进的性能，与更大、多模态的扩散规划器的能力相匹配，同时在推理速度和模型尺寸方面效率显著更高，使其成为现实世界部署的实用解决方案。我们的工作是开源的，代码将发布在此https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17596" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>强化学习与大模型对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">评分标准即奖励：超越可验证领域的强化学习</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17746" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17746 - Rubrics as Rewards: Reinforcement Learning Beyond Verifiable Domains</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Anisha Gunjal, Anthony Wang, Elaine Lau, Vaskar Nath, Bing Liu, Sean Hendryx</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">将带可验证奖励的强化学习（RLVR）扩展到现实世界任务，通常需要在客观和主观评估标准之间取得平衡。然而，许多此类任务缺乏单一、明确的基准真相，这使得为后训练语言模型定义可靠的奖励信号变得困难。虽然传统的基于偏好的方法提供了一种变通方案，但它们依赖于不透明的奖励函数，这些函数难以解释且容易产生伪相关。我们引入了“评分标准即奖励”（RaR）框架，该框架使用结构化的、清单式的评分标准作为可解释的奖励信号，用于与GRPO进行在线策略训练。与简单的基于李克特量表的方法相比，我们最好的RaR方法在HealthBench-1k上实现了高达28%的相对改进，同时其性能与从专家撰写的参考资料中得出的奖励信号相当或更优。通过将评分标准视为结构化的奖励信号，我们表明RaR能够使规模较小的评判模型更好地与人类偏好对齐，并在不同模型规模下保持稳健的性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17746" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一个领域能否帮助其他领域？基于强化学习的多领域推理的数据中心研究</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17512" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17512 - Can One Domain Help Others? A Data-Centric Study on Multi-Domain Reasoning via Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yu Li, Zhuoshi Pan, Honglin Lin, Mengyuan Sun, Conghui He, Lijun Wu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">带可验证奖励的强化学习（RLVR）已成为增强大语言模型（LLM）推理能力的强大范式。现有研究主要集中在孤立的推理领域，如数学问题解决、编码任务或逻辑推理。然而，现实世界的推理场景本质上要求多种认知技能的综合应用。尽管如此，在强化学习下这些推理技能之间的相互作用仍然知之甚少。为了弥补这一差距，我们对RLVR框架内的多领域推理进行了系统性研究，明确关注三个主要领域：数学推理、代码生成和逻辑谜题解决。我们进行了一项包含四个关键部分的综合研究：（1）利用GRPO算法和Qwen-2.5-7B模型系列，我们的研究在单领域数据集上训练时，全面评估了模型的领域内改进和跨领域泛化能力。（2）此外，我们研究了在跨领域联合训练中出现的复杂相互作用，包括相互增强和冲突。（3）为了进一步理解监督微调（SFT）对强化学习（RL）的影响，我们还在相同的RL配置下分析和比较了基础模型和指令模型之间的性能差异。（4）此外，我们深入研究了关键的RL训练细节，系统地探讨了课程学习策略、奖励设计变化和特定语言因素的影响。通过广泛的实验，我们的结果为支配领域相互作用的动态提供了重要见解，揭示了影响专业化和泛化推理性能的关键因素。这些发现为优化RL方法以培养LLM的全面、多领域推理能力提供了宝贵的指导。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17512" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">强化学习对大语言模型中的稀疏子网络进行微调</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17107" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17107 - Reinforcement Learning Fine-Tunes a Sparse Subnetwork in Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Andrii Balashov</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习（RL）是大型语言模型（LLM）在预训练后与复杂任务和人类偏好对齐的关键步骤。虽然通常认为RL微调需要更新模型的大部分参数，但我们以一个惊人的发现挑战了这一假设：RL微调始终只修改一个小的子网络（通常为权重的5-30%），而大部分参数保持不变。我们称这种现象为RL引起的参数更新稀疏性。它是在没有任何稀疏性约束或参数高效调整的情况下自然出现的，并且在多种RL算法（如PPO、DPO、SimPO、PRIME）和模型家族（如OpenAI、Meta和开源LLM）中都出现。此外，由RL更新的子网络在不同种子、数据集和算法之间显示出显著的重叠——远超偶然——这表明预训练模型中存在部分可转移的结构。我们证明，仅微调这个稀疏子网络就能恢复完整模型的性能，并产生与完全微调模型几乎相同的参数。我们的分析表明，这种稀疏性的出现是因为RL在模型的原始分布附近操作，只需要进行有针对性的改变。KL惩罚、梯度裁剪和在线策略动态对稀疏性模式的影响有限。这些发现为RL如何适应模型提供了新的见解：不是通过移动所有权重，而是通过将训练集中在一个小的、持续更新的子网络上。这一见解为更高效的RL方法提供了可能，并从彩票假设的角度重新定义了稀疏性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17107" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于多步推理的双曲空间强化学习</div>
+                                <div><a href="https://arxiv.org/pdf/2507.16864" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16864 - Reinforcement Learning in hyperbolic space for multi-step reasoning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tao Xu, Dung-Yang Lee, Momiao Xiong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多步推理是人工智能中的一个基本挑战，其应用范围从数学问题解决到动态环境中的决策制定。强化学习（RL）通过优化长期奖励，在使智能体能够执行多步推理方面显示出潜力。然而，传统的RL方法由于信用分配、高维状态表示和稳定性等问题，在处理复杂推理任务时表现不佳。Transformer架构和双曲几何的最新进展为这些挑战提供了新的解决方案。本文介绍了一个将双曲Transformer集成到RL中用于多步推理的新框架。所提出的方法利用双曲嵌入来有效建模层次结构。我们提供了理论见解、算法细节和实验结果，包括前沿数学（Frontier Math）和非线性最优控制问题。与使用普通Transformer的RL相比，双曲RL在FrontierMath基准上的准确率大幅提高了（32%~44%），在非线性最优控制基准上提高了（43%~45%），同时在FrontierMath基准上的计算时间显著减少了（16%~32%），在非线性最优控制基准上减少了（16%~17%）。我们的工作展示了双曲Transformer在强化学习中的潜力，特别是对于涉及层次结构的多步推理任务。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.16864" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">我们应该如何元学习强化学习算法？</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17668" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17668 - How Should We Meta-Learn Reinforcement Learning Algorithms?</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Alexander David Goldie, Zilin Wang, Jakob Nicolaus Foerster, Shimon Whiteson</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">从数据中元学习算法，而不是依赖手动设计，正日益成为一种提高机器学习系统性能的范式。元学习在强化学习（RL）领域显示出特别的潜力，因为RL算法通常是从监督或无监督学习中改编而来，尽管它们对于RL并非最优。然而，到目前为止，严重缺乏对不同元学习算法之间的比较，例如使用进化优化黑盒函数或使用LLM提出代码。在本文中，我们将这些不同方法应用于一系列针对RL流程不同部分的元学习算法，并进行了实证比较。除了元训练和元测试性能，我们还研究了每个元学习算法的解释性、样本成本和训练时间等因素。基于这些发现，我们提出了几条元学习新RL算法的指导方针，这将有助于确保未来学习到的算法尽可能地具有高性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17668" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LoRA：实现推理大语言模型安全对齐的唯一所需</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17075" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17075 - LoRA is All You Need for Safety Alignment of Reasoning LLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yihao Xue, Baharan Mirzasoleiman</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">推理大语言模型（LLM）在解决以往无法触及的复杂问题上取得了显著突破。为确保LLM不协助有害请求，在后训练阶段进行安全对齐微调是必要的。然而，最近的研究表明，安全对齐微调会显著降低推理能力，这种现象被称为“安全税”。在这项工作中，我们表明使用LoRA在拒绝数据集上进行监督微调（SFT）可以有效地实现模型的安全对齐，而不会损害其推理能力。这是因为将安全权重更新限制在一个低秩空间内，可以最小化对推理权重的干扰。我们在涵盖数学、科学和编码的四个基准上进行了广泛的实验，结果表明，这种方法产生了高度安全的LLM——其安全水平与全模型微调相当——而没有牺牲其推理能力。此外，我们观察到，与全模型微调相比，LoRA引起的权重更新与初始权重的重叠更小。我们还探索了通过正则化或在权重合并期间进一步减少这种重叠的方法，并观察到在某些任务上有所改进。我们希望这一结果能激励设计出在推理-安全权衡方面产生更一致改进的方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17075" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一种不确定性驱动的大语言模型自适应对齐框架</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17477" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17477 - An Uncertainty-Driven Adaptive Self-Alignment Framework for Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Haoran Sun, Zekun Zhang, Shaoning Zeng</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）在指令遵循和通用推理方面取得了显著进展。然而，在没有人为标注的情况下实现与人类意图和安全规范的高质量对齐仍然是一个根本性挑战。在这项工作中，我们提出了一个不确定性驱动的自适应自对齐（UDASA）框架，旨在以完全自动化的方式改进LLM的对齐。UDASA首先为每个输入生成多个响应，并在三个维度上量化输出不确定性：语义、事实性和价值对齐。基于这些不确定性分数，该框架构建偏好对，并根据它们的不确定性差异将训练样本分为三个阶段：保守、中度和探索性。然后，模型在这三个阶段中逐步进行优化。此外，我们进行了一系列初步研究，以验证核心设计假设，并为所提出的框架提供了强有力的实证动机。实验结果表明，UDASA在无害性、有益性、真实性和受控情感生成等多个任务上优于现有的对齐方法，显著提高了模型性能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17477" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态模型与高效化技术</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SiLQ：简单的大语言模型量化感知训练</div>
+                                <div><a href="https://arxiv.org/pdf/2507.16933" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16933 - SiLQ: Simple Large Language Model Quantization-Aware Training</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Steven K. Esser, Jeffrey L. McKinstry, Deepika Bablani, Rathinakumar Appuswamy, Dharmendra S. Modha</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">对大型语言模型进行量化可以减少推理延迟、模型大小和能耗，从而以更低的成本提供更好的用户体验。目前面临的挑战是如何在合理的时间内提供量化模型，并使准确性损失最小化，特别是要做到这一点，而不需要与专用推理加速器不兼容的机制。在这里，我们展示了一种简单的、端到端的量化感知训练方法，该方法在总模型训练预算增加不到0.1%的情况下，在几个现代基准测试中，无论是基础模型还是指令模型变体，都大幅超越了已发表的领先量化方法。该方法可以轻松地泛化到不同的模型架构，可以应用于激活值、缓存和权重，并且除了量化本身之外，不需要向模型引入任何额外的操作。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.16933" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SADA：稳定性引导的自适应扩散加速</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17135" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17135 - SADA: Stability-guided Adaptive Diffusion Acceleration</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ting Jiang, Yixiao Wang, Hancheng Ye, Zishan Shao, Jingwei Sun, Jingyang Zhang, Zekai Chen, Jianyi Zhang, Yiran Chen, Hai Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">扩散模型在生成任务中取得了显著成功，但由于其迭代采样过程和二次注意力的成本，计算开销巨大。现有的免训练加速策略通过减少每步计算成本来有效缩短采样时间，但与原始基线相比，保真度较低。我们假设这种保真度差距的产生原因在于（a）不同的提示对应不同的去噪轨迹，以及（b）这类方法没有考虑底层的ODE（常微分方程）公式及其数值解。在本文中，我们提出了稳定性引导的自适应扩散加速（SADA），这是一种新的范式，通过单一的稳定性标准统一了步进式和令牌式的稀疏性决策，以加速基于ODE的生成模型（扩散和流匹配）的采样。对于（a），SADA根据采样轨迹自适应地分配稀疏性。对于（b），SADA引入了有原则的近似方案，利用了数值ODE求解器的精确梯度信息。在SD-2、SDXL和Flux上使用EDM和DPM++求解器进行的全面评估显示，与未修改的基线相比，SADA在保真度退化最小（LPIPS ≤ 0.10和FID ≤ 4.5）的情况下，实现了持续的≥1.8倍加速，显著优于先前的方法。此外，SADA能无缝适应其他流程和模态：它在没有任何修改的情况下加速了ControlNet，并将MusicLDM加速了1.8倍，频谱图LPIPS约为0.01。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17135" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过临床认知链推理构建用于定位-诊断协同的眼科多模态大语言模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17539" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17539 - Constructing Ophthalmic MLLM for Positioning-diagnosis Collaboration Through Clinical Cognitive Chain Reasoning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xinyao Liu, Diping Song</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态大型语言模型（MLLM）在医疗诊断领域展现出巨大潜力。然而，它们在眼科等专业领域面临关键挑战，特别是标注粒度的碎片化和临床推理逻辑的不一致性，这阻碍了精确的跨模态理解。本文介绍了FundusExpert，一个具有集成定位-诊断推理能力的眼科专用MLLM，以及FundusGen，一个通过智能Fundus-Engine系统构建的数据集。Fundus-Engine能自动定位，并利用基于MLLM的语义扩展，在单张眼底图像中整合全局疾病分类、局部目标检测和细粒度特征分析。此外，通过构建一个与临床对齐的认知链，它引导模型生成可解释的推理路径。使用FundusGen的指令数据进行微调的FundusExpert，在眼科问答任务中取得了最佳性能，超过了40B参数的MedRegA模型的平均准确率26.6%。它在零样本报告生成任务中也表现出色，达到了77.0%的临床一致性，显著优于GPT-4o的47.6%。此外，我们揭示了数据质量与模型能力之间的缩放定律（L ∝ N^0.068），表明FundusGen中的认知对齐标注提高了数据利用效率。通过将区域级定位与诊断推理链相结合，我们的工作开发了一个可扩展的、与临床对齐的MLLM，并探索了一条弥合特定MLLM中视觉-语言差距的途径。我们的项目可在 此https URL 找到。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17539" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">HiProbe-VAD：通过在免调优多模态大语言模型中探测隐藏状态进行视频异常检测</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17394" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17394 - HiProbe-VAD: Video Anomaly Detection via Hidden States Probing in Tuning-Free Multimodal LLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zhaolin Cai, Fan Li, Ziwei Zheng, Yanjun Qin</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视频异常检测（VAD）旨在识别和定位视频序列中偏离正常模式的现象。传统方法通常面临巨大的计算需求和对大量标注数据集的依赖，从而限制了其实际应用。为了解决这些限制，我们提出了HiProbe-VAD，这是一个新颖的框架，利用预训练的多模态大型语言模型（MLLM）进行VAD，而无需微调。在本文中，我们发现MLLM的中间隐藏状态包含信息丰富的表示，与输出层相比，对异常表现出更高的敏感度和线性可分性。为了利用这一点，我们提出了一种动态层显著性探测（DLSP）机制，该机制在MLLM推理过程中智能地识别并从最佳中间层提取信息最丰富的隐藏状态。然后，一个轻量级的异常评分器和时间定位模块利用这些提取的隐藏状态高效地检测异常，并最终生成解释。在UCF-Crime和XD-Violence数据集上的实验表明，HiProbe-VAD优于现有的免训练方法和大多数传统方法。此外，我们的框架在不同的MLLM中表现出卓越的跨模型泛化能力，而无需任何调整，释放了预训练MLLM在视频异常检测方面的潜力，并为更实用和可扩展的解决方案铺平了道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17394" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SDGOCC：用于三维多模态占据预测的语义与深度引导鸟瞰图变换</div>
+                                <div><a href="https://arxiv.org/pdf/2507.17083" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17083 - SDGOCC: Semantic and Depth-Guided Bird's-Eye View Transformation for 3D Multimodal Occupancy Prediction</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zaipeng Duan, Chenxu Dang, Xuzhong Hu, Pei An, Junfeng Ding, Jie Zhan, Yunbiao Xu, Jie Ma</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态三维占据预测因其在自动驾驶领域的潜力而受到广泛关注。然而，大多数现有方法都是单模态的：基于摄像头的方法缺乏深度信息，而基于激光雷达的方法则难以处理遮挡问题。当前的轻量级方法主要依赖于Lift-Splat-Shoot（LSS）流程，但该流程存在深度估计不准确的问题，并且未能充分利用三维激光雷达点的几何和语义信息。因此，我们提出了一种名为SDG-OCC的新型多模态占据预测网络，该网络结合了语义和深度联合引导的视图变换以及融合到占据驱动的主动蒸馏。增强的视图变换通过扩散和双线性离散化整合像素语义和共点深度，构建了准确的深度分布。融合到占据驱动的主动蒸馏从多模态数据中提取丰富的语义信息，并根据激光雷达识别的区域选择性地将知识转移到图像特征中。最后，为了获得最佳性能，我们引入了仅使用融合的SDG-Fusion，以及集成了融合和蒸馏以实现更快推理的SDG-KL。我们的方法在Occ3D-nuScenes数据集上实现了最先进（SOTA）的性能和实时处理，并在更具挑战性的SurroundOcc-nuScenes数据集上表现出可比的性能，证明了其有效性和鲁棒性。代码将发布于此https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.17083" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
