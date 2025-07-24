@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-23</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-23)</h1>
+                    <p id="intro">为您找到日期 2025-07-23 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>3D视觉与生成</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">梦想、提升、动画：从单张图像到可动画的高斯化身</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.15979&amp;sa=D&amp;source=editors&amp;ust=1753248964842288&amp;usg=AOvVaw1URrSmD1kUsJjalXgNtahT" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15979 - Dream, Lift, Animate: From Single Images to Animatable Gaussian Avatars</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Marcel C. Bühler, Ye Yuan, Xueting Li, Yangyi Huang, Koki Nagano, Umar Iqbal</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍了“梦想、提升、动画”（Dream, Lift, Animate, DLA）框架，这是一个从单张图像重建可动画三维人体化身的新颖框架。该框架通过利用多视角生成、三维高斯提升以及三维高斯函数的姿态感知UV空间映射来实现。给定一张图像，我们首先使用视频扩散模型构想出合理的多视角图像，捕捉丰富的几何和外观细节。然后，这些视图被提升为非结构化的三维高斯函数。为了实现动画，我们提出了一种基于Transformer的编码器，该编码器建模全局空间关系，并将这些高斯函数投影到一个与参数化身体模型的UV空间对齐的结构化潜在表示中。这个潜在代码被解码为UV空间的高斯函数，可以通过身体驱动的变形进行动画处理，并根据姿态和视角进行条件渲染。通过将高斯函数锚定到UV流形上，我们的方法在动画过程中确保了一致性，同时保留了精细的视觉细节。DLA支持实时渲染和直观编辑，无需后期处理。在ActorsHQ和4D-Dress数据集上，我们的方法在感知质量和光度准确性方面均优于最先进的方法。通过将视频扩散模型的生成优势与姿态感知的UV空间高斯映射相结合，DLA填补了非结构化三维表示与高保真、可动画化身之间的鸿沟。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.15979&amp;sa=D&amp;source=editors&amp;ust=1753248964842266&amp;usg=AOvVaw0KixPPcPX0LVb5pxMyVNoV" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">EarthCrafter：通过双稀疏潜在扩散实现可扩展的地球三维生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16535&amp;sa=D&amp;source=editors&amp;ust=1753248964829142&amp;usg=AOvVaw2IDWBsapukSBaaDBy0QrZ8" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16535 - EarthCrafter: Scalable 3D Earth Generation via Dual-Sparse Latent Diffusion</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shang Liu, Chenjie Cao, Chaohui Yu, Wen Qian, Jing Wang, Fan Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管近期的三维生成工作取得了显著进展，但将这些方法扩展到地理范围（例如模拟数千平方公里的地球表面）仍然是一个开放的挑战。我们通过数据基础设施和模型架构的双重创新来解决这个问题。首先，我们推出了Aerial-Earth3D，这是迄今为止最大的三维航拍数据集，包含在美国大陆各地拍摄的5万个精心策划的场景（每个场景尺寸为600米x600米），共计4500万个多视角谷歌地球帧。每个场景都提供带姿态注释的多视角图像、深度图、法线、语义分割和相机姿态，并进行明确的质量控制以确保地形多样性。在此基础上，我们提出了EarthCrafter，这是一个专为大规模三维地球生成设计的框架，采用稀疏解耦的潜在扩散方法。我们的架构将结构和纹理生成分离开来：1) 双稀疏三维变分自编码器（3D-VAE）将高分辨率的几何体素和纹理二维高斯溅射（2DGS）压缩到紧凑的潜在空间中，极大地缓解了因广阔地理尺度而产生的高昂计算成本，同时保留了关键信息。2) 我们提出了在混合输入（语义、图像或两者皆无）上训练的条件感知流匹配模型，以灵活地独立建模潜在的几何和纹理特征。大量实验表明，EarthCrafter在超大规模生成方面表现出色。该框架还支持多种应用，从语义引导的城市布局生成到无条件的崎岖地形合成，同时通过我们从Aerial-Earth3D获得的丰富数据先验保持了地理上的合理性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16535&amp;sa=D&amp;source=editors&amp;ust=1753248964829106&amp;usg=AOvVaw1JPB1jrRCVniXD4HxkuaMf" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Spatial 3D-LLM：探索3D视觉语言模型中的空间感知能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16524&amp;sa=D&amp;source=editors&amp;ust=1753248964829780&amp;usg=AOvVaw1aF5eU4YgvA4kP7XWAJ9vg" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16524 - Spatial 3D-LLM: Exploring Spatial Awareness in 3D Vision-Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xiaoyan Wang, Zeju Li, Yifan Xu, Jiaxing Qi, Zhifei Yang, Ruifei Ma, Xiangde Liu, Chao Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">新时代为扩展大型语言模型（LLM）以处理3D视觉语言任务开启了激动人心的可能性。然而，大多数现有的3D多模态LLM（MLLM）依赖于压缩整体3D场景信息或分割独立对象来执行这些任务，这由于对3D场景内在丰富性的表征不足而限制了它们的空间感知能力。为了克服这些限制，我们提出了Spatial 3D-LLM，一个专门设计用于增强3D视觉语言任务空间感知能力的3D MLLM，通过丰富3D场景的空间嵌入来实现。Spatial 3D-LLM集成了一个LLM主干和一个渐进式空间感知方案，该方案随着感知领域的扩展逐步捕捉空间信息，生成位置丰富的3D场景嵌入作为视觉提示。此外，我们引入了两个新颖的任务：3D对象距离测量和3D布局编辑，并构建了一个3D指令数据集MODEL，以评估模型的空间感知能力。实验结果表明，Spatial 3D-LLM在广泛的3D视觉语言任务中取得了最先进的性能，揭示了我们渐进式空间感知方案在挖掘更深层空间信息方面带来的改进。我们的代码可在 https://this URL 获得。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16524&amp;sa=D&amp;source=editors&amp;ust=1753248964829744&amp;usg=AOvVaw3sJpmv9Sd5UUpgeXuDNpHu" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">收缩期条件下的生成式心脏运动</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.15894&amp;sa=D&amp;source=editors&amp;ust=1753248964845492&amp;usg=AOvVaw2ZoYd_UOriz_AMAwf-6fYj" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15894 - Systole-Conditioned Generative Cardiac Motion</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shahar Zuler, Gal Lifshitz, Hadar Averbuch-Elor, Dan Raviv</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">心脏计算机断层扫描（CT）成像中的精确运动估计对于评估心脏功能和手术规划至关重要。数据驱动方法已成为密集运动估计的标准方法，但它们依赖于大量带有密集真实运动（GT）标注的标记数据，而这些数据通常难以获得。为了解决这一限制，我们提出了一种新颖的方法，可以合成外观逼真的心脏CT帧对，并附有密集的3D流场标注。我们的方法利用了一个条件变分自编码器（CVAE），其中包含一种新颖的多尺度特征条件机制，并被训练用于根据单个CT帧生成3D流场。通过应用生成的流场来扭曲给定的帧，我们创建了模拟整个心动周期中心肌真实变形的帧对。这些帧对可作为完全标注的数据样本，提供光流GT标注。我们的数据生成流程可以支持更复杂、更精确的心肌运动模型的训练和验证，从而大大减少对手动标注的依赖。我们的代码以及生成的动画样本和附加材料可在我们的项目页面上找到：https://this URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.15894&amp;sa=D&amp;source=editors&amp;ust=1753248964845471&amp;usg=AOvVaw3JPCm-xiy2ohGjAPF3-AAA" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态大模型与强化学习</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ThinkAct：通过强化视觉潜在规划实现视觉-语言-行动推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16815&amp;sa=D&amp;source=editors&amp;ust=1753248964820601&amp;usg=AOvVaw35UaV1-HAwriL3HjcXHdlH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16815 - ThinkAct: Vision-Language-Action Reasoning via Reinforced Visual Latent Planning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Chi-Pin Huang, Yueh-Hua Wu, Min-Hung Chen, Yu-Chiang Frank Wang, Fu-En Yang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视觉-语言-行动（VLA）推理任务要求智能体解释多模态指令，执行长时程规划，并在动态环境中自适应地行动。现有方法通常以端到端的方式训练VLA模型，直接将输入映射到行动，而没有明确的推理过程，这限制了它们进行多步规划或适应复杂任务变化的能力。在本文中，我们提出了ThinkAct，一个通过强化视觉潜在规划来连接高级推理与低级行动执行的双系统框架。ThinkAct训练一个多模态大语言模型，以生成具身推理计划，该计划由基于目标完成度和轨迹一致性的强化行动对齐视觉奖励来指导。这些推理计划被压缩成一个视觉计划潜在表示，用于调节下游的行动模型，以在目标环境中实现稳健的行动执行。在具身推理和机器人操控基准上的大量实验表明，ThinkAct在复杂的具身AI任务中实现了少样本适应、长时程规划和自我纠正行为。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16815&amp;sa=D&amp;source=editors&amp;ust=1753248964820558&amp;usg=AOvVaw0ieCvb0pG1dauvW2uYlcTW" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">经验是最好的老师：通过自我生成的记忆为机器人技术奠定视觉语言模型的基础</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16713&amp;sa=D&amp;source=editors&amp;ust=1753248964823412&amp;usg=AOvVaw1W0S50UY_UrV-DkA_ySWGE" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16713 - Experience is the Best Teacher: Grounding VLMs for Robotics through Self-Generated Memory</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Guowei Lan, Kaixian Qu, René Zurbrügg, Changan Chen, Christopher E. Mower, Haitham Bou-Ammar, Marco Hutter</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视觉语言模型（VLM）已在机器人领域被广泛采用以实现自主规划。然而，将最初在互联网数据上训练的VLM应用于多样化的真实世界机器人仍然是一个挑战。本文提出了ExpTeach框架，该框架通过构建一个真实世界经验的自我生成记忆库，将VLM与物理机器人联系起来。在ExpTeach中，VLM自主规划行动，验证结果，反思失败，并在一个闭环中调整机器人行为。在此过程中自我生成的经验随后被总结为长期记忆，通过检索增强生成（RAG）来检索学到的知识以指导未来的任务。此外，ExpTeach通过一个按需图像标注模块增强了VLM的空间理解能力。实验中，我们展示了反思能力将四个具有挑战性的机器人任务的成功率从36%提高到84%，并观察到智能物体交互的出现，包括创造性的工具使用。在对12个真实世界场景（包括8个未见过的场景）的广泛测试中，我们发现使用长期记忆进行基础构建将单次试验成功率从22%提升至80%，证明了ExpTeach的有效性和泛化能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16713&amp;sa=D&amp;source=editors&amp;ust=1753248964823368&amp;usg=AOvVaw3btdQzvRiG7111iGGdQZOZ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">以自我矛盾促自我提升：弥合多模态大模型中生成与理解的差距</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16663&amp;sa=D&amp;source=editors&amp;ust=1753248964825456&amp;usg=AOvVaw3xSIpTQagPzPFIb320-krV" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16663 - Self-Contradiction as Self-Improvement: Mitigating the Generation-Understanding Gap in MLLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yujin Han, Hao Chen, Andi Han, Zhiheng Wang, Xinyu Lin, Yingya Zhang, Shiwei Zhang, Difan Zou</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管人们努力在单一模型中统一多模态生成和理解任务，但我们发现这些多模态大语言模型（MLLM）表现出自我矛盾，即其生成的图像根据模型自身的理解被判断为与输入提示不符。我们定义了一个“非统一得分”（Nonunified score）来量化这种自我矛盾。我们的实证结果表明，自我矛盾主要源于生成能力较弱，未能与提示对齐，而非理解能力不足。这种能力上的不对称性表明，可以利用自我矛盾进行自我提升，即由更强的模型理解能力来指导较弱的生成能力，以弥合生成与理解之间的差距。应用标准后训练方法（如SFT、DPO）并结合这种内部监督，成功地改善了生成和统一能力。我们发现，仅微调生成分支时，生成和理解能力会共同提升，这一现象在预训练中已知，但在后训练中尚未充分探索。我们的分析表明，改进源于更好地检测到先前被错误识别为与提示对齐的假阳性样本。理论上，我们证明了生成和理解之间对齐的训练动态使得减少与提示不符的生成也能改善理解分支中的不匹配检测。此外，该框架揭示了在监督不佳的情况下可能出现的共同退化风险——这是一个被忽视的现象，并在我们的实验中得到了实证验证。值得注意的是，我们发现像非统一得分这样的内在指标无法区分共同提升和共同退化，这凸显了数据质量检查的必要性。最后，我们根据我们的发现提出了一种基于课程学习的策略，随着模型的改进逐步引入更难的样本，从而实现更好的统一并改善MLLM的生成和理解能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16663&amp;sa=D&amp;source=editors&amp;ust=1753248964825418&amp;usg=AOvVaw3n92l5i0s7nIjrw3lEz0a7" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LLM引导的强化学习在带碰撞避免的编队控制中的应用</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16382&amp;sa=D&amp;source=editors&amp;ust=1753248964832265&amp;usg=AOvVaw2VZp8zlKEvHgmAGbPO1VB6" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16382 - Application of LLM Guided Reinforcement Learning in Formation Control with Collision Avoidance</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Chenhao Yao, Zike Yuan, Xiaoxu Liu, Chi Zhu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多智能体系统（MAS）通过个体智能体的协同努力，在完成复杂目标方面表现出色。在MAS所采用的方法中，多智能体强化学习（MARL）是最高效的算法之一。然而，当面临带碰撞避免的编队控制（FCCA）这一复杂目标时，设计一个能促进策略网络快速收敛到最优解的有效奖励函数成为一个挑战。在本文中，我们引入了一个新颖的框架来克服这一挑战。通过让大型语言模型（LLM）处理任务优先级和每个智能体可观察的信息，我们的框架能够生成可根据评估结果在线动态调整的奖励函数，这得益于采用了比奖励本身更先进的评估指标。这种机制使MAS能够在动态环境中同时实现编队控制和障碍物避免，效率更高，达到更优性能所需的迭代次数更少。我们在模拟和真实世界环境中的实证研究验证了我们所提方法的实用性和有效性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16382&amp;sa=D&amp;source=editors&amp;ust=1753248964832217&amp;usg=AOvVaw04P3pTvzXB8jyYRMiu9y17" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">专家引导的LLM推理用于电池发现：从AI驱动的假设到合成与表征</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16110&amp;sa=D&amp;source=editors&amp;ust=1753248964815412&amp;usg=AOvVaw1ffjRD7ROut4AuvHlb2ntX" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16110 - Expert-Guided LLM Reasoning for Battery Discovery: From AI-Driven Hypothesis to Synthesis and Characterization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shengchao Liu, Hannan Xu, Yan Ai, Huanxin Li, Yoshua Bengio, Harry Guo</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）利用思维链（CoT）技术解决复杂问题，代表了人工智能（AI）领域的一项变革性突破。然而，它们的推理能力主要在解决数学和编程问题上得到展示，其在特定领域应用（如电池发现）中的潜力在很大程度上仍未被探索。受推理反映了一种引导式搜索这一思想的启发，我们引入了ChatBattery，一个新颖的智能体框架，它整合领域知识以引导LLM在材料设计中进行更有效的推理。利用ChatBattery，我们成功地识别、合成并表征了三种新型锂离子电池正极材料，与广泛使用的正极材料LiNi0.8Mn0.1Co0.1O2（NMC811）相比，其实际容量分别提高了28.8%、25.2%和18.5%。除了这一发现，ChatBattery通过展示一个成功的、由LLM驱动并基于推理的电池材料发明平台，开辟了一条新路径。这个完整的AI驱动循环——从设计到合成再到表征——展示了AI驱动的推理在革新材料发现方面的变革性潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16110&amp;sa=D&amp;source=editors&amp;ust=1753248964815365&amp;usg=AOvVaw0PlVUY05izde2bIVRda0VE" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>大模型对齐与安全性</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">超越二元奖励：训练语言模型推理其不确定性</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16806&amp;sa=D&amp;source=editors&amp;ust=1753248964821678&amp;usg=AOvVaw39n38bqf9A1us3WRwL4ts3" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16806 - Beyond Binary Rewards: Training LMs to Reason About Their Uncertainty</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Mehul Damani, Isha Puri, Stewart Slocum, Idan Shenfeld, Leshem Choshen, Yoon Kim, Jacob Andreas</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">当语言模型（LM）通过强化学习（RL）训练生成自然语言“推理链”时，它们在各种困难的问答任务上的表现得到提升。如今，几乎所有成功的RL推理应用都使用评估LM输出正确性的二元奖励函数。由于这类奖励函数不惩罚猜测或低置信度的输出，它们常常会产生意想不到的副作用，即降低校准度并增加LM在其他问题领域生成不正确响应（或“幻觉”）的频率。本文描述了RLCR（带校准奖励的强化学习），一种训练推理模型的方法，可同时提高准确性和校准置信度估计。在RLCR期间，LM在推理后会生成预测和数值置信度估计。它们被训练以优化一个奖励函数，该函数在二元正确性得分的基础上增加了Brier得分——一种激励校准预测的置信度估计评分规则。我们首先证明，这个奖励函数（或任何使用有界、适当评分规则的类似奖励函数）产生的模型预测既准确又校准良好。接下来，我们展示了在各种数据集上，RLCR在不损失准确性的情况下，在域内和域外评估中都显著提高了校准度——优于普通的RL训练和训练用于分配事后置信度分数的分类器。普通RL会损害校准度，而RLCR则能改善它。最后，我们证明了在测试时可以利用口头表达的置信度，通过置信度加权缩放方法来提高准确性和校准度。我们的结果表明，明确地为校准进行优化可以产生更普遍可靠的推理模型。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16806&amp;sa=D&amp;source=editors&amp;ust=1753248964821650&amp;usg=AOvVaw3Yrc9H66t2dzQ8h5LSlY3w" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">从推理到超级智能：一种基于搜索理论的视角</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.15865&amp;sa=D&amp;source=editors&amp;ust=1753248964820293&amp;usg=AOvVaw1HirzusXAblDae01R_ItPk" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15865 - From Reasoning to Super-Intelligence: A Search-Theoretic Perspective</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shai Shalev-Shwartz, Amnon Shashua</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">思维链（CoT）推理已成为增强大型语言模型（LLM）解决问题能力的强大工具。然而，从CoT数据中学习的理论基础仍不完善，现有方法——如监督微调（SFT）、强化学习（RL）、思维树（ToT）和蒙特卡洛树搜索（MCTS）——在复杂的推理任务上常常失败。在这项工作中，我们指出了阻碍有效CoT学习的核心障碍，包括分布漂移、缺乏嵌入式搜索以及指数级的推理成本。我们引入了“勤奋学习者”（Diligent Learner），一种新的学习范式，它明确地将推理建模为由验证器指导的深度优先搜索，并在失败时支持回溯。在两个温和且现实的假设下，我们证明了勤奋学习者可以有效地从CoT数据中学习，而现有方法则无法做到。该框架为构建可扩展且可靠的推理系统提供了一条路径，这些系统可以从自然产生的不完整数据中进行训练——为开发具有稳健、可解释问题解决能力的大型推理模型（LRM）铺平了道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.15865&amp;sa=D&amp;source=editors&amp;ust=1753248964820248&amp;usg=AOvVaw1qeyMFQYmGS3ua82ypNd73" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过概念消除微调引导分布外泛化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16795&amp;sa=D&amp;source=editors&amp;ust=1753248964822258&amp;usg=AOvVaw0rn_rQIUKC_Jco1BxLGr6y" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16795 - Steering Out-of-Distribution Generalization with Concept Ablation Fine-Tuning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Helena Casademunt, Caden Juang, Adam Karvonen, Samuel Marks, Senthooran Rajamanoharan, Neel Nanda</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">对大型语言模型（LLM）进行微调可能导致意料之外的分布外泛化。解决此问题的标准方法依赖于修改训练数据，例如通过添加能更好指定预期泛化行为的数据。然而，这并非总是可行的。我们引入了概念消除微调（CAFT），这是一种利用可解释性工具来控制LLM如何从微调中泛化的技术，而无需修改训练数据或使用目标分布的数据。给定LLM潜在空间中对应于不期望概念的一组方向，CAFT通过在微调期间使用线性投影消除这些概念，从而引导模型远离意料之外的泛化。我们成功地将CAFT应用于三个微调任务，包括涌现性错位（emergent misalignment），这是一种现象，即在狭窄任务上微调的LLM泛化后会对一般性问题给出严重错位的回答。在不改变任何微调数据的情况下，CAFT将错位回答减少了10倍，同时不降低在训练分布上的性能。总的来说，CAFT代表了一种在不修改训练数据的情况下引导LLM泛化的新方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16795&amp;sa=D&amp;source=editors&amp;ust=1753248964822229&amp;usg=AOvVaw0WZPn7eP72uhf9kOmhjFtE" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">面向下游微调的扩散模型弹性安全驱动遗忘方法研究</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16302&amp;sa=D&amp;source=editors&amp;ust=1753248964833942&amp;usg=AOvVaw3Kw2jYkCc_pgAmPeZkSu1g" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16302 - Towards Resilient Safety-driven Unlearning for Diffusion Models against Downstream Fine-tuning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Boheng Li, Renjie Gu, Junjie Wang, Leyi Qi, Yiming Li, Run Wang, Zhan Qin, Tianwei Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">文本到图像（T2I）扩散模型在图像生成质量方面取得了令人印象深刻的成就，并越来越多地被微调用于个性化应用。然而，这些模型常常从有毒的预训练数据中继承不安全的行为，引发了日益增长的安全担忧。尽管最近的安全驱动遗忘方法在抑制模型毒性方面取得了有希望的进展，但它们被发现在下游微调面前很脆弱，我们揭示即使在完全良性的数据集上进行微调，最先进的方法也基本上无法保持其有效性。为了缓解这个问题，本文提出了ResAlign，一个在下游微调面前具有增强弹性的安全驱动遗忘框架。通过将下游微调建模为一个隐式优化问题，并使用基于Moreau包络的重构，ResAlign能够高效地估计梯度，以最小化有害行为的恢复。此外，我们提出了一种元学习策略，以模拟多样化的微调场景分布，从而提高泛化能力。在广泛的数据集、微调方法和配置上的大量实验表明，ResAlign在下游微调后保持安全性方面始终优于先前的遗忘方法，同时很好地保留了良性生成能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16302&amp;sa=D&amp;source=editors&amp;ust=1753248964833909&amp;usg=AOvVaw38K_2e-QHyLtFQQyb-bilA" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">DREAM：通过分布建模对文本到图像生成系统进行可扩展的红队测试</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16329&amp;sa=D&amp;source=editors&amp;ust=1753248964833406&amp;usg=AOvVaw0DwCCaiBMLnUlVurjSAC8Y" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16329 - DREAM: Scalable Red Teaming for Text-to-Image Generative Systems via Distribution Modeling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Boheng Li, Junjie Wang, Yiming Li, Zhiyang Hu, Leyi Qi, Jianshuo Dong, Run Wang, Han Qiu, Zhan Qin, Tianwei Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管集成了安全对齐和外部过滤器，文本到图像（T2I）生成模型仍然容易产生有害内容，如色情或暴力图像。这引发了关于意外暴露和潜在滥用的严重关切。红队测试旨在主动识别能够从T2I系统（包括核心生成模型以及潜在的外部安全过滤器和其他处理组件）引发不安全输出的各种提示，正日益被认为是评估和提高部署前安全性的重要方法。然而，现有的自动化红队测试方法通常将提示发现视为一个孤立的、提示级别的优化任务，这限制了其可扩展性、多样性和整体有效性。为了弥补这一差距，本文提出了DREAM，一个可扩展的红队测试框架，用于自动发现给定T2I系统中各种有问题提示。与大多数优化单个提示的先前工作不同，DREAM直接对目标系统有问题提示的概率分布进行建模，这使得能够明确地对有效性和多样性进行优化，并允许在训练后进行高效的大规模采样。为了在没有直接访问代表性训练样本的情况下实现这一点，我们从基于能量的模型中汲取灵感，并将目标重构为简单且易于处理的目标。我们进一步引入了GC-SPSA，一种高效的优化算法，通过长且可能不可微的T2I流水线提供稳定的梯度估计。DREAM的有效性通过广泛的实验得到验证，表明它在提示成功率和多样性方面，在一系列T2I模型和安全过滤器上，均显著优于9个最先进的基线方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16329&amp;sa=D&amp;source=editors&amp;ust=1753248964833356&amp;usg=AOvVaw37U8k9KJz5TJbYwlnprlnZ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>高效生成模型与音频合成</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">TTMBA：迈向文本到多源双耳音频生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16564&amp;sa=D&amp;source=editors&amp;ust=1753248964827495&amp;usg=AOvVaw2nzs06iB1iDRO6zi0bTgYK" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16564 - TTMBA: Towards Text To Multiple Sources Binaural Audio Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuxuan He, Xiaoran Yang, Ningning Pan, Gongping Huang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大多数现有的文本到音频（TTA）生成方法产生的是单声道输出，忽略了沉浸式听觉体验所必需的空间信息。为了解决这个问题，我们提出了一种用于文本到多源双耳音频生成（TTMBA）的级联方法，该方法具有时间和空间上的双重控制。首先，一个预训练的大型语言模型（LLM）将文本分割成结构化格式，包含每个声音事件的时间和空间细节。接下来，一个预训练的单声道音频生成网络为每个事件创建多个不同时长的单声道音频。这些单声道音频利用基于LLM空间数据的双耳渲染神经网络转换为双耳音频。最后，这些双耳音频根据其开始时间进行排列，从而生成多源双耳音频。实验结果表明，该方法在音频生成质量和空间感知准确性方面均表现出优越性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16564&amp;sa=D&amp;source=editors&amp;ust=1753248964827459&amp;usg=AOvVaw19-AepiYFMyIPym3kiU38W" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于语音带宽扩展的非线性框架</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.15970&amp;sa=D&amp;source=editors&amp;ust=1753248964842788&amp;usg=AOvVaw0L7xusTUDdj-U2tG-xcL3e" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15970 - Nonlinear Framework for Speech Bandwidth Extension</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tarikul Islam Tamiti, Nursad Mamun, Anomadarshi Barua</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">恢复因带宽限制而丢失的高频分量对于从电信到资源有限设备上的高保真音频等应用至关重要。我们引入了NDSI-BWE，这是一个新的对抗性带宽扩展（BWE）框架，它利用了四个受非线性动力系统启发的新的判别器来捕捉不同的时间行为：一个多分辨率Lyapunov判别器（MRLD），通过捕捉确定性混沌来确定对初始条件的敏感性；一个多尺度递归判别器（MS-RD），用于自相似的递归动态；一个多尺度去趋势分形分析判别器（MSDFA），用于长程慢变尺度不变关系；一个多分辨率庞加莱图判别器（MR-PPD），用于捕捉隐藏的潜在空间关系；一个多周期判别器（MPD），用于周期性模式；一个多分辨率幅度判别器（MRAD）和一个多分辨率相位判别器（MRPD），用于捕捉复杂的幅相转换统计信息。通过在每个判别器的卷积块核心使用深度可分离卷积，NDSI-BWE实现了八倍的参数减少。这七个判别器指导一个基于复杂值ConformerNeXt的生成器，该生成器具有双流Lattice-Net架构，可同时优化幅度和相位。生成器利用了基于Transformer的Conformer的全局依赖建模能力和ConvNeXt块的局部时间建模能力。在六个客观评估指标和由五名人类评委组成的基于主观的测试中，NDSI-BWE在BWE领域建立了新的技术水平。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.15970&amp;sa=D&amp;source=editors&amp;ust=1753248964842744&amp;usg=AOvVaw3ifKKsbhm8CqWeQvVmYSXX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LSSGen：利用流和扩散模型中的潜在空间缩放实现高效的文本到图像生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16154&amp;sa=D&amp;source=editors&amp;ust=1753248964838679&amp;usg=AOvVaw2wK0SExL-F9Ju6PszsCJAG" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16154 - LSSGen: Leveraging Latent Space Scaling in Flow and Diffusion for Efficient Text to Image Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jyun-Ze Tang, Chih-Fan Hsu, Jeng-Lin Li, Ming-Ching Chang, Wei-Chao Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">流匹配和扩散模型在文本到图像生成方面取得了令人瞩目的成果，通过迭代去噪过程产生逼真的图像。一种常见的加速合成策略是在较低分辨率下进行早期去噪。然而，传统方法在像素空间中进行降采样和升采样常常会引入伪影和失真。当升采样后的图像被重新编码到潜在空间时，这些问题就会出现，导致最终图像质量下降。为了解决这些问题，我们提出了潜在空间缩放生成（LSSGen）框架，该框架使用一个轻量级的潜在升采样器直接在潜在空间中执行分辨率缩放。LSSGen在不改变Transformer或U-Net架构的情况下，提高了效率和视觉质量，同时支持灵活的多分辨率生成。我们对文本-图像对齐和感知质量进行了全面评估，结果表明LSSGen显著优于传统的缩放方法。在以相似速度生成1024x1024图像时，其TOPIQ得分提升高达246%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16154&amp;sa=D&amp;source=editors&amp;ust=1753248964838657&amp;usg=AOvVaw0ec_wxFLJD2_8jbC1fonVi" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">三元ReLU回归神经网络线性区域数量的下界</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16079&amp;sa=D&amp;source=editors&amp;ust=1753248964840084&amp;usg=AOvVaw3Emr-_drFllVflTtQgEiNf" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16079 - A Lower Bound for the Number of Linear Regions of Ternary ReLU Regression Neural Networks</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuta Nakahara, Manabu Kobayashi, Toshiyasu Matsushima</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着深度学习的发展，降低计算复杂度和内存消耗已成为一个关键挑战，而将参数限制在{-1, 0, +1}的三元神经网络（NNs）作为一种有前景的方法受到了关注。虽然三元神经网络在图像识别和自然语言处理等实际应用中表现出优异的性能，但其理论理解仍然不足。本文中，我们从线性区域数量的角度理论分析了三元神经网络的表达能力。具体来说，我们评估了使用修正线性单元（ReLU）作为激活函数的三元回归神经网络的线性区域数量，并证明了其线性区域数量相对于网络宽度呈多项式增长，相对于深度呈指数增长，这与标准神经网络相似。此外，我们表明，将三元神经网络的宽度平方或深度加倍，就足以达到与通用ReLU回归神经网络相当的最大线性区域数量下界。这在某种程度上为三元神经网络在实践中的成功提供了理论解释。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16079&amp;sa=D&amp;source=editors&amp;ust=1753248964840058&amp;usg=AOvVaw0VwG2-BU_kQN9z1TrWD6mM" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">关于稀疏自编码器在解释压缩模型中的可迁移性研究</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.15977&amp;sa=D&amp;source=editors&amp;ust=1753248964842477&amp;usg=AOvVaw1x9ya5qzoKwvlekZXdPSI0" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.15977 - On the transferability of Sparse Autoencoders for interpreting compressed models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Suchit Gupte, Vishnu Kabir Chhabra, Mohammad Mahdi Khalili</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">现代大语言模型（LLM）由于其规模庞大而面临推理效率的挑战。为了解决这个问题，已经提出了许多压缩方法，如剪枝和量化。然而，压缩对模型可解释性的影响仍然不明确。虽然存在多种模型解释方法，如电路发现，但稀疏自编码器（SAE）在将模型的激活空间分解为其特征基础上已被证明特别有效。在这项工作中，我们探讨了原始模型和压缩模型的SAE之间的差异。我们发现，在原始模型上训练的SAE可以解释压缩模型，尽管与在压缩模型上训练的SAE相比性能略有下降。此外，简单地对原始SAE本身进行剪枝，其性能与在剪枝模型上训练一个新的SAE相当。这一发现使我们能够减少SAE的巨大训练成本。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.15977&amp;sa=D&amp;source=editors&amp;ust=1753248964842456&amp;usg=AOvVaw3j8L4XVq4uRRMOnY-nxtqy" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">在机密计算环境中用于片上系统设计的蒸馏大语言模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.16226&amp;sa=D&amp;source=editors&amp;ust=1753248964813775&amp;usg=AOvVaw2fNcrgPaY1AkPiGwMEgplr" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.16226 - Distilled Large Language Model in Confidential Computing Environment for System-on-Chip Design</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Dong Ben, Hui Feng, Qian Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）越来越多地用于电路设计任务，并且通常经过多轮训练。训练好的模型及其相关的训练数据都被视为机密知识产权（IP），必须加以保护以防泄露。机密计算通过可信执行环境（TEE）为保护数据和模型提供了一个有前景的解决方案。然而，现有的TEE实现并未设计用于高效支持LLM这类资源密集型应用。在这项工作中，我们首先在一个启用TEE的机密计算环境中，特别利用英特尔信任域扩展（TDX），对LLM进行了全面评估。我们在三种环境下构建了实验：基于TEE的环境、仅CPU的环境以及CPU-GPU混合实现，并以每秒令牌数（tokens per second）为指标评估了它们的性能。我们的第一个观察是，由于参数较小，蒸馏模型（即DeepSeek）在性能上超过了其他模型，使其适用于资源受限的设备。此外，在量化模型中，如4位量化（Q4）和8位量化（Q8），我们观察到与FP16模型相比性能提升高达3倍。我们的研究结果表明，对于较少的参数集，如DeepSeek-r1-1.5B，TDX实现在安全环境中执行计算的性能优于CPU版本。我们进一步使用专为SoC设计任务设计的测试平台验证了这些结果。这些验证展示了在资源受限系统上为半导体CAD应用高效部署轻量级LLM的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.16226&amp;sa=D&amp;source=editors&amp;ust=1753248964813731&amp;usg=AOvVaw3ubb92SogMNWO7DfbVLran" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
