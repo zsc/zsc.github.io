@@ -29,14 +29,18 @@
             color: #444;
             margin-top: 0;
         }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
         #search-input {
-            width: 100%;
+            flex: 1;
             padding: 12px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
-            margin-bottom: 10px;
         }
         #search-input:focus {
             outline: none;
@@ -74,13 +78,33 @@
             padding: 2px 3px;
             font-weight: bold;
         }
+        #download-btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #download-btn:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        #download-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>cs.AI Arxiv Instant Search (2025)</h1>
-        <input type="text" id="search-input" placeholder="Type to search..." disabled>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Type to search..." disabled>
+            <button id="download-btn" disabled>Download Results</button>
+        </div>
         <div id="status">Loading index files...</div>
         <ul id="results"></ul>
     </div>
@@ -90,6 +114,9 @@
     const searchInput = document.getElementById('search-input');
     const statusDiv = document.getElementById('status');
     const resultsUl = document.getElementById('results');
+    const downloadBtn = document.getElementById('download-btn');
+    let currentSearchResults = []; // Store current search results for download
+    let currentSearchQuery = ''; // Store current search query
 
     // This object will hold all the loaded FM-Index data
     const fmIndex = {
@@ -307,10 +334,13 @@
      */
     function handleSearch() {
         const query = searchInput.value.replace(/[\r\n]+$/, '');
+        currentSearchQuery = query; // Store current query
 
         // Only search if the query has 2 or more characters
         if (query.length < 2) {
             resultsUl.innerHTML = ''; // Clear results
+            currentSearchResults = []; // Clear stored results
+            downloadBtn.disabled = true; // Disable download button
             if (query.length === 0) {
                 statusDiv.textContent = `Index ready. ${fmIndex.docMap.length.toLocaleString()} articles loaded.`;
             } else {
@@ -396,6 +426,8 @@
      */
     function displayResults(results, query) {
         resultsUl.innerHTML = ''; // Clear previous results
+        currentSearchResults = results; // Store results for download
+        downloadBtn.disabled = results.length === 0; // Enable/disable download button
 
         if (results.length === 0) {
             statusDiv.textContent = `No results found for "${query}".`;
@@ -471,6 +503,70 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // --- Download Functionality ---
+    
+    /**
+     * Converts search results to Markdown format
+     */
+    function convertToMarkdown(results, query) {
+        const date = new Date().toISOString().split('T')[0];
+        let markdown = `# arXiv Search Results\n\n`;
+        markdown += `**Search Query:** ${query}\n`;
+        markdown += `**Date:** ${date}\n`;
+        markdown += `**Total Results:** ${results.length}\n\n`;
+        markdown += `---\n\n`;
+
+        results.forEach((result, index) => {
+            const fields = parseCsvRow(result.originalText);
+            
+            if (fields.length < 7 || fields[0] === "ID") {
+                return; // skip header or malformed row
+            }
+
+            const [id, title, authors, subjects, abstract, abstractLink, pdfLink] = fields;
+            
+            markdown += `## ${index + 1}. ${title}\n\n`;
+            markdown += `**Authors:** ${authors}\n\n`;
+            markdown += `**Subjects:** ${subjects}\n\n`;
+            markdown += `**Abstract:** ${abstract}\n\n`;
+            markdown += `**Links:**\n`;
+            markdown += `- [Abstract](${abstractLink})\n`;
+            markdown += `- [PDF](${pdfLink})\n\n`;
+            markdown += `---\n\n`;
+        });
+
+        return markdown;
+    }
+
+    /**
+     * Downloads content as a file
+     */
+    function downloadFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Handle download button click
+     */
+    downloadBtn.addEventListener('click', () => {
+        if (currentSearchResults.length === 0) return;
+        
+        const markdown = convertToMarkdown(currentSearchResults, currentSearchQuery);
+        const date = new Date().toISOString().split('T')[0];
+        const safeQuery = currentSearchQuery.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `arxiv_search_${safeQuery}_${date}.md`;
+        
+        downloadFile(markdown, filename);
+    });
 
     </script>
 </body>
