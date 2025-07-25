@@ -1,0 +1,610 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-25</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-25)</h1>
+                    <p id="intro">为您找到日期 2025-07-25 的数据。论文已为您整理成以下 3 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>强化学习与大模型对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">组序列策略优化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18071&amp;sa=D&amp;source=editors&amp;ust=1753421179826079&amp;usg=AOvVaw1SwbLxjlmrGKSt7GRUjjxq" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18071 - Group Sequence Policy Optimization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Chujie Zheng, Shixuan Liu, Mingze Li, Xiong-Hui Chen, Bowen Yu, Chang Gao, Kai Dang, Yuqiong Liu, Rui Men, An Yang, Jingren Zhou, Junyang Lin</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文介绍了组序列策略优化（GSPO），这是一种我们为训练大型语言模型而设计的稳定、高效且高性能的强化学习算法。与以往采用令牌级重要性比率的算法不同，GSPO基于序列似然来定义重要性比率，并执行序列级别的裁剪、奖励和优化。我们证明，与GRPO算法相比，GSPO实现了更优的训练效率和性能，显著稳定了混合专家（MoE）模型的强化学习训练，并有潜力简化强化学习基础设施的设计。GSPO的这些优点为最新的Qwen3模型带来了显著的改进。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18071&amp;sa=D&amp;source=editors&amp;ust=1753421179826028&amp;usg=AOvVaw3ebLewTtXwriNuYxeOJWpZ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SafeWork-R1：在AI-45度定律下实现安全性与智能的协同进化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18576&amp;sa=D&amp;source=editors&amp;ust=1753421179784902&amp;usg=AOvVaw0g45k4ElbPwCuqYsuREfcT" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18576 - SafeWork-R1: Coevolving Safety and Intelligence under the AI-45$^{\circ}$ Law</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shanghai AI Lab, Yicheng Bao, Guanxu Chen, Mingkang Chen, Yunhao Chen, Chiyu Chen, Lingjie Chen, Sirui Chen, Xinquan Chen, Jie Cheng, Yu Cheng, Dengke Deng, Yizhuo Ding, Dan Ding, Xiaoshan Ding, Yi Ding, Zhichen Dong, Lingxiao Du, Yuyu Fan, Xinshun Feng, Yanwei Fu, Yuxuan Gao, Ruijun Ge, Tianle Gu, Lujun Gui, Jiaxuan Guo, Qianxi He, Yuenan Hou, Xuhao Hu, Hong Huang, Kaichen Huang, Shiyang Huang, Yuxian Jiang, Shanzhe Lei, Jie Li, Lijun Li, Hao Li, Juncheng Li, Xiangtian Li, Yafu Li, Lingyu Li, Xueyan Li, Haotian Liang, Dongrui Liu, Qihua Liu, Zhixuan Liu, Bangwei Liu, Huacan Liu, Yuexiao Liu, Zongkai Liu, Chaochao Lu, Yudong Lu, Xiaoya Lu, Zhenghao Lu, Qitan Lv, Caoyuan Ma, Jiachen Ma, Xiaoya Ma, Zhongtian Ma, Lingyu Meng, Ziqi Miao, Yazhe Niu, Yuezhang Peng, Yuan Pu, Han Qi, Chen Qian, Xingge Qiao, Jingjing Qu, Jiashu Qu, Wanying Qu, Wenwen Qu, Xiaoye Qu, Qihan Ren, Qingnan Ren, Qingyu Ren, Jing Shao, Wenqi Shao, Shuai Shao, Dongxing Shi, Xin Song, Xinhao Song, Yan Teng, Xuan Tong, Yingchun Wang, Xuhong Wang, Shujie Wang, Xin Wang, Yige Wang, Yixu Wang, Yuanfu Wang, Futing Wang, Ruofan Wang, Wenjie Wang, Yajie Wang, Muhao Wei, Xiaoyu Wen, Fenghua Weng, Yuqi Wu, Yingtong Xiong, Xingcheng Xu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍SafeWork-R1，这是一款前沿的多模态推理模型，展示了能力与安全性的协同进化。该模型是我们提出的SafeLadder框架开发的，该框架融合了大规模、渐进式、面向安全的强化学习后训练，并由一套多原则验证器支持。与以往如RLHF等仅学习人类偏好的对齐方法不同，SafeLadder使SafeWork-R1能够发展出内在的安全推理和自我反思能力，从而产生安全的“顿悟”时刻。值得注意的是，SafeWork-R1在其基础模型Qwen2.5-VL-72B的基础上，在安全相关基准测试上平均提升了46.54%，且未损害通用能力，并与GPT-4.1和Claude Opus 4等领先的专有模型相比，展现了最先进的安全性能。为了进一步增强其可靠性，我们实现了两种不同的推理时干预方法和一个审议式搜索机制，以强制执行步骤级验证。最后，我们进一步开发了SafeWork-R1-InternVL3-78B、SafeWork-R1-DeepSeek-70B和SafeWork-R1-Qwen2.5VL-7B。所有这些模型都证明了安全性和能力可以协同进化，凸显了我们框架在构建稳健、可靠和可信的通用人工智能方面的普适性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18576&amp;sa=D&amp;source=editors&amp;ust=1753421179784798&amp;usg=AOvVaw39F__a-SpfNOOVsc25U9rd" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">使用强化学习优化呼叫中心运营：价值迭代与近端策略优化的比较</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18398&amp;sa=D&amp;source=editors&amp;ust=1753421179786850&amp;usg=AOvVaw07CWtdYc-YhmrN5meEmQNQ" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18398 - Optimising Call Centre Operations using Reinforcement Learning: Value Iteration versus Proximal Policy Optimisation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Kwong Ho Li, Wathsala Karunarathne</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文研究了强化学习（RL）在优化呼叫中心呼叫路由中的应用，以最小化客户等待时间和员工空闲时间。我们比较了两种方法：一种是基于模型的方法，在已知系统动态下使用价值迭代（VI）；另一种是无模型方法，使用近端策略优化（PPO）从经验中学习。对于基于模型的方法，我们使用了一个理论模型；而对于无模型学习，我们开发了一个结合离散事件模拟（DES）和OpenAI Gym环境的仿真模型。两种模型都将问题构建为基于技能路由（SBR）框架内的马尔可夫决策过程（MDP），其中客户到达服从泊松分布，服务时间和放弃时间服从指数分布。在策略评估方面，我们使用仿真模型评估了随机策略、VI策略和PPO策略。经过1000个测试周期的评估，PPO尽管需要更长的训练时间，但始终获得了最高的回报，以及最低的客户等待时间和员工空闲时间。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18398&amp;sa=D&amp;source=editors&amp;ust=1753421179786769&amp;usg=AOvVaw2cHXtIW_O3IlgSCf_1cTZP" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过信息瓶颈重新审视大语言模型的推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18391&amp;sa=D&amp;source=editors&amp;ust=1753421179787359&amp;usg=AOvVaw0vNt-AuUIeG2UbqjkHW7mF" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18391 - Revisiting LLM Reasoning via Information Bottleneck</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shiye Lei, Zhihao Cheng, Kai Jia, Dacheng Tao</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）最近通过可验证奖励的强化学习（RLVR）在推理能力上取得了显著进展。通过利用简单的基于规则的奖励，强化学习有效地激励LLM产生扩展的思维链（CoT）推理轨迹，逐步引导它们走向正确答案。然而，现有方法在很大程度上仍然是启发式和直觉驱动的，这限制了原则性方法论的发展。在本文中，我们提出了一个基于信息瓶颈（IB）原理的LLM推理的理论刻画，引入了IB感知推理优化（IBRO）框架，该框架鼓励推理轨迹既能提供关于最终正确答案的信息，又能泛化到不同的提示。我们推导出一个实用的令牌级代理目标，并提出了一个高效的近似方法，从而产生了轻量级的IB正则化方法。该技术可以无缝集成到现有的基于强化学习的后训练框架中，无需额外的计算开销，仅需修改一行代码。在经验上，我们在多个数学推理基准和强化学习算法上验证了IB正则化，展示了LLM推理性能的持续改进。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18391&amp;sa=D&amp;source=editors&amp;ust=1753421179787285&amp;usg=AOvVaw2H9RAAWMER6Db1e_4SRr6e" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">多智能体引导策略优化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18059&amp;sa=D&amp;source=editors&amp;ust=1753421179793139&amp;usg=AOvVaw2p3BYkWBp99zyIxXLiLA4N" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18059 - Multi-Agent Guided Policy Optimization</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yueheng Li, Guangming Xie, Zongqing Lu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">由于部分可观测性和有限通信等实际限制，集中式训练与分散式执行（CTDE）已成为合作式多智能体强化学习（MARL）的主流范式。然而，现有的CTDE方法通常未能充分利用集中式训练或缺乏理论保证。我们提出了多智能体引导策略优化（MAGPO），这是一个新颖的框架，通过将集中式引导与分散式执行相结合，更好地利用了集中式训练。MAGPO使用自回归联合策略进行可扩展的协调探索，并明确将其与分散式策略对齐，以确保在部分可观测性下的可部署性。我们为单调策略改进提供了理论保证，并在6个不同环境的43个任务上对MAGPO进行了实证评估。结果表明，MAGPO在性能上持续优于强大的CTDE基线，并能达到或超过完全集中的方法，为分散式多智能体学习提供了一个有原则且实用的解决方案。我们的代码和实验数据可以在此https URL找到。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18059&amp;sa=D&amp;source=editors&amp;ust=1753421179792947&amp;usg=AOvVaw0hqvZbr_UmNRjmYJTOrzr0" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">强化具身主动防御：利用自适应交互实现对抗性3D环境中稳健的视觉感知</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18484&amp;sa=D&amp;source=editors&amp;ust=1753421179806072&amp;usg=AOvVaw3PG2BqC-d139mtQ4WbUEFm" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18484 - Reinforced Embodied Active Defense: Exploiting Adaptive Interaction for Robust Visual Perception in Adversarial 3D Environments</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xiao Yang, Lingxuan Wu, Lizhong Wang, Chengyang Ying, Hang Su, Jun Zhu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在3D环境中的对抗性攻击已成为视觉感知系统可靠性的关键威胁，尤其是在身份验证和自动驾驶等安全敏感应用中。这些攻击利用对抗性补丁和3D对象，通过利用复杂场景中的漏洞来操纵深度神经网络（DNN）的预测。现有的防御机制，如对抗性训练和净化，主要采用被动策略来增强鲁棒性。然而，这些方法通常依赖于对对抗性策略的预定义假设，限制了它们在动态3D环境中的适应性。为了应对这些挑战，我们引入了强化具身主动防御（Rein-EAD），这是一个主动防御框架，利用与环境的自适应探索和交互来提高在3D对抗性背景下的感知鲁棒性。通过实施一个平衡即时预测准确性与预测熵最小化的多步目标，Rein-EAD在多步视野内优化防御策略。此外，Rein-EAD涉及一个面向不确定性的奖励塑造机制，促进了高效的策略更新，从而减少了计算开销，并支持在无需可微环境的情况下实现现实世界的应用。全面的实验验证了Rein-EAD的有效性，显示其在保持各种任务标准准确性的同时，显著降低了攻击成功率。值得注意的是，Rein-EAD对未见和自适应攻击表现出强大的泛化能力，使其适用于现实世界的复杂任务，包括3D对象分类、人脸识别和自动驾驶。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18484&amp;sa=D&amp;source=editors&amp;ust=1753421179806019&amp;usg=AOvVaw2I4C0ZpWD_iGg-nWIBUZVy" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GrAInS：用于大语言模型和视觉语言模型推理时引导的基于梯度的归因方法</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18043&amp;sa=D&amp;source=editors&amp;ust=1753421179827700&amp;usg=AOvVaw3XOXrHZ7b-Q_tFHyL24kZ8" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18043 - GrAInS: Gradient-based Attribution for Inference-Time Steering of LLMs and VLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Duy Nguyen, Archiki Prasad, Elias Stengel-Eskin, Mohit Bansal</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">推理时引导方法通过在测试时修改内部激活，提供了一种轻量级的替代方案来微调大型语言模型（LLM）和视觉-语言模型（VLM），而无需更新模型权重。然而，大多数现有方法依赖于固定的、全局的干预向量，忽略了单个输入令牌的因果影响，并且未能利用模型logit中信息丰富的梯度，特别是在视觉和文本输入贡献不均的多模态设置中。为了解决这些局限性，我们引入了GrAInS，一种跨语言模型和视觉-语言模型及任务的推理时引导方法。GrAInS使用对比性的、基于梯度的归因方法（通过积分梯度）来识别最具影响力的前k个令牌，这些令牌根据其对偏好输出与非偏好输出的贡献被分为正向或负向归因。然后，这些令牌被用来构建方向性引导向量，捕捉从不期望行为到期望行为的语义转变。在推理过程中，GrAInS在Transformer层调整隐藏激活，由令牌级归因信号引导，并对激活进行归一化以保持表示尺度。这实现了对模型行为的细粒度、可解释和模块化的控制，无需重新训练或辅助监督。在经验上，GrAInS在性能上持续优于微调和现有的引导基线：在TruthfulQA上使用Llama-3.1-8B实现了13.22%的准确率提升，在MMHal-Bench上使用LLaVA-1.6-7B将幻觉率从0.624降低到0.514，并在SPA-VL上将对齐胜率提高了8.11%，同时保持了模型的流畅性和通用能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18043&amp;sa=D&amp;source=editors&amp;ust=1753421179827645&amp;usg=AOvVaw1YuQS5XWrmZdzYicDHA3aK" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态与三维内容生成</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过后训练增强视频生成中的场景转换感知能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18046&amp;sa=D&amp;source=editors&amp;ust=1753421179826892&amp;usg=AOvVaw3zDyVPDnc4Fx70HHCpxPW2" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18046 - Enhancing Scene Transition Awareness in Video Generation via Post-Training</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hanwen Shen, Jiajie Lu, Yupeng Cao, Xiaonan Yang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近期人工智能生成视频的进展在“文本到视频”任务上表现出色，尤其是在描绘单一场景的短片中。然而，当前模型在生成具有连贯场景转换的长视频方面存在困难，这主要是因为它们无法从提示中推断出何时需要进行转换。大多数开源模型都是在由单场景视频片段组成的数据集上训练的，这限制了它们学习和响应需要多个场景的提示的能力。发展场景转换感知能力对于多场景生成至关重要，因为它能让模型通过准确检测转换，将视频识别并分割成不同的片段。为了解决这个问题，我们提出了“转换感知视频”（TAV）数据集，该数据集由经过预处理的、包含多个场景转换的视频片段组成。我们的实验表明，在TAV数据集上进行后训练可以提高基于提示的场景转换理解能力，缩小所需场景与生成场景之间的差距，并保持图像质量。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18046&amp;sa=D&amp;source=editors&amp;ust=1753421179826844&amp;usg=AOvVaw12Fl5HKRKl97BG_m8hHk8z" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">鲍勃的五彩纸屑：音乐与视频生成中的语音记忆攻击</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.17937&amp;sa=D&amp;source=editors&amp;ust=1753421179836704&amp;usg=AOvVaw3YLGWUiHU8zsSrH9xidGX9" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17937 - Bob's Confetti: Phonetic Memorization Attacks in Music and Video Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jaechul Roh, Zachary Novack, Yuefeng Peng, Niloofar Mireshghallah, Taylor Berg-Kirkpatrick, Amir Houmansadr</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">歌词到歌曲（LS2）生成模型有望实现从文本到端到端的音乐合成，但它们对训练数据记忆的脆弱性仍未被充分探索。我们引入了对抗性语音提示（APT），一种新颖的攻击方法，其中歌词在语义上被改变，同时通过谐音替换（如同音异义词替换，例如阿姆著名的“mom's spaghetti” -&gt; “Bob's confetti”）保持其声学结构。尽管存在这些扭曲，我们发现了一种强大的亚词汇记忆形式：像SUNO和YuE这样的模型重新生成的输出与已知的训练内容惊人地相似，在音频领域的度量标准（包括CLAP、AudioJudge和CoverID）上实现了高度相似性。这种脆弱性在多种语言和流派中持续存在。更令人惊讶的是，我们发现仅凭音素改变的歌词就能触发文本到视频模型中的视觉记忆。当使用来自《Lose Yourself》的语音修改歌词作为提示时，Veo 3重建了原始音乐视频中的视觉元素——包括角色外观和场景构图——尽管提示中没有视觉线索。我们称这种现象为“语音到视觉的反刍”。总之，这些发现揭示了以转录本为条件的多模态生成中的一个关键脆弱性：仅语音提示就足以解锁记忆的视听内容，这对现代生成系统中的版权、安全性和内容溯源提出了紧迫的问题。示例生成内容可在我们的演示页面（this http URL）上找到。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.17937&amp;sa=D&amp;source=editors&amp;ust=1753421179836613&amp;usg=AOvVaw19gz_xoTh5c-x0xJ8S3RoR" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">利用大型语言模型为短语中断预测生成合成数据</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18044&amp;sa=D&amp;source=editors&amp;ust=1753421179827241&amp;usg=AOvVaw1Br2MJ15ohc-tPl2EgE-i_" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18044 - Synthetic Data Generation for Phrase Break Prediction with Large Language Model</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hoyeon Lee, Sejung Son, Ye-Eun Kang, Jong-Hwan Kim</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">当前用于短语中断预测的方法解决了文本到语音系统中关键的韵律问题，但严重依赖于来自音频或文本的大量人工标注，这需要大量的人工劳动和成本。语音领域固有的由语音因素驱动的可变性，进一步使得获取一致、高质量的数据变得复杂。最近，大型语言模型（LLM）通过生成定制的合成数据，在解决自然语言处理中的数据挑战方面取得了成功，同时减少了人工标注的需求。受此启发，我们探索利用LLM生成合成的短语中断标注，通过与传统标注进行比较并评估其在多种语言中的有效性，来解决人工标注和语音相关任务的双重挑战。我们的研究结果表明，基于LLM的合成数据生成能有效缓解短语中断预测中的数据挑战，并突显了LLM作为语音领域可行解决方案的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18044&amp;sa=D&amp;source=editors&amp;ust=1753421179827194&amp;usg=AOvVaw0kS0jGyyxqsrA10hDjxAhX" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GOAT-SLM：一个具备副语言和说话人特征感知的口语语言模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18119&amp;sa=D&amp;source=editors&amp;ust=1753421179823610&amp;usg=AOvVaw1bgiIfoiaS5IvcvcXXSptd" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18119 - GOAT-SLM: A Spoken Language Model with Paralinguistic and Speaker Characteristic Awareness</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hongjie Chen, Zehan Li, Yaodong Song, Wenming Deng, Yitong Yao, Yuxin Zhang, Hang Lv, Xuechao Zhu, Jian Kang, Jie Lian, Jie Li, Chao Wang, Shuangyong Song, Yongxiang Li, Zhongjiang He</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近年来，端到端口语语言模型（SLM）的进步显著提升了AI系统进行自然口语交互的能力。然而，大多数现有模型仅将语音视为语言内容的载体，常常忽略了人类语音中嵌入的丰富副语言和说话人特征线索，如方言、年龄、情感和非语音发声。在这项工作中，我们介绍了GOAT-SLM，一个新颖的、具备副语言和说话人特征感知的口语语言模型，旨在将口语语言建模扩展到文本语义之外。GOAT-SLM采用双模态头结构，将语言建模与声学实现解耦，从而在支持富有表现力和自适应的语音生成的同时，实现鲁棒的语言理解。为了提高模型的效率和多功能性，我们提出了一种模块化的分阶段训练策略，利用大规模语音-文本语料库逐步对齐语言、副语言和说话人特征信息。在多维度评估基准TELEVAL上的实验结果表明，GOAT-SLM在语义和非语义任务上均取得了均衡的性能，并在处理情感、方言变体和年龄敏感交互方面优于现有的开源模型。这项工作强调了超越语言内容建模的重要性，并推动了更自然、自适应和具备社会意识的口语语言系统的发展。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18119&amp;sa=D&amp;source=editors&amp;ust=1753421179823526&amp;usg=AOvVaw15NwLI5BJbZibsv53_RJoq" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">VideoMind：一个带有意图接地的全模态视频数据集，用于深度认知视频理解</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18552&amp;sa=D&amp;source=editors&amp;ust=1753421179803748&amp;usg=AOvVaw3cF_9r9VZO7gmEdPMl6dNv" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18552 - VideoMind: An Omni-Modal Video Dataset with Intent Grounding for Deep-Cognitive Video Understanding</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Baoyao Yang, Wanyun Li, Dixin Chen, Junxiang Chen, Wenbin Yao, Haifeng Lin</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文介绍了VideoMind，一个以视频为中心的全模态数据集，旨在实现深度视频内容认知和增强的多模态特征表示。该数据集包含10.3万个视频样本（其中3千个保留用于测试），每个样本都配有音频和系统化的详细文本描述。具体来说，每个视频及其音频都从三个层次（事实层、抽象层和意图层）进行描述，从表层深入到深层。它包含超过2200万个单词，平均每个样本约225个单词。VideoMind与现有数据集的关键区别在于它提供了意图表达，这需要整合整个视频的上下文，并且不能直接观察到。这些深度认知表达是使用思维链（COT）方法生成的，通过逐步推理来提示多模态大语言模型。每个描述都包括对主体、地点、时间、事件、动作和意图的标注，支持下游的识别任务。至关重要的是，我们建立了一个包含3000个手动验证样本的黄金标准基准，用于评估深度认知视频理解。我们设计了混合认知检索实验，通过多级检索指标进行评分，以恰当地评估深度视频理解能力。我们发布了InternVideo、VAST、UMT-L等模型的评估结果。VideoMind作为一个强大的基准，可用于细粒度的跨模态对齐，并推动需要深入视频理解的领域发展，如情感和意图识别。数据已在GitHub、HuggingFace和OpenDataLab上公开发布，网址为this https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18552&amp;sa=D&amp;source=editors&amp;ust=1753421179803697&amp;usg=AOvVaw2_XinVYOSio27vRzTkewg3" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">OpenNav：利用多模态大型语言模型进行开放世界导航</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18033&amp;sa=D&amp;source=editors&amp;ust=1753421179828215&amp;usg=AOvVaw20VHfgKPDGk8z0z1Vp8zUp" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18033 - OpenNav: Open-World Navigation with Multimodal Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Mingfeng Yuan, Letian Wang, Steven L. Waslander</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">预训练的大型语言模型（LLM）已展现出强大的常识推理能力，使其在机器人导航和规划任务中具有广阔前景。然而，尽管近期取得了进展，但在开放世界中将语言描述与实际机器人动作联系起来，而不仅仅是调用有限的预定义运动基元，仍然是一个开放的挑战。在这项工作中，我们的目标是使机器人能够解释和分解复杂的语言指令，最终合成一系列轨迹点，以完成在开放指令集和开放对象集下的多样化导航任务。我们观察到，多模态大型语言模型（MLLM）在处理自由形式的语言指令时表现出强大的跨模态理解能力，展现了稳健的场景理解能力。更重要的是，利用其代码生成能力，MLLM可以与视觉-语言感知模型交互，生成组合式的二维鸟瞰价值图，有效地将MLLM的语义知识与地图的空间信息相结合，以增强机器人的空间理解。为了进一步验证我们的方法，我们有效地利用了大规模自动驾驶数据集（AVD）来验证我们提出的零样本视觉-语言导航框架在室外导航任务中的表现，证明了其在执行各种自由形式自然语言导航指令的同时，仍能对物体检测错误和语言歧义保持鲁棒性。此外，我们在室内和室外场景中对Husky机器人验证了我们的系统，展示了其在现实世界中的鲁棒性和适用性。补充视频可在this https URL观看。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18033&amp;sa=D&amp;source=editors&amp;ust=1753421179828158&amp;usg=AOvVaw2mW1Lnh0RDTTfDp5VGuZgp" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ReSem3D：通过细粒度语义接地的可精化3D空间约束，实现可泛化的机器人操作</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18262&amp;sa=D&amp;source=editors&amp;ust=1753421179814337&amp;usg=AOvVaw2xI4-UloI8cgO77vs2STMk" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18262 - ReSem3D: Refinable 3D Spatial Constraints via Fine-Grained Semantic Grounding for Generalizable Robotic Manipulation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Chenyu Su, Weiwei Shang, Chen Qian, Fei Zhang, Shuang Cong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">语义驱动的3D空间约束将高层语义表示与低层动作空间对齐，促进了机器人操作中任务理解与执行的统一。多模态大语言模型（MLLM）和视觉基础模型（VFM）的协同推理使得跨模态的3D空间约束构建成为可能。然而，现有方法存在三个关键限制：（1）约束建模中的语义粒度粗糙，（2）缺乏实时闭环规划，（3）在语义多样化环境中的鲁棒性受损。为应对这些挑战，我们提出了ReSem3D，一个统一的、适用于语义多样化环境的操作框架，利用VFM和MLLM之间的协同作用，实现细粒度的视觉接地，并动态构建分层3D空间约束以进行实时操作。具体来说，该框架由MLLM中的分层递归推理驱动，与VFM交互，通过两个阶段（部件级提取和区域级精化）从自然语言指令和RGB-D观测中自动构建3D空间约束。随后，这些约束被编码为关节空间中的实时优化目标，从而能够对动态干扰做出反应性行为。我们在语义丰富的家庭环境和稀疏的化学实验室环境中进行了广泛的仿真和真实世界实验。结果表明，ReSem3D在零样本条件下执行多样化的操作任务，表现出强大的适应性和泛化能力。代码和视频请见this https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18262&amp;sa=D&amp;source=editors&amp;ust=1753421179814278&amp;usg=AOvVaw0EPi1KP225CiSm3bPiCrBk" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">基于约束表达中间表示引导的3D软件合成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18625&amp;sa=D&amp;source=editors&amp;ust=1753421179797548&amp;usg=AOvVaw3NkJrnP77nNG90zG6bW3Vs" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18625 - 3D Software Synthesis Guided by Constraint-Expressive Intermediate Representation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shuqing Li, Anson Y. Lam, Yun Peng, Wenxuan Wang, Michael R. Lyu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">图形用户界面（UI）软件已经从传统的二维（2D）桌面/网页/移动界面经历了向空间三维（3D）环境的根本性转变。虽然现有工作在自动化2D软件生成（如HTML/CSS和移动应用界面代码合成）方面取得了显著成功，但3D软件的生成仍未得到充分探索。当前的3D软件生成方法通常将3D环境作为一个整体来生成，无法修改或控制软件中的特定元素。此外，这些方法难以处理现实世界中固有的复杂空间和语义约束。为了应对这些挑战，我们提出了Scenethesis，一种新颖的、对需求敏感的3D软件合成方法，该方法在用户规范和生成的3D软件之间保持了形式化的可追溯性。Scenethesis建立在ScenethesisLang之上，这是一种领域特定语言，作为一种粒度化、约束感知的中间表示（IR），连接自然语言需求和可执行的3D软件。它既是一种能够对3D软件元素进行细粒度修改的综合场景描述语言，又是一种能够表达复杂空间约束的形式化约束表达规范语言。通过将3D软件合成分解为在ScenethesisLang上操作的多个阶段，Scenethesis实现了独立验证、定向修改和系统性的约束满足。我们的评估表明，Scenethesis能够准确捕捉超过80%的用户需求，并满足超过90%的硬约束，同时能处理超过100个约束。此外，与最先进的方法相比，Scenethesis在BLIP-2视觉评估得分上实现了42.8%的提升。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18625&amp;sa=D&amp;source=editors&amp;ust=1753421179797474&amp;usg=AOvVaw0vnhJAXcQCOPNF6-RiBx6B" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">利用张量网络对用于MRI图像生成的三维DDPM进行参数高效微调</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18112&amp;sa=D&amp;source=editors&amp;ust=1753421179824150&amp;usg=AOvVaw0B2YoPPtGhSpwKf_S_XrmU" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18112 - Parameter-Efficient Fine-Tuning of 3D DDPM for MRI Image Generation Using Tensor Networks</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Binghua Li, Ziqing Chang, Tong Liang, Chao Li, Toshihisa Tanaka, Shigeki Aoki, Qibin Zhao, Zhe Sun</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们解决了在磁共振成像（MRI）图像生成中，对基于三维（3D）U-Net的去噪扩散概率模型（DDPMs）进行参数高效微调（PEFT）的挑战。尽管具有实际意义，但关于3D卷积操作的参数高效表示的研究仍然有限。为了弥补这一差距，我们提出了张量体积算子（TenVOO），这是一种专为微调具有3D卷积骨干的DDPMs而设计的新型PEFT方法。TenVOO利用张量网络建模，用较低维度的张量表示3D卷积核，从而在微调过程中以少量参数有效地捕捉复杂的空间依赖关系。我们在三个下游脑部MRI数据集——ADNI、PPMI和BraTS2021——上评估了TenVOO，通过微调一个在来自英国生物银行的59,830个T1加权脑部MRI扫描上预训练的DDPM。我们的结果表明，TenVOO在多尺度结构相似性指数（MS-SSIM）上达到了最先进的性能，在捕捉空间依赖性方面优于现有方法，而所需的可训练参数仅为原始模型的0.3%。我们的代码可在以下网址获取：this https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18112&amp;sa=D&amp;source=editors&amp;ust=1753421179824073&amp;usg=AOvVaw1qjonHyHM4F6b-cerBHvkA" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Detail++：一种用于文本到图像扩散模型的免训练细节增强器</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.17853&amp;sa=D&amp;source=editors&amp;ust=1753421179841012&amp;usg=AOvVaw1KkTg8lbyhGNKQyuFjh4JA" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.17853 - Detail++: Training-Free Detail Enhancer for Text-to-Image Diffusion Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Lifeng Chen, Jiner Wang, Zihao Pan, Beier Zhu, Xiaofeng Yang, Chi Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">最近在文本到图像（T2I）生成方面的进展带来了令人印象深刻的视觉效果。然而，这些模型在处理复杂提示时仍面临重大挑战，特别是那些涉及多个具有不同属性的主体的提示。受人类绘画过程（首先勾勒构图，然后逐步添加细节）的启发，我们提出了Detail++，一个免训练的框架，它引入了一种新颖的渐进式细节注入（PDI）策略来解决这一局限性。具体来说，我们将一个复杂的提示分解为一系列简化的子提示，分阶段指导生成过程。这种分阶段生成利用自注意力固有的布局控制能力，首先确保全局构图，然后进行精确的细化。为了实现属性与相应主体之间的精确绑定，我们利用交叉注意力机制，并进一步在测试时引入质心对齐损失，以减少绑定噪声并增强属性一致性。在T2I-CompBench和一个新构建的风格组合基准上进行的大量实验表明，Detail++显著优于现有方法，特别是在涉及多个对象和复杂风格条件的场景中。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.17853&amp;sa=D&amp;source=editors&amp;ust=1753421179840906&amp;usg=AOvVaw3WWmsUq1FyapNCE71YH2nm" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>大语言模型架构、编辑与效率</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">NeuralDB：利用神经键值数据库将大语言模型中的知识编辑扩展至10万个事实</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18028&amp;sa=D&amp;source=editors&amp;ust=1753421179829296&amp;usg=AOvVaw2We8hUPzC1NinIN5ik_C7T" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18028 - NeuralDB: Scaling Knowledge Editing in LLMs to 100,000 Facts with Neural KV Database</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Weizhi Fei, Hao Shi, Jing Xu, Jingchen Peng, Jiazheng Li, Jingzhao Zhang, Bo Bai, Wei Han, Zhenyuan Chen, Xueyan Niu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">高效地编辑存储在大型语言模型（LLM）中的知识，可以在无需大规模训练的情况下实现模型更新。一种可能的解决方案是定位并编辑（L&amp;E），它允许同时修改大量事实。然而，这种编辑可能会损害LLM的通用能力，甚至在扩展到数千次编辑时导致忘记已编辑的事实。在本文中，我们将现有的线性L&amp;E方法建模为查询一个键值（KV）数据库。从这个角度出发，我们提出了NeuralDB，一个编辑框架，它明确地将编辑过的事实表示为一个配备了非线性门控检索模块的神经KV数据库。我们的门控模块仅在推理涉及已编辑事实时才操作，有效地保留了LLM的通用能力。我们在ZsRE和CounterFacts数据集上，使用GPT2-XL、GPT-J (6B)和Llama-3 (8B)进行了涉及编辑10,000个事实的全面实验。结果表明，NeuralDB不仅在编辑效果、泛化性、特异性、流畅性和一致性方面表现出色，而且在六个代表性的文本理解和生成任务中保持了整体性能。进一步的实验表明，即使扩展到100,000个事实（比以往工作多50倍），NeuralDB仍然保持其有效性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18028&amp;sa=D&amp;source=editors&amp;ust=1753421179829217&amp;usg=AOvVaw1aa6a7dckO9ijKhIXbSQ1H" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">模型架构发现的AlphaGo时刻</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18074&amp;sa=D&amp;source=editors&amp;ust=1753421179792607&amp;usg=AOvVaw2iXxsqtzyv7XghiywwWhn1" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18074 - AlphaGo Moment for Model Architecture Discovery</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yixiu Liu, Yang Nan, Weixian Xu, Xiangkun Hu, Lyumanshan Ye, Zhen Qin, Pengfei Liu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管人工智能系统的能力呈指数级提升，但人工智能研究本身的步伐仍然受到人类认知能力的线性限制，造成了日益严重的发展瓶颈。我们展示了ASI-Arch，这是在神经架构发现这一关键领域中，人工智能用于AI研究（ASI4AI）的首次演示——一个完全自主的系统，它通过使AI能够进行自身的架构创新，打破了这一根本性约束。我们超越了传统的神经架构搜索（NAS）——后者从根本上局限于探索人类定义的空间——引入了从自动化优化到自动化创新的范式转变。ASI-Arch可以在架构发现领域进行端到端的科学研究，自主地假设新颖的架构概念，将它们实现为可执行代码，并通过严格的实验和过往经验来训练和实证验证其性能。ASI-Arch在超过20,000个GPU小时内进行了1,773次自主实验，最终发现了106种创新的、达到业界顶尖水平（SOTA）的线性注意力架构。就像AlphaGo的第37手棋揭示了人类棋手无法看到的意想不到的战略见解一样，我们由AI发现的架构展示了涌现的设计原则，这些原则系统地超越了人类设计的基线，并照亮了先前未知的架构创新路径。至关重要的是，我们首次建立了科学发现本身的经验性扩展定律——证明了架构突破可以通过计算来扩展，从而将研究进展从受人类限制的过程转变为计算可扩展的过程。我们对促成这些突破的涌现设计模式和自主研究能力进行了全面分析，为自我加速的AI系统建立了一个蓝图。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18074&amp;sa=D&amp;source=editors&amp;ust=1753421179792542&amp;usg=AOvVaw1JJLROBrDJ3do-XXd2cOD8" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Sandwich：分离预填充-解码编译以实现高效的CPU LLM服务</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18454&amp;sa=D&amp;source=editors&amp;ust=1753421179807584&amp;usg=AOvVaw0Y0iEgiMgF1XyyV4XR7llN" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18454 - Sandwich: Separating Prefill-Decode Compilation for Efficient CPU LLM Serving</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Juntao Zhao, Jiuru Li, Chuan Wu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">利用CPU为大型语言模型（LLM）提供服务是GPU服务的一种资源友好型替代方案。现有的基于CPU的解决方案忽略了LLM推理中预填充（prefill）和解码（decode）阶段的工作负载差异，采用了静态的、基于每个NUMA（非均匀内存访问）节点的模型分区，并利用供应商库进行算子级执行，这种方式并非最优。我们提出了Sandwich，一个以硬件为中心的、基于CPU的LLM服务引擎，它为预填充和解码阶段使用不同的执行计划，并分别对它们进行优化。我们在五个CPU平台（包括支持AVX-2和AVX-512的x86平台，以及支持NEON的ARM平台）上，针对多种基线和数据集评估了Sandwich。Sandwich实现了平均2.01倍的吞吐量提升，并在单序列服务中以低至3.40倍的需求实现了90%的满意首令牌时间（TTFT）和每输出令牌时间（TPOT）延迟，并在连续批处理服务中显著提高了Goodput。Sandwich生成的GEMM核性能优于代表性的供应商核和其他动态形状解决方案，达到了与静态编译器相当的性能，而核调优成本降低了三个数量级。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18454&amp;sa=D&amp;source=editors&amp;ust=1753421179807452&amp;usg=AOvVaw0xrTi6RSg4pdfhQlUzvwoi" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
