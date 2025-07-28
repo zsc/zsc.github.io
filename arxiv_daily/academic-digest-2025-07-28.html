@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-28</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-28)</h1>
+                    <p id="intro">为您找到日期 2025-07-28 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>大规模模型优化与效率</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Step-3：大而经济：面向高性价比解码的模型-系统协同设计</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19427&amp;sa=D&amp;source=editors&amp;ust=1753746852271882&amp;usg=AOvVaw0F17Z1pebZ5Ix-nonhlXmm" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19427 - Step-3 is Large yet Affordable: Model-system Co-design for Cost-effective Decoding</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">StepFun, Bin Wang, Bojun Wang, Changyi Wan, Guanzhe Huang, Hanpeng Hu, Haonan Jia, Hao Nie, Mingliang Li, Nuo Chen, Siyu Chen, Song Yuan, Wuxun Xie, Xiaoniu Song, Xing Chen, Xingping Yang, Xuelin Zhang, Yanbo Yu, Yaoyu Wang, Yibo Zhu, Yimin Jiang, Yu Zhou, Yuanwei Lu, Houyi Li, Jingcheng Hu, Ka Man Lo, Ailin Huang, Binxing Jiao, Bo Li, Boyu Chen, Changxin Miao, Chang Lou, Chen Hu, Chen Xu, Chenfeng Yu, Chengyuan Yao, Daokuan Lv, Dapeng Shi, Deshan Sun, Ding Huang, Dingyuan Hu, Dongqing Pang, Enle Liu, Fajie Zhang, Fanqi Wan, Gulin Yan, Han Zhang, Han Zhou, Hanghao Wu, Hangyu Guo, Hanqi Chen, Hanshan Zhang, Hao Wu, Haocheng Zhang, Haolong Yan, Haoran Lv, Haoran Wei, Hebin Zhou, Heng Wang, Heng Wang, Hongxin Li, Hongyu Zhou, Hongyuan Wang, Huiyong Guo, Jia Wang, Jiahao Gong, Jialing Xie, Jian Zhou, Jianjian Sun, Jiaoren Wu, Jiaran Zhang, Jiayu Liu, Jie Cheng, Jie Luo, Jie Yan, Jie Yang, Jieyi Hou, Jinguang Zhang, Jinlan Cao, Jisheng Yin, Junfeng Liu, Junhao Huang, Junzhe Lin, Kaijun Tan, Kaixiang Li, Kang An, Kangheng Lin, Kenkun Liu, Lei Yang, Liang Zhao, Liangyu Chen, Lieyu Shi, Liguo Tan, Lin Lin, Lin Zhang, Lina Chen, Liwen Huang, Liying Shi, Longlong Gu, Mei Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）在解码过程中面临硬件效率低下的问题，尤其是在长上下文推理任务中。本文介绍了Step-3，一个拥有3210亿参数的视觉语言模型（VLM），其采用硬件感知的模型-系统协同设计，旨在优化并最小化解码成本。Step-3在两个关键维度上进行了创新：（1）一种新颖的多矩阵分解注意力（MFA）机制，在保持高注意力表达能力的同时，显著减少了KV缓存大小和计算量；（2）注意力-前馈网络解耦（AFD），一个将注意力和前馈网络（FFN）层解耦到专用子系统的分布式推理系统。这种协同设计实现了前所未有的成本效益：与DeepSeek-V3和Qwen3 MoE 235B等模型相比，Step-3显著降低了理论解码成本，且在更长上下文中优势愈发明显。Step-3在每个token激活380亿参数（多于DeepSeek-V3和Qwen3 MoE 235B）的情况下实现了低成本，证明了硬件对齐的注意力算术强度、MoE稀疏性和AFD对于成本效益至关重要。我们在DeepSeek-V3的有利场景下进行了直接对比。我们在Hopper GPU上的实现，在50毫秒TPOT（首个token输出时间）服务等级协议下（4K上下文，FP8，无MTP），每GPU解码吞吐量高达每秒4039个token。这一性能超过了同等设置下DeepSeek-V3的2324，并为LLM解码设定了新的帕累托前沿。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19427&amp;sa=D&amp;source=editors&amp;ust=1753746852271785&amp;usg=AOvVaw02Q_upgfgfn0-QbrDF2QrQ" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MindSpeed RL：基于昇腾NPU集群的可扩展高效强化学习训练的分布式数据流</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19017&amp;sa=D&amp;source=editors&amp;ust=1753746852293619&amp;usg=AOvVaw2HpcJGJsEa0Ks4FPLLtSoW" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19017 - MindSpeed RL: Distributed Dataflow for Scalable and Efficient RL Training on Ascend NPU Cluster</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Laingjun Feng, Chenyi Pan, Xinjie Guo, Fei Mei, Benzhe Ning, Jianxiang Zhang, Xinyang Liu, Beirong Zhou, Zeng Shu, Chang Liu, Guang Yang, Zhenyu Han, Jiangben Wang, Bo Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习（RL）是一种日益用于对齐大型语言模型的范式。流行的强化学习算法利用多个工作节点，并且可以被建模为一个图，其中每个节点代表一个工作节点的状态，每条边代表节点之间的数据流。由于严重的跨节点依赖性，强化学习训练系统通常面临集群可扩展性差和内存利用率低的问题。在本文中，我们介绍了MindSpeed RL，一个用于大规模强化学习训练的有效且高效的系统。与现有的中心化方法不同，MindSpeed RL从分布式视角组织了强化学习训练中至关重要的数据依赖关系，即样本流和重分片流。一方面，设计了一种分布式传输坞策略，该策略在传统经验回放缓冲区的基础上设置了控制器和仓库，以减轻样本流中的调度开销。另一方面，提出了一种实用的allgather-swap策略，以消除重分片流中冗余的内存使用。此外，MindSpeed RL进一步集成了众多并行化策略和加速技术以进行系统性优化。与现有最先进的系统相比，在流行的Qwen2.5-Dense-7B/32B、Qwen3-MoE-30B和DeepSeek-R1-MoE-671B的强化学习训练上的综合实验表明，MindSpeed RL将吞吐量提高了1.42至3.97倍。最后，我们开源了MindSpeed RL，并在一个拥有384个神经处理单元（NPU）的昇腾超级计算节点上进行了所有实验，以展示昇腾强大的性能和可靠性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19017&amp;sa=D&amp;source=editors&amp;ust=1753746852293527&amp;usg=AOvVaw0z99UR0fjUnPqPKUiKmB9a" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Innovator：通过细粒度专家混合（MoE）模型升级进行科学领域持续预训练</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18671&amp;sa=D&amp;source=editors&amp;ust=1753746852310694&amp;usg=AOvVaw3CbkyGJdmDV910gXCy0XNo" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18671 - Innovator: Scientific Continued Pretraining with Fine-grained MoE Upcycling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ning Liao, Xiaoxing Wang, Zehao Lin, Weiyang Guo, Feng Hong, Shixiang Song, Geng Yu, Zihua Zhao, Sitao Xie, Longxuan Wei, Xiangqi Jin, Xiaohan Qin, Jiale Ma, Kai Chen, Jiangchao Yao, Zhouhan Lin, Junchi Yan, Zhiyu Li, Feiyu Xiong, Yanfeng Wang, Linfeng Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">一个兼具科学和通用任务知识的大型语言模型（LLM）是科学通用智能的基础。然而，直接使用科学数据对LLM进行持续预训练通常会导致灾难性遗忘，即通用能力严重下降。在本报告中，我们提出了Innovator，它通过在持续预训练期间将预训练的密集LLM升级为细粒度的专家混合（MoE）模型来解决此问题，其中不同的专家旨在学习不同学科的科学知识，而一个共享专家则用于通用任务。Innovator引入了一个四阶段的升级训练范式：（1）在特定学科数据上进行科学专家引导，（2）通过FFN维度分解进行细粒度专家拆分，（3）科学感知路由预热，以及（4）在混合数据集上进行通用-科学专家集成训练。这种范式使得通用领域和不同科学学科的知识能够解耦，避免了不同领域知识之间的负面影响。Innovator总参数量为533亿，激活参数量为133亿，它通过一个共享的通用专家和64个专门的科学专家（激活8个）扩展了Qwen2.5-7B。Innovator使用3000亿个经过三级质量控制的token进行训练，在30个科学任务上平均提升了25%，胜率达到70%，同时在通用任务上保留了99%的性能。此外，为提升推理能力而从Innovator后训练得到的Innovator-Reason，在解决复杂科学问题方面表现出卓越的推理性能，提升超过30%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18671&amp;sa=D&amp;source=editors&amp;ust=1753746852310602&amp;usg=AOvVaw02XXhD-8C_N5MhIjg8pPiO" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">流畅阅读：弥合循环LLM与自注意力LLM在长上下文任务上的差距</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19353&amp;sa=D&amp;source=editors&amp;ust=1753746852278085&amp;usg=AOvVaw019JUbnX4DVy7j57lJb-Ap" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19353 - Smooth Reading: Bridging the Gap of Recurrent LLM to Self-Attention LLM on Long-Context Tasks</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Kai Liu, Zhan Su, Peijie Dong, Fengran Mo, Jianfei Gao, ShaoTing Zhang, Kai Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">最近，具有线性计算复杂度的循环大型语言模型（Recurrent LLMs）重新成为具有二次复杂度的自注意力大型语言模型（Self-Attention LLMs）的高效替代方案。然而，由于其有限的固定大小内存，循环LLM在长上下文任务上通常表现不佳。以往的研究主要集中于通过架构创新来增强循环LLM的内存容量，但这些方法尚未使循环LLM在长上下文任务上的性能与自注意力LLM相媲美。我们认为，这种局限性源于一次性处理整个上下文并不适合循环LLM。在本文中，我们提出了一种受人类阅读策略启发的块式推理方法——流畅阅读（Smooth Reading）。流畅阅读以块为单位处理上下文，并迭代地总结上下文信息，从而减少内存需求，使该方法更兼容循环LLM。我们的实验结果表明，该方法在保持循环LLM效率优势的同时，显著缩小了循环LLM与自注意力LLM在长上下文任务上的性能差距。我们的流畅阅读方法将SWA-3B-4k（一种循环LLM）在LongBench上的性能从比自注意力LLM低5.68%提升到高3.61%。此外，我们的方法保持了高效率，在64k上下文长度下，训练速度快3倍，推理速度快2倍。据我们所知，这是首次使用循环LLM在长上下文任务上实现与自注意力LLM相当性能的工作。我们希望我们的方法能激励该领域的未来研究。为促进进一步的进展，我们将发布代码和数据集。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19353&amp;sa=D&amp;source=editors&amp;ust=1753746852277993&amp;usg=AOvVaw2ImJ_nK1SasJYKnPwKrYMB" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GENIAL：通过网络反演为低功耗算法逻辑单元进行生成式设计空间探索</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18989&amp;sa=D&amp;source=editors&amp;ust=1753746852295317&amp;usg=AOvVaw3dfwNBpahjPpadRhXah_Ek" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18989 - GENIAL: Generative Design Space Exploration via Network Inversion for Low Power Algorithmic Logic Units</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Maxence Bouvier, Ryan Amaudruz, Felix Arnold, Renzo Andri, Lukas Cavigelli</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着AI工作负载的激增，优化算术单元以减少数字系统占用的资源变得越来越重要。传统的设计流程通常依赖手动或基于启发式的优化，其在彻底探索广阔设计空间方面的能力有限。在本文中，我们介绍了GENIAL，一个基于机器学习的框架，用于自动生成和优化算术单元，特别是乘法器。GENIAL的核心是一个基于Transformer的代理模型，该模型通过两个阶段进行训练，包括自监督预训练和监督微调，以从抽象的设计表示中稳健地预测关键硬件指标，如功耗和面积。通过反演该代理模型，GENIAL能高效地搜索新的操作数编码，从而直接最小化特定输入数据分布下算术单元的功耗。在大型数据集上的广泛实验表明，GENIAL在样本效率上始终优于其他方法，并能更快地收敛到优化设计。这使得在循环中部署高强度的逻辑综合优化流程成为可能，从而提高了代理模型的准确性。值得注意的是，与传统的二进制补码相比，GENIAL自动发现的编码在代表性的AI工作负载中，乘法器的开关活动节省高达18%。我们还通过在有限状态机上实现显著改进来展示我们方法的多功能性，突显了GENIAL在广泛逻辑函数中的适用性。总之，这些进展标志着在为数字系统自动生成质量结果优化的组合电路方面迈出了重要一步。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18989&amp;sa=D&amp;source=editors&amp;ust=1753746852295205&amp;usg=AOvVaw0-TC6nfZfBL6E7m5DpmDy5" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">剪枝中的被遗忘权：揭示稀疏模型上的机器忘却学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18725&amp;sa=D&amp;source=editors&amp;ust=1753746852308625&amp;usg=AOvVaw0SNBEkN6VqcMVOYWS8p9aB" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18725 - The Right to be Forgotten in Pruning: Unveil Machine Unlearning on Sparse Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yang Xiao, Gen Li, Jie Ji, Ruimeng Ye, Xiaolong Ma, Bo Hui</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">机器忘却学习旨在高效地从已训练模型中消除关于被删除数据的记忆，以解决“被遗忘权”问题。尽管现有忘却学习算法取得了成功，但在稀疏模型中的忘却学习尚未得到充分研究。在本文中，我们通过经验发现，被删除的数据对稀疏模型中的剪枝拓扑结构有影响。受此观察和“被遗忘权”的启发，我们定义了一个新术语“反剪枝”（un-pruning），以消除被删除数据对模型剪枝的影响。然后，我们提出了一种反剪枝算法，以近似由保留数据驱动的剪枝拓扑。我们强调，任何现有的忘却学习算法都可以与所提出的反剪枝工作流集成，并且理论上反剪枝的误差是有上界的。此外，我们的反剪枝算法可应用于结构化和非结构化稀疏模型。在实验中，我们进一步发现，成员推理攻击（MIA）的准确性在评估模型是否忘记了被删除数据方面并不可靠，因为被删除数据量的微小变化可能会产生任意的MIA结果。因此，我们为稀疏模型设计了新的性能指标来评估反剪枝的成功与否。最后，我们进行了广泛的实验，以验证反剪枝在各种剪枝方法和忘却学习算法下的有效性。我们的代码发布在 https://this URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18725&amp;sa=D&amp;source=editors&amp;ust=1753746852308533&amp;usg=AOvVaw15nvMdQuxqmAxP6gSPSc9a" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>LLM对齐与高级推理</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GEPA：反思性提示演化能够超越强化学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19457&amp;sa=D&amp;source=editors&amp;ust=1753746852271176&amp;usg=AOvVaw1_V1vBJpm2U5kbhk1Mm1T6" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19457 - GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Lakshya A Agrawal, Shangyin Tan, Dilara Soylu, Noah Ziems, Rishi Khare, Krista Opsahl-Ong, Arnav Singhvi, Herumb Shandilya, Michael J Ryan, Meng Jiang, Christopher Potts, Koushik Sen, Alexandros G. Dimakis, Ion Stoica, Dan Klein, Matei Zaharia, Omar Khattab</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）越来越多地通过强化学习（RL）方法（如组相对策略优化，GRPO）来适应下游任务，而这通常需要数千次试验（rollouts）来学习新任务。我们认为，与从稀疏标量奖励中派生的策略梯度相比，语言的可解释性通常可以为LLM提供更丰富的学习媒介。为了验证这一点，我们引入了GEPA（Genetic-Pareto），一个提示优化器，它充分利用自然语言反思来从试错中学习高层规则。对于任何包含一个或多个LLM提示的AI系统，GEPA会采样系统级的轨迹（例如，推理、工具调用和工具输出），并用自然语言对其进行反思，以诊断问题、提出并测试提示更新，并从其自身尝试的帕累托前沿中结合互补的经验教训。由于GEPA的设计，它通常能将仅仅几次试验转化为巨大的质量提升。在四个任务中，GEPA的平均性能比GRPO高出10%，最高可达20%，同时使用的试验次数减少了多达35倍。GEPA在两个LLM上的表现也比领先的提示优化器MIPROv2高出10%以上，并作为一种代码优化的推理时搜索策略展示了有希望的结果。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19457&amp;sa=D&amp;source=editors&amp;ust=1753746852271072&amp;usg=AOvVaw3Sy8qdmP0uCkTuBn2QWXAd" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">DxHF：通过交互式分解为大型语言模型对齐提供高质量的人类反馈</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18802&amp;sa=D&amp;source=editors&amp;ust=1753746852305180&amp;usg=AOvVaw3gczsDAGwEBxHTHyz6urtM" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18802 - DxHF: Providing High-Quality Human Feedback for LLM Alignment via Interactive Decomposition</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Danqing Shi, Furui Cheng, Tino Weinkauf, Antti Oulasvirta, Mennatallah El-Assady</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">人类偏好被广泛用于通过诸如从人类反馈中进行强化学习（RLHF）等方法来对齐大型语言模型（LLM）。然而，当前的用户界面要求标注者比较文本段落，当文本冗长或不熟悉时，这在认知上具有挑战性。本文通过研究分解原则作为一种提高LLM对齐中人类反馈质量的方法做出贡献。该方法将文本分解为单个论点，而不是直接比较两个长篇文本回复。基于此原则，我们构建了一个新颖的用户界面DxHF。它通过显示分解后的论点、视觉化编码论点与对话的相关性以及链接相似论点来增强比较过程。这使用户能够快速浏览关键信息并识别差异，从而做出更好、更快的判断。我们的技术评估表明，分解通常能提高相对于真实情况的反馈准确性，特别是对于不确定的用户。一项有160名参与者的众包研究表明，使用DxHF可将反馈准确性平均提高5%，尽管平均反馈时间增加了18秒。值得注意的是，在用户确定性较低的情况下，准确性显著更高。该研究的发现凸显了人机交互（HCI）作为改善人与AI对齐的有效方法的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18802&amp;sa=D&amp;source=editors&amp;ust=1753746852305074&amp;usg=AOvVaw2TD54gMYRoFX6cS5OmRW21" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">规约自修正：通过测试时优化减轻上下文中的奖励攻击</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18742&amp;sa=D&amp;source=editors&amp;ust=1753746852306982&amp;usg=AOvVaw3eCJtQAWCKKo-MBISFV9CH" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18742 - Specification Self-Correction: Mitigating In-Context Reward Hacking Through Test-Time Refinement</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Víctor Gallego</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">语言模型（LM）容易受到上下文奖励攻击（in-context reward hacking）的影响，即它们会利用有瑕疵或错误的书面规约或评分标准中的漏洞来获得高分，而没有实现用户的真实意图。我们引入了规约自修正（Specification Self-Correction, SSC），这是一种新颖的测试时框架，使语言模型能够识别并纠正其自身指导规约中的缺陷。SSC采用多步推理过程：模型首先基于一个可能存在问题的规约生成回应，然后对其输出进行批判，接着修正规约本身以消除可被利用的漏洞。最后，使用这个自修正后的规约生成一个更稳健的回应。在跨越创意写作和智能体编程任务的多个语言模型实验中，我们证明了尽管模型最初在50-70%的情况下会利用有问题的规约，但SSC过程将此漏洞减少了90%以上。这种动态修复发生在推理时，无需修改模型权重，并能引导出更稳健对齐的模型行为。代码可在 https://this URL 公开获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18742&amp;sa=D&amp;source=editors&amp;ust=1753746852306863&amp;usg=AOvVaw1Pmxe0FH45TNXxigY5mzvH" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>强化学习前沿与应用</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">在部分可观测条件下成功实现人形机器人强化学习</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18883&amp;sa=D&amp;source=editors&amp;ust=1753746852268030&amp;usg=AOvVaw381yKoOp_M3GJwBBz2bWv4" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18883 - Success in Humanoid Reinforcement Learning under Partial Observation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Wuhao Wang, Zhiyong Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习已被广泛应用于机器人控制，但在部分可观测性下进行有效的策略学习仍然是一个主要挑战，尤其是在像人形机器人移动这样的高维任务中。至今，尚无先前工作在基准环境Gymnasium Humanoid-v4中展示过在不完整状态信息下稳定训练人形机器人策略。该环境的目标是在不摔倒的情况下尽可能快地向前行走，奖励来自于保持直立和前进，而过度的动作和外部接触力会受到惩罚。本研究首次展示了在该环境下部分可观测学习的成功案例。尽管只使用了原始状态的三分之一到三分之二，学习到的策略性能与完全状态接入下的最先进结果相当。此外，该策略对机器人属性（如身体部件质量的变化）表现出适应性。成功的关键在于一种新颖的历史编码器，它能并行处理固定长度的过去观测序列。该编码器集成到标准的无模型算法中，使得性能与完全可观测的基线相当。我们假设它能从最近的观测中重建必要的上下文信息，从而实现稳健的决策。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18883&amp;sa=D&amp;source=editors&amp;ust=1753746852267923&amp;usg=AOvVaw3zjQr5_erDaTGufTEqWWhS" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">预算约束下多年期资产管理的分层深度强化学习框架</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19458&amp;sa=D&amp;source=editors&amp;ust=1753746852261071&amp;usg=AOvVaw3_lgk4YyrM7yJiVeDyQ0SD" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19458 - Hierarchical Deep Reinforcement Learning Framework for Multi-Year Asset Management Under Budget Constraints</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Amir Fard, Arnold X.-X. Yuan</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">预算规划和维护优化对于基础设施资产管理至关重要，能确保成本效益和可持续性。然而，由组合动作空间、多样化的资产恶化、严格的预算限制和环境不确定性所带来的复杂性，极大地限制了现有方法的可扩展性。本文提出了一种专门针对多年期基础设施规划的分层深度强化学习方法。我们的方法将问题分解为两个层级：一个高层级的预算规划器，在明确的可行性边界内分配年度预算；以及一个低层级的维护规划器，在分配的预算内对资产进行优先级排序。通过将宏观预算决策与资产级优先级排序进行结构性分离，并在分层软演员-评论家（Hierarchical Soft Actor-Critic）框架内集成了线性规划投影，该方法有效解决了动作空间的指数级增长问题，并确保了严格的预算合规性。一项评估不同规模（10、15和20个污水收集区）下水道网络的案例研究，展示了所提方法的有效性。与传统的深度Q学习和增强型遗传算法相比，我们的方法收敛更快，扩展性更好，并且即使在网络规模增长时也能持续提供接近最优的解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19458&amp;sa=D&amp;source=editors&amp;ust=1753746852260814&amp;usg=AOvVaw1PruVRXbqxOoxJ8lUuM28o" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ReCoDe：基于强化学习的动态约束设计用于多智能体协调</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19151&amp;sa=D&amp;source=editors&amp;ust=1753746852287191&amp;usg=AOvVaw0rgoOsAUq74OdEeJFIvV9K" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19151 - ReCoDe: Reinforcement Learning-based Dynamic Constraint Design for Multi-Agent Coordination</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Michael Amir, Guang Yang, Zhan Gao, Keisuke Okumura, Heedo Woo, Amanda Prorok</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">基于约束的优化是机器人学的基石，它使得设计的控制器能够可靠地编码任务和安全要求，如避免碰撞或保持队形。然而，手工设计的约束在需要复杂协调的多智能体环境中可能会失效。我们引入了ReCoDe——基于强化学习的约束设计——一个分散式的混合框架，它融合了基于优化的控制器的可靠性与多智能体强化学习的适应性。ReCoDe并非抛弃专家控制器，而是通过学习额外的动态约束来改进它们，这些动态约束能捕捉更细微的行为，例如，通过约束智能体的移动来防止在拥挤场景中发生拥堵。通过局部通信，智能体共同约束其允许的动作，以便在不断变化的条件下更有效地进行协调。在这项工作中，我们专注于ReCoDe在需要复杂、基于上下文的移动和共识的多智能体导航任务中的应用，我们展示了它优于纯手工控制器、其他混合方法以及标准的多智能体强化学习基线。我们提供了经验（真实机器人）和理论证据，证明保留一个用户定义的控制器，即使它不完美，也比从头学习更有效，特别是因为ReCoDe可以动态地改变其对该控制器的依赖程度。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19151&amp;sa=D&amp;source=editors&amp;ust=1753746852287077&amp;usg=AOvVaw0g0LxCL_wbQx3p7DqKqbVK" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过强化学习控制极性流体中的拓扑缺陷</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19298&amp;sa=D&amp;source=editors&amp;ust=1753746852280311&amp;usg=AOvVaw2rPmryuq5rHAFtr6qgt1Qy" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19298 - Controlling Topological Defects in Polar Fluids via Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Abhinav Singh, Petros Koumoutsakos</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">活性极性流体中的拓扑缺陷展现出由内部产生的应力驱动的复杂动力学，反映了拓扑、流动和非平衡流体动力学之间的深刻相互作用。反馈控制为引导此类系统提供了一种强有力的方法，能够实现动态状态之间的转换。我们通过调节活动的 spatially profile 来研究对受限活性流体中整数电荷缺陷的闭环操控。使用连续介质流体动力学模型，我们表明，对活性应力的局部控制可以诱导流场，通过利用系统中的非线性耦合来重新定位和引导缺陷沿着预定轨迹运动。我们使用强化学习框架来发现有效的控制策略，这些策略在训练轨迹和新轨迹上都能产生稳健的缺陷输运。研究结果突显了AI智能体如何学习底层动力学并空间化地构建活动以操纵拓扑激发，为活性物质的可控性以及自适应、自组织材料的设计提供了见解。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19298&amp;sa=D&amp;source=editors&amp;ust=1753746852280206&amp;usg=AOvVaw3UrBU4CYYAt_1KmzpRJv__" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态与生成模型</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">HH-Codec：用于口语建模的高压缩高保真离散神经编解码器</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18897&amp;sa=D&amp;source=editors&amp;ust=1753746852300426&amp;usg=AOvVaw1yd37bkE0a-HX8TAUflmqx" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18897 - HH-Codec: High Compression High-fidelity Discrete Neural Codec for Spoken Language Modeling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Rongkun Xue, Yazhe Niu, Shuai Hu, Zixin Yin, Yongqiang Yao, Jing Yang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">离散语音令牌化是语音编解码器中的一个基本组成部分。然而，在大型语音到语音系统中，来自多个量化器的并行流的复杂性以及高时间维度编解码器的计算成本构成了重大挑战。在本文中，我们介绍了HH-Codec，这是一种神经编解码器，它在24 kHz音频下实现了每秒24个令牌的极致压缩，并且仅依赖于单量化器推理。我们的方法涉及一个为口语建模精心设计的矢量量化空间，优化了压缩效率，同时最大限度地减少了信息损失。在此基础上，我们提出了一种非对称的编码器-解码器架构（Audio-VQ-Mel-Audio），利用双重监督和渐进式训练来增强重建的稳定性和保真度。HH-Codec在0.3 kbps的超低带宽下实现了语音重建的最先进性能。我们进一步评估了其在码本利用率和生成模型适应性方面的有效性，并通过广泛的消融实验验证了每个模块的必要性。HH-Codec可在 https://this URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18897&amp;sa=D&amp;source=editors&amp;ust=1753746852300342&amp;usg=AOvVaw2IG5GgCbinIhu2XqGN9teG" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SpeechIQ：语音理解大语言模型中跨认知层级的语音智商</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19361&amp;sa=D&amp;source=editors&amp;ust=1753746852277552&amp;usg=AOvVaw18QJM59FrTBPY63Mqds_df" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19361 - SpeechIQ: Speech Intelligence Quotient Across Cognitive Levels in Voice Understanding Large Language Models</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zhen Wan, Chao-Han Huck Yang, Yahan Yu, Jinchuan Tian, Sheng Li, Ke Hu, Zhehuai Chen, Shinji Watanabe, Fei Cheng, Chenhui Chu, Sadao Kurohashi</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们引入了基于语音的智商（Speech-based Intelligence Quotient, SIQ），作为一种受人类认知启发的、用于语音理解大型语言模型（LLM Voice）的新型评估流程，旨在评估其语音理解能力。SIQ超越了如词错误率（WER）等流行的语音理解指标，它根据布鲁姆分类学（Bloom's Taxonomy）的启发，在三个认知层面上对LLM Voice进行考察：（1）记忆（即评估逐字准确性的WER）；（2）理解（即LLM解释的相似性）；以及（3）应用（即模拟下游任务的问答准确性）。我们证明，SIQ不仅能够量化语音理解能力，还能提供级联方法（如ASR+LLM）与端到端模型之间的统一比较，识别现有基准中的标注错误，并检测LLM Voice中的幻觉。我们的框架是首个将认知原则与面向语音的基准相结合的智能测试，同时也揭示了多模态训练中被忽视的挑战。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19361&amp;sa=D&amp;source=editors&amp;ust=1753746852277457&amp;usg=AOvVaw3CATPntp_615MVGL8QKdxd" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过2D到3D数据提升实现可扩展的空间智能</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.18678&amp;sa=D&amp;source=editors&amp;ust=1753746852310100&amp;usg=AOvVaw3IXgNewAUut9bbBD5Iduah" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.18678 - Towards Scalable Spatial Intelligence via 2D-to-3D Data Lifting</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xingyu Miao, Haoran Duan, Quanhao Qian, Jiuniu Wang, Yang Long, Ling Shao, Deli Zhao, Ran Xu, Gongjie Zhang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">空间智能正在成为人工智能的一个变革性前沿，但它仍然受到大规模3D数据集稀缺的限制。与丰富的2D图像不同，获取3D数据通常需要专门的传感器和费力的标注。在这项工作中，我们提出了一个可扩展的流程，通过集成的深度估计、相机标定和尺度标定，将单视角图像转换为全面的、具有真实尺度和外观的3D表示——包括点云、相机位姿、深度图和伪RGBD。我们的方法弥合了庞大的图像库与日益增长的空间场景理解需求之间的差距。通过从图像中自动生成真实的、具有尺度感知的3D数据，我们显著降低了数据收集成本，并为推进空间智能开辟了新途径。我们发布了两个生成的空间数据集，即COCO-3D和Objects365-v2-3D，并通过广泛的实验证明，我们生成的数据可以惠及各种3D任务，从基础的感知到基于多模态大语言模型（MLLM）的推理。这些结果验证了我们的流程是开发能够感知、理解和与物理环境交互的AI系统的有效解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.18678&amp;sa=D&amp;source=editors&amp;ust=1753746852309981&amp;usg=AOvVaw2zpCxlCi6qdz0li1EZa5-N" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过门控条件扩散模型实现整体与病变联合可控的乳腺X光图像合成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19201&amp;sa=D&amp;source=editors&amp;ust=1753746852283827&amp;usg=AOvVaw2Y5pxql93i8GJlhRiZERRn" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19201 - Joint Holistic and Lesion Controllable Mammogram Synthesis via Gated Conditional Diffusion Model</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xin Li, Kaixiang Yang, Qiang Li, Zhiwei Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">乳腺X光摄影是乳腺癌筛查最常用的成像方式，推动了对支持大规模分析的深度学习技术的日益增长的需求。然而，准确和鲁棒方法的开发常常受到数据可用性不足和病变特征多样性缺乏的限制。虽然生成模型为数据合成提供了一个有前景的解决方案，但现有方法往往未能充分强调病变特异性特征及其与周围组织的关系。在本文中，我们提出了门控条件扩散模型（GCDM），一个旨在联合合成整体乳腺X光图像和局部病变的新颖框架。GCDM建立在潜在去噪扩散框架之上，其中带噪声的潜在图像与代表乳房、病变及其过渡区域的软掩码嵌入连接，以确保在去噪过程中它们之间的解剖学一致性。为了进一步强调病变特异性特征，GCDM集成了一个门控条件分支，该分支通过动态选择和融合最相关的病变放射组学和几何属性来指导去噪过程，有效捕捉它们的相互作用。实验结果表明，GCDM在精确控制小病变区域的同时，增强了合成乳腺X光图像的真实性和多样性。这些进展使GCDM成为乳腺X光图像合成领域一个有前景的临床应用工具。我们的代码可在 https://this URL 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19201&amp;sa=D&amp;source=editors&amp;ust=1753746852283686&amp;usg=AOvVaw0z8phUXscD69awoQUvgfQH" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一种基于几何布朗运动的金融时间序列扩散生成模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19003&amp;sa=D&amp;source=editors&amp;ust=1753746852294710&amp;usg=AOvVaw12w8e2hAKFbXIgSxGXgUnm" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19003 - A diffusion-based generative model for financial time series via geometric Brownian motion</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Gihun Kim, Sun-Yong Choi, Yeoneung Kim</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了一种新颖的基于扩散的金融时间序列生成框架，该框架将布莱克-斯科尔斯理论的基础——几何布朗运动（GBM）——融入到前向加噪过程中。与将价格轨迹视为通用数值序列的标准基于分数的模型不同，我们的方法在每个时间步按资产价格比例注入噪声，反映了金融时间序列中观察到的异方差性。通过精确平衡漂移项和扩散项，我们表明，由此产生的对数价格过程可以简化为一个方差爆炸的随机微分方程，这与基于分数的生成模型中的表述一致。逆向生成过程通过去噪分数匹配进行训练，使用了一种从条件分数扩散插补（CSDI）框架改编的基于Transformer的架构。对历史股票数据的实证评估表明，与传统扩散模型相比，我们的模型更真实地再现了关键的风格化事实，如重尾收益分布、波动率聚集和杠杆效应。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19003&amp;sa=D&amp;source=editors&amp;ust=1753746852294613&amp;usg=AOvVaw2nBrCoJCIi-89sxFH6afri" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">分钟内数据翻倍：通过LLM诱导的依赖图实现超快速表格数据生成</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19334&amp;sa=D&amp;source=editors&amp;ust=1753746852278631&amp;usg=AOvVaw0XQ4R5p1rwEhsP1tlpfyEW" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19334 - Doubling Your Data in Minutes: Ultra-fast Tabular Data Generation via LLM-Induced Dependency Graphs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shuo Yang, Zheyu Zhang, Bardh Prenkaj, Gjergji Kasneci</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">表格数据在不同领域至关重要，然而由于隐私问题和收集成本，高质量的数据集仍然稀缺。当代方法采用大型语言模型（LLM）进行表格数据增强，但存在两个主要限制：（1）表格特征之间的密集依赖建模可能引入偏差，（2）采样过程中的计算开销高。为解决这些问题，我们提出了SPADA（SPArse Dependency-driven Augmentation），一个轻量级的生成框架，通过LLM诱导的图来明确捕捉稀疏依赖关系。我们将每个特征视为一个节点，通过遍历图来合成数值，每个特征仅以其父节点为条件。我们探索了两种合成策略：一种是使用高斯核密度估计的非参数方法，另一种是学习可逆映射以进行条件密度估计的条件归一化流模型。在四个数据集上的实验表明，与基于扩散的方法相比，SPADA将约束违反减少了4%，并且生成速度比基于LLM的基线快了近9500倍。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19334&amp;sa=D&amp;source=editors&amp;ust=1753746852278530&amp;usg=AOvVaw0Q3vvMucE-LWTM2jJeL3rk" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">弥合混合模态搜索中的模态鸿沟</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.19054&amp;sa=D&amp;source=editors&amp;ust=1753746852292348&amp;usg=AOvVaw2c2WF_EiOccST-86mVs8zD" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.19054 - Closing the Modality Gap for Mixed Modality Search</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Binxu Li, Yuhui Zhang, Xiaohan Wang, Weixin Liang, Ludwig Schmidt, Serena Yeung-Levy</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">混合模态搜索——在由图像、文本和多模态文档组成的异构语料库中检索信息——是一项重要但尚未充分探索的现实世界应用。在这项工作中，我们研究了像CLIP这样的对比性视觉-语言模型在混合模态搜索任务上的表现。我们的分析揭示了一个关键限制：这些模型在嵌入空间中表现出明显的模态鸿沟，其中图像和文本嵌入形成不同的簇，导致模态内排序偏差和模态间融合失败。为了解决这个问题，我们提出了GR-CLIP，一种轻量级的后处理校准方法，可以消除CLIP嵌入空间中的模态鸿沟。在专门为混合模态搜索设计的首个基准MixBench上进行评估，GR-CLIP的NDCG@10比CLIP提高了多达26个百分点，超过了最近的视觉-语言生成嵌入模型4个百分点，而计算量减少了75倍。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.19054&amp;sa=D&amp;source=editors&amp;ust=1753746852292243&amp;usg=AOvVaw0XGyOAIQ8qbgf94KXepsEN" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
