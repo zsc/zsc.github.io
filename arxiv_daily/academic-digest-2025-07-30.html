@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-30</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-30)</h1>
+                    <p id="intro">为您找到日期 2025-07-30 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>强化学习与大模型对齐</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">EDGE-GRPO: 用于优势多样性的熵驱动GRPO与引导式纠错</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21848&amp;sa=D&amp;source=editors&amp;ust=1753881387588975&amp;usg=AOvVaw0d4HL73utl1RswZfW-bs84" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21848 - EDGE-GRPO: Entropy-Driven GRPO with Guided Error Correction for Advantage Diversity</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xingjian Zhang, Siwei Wen, Wenjun Wu, Lei Huang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）在通过强化学习增强逐步推理方面取得了显著进展。然而，依赖稀疏奖励规则的组相对策略优化（GRPO）算法经常遇到组内奖励相同的问题，导致优势崩溃问题。现有工作通常从两个角度解决这一挑战：强制模型反思以增强响应多样性，以及引入内部反馈以增强训练信号（优势）。在这项工作中，我们首先分析了模型反思的局限性，并研究了在细粒度样本级别上响应的策略熵。基于我们的实验发现，我们提出了EDGE-GRPO算法，该算法采用**熵驱动优势**和**引导式纠错**来有效缓解优势崩溃问题。在几个主要的推理基准上的大量实验证明了我们方法的有效性和优越性。该方法可在 https://github.com/Xingjian-Zhang/EDGE-GRPO 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21848&amp;sa=D&amp;source=editors&amp;ust=1753881387588889&amp;usg=AOvVaw0a1EbU35YKNUoe4MsVAzCI" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MixGRPO: 通过混合常微分/随机微分方程解锁基于流的GRPO效率</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21802&amp;sa=D&amp;source=editors&amp;ust=1753881387590511&amp;usg=AOvVaw19WWvrDcV8Vz-ZO1QKtvwS" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21802 - MixGRPO: Unlocking Flow-based GRPO Efficiency with Mixed ODE-SDE</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Junzhe Li, Yutao Cui, Tao Huang, Yinping Ma, Chun Fan, Miles Yang, Zhao Zhong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">尽管GRPO在图像生成的人类偏好对齐方面显著增强了流匹配模型，但像FlowGRPO这样的方法由于需要在马尔可夫决策过程（MDP）指定的所有去噪步骤上进行采样和优化，仍然效率低下。在本文中，我们提出了**MixGRPO**，一个新颖的框架，它通过整合随机微分方程（SDE）和常微分方程（ODE）来利用混合采样策略的灵活性。这简化了MDP内的优化过程，以提高效率和性能。具体来说，MixGRPO引入了一个滑动窗口机制，仅在窗口内使用SDE采样和GRPO引导的优化，而在窗口外应用ODE采样。这种设计将采样随机性限制在窗口内的时间步长，从而减少了优化开销，并允许更集中的梯度更新以加速收敛。此外，由于滑动窗口之外的时间步不参与优化，因此支持使用高阶求解器进行采样。因此，我们提出了一个更快的变体，称为**MixGRPO-Flash**，它进一步提高了训练效率，同时实现了可比的性能。MixGRPO在人类偏好对齐的多个维度上表现出显著的增益，在效果和效率上都优于DanceGRPO，训练时间减少了近50%。值得注意的是，MixGRPO-Flash进一步将训练时间减少了71%。代码和模型可在MixGRPO获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21802&amp;sa=D&amp;source=editors&amp;ust=1753881387590429&amp;usg=AOvVaw3gcUHwNUmErSMR_RckhjCb" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MaPPO: 结合先验知识的最大后验偏好优化</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21183&amp;sa=D&amp;source=editors&amp;ust=1753881387651227&amp;usg=AOvVaw1fCgvITukP3yF_W0stTZpz" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21183 - MaPPO: Maximum a Posteriori Preference Optimization with Prior Knowledge</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Guangchen Lan, Sipeng Zhang, Tianle Wang, Yuwei Zhang, Daoan Zhang, Xinpeng Wei, Xiaoman Pan, Hongming Zhang, Dong-Jun Han, Christopher G. Brinton</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着代表用户的大型语言模型（LLM）时代的到来，偏好优化（PO）方法已成为使LLM与人类偏好对齐并提高其性能的核心途径。我们提出了最大后验偏好优化（MaPPO），这是一个从偏好中学习的框架，它将先验奖励知识明确地整合到优化目标中。现有方法如直接偏好优化（DPO）及其变体将偏好学习视为最大似然估计（MLE）问题，而MaPPO通过将先验奖励估计整合到一个有原则的最大后验（MaP）目标中，扩展了这一范式。这不仅推广了DPO及其变体，还通过减轻对响应的过于简化的二元分类来增强对齐。更重要的是，MaPPO没有引入额外的超参数，并支持在线和离线设置中的偏好优化。此外，MaPPO可以作为一个插件使用，在DPO变体（包括广泛使用的SimPO、IPO和CPO）上实现持续改进。对不同模型大小和模型系列在三个标准基准（包括MT-Bench、AlpacaEval 2.0和Arena-Hard）上的广泛实证评估表明，在不牺牲计算效率的情况下，对齐性能得到了一致的提升。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21183&amp;sa=D&amp;source=editors&amp;ust=1753881387651142&amp;usg=AOvVaw1h3gPP4npDDdR--AMc7TRT" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过自我反馈的强化学习对大型语言模型进行后训练</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21931&amp;sa=D&amp;source=editors&amp;ust=1753881387618397&amp;usg=AOvVaw1olgX3FREiUfFBphwTyUNE" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21931 - Post-Training Large Language Models via Reinforcement Learning from Self-Feedback</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Carel van Niekerk, Renato Vukovic, Benjamin Matthias Ruppik, Hsien-chin Lin, Milica Gašić</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）经常产生看似合理但校准不佳的答案，这限制了它们在推理密集型任务上的可靠性。我们提出了“从自我反馈中进行强化学习”（RLSF），这是一个后训练阶段，它使用模型自身的置信度作为内在奖励，模仿人类在没有外部反馈的情况下学习的方式。在一个固定的LLM生成多个思维链解决方案后，我们定义并计算每个最终答案区间的置信度，并据此对轨迹进行排序。这些合成的偏好随后被用于通过标准的偏好优化来微调策略，这与RLHF相似，但不需要人类标签、黄金答案或外部策划的奖励。RLSF同时（i）优化模型的概率估计——恢复良好校准——和（ii）加强逐步推理，从而在算术推理和多项选择问答任务上获得更好的性能。通过将模型自身的不确定性转化为有用的自我反馈，RLSF确认了基于模型内在行为的强化学习是LLM后训练流程中一个有原则且数据高效的组成部分，并值得在LLM后训练的内在奖励方面进行进一步研究。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21931&amp;sa=D&amp;source=editors&amp;ust=1753881387618303&amp;usg=AOvVaw1rRtf3UDwKo7wNvSoxOCGM" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">安全拔河 (SecTOW): 用于多模态模型安全的迭代式防御-攻击强化学习训练</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.22037&amp;sa=D&amp;source=editors&amp;ust=1753881387612015&amp;usg=AOvVaw0UadN3eTc-rMA1p93Yr0KT" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22037 - Secure Tug-of-War (SecTOW): Iterative Defense-Attack Training with Reinforcement Learning for Multimodal Model Security</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Muzhi Dai, Shixuan Liu, Zhiyuan Zhao, Junyu Gao, Hao Sun, Xuelong Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态大型语言模型（MLLM）的快速发展在各种应用中取得了突破，但其安全性仍然是一个关键挑战。一个紧迫的问题涉及不安全的图像-查询对——专门设计用于绕过安全约束并从MLLM中引出意外响应的越狱输入。与通用的多模态数据相比，这类不安全输入相对稀疏，这限制了用于开发鲁棒防御模型的训练样本的多样性和丰富性。与此同时，现有的护栏式方法依赖外部模块来强制执行安全约束，但未能解决MLLM内部的固有漏洞。另一方面，传统的监督式微调（SFT）常常过度拒绝无害输入，损害了通用性能。鉴于这些挑战，我们提出了“安全拔河”（SecTOW），一种创新的迭代式防御-攻击训练方法，以增强MLLM的安全性。SecTOW由两个模块组成：一个防御者和一个辅助攻击者，两者都使用强化学习（GRPO）进行迭代训练。在迭代过程中，攻击者识别防御模型的安全漏洞并扩展越狱数据。然后，扩展后的数据用于训练防御者，使其能够解决已识别的安全漏洞。我们还设计了用于GRPO的奖励机制，以简化响应标签的使用，减少对复杂生成标签的依赖，并能够高效地使用合成数据。此外，还使用质量监控机制来减轻防御者对无害输入的过度拒绝，并确保攻击者生成的越狱数据的多样性。在特定安全基准和通用基准上的实验结果表明，SecTOW在保持通用性能的同时显著提高了安全性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.22037&amp;sa=D&amp;source=editors&amp;ust=1753881387611921&amp;usg=AOvVaw2Kq9wK5tNd3ckGi8yniQdh" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">多模态大语言模型作为文本到图像生成的定制化奖励模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21391&amp;sa=D&amp;source=editors&amp;ust=1753881387642429&amp;usg=AOvVaw2oQdN6CJkS3xN7_e700POu" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21391 - Multimodal LLMs as Customized Reward Models for Text-to-Image Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shijie Zhou, Ruiyi Zhang, Huaisheng Zhu, Branislav Kveton, Yufan Zhou, Jiuxiang Gu, Jian Chen, Changyou Chen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍了 LLaVA-Reward，这是一种高效的奖励模型，旨在利用预训练的多模态大型语言模型（MLLMs）从多个角度自动评估文本到图像（T2I）的生成。现有的基于 MLLM 的方法需要指令遵循数据进行监督微调，并通过分析文本响应来评估生成质量，这种方式耗时且难以训练。为了解决这个问题，我们提出了 LLaVA-Reward，它直接利用 MLLM 在给定文本-图像对时的隐藏状态。为了增强仅解码器 MLLM 中视觉和文本表示之间的双向交互，我们进一步提出添加一个跳跃连接交叉注意力（SkipCA）模块。这种设计通过将早期层的视觉特征与后期层的隐藏状态连接起来，增强了文本-图像相关性推理。此外，LLaVA-Reward 支持不同类型的偏好数据进行高效微调，包括成对偏好数据和不成对数据。我们在四个评估维度上训练 LLaVA-Reward：文本-图像对齐、保真度/伪影、安全性以及总体排名。实验结果表明，LLaVA-Reward 在生成与人类对齐的分数以进行自动评估和在文本到图像生成中的推理时缩放方面，均优于传统和基于 MLLM 的方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21391&amp;sa=D&amp;source=editors&amp;ust=1753881387642329&amp;usg=AOvVaw1mzVVaLy16ZhsPkFDHZcD4" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Assistax: 用于辅助机器人的硬件加速强化学习基准</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21638&amp;sa=D&amp;source=editors&amp;ust=1753881387593709&amp;usg=AOvVaw2JkgbaAeWS40TJ3Bb7_6_n" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21638 - Assistax: A Hardware-Accelerated Reinforcement Learning Benchmark for Assistive Robotics</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Leonard Hinckeldey, Elliot Fosong, Elle Miller, Rimvydas Rubavicius, Trevor McInroe, Patricia Wollstadt, Christiane B. Wiebel-Herboth, Subramanian Ramamoorthy, Stefano V. Albrecht</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习（RL）算法的发展在很大程度上受到雄心勃勃的挑战任务和基准的推动。游戏主导了RL基准，因为它们提出了相关挑战，运行成本低且易于理解。虽然像围棋和雅达利这样的游戏带来了许多突破，但它们通常不能直接转化为现实世界的具身应用。在认识到RL基准多样化的需求并解决具身交互场景中出现的复杂性后，我们引入了Assistax：一个旨在解决辅助机器人任务中挑战的开源基准。Assistax利用JAX的硬件加速，在基于物理的模拟中显著加快了学习速度。在开环挂钟时间方面，与基于CPU的替代方案相比，当矢量化训练运行时，Assistax的运行速度提高了高达370倍。Assistax使用多智能体RL来概念化辅助机器人与活跃人类患者之间的交互，训练出一群多样化的伙伴智能体，以测试具身机器人智能体的零样本协调能力。对流行的连续控制RL和MARL算法进行的广泛评估和超参数调整提供了可靠的基线，并确立了Assistax作为推进辅助机器人RL研究的实用基准。代码可在以下网址获取：this https URL。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21638&amp;sa=D&amp;source=editors&amp;ust=1753881387593649&amp;usg=AOvVaw3UqHMt2oWYXvZWylRFv2mE" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态生成与3D视觉</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">TTS-1 技术报告</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21138&amp;sa=D&amp;source=editors&amp;ust=1753881387658577&amp;usg=AOvVaw14AKLL2hdf6mZ7IA2niYMV" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21138 - TTS-1 Technical Report</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Oleg Atamanenko, Anna Chalova, Joseph Coombes, Nikki Cope, Phillip Dang, Zhifeng Deng, Jimmy Du, Michael Ermolenko, Feifan Fan, Yufei Feng, Cheryl Fichter, Pavel Filimonov, Louis Fischer, Kylan Gibbs, Valeria Gusarova, Pavel Karpik, Andreas Assad Kottner, Ian Lee, Oliver Louie, Jasmine Mai, Mikhail Mamontov, Suri Mao, Nurullah Morshed, Igor Poletaev, Florin Radu, Dmytro Semernia, Evgenii Shingarev, Vikram Sivaraja, Peter Skirko, Rinat Takhautdinov, Robert Villahermosa, Jean Wang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们介绍了 Inworld TTS-1，这是一套包含两个基于 Transformer 的自回归文本到语音（TTS）模型。我们最大的模型 TTS-1-Max 拥有 88 亿参数，专为要求严苛的应用提供最高的质量和表现力。TTS-1 是我们最高效的模型，拥有 16 亿参数，专为实时语音合成和设备端应用场景打造。通过扩展训练时计算资源，并对语音语言模型（SpeechLM）组件应用预训练、微调和强化学习对齐的序列化流程，两个模型在多种基准测试中均达到了业界领先的性能，展示了完全依赖于上下文学习说话者声音的卓越质量。Inworld TTS-1 和 TTS-1-Max 能够以低延迟生成高分辨率的 48 kHz 语音，并支持 11 种语言，通过音频标记实现精细的情感控制和非语言发声。此外，我们根据 MIT 许可证开源了我们的训练和建模代码。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21138&amp;sa=D&amp;source=editors&amp;ust=1753881387658485&amp;usg=AOvVaw04nmTiQULBfmHGPUdbzvj7" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MultiEditor: 使用3D高斯溅射先验实现可控的多模态驾驶场景对象编辑</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21872&amp;sa=D&amp;source=editors&amp;ust=1753881387588564&amp;usg=AOvVaw3tRc_lOm3nzwPfedWqxpDD" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21872 - MultiEditor: Controllable Multimodal Object Editing for Driving Scenarios Using 3D Gaussian Splatting Priors</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shouyi Lu, Zihan Lin, Chao Lu, Huanran Wang, Guirong Zhuo, Lianqing Zheng</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">自动驾驶系统严重依赖多模态感知数据来理解复杂环境。然而，真实世界数据的长尾分布阻碍了模型的泛化能力，尤其是对于罕见但安全关键的车辆类别。为应对这一挑战，我们提出了 MultiEditor，这是一个双分支潜在扩散框架，旨在联合编辑驾驶场景中的图像和激光雷达点云。我们方法的核心是引入3D高斯溅射（3DGS）作为目标物体的结构和外观先验。利用此先验，我们设计了一个多层次外观控制机制——包括像素级粘贴、语义级引导和多分支优化——以实现跨模态的高保真度重建。我们进一步提出了一个深度引导的可变形跨模态条件模块，该模块利用3DGS渲染的深度自适应地实现模态间的相互引导，显著增强了跨模态一致性。大量实验表明，MultiEditor 在视觉和几何保真度、编辑可控性以及跨模态一致性方面均取得了优越的性能。此外，使用 MultiEditor 生成稀有类别车辆数据，可以显著提高感知模型在代表性不足类别上的检测准确率。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21872&amp;sa=D&amp;source=editors&amp;ust=1753881387588465&amp;usg=AOvVaw05uhDczfVd9jPNnfDP1mzy" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MapDiffusion: 用于自动驾驶中矢量化在线高清地图构建和不确定性估计的生成式扩散模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21423&amp;sa=D&amp;source=editors&amp;ust=1753881387641457&amp;usg=AOvVaw1hlCfl2zKG-0pkPQ6xXKQ-" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21423 - MapDiffusion: Generative Diffusion for Vectorized Online HD Map Construction and Uncertainty Estimation in Autonomous Driving</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Thomas Monninger, Zihan Zhang, Zhipeng Mo, Md Zafar Anwar, Steffen Staab, Sihao Ding</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">自动驾驶需要从传感器数据中理解静态环境。学习型鸟瞰图（BEV）编码器通常用于融合多个输入，而矢量解码器则从潜在的 BEV 网格中预测矢量化地图表示。然而，传统的地图构建模型提供的是确定性的点估计，无法捕捉现实世界环境中的不确定性和固有的模糊性，例如遮挡和缺失的车道标记。我们提出了 MapDiffusion，这是一种新颖的生成方法，它利用扩散范式来学习所有可能的矢量化地图的完整分布。MapDiffusion 不是从学习到的查询中预测单一的确定性输出，而是迭代地优化随机初始化的查询，以 BEV 潜在网格为条件，生成多个合理的地图样本。这使得可以聚合样本以提高预测准确性，并导出与场景模糊性直接相关的不确定性估计。在 nuScenes 数据集上的大量实验表明，MapDiffusion 在在线地图构建方面达到了最先进的性能，单样本性能比基线高出5%。我们进一步证明，聚合多个样本能够持续改善 ROC 曲线上的性能，验证了分布建模的优势。此外，我们的不确定性估计在遮挡区域显著更高，这加强了其在识别传感器输入模糊区域中的价值。通过对完整地图分布进行建模，MapDiffusion 增强了在线矢量化高清地图构建的鲁棒性和可靠性，为自动驾驶车辆在复杂环境中的不确定性感知决策提供了可能。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21423&amp;sa=D&amp;source=editors&amp;ust=1753881387641357&amp;usg=AOvVaw1Umo1CvBNblWsbSSynPvV5" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">ST-GDance: 基于音乐的长期无碰撞集体舞蹈编排</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21518&amp;sa=D&amp;source=editors&amp;ust=1753881387596900&amp;usg=AOvVaw0mG2cGsAaXtR4Tep0mAqpE" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21518 - ST-GDance: Long-Term and Collision-Free Group Choreography from Music</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jing Xu, Weiqiang Wang, Cunjian Chen, Jun Liu, Qiuhong Ke</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">从音乐生成集体舞蹈在电影、游戏和动画制作中有广泛应用。然而，这需要在保持空间协调的同时同步多个舞者。随着舞者数量和序列长度的增加，这项任务面临更高的计算复杂度和更大的动作碰撞风险。现有方法通常难以建模密集的时空交互，导致可扩展性问题和多舞者碰撞。为了解决这些挑战，我们提出了ST-GDance，一个新颖的框架，它解耦了空间和时间依赖关系，以优化长期无碰撞的集体舞蹈编排。我们采用轻量级图卷积进行距离感知的空间建模，并使用加速的稀疏注意力进行高效的时间建模。这种设计显著降低了计算成本，同时确保了平滑且无碰撞的交互。在AIOZ-GDance数据集上的实验表明，ST-GDance优于最先进的基线方法，尤其是在生成长而连贯的集体舞蹈序列方面。项目页面：https://jingxu-git.github.io/ST-GDance/</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21518&amp;sa=D&amp;source=editors&amp;ust=1753881387596820&amp;usg=AOvVaw2OSBvShecGPJ7XiD9w8jcK" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">学习具有空间变化本构属性的可模拟布料模型</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21288&amp;sa=D&amp;source=editors&amp;ust=1753881387646351&amp;usg=AOvVaw25Iy7_hDYC63R8CMS-8Jfw" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21288 - Learning Simulatable Models of Cloth with Spatially-varying Constitutive Properties</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Guanxiong Chen, Shashwat Suri, Yuhao Wu, Etienne Voulga, David I.W. Levin, Dinesh Pai</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">真实服装中使用的材料表现出显著的复杂性和空间变化，这是由于缝合、包边、染色、印花、填充和粘合等常见工艺造成的。模拟这些材料，例如使用有限元方法，通常计算量大且速度慢。更糟糕的是，这些方法可能会遭受称为“薄膜锁定”的数值伪影，使布料显得人为地僵硬。在这里，我们提出了一个通用框架，称为“质点-弹簧网络”（Mass-Spring Net），用于学习一个简单而高效的代理模型，该模型仅使用运动观测就能捕捉这些复杂材料的效果。布料被离散化为一个质点-弹簧网络，其未知的材料参数直接从运动数据中学习，使用一种新颖的力与冲量损失函数。我们的方法展示了从各种数据源准确建模空间变化材料属性的能力，并且不受困扰有限元仿真的薄膜锁定问题的影响。与基于图的网络和基于神经常微分方程的架构相比，我们的方法实现了显著更快的训练时间、更高的重建精度和对新颖动态场景的更好泛化能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21288&amp;sa=D&amp;source=editors&amp;ust=1753881387646267&amp;usg=AOvVaw1XRPTiKUYrCcQw3axuyfAh" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态大语言模型应用</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MoHoBench: 通过无法回答的视觉问题评估多模态大语言模型的诚实度</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21503&amp;sa=D&amp;source=editors&amp;ust=1753881387597628&amp;usg=AOvVaw2blV734BZV9s3hoxgH_liG" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21503 - MoHoBench: Assessing Honesty of Multimodal Large Language Models via Unanswerable Visual Questions</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yanxu Zhu, Shitong Duan, Xiangxu Zhang, Jitao Sang, Peng Zhang, Tun Lu, Xiao Zhou, Jing Yao, Xiaoyuan Yi, Xing Xie</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近年来，多模态大型语言模型（MLLM）在视觉-语言任务上取得了显著进展，但它们也可能产生有害或不可信的内容。尽管已有大量工作研究语言模型的诚信度，但 MLLM 在面对无法回答的视觉问题时表现出诚实的能力在很大程度上仍未被探索。本工作首次对各种 MLLM 的诚实行为进行了系统性评估。我们将诚实度建立在模型对无法回答的视觉问题的响应行为上，定义了四种代表性的此类问题，并构建了一个大规模的 MLLM 诚实度基准测试 MoHoBench，其中包含超过12000个视觉问题样本，其质量通过多阶段筛选和人工验证得到保证。利用 MoHoBench，我们对28个流行的 MLLM 的诚实度进行了基准测试并进行了全面分析。我们的发现表明：（1）大多数模型在必要时未能适当地拒绝回答，以及（2）MLLM 的诚实度不仅仅是一个语言建模问题，而是深受视觉信息的影响，这需要开发专门的多模态诚实度对齐方法。因此，我们使用监督学习和偏好学习实现了初步的对齐方法以改善诚实行为，为未来研究可信赖的 MLLM 提供了基础。我们的数据和代码可以在 https://github.com/Tsinghua-VisLab/MoHoBench 找到。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21503&amp;sa=D&amp;source=editors&amp;ust=1753881387597549&amp;usg=AOvVaw3mfqjGaOB5qVpvcKIGG7YO" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">UI-AGILE: 通过有效的强化学习和精确的推理时定位提升GUI智能体</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.22025&amp;sa=D&amp;source=editors&amp;ust=1753881387583619&amp;usg=AOvVaw1vdDU45BPdULifpt8-R7KF" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22025 - UI-AGILE: Advancing GUI Agents with Effective Reinforcement Learning and Precise Inference-Time Grounding</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shuquan Lian, Yuhang Wu, Jia Ma, Zihan Song, Bingqi Chen, Xiawu Zheng, Hui Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态大型语言模型（MLLM）的出现推动了图形用户界面（GUI）智能体能力的显著进步。然而，现有的GUI智能体训练和推理技术在推理设计、奖励机制无效和视觉噪声方面仍然存在困境。为了解决这些问题，我们引入了UI-AGILE，一个在训练和推理阶段全面增强GUI智能体的框架。在训练方面，我们提出了一套对监督式微调（SFT）过程的改进：1）连续奖励函数，以激励高精度定位；2）“简单思考”奖励，以平衡规划与速度和定位准确性；3）基于裁剪的重采样策略，以缓解稀疏奖励问题并改善在复杂任务上的学习。在推理方面，我们提出了一种名为“带选择的分解定位”的新方法，通过将图像分解为更小、可管理的部分，极大地提高了在高分辨率显示器上的定位准确性。实验表明，UI-AGILE在两个基准测试ScreenSpot-Pro和ScreenSpot-v2上均达到了最先进的性能。例如，在ScreenSpot-Pro上，同时使用我们提出的训练和推理增强方法，相比最佳基线，定位准确性提高了23%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.22025&amp;sa=D&amp;source=editors&amp;ust=1753881387583529&amp;usg=AOvVaw2Ck5qwnZUyyAqRZkW4qplN" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SafeDriveRAG: 通过基于知识图谱的检索增强生成实现安全的自动驾驶</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21585&amp;sa=D&amp;source=editors&amp;ust=1753881387595769&amp;usg=AOvVaw1FqEYYXQd7E1m8gdF8g9Iu" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21585 - SafeDriveRAG: Towards Safe Autonomous Driving with Knowledge Graph-based Retrieval-Augmented Generation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hao Ye, Mengshi Qi, Zhaohong Liu, Liang Liu, Huadong Ma</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在这项工作中，我们研究了如何利用视觉-语言模型（VLM）来增强自动驾驶系统的安全性，包括感知、情境理解和路径规划。然而，现有研究在很大程度上忽略了在交通安全关键驾驶场景中对这些模型的评估。为了弥补这一差距，我们创建了基准测试（SafeDrive228K），并提出了一种基于VLM和知识图谱检索增强生成（SafeDriveRAG）的新基线，用于视觉问答（VQA）。具体来说，我们引入了SafeDrive228K，这是第一个大规模多模态问答基准，包含18个子任务的22.8万个示例。该基准涵盖了从交通事故、极端情况到常见安全知识的各种交通安全查询，从而能够全面评估模型的理解和推理能力。此外，我们提出了一种即插即用的多模态知识图谱检索增强生成方法，该方法采用新颖的多尺度子图检索算法以实现高效信息检索。通过整合从互联网收集的交通安全指南，该框架进一步增强了模型处理安全关键情况的能力。最后，我们对五个主流VLM进行了全面评估，以评估其在安全敏感驾驶任务中的可靠性。实验结果表明，整合RAG显著提高了性能，在交通事故任务中增益+4.73%，在极端情况任务中增益+8.79%，在交通安全常识任务中增益+14.57%，突显了我们提出的基准和方法在推进交通安全研究方面的潜力。我们的源代码和数据可在 https://github.com/SafeDriveVLM/SafeDriveRAG 获取。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21585&amp;sa=D&amp;source=editors&amp;ust=1753881387595708&amp;usg=AOvVaw3oad8pfpH5xP4HzERHjaS0" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">利用交互式多模态通信中的结构化任务关系推进组合式LLM推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21199&amp;sa=D&amp;source=editors&amp;ust=1753881387648684&amp;usg=AOvVaw3hf2F22uv6tsURihdZEBdX" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21199 - Advancing Compositional LLM Reasoning with Structured Task Relations in Interactive Multimodal Communications</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xinye Cao, Hongcan Guo, Guoshun Nan, Jiaoyang Cui, Haoting Qian, Yihan Lin, Yilin Peng, Diyang Zhang, Yanzhao Hou, Huici Wu, Xiaofeng Tao, Tony Q.S. Quek</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">交互式多模态应用（IMA），例如车联网中的路线规划，通过在无线网络上整合各种形式的数据，丰富了用户的个性化体验。大型语言模型（LLM）的最新进展利用专家混合（MoE）机制来支持多个IMA，其中每个LLM都为呈现不同业务工作流的特定任务进行单独训练。与现有依赖多个LLM进行IMA的方法不同，本文提出了一种新范式，即在无线网络上使用单一组合式LLM完成各种IMA。两个主要挑战包括：1）引导单一LLM适应多样化的IMA目标；2）在资源受限的移动环境中确保LLM的灵活性和效率。为解决第一个挑战，我们提出了ContextLoRA，一种通过构建任务依赖图来引导LLM学习IMA之间丰富结构化上下文的新方法。我们为每个IMA划分神经层的可学习参数矩阵，以促进LLM的组合。然后，我们开发了一个由任务关系指导的逐步微调程序，包括训练、冻结和掩码阶段。这使得LLM能够学习在任务间进行推理以更好地适应，捕捉任务间的潜在依赖关系。为应对第二个挑战，我们引入了ContextGear，一种优化ContextLoRA训练过程的调度策略，旨在通过战略性分组机制最小化计算和通信成本。在三个基准测试上的实验显示了所提出的ContextLoRA和ContextGear的优越性。此外，我们在真实世界的无线测试平台上对我们提出的范式进行了原型验证，证明了其在各种IMA中的实际适用性。我们将向社区发布我们的代码。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21199&amp;sa=D&amp;source=editors&amp;ust=1753881387648595&amp;usg=AOvVaw2FIzh4zKv7hpL3ULt5UA3F" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过子概念探测揭示大语言模型中有害性的几何结构</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21141&amp;sa=D&amp;source=editors&amp;ust=1753881387607224&amp;usg=AOvVaw01bXHNjXHB0kTpIS17Jhz-" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21141 - The Geometry of Harmfulness in LLMs through Subconcept Probing</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">McNair Shah, Saleena Angeline, Adhitya Rajendra Kumar, Naitik Chheda, Kevin Zhu, Vasu Sharma, Sean O'Brien, Will Cai</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）的最新进展加剧了理解并可靠地遏制其有害行为的需求。我们引入了一个多维框架，用于探测和引导模型内部的有害内容。针对55个不同的有害性子概念（例如，种族仇恨、就业诈骗、武器），我们学习一个线性探针，从而在激活空间中得到55个可解释的方向。这些方向共同构成了一个有害性子空间，我们证明该子空间具有惊人的低秩特性。然后，我们测试了从模型内部消融整个子空间，以及在该子空间的主导方向上进行引导和消融的效果。我们发现，主导方向引导可以几乎消除有害性，而效用下降很小。我们的发现推进了新兴的观点，即概念子空间为LLM行为提供了可扩展的视角，并为社区审核和加固未来几代语言模型提供了实用工具。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21141&amp;sa=D&amp;source=editors&amp;ust=1753881387607164&amp;usg=AOvVaw3GnPJrwIlWVN3_MWLZqBdU" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>模型量化与高效推理</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">压缩技术在医疗领域对大型多模态语言模型的影响</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21976&amp;sa=D&amp;source=editors&amp;ust=1753881387584396&amp;usg=AOvVaw0kD_74d4FzPicKPpJIYFyl" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21976 - The Effect of Compression Techniques on Large Multimodal Language Models in the Medical Domain</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tanvir Ahmed Khan, Aranya Saha, Ismam Nur Swapnil, Mohammad Ariful Haque</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">多模态大型语言模型（MLLMs）在医疗领域具有巨大的应用潜力，但其高昂的计算成本使得高效的压缩技术变得至关重要。本文评估了结构化剪枝和激活感知量化对一个为医疗应用微调的LLAVA模型的影响。我们提出了一种新颖的剪枝层选择方法，分析了不同的量化技术，并评估了“剪枝-监督微调-量化”流程中的性能权衡。我们提出的方法使得具有70亿参数的MLLM能够在4GB的显存内运行，内存使用量减少了70%，同时在相同的压缩比下，模型性能比传统剪枝和量化技术高出4%。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21976&amp;sa=D&amp;source=editors&amp;ust=1753881387584316&amp;usg=AOvVaw3EmXXimwpA7VOqJB9YoULl" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过混合类别提示增强无数据量化的泛化能力</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21947&amp;sa=D&amp;source=editors&amp;ust=1753881387617897&amp;usg=AOvVaw1o_U6ULA2gTQZk22RWMTRO" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21947 - Enhancing Generalization in Data-free Quantization via Mixup-class Prompting</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Jiwoong Park, Chaeun Lee, Yongseok Choi, Sein Park, Deokki Hong, Jungwook Choi</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">训练后量化（PTQ）提高了效率，但在校准数据有限的情况下表现不佳，尤其是在隐私限制下。无数据量化（DFQ）通过使用生成对抗网络（GAN）和文本条件的潜在扩散模型（LDM）等生成模型合成图像，并应用现有的PTQ算法来缓解这一问题。然而，生成的合成图像与PTQ过程中量化模型的泛化能力之间的关系尚未得到充分探讨。在未研究这种关系的情况下，先前基于单类别提示的提示工程方法生成的合成图像存在多义性等问题，导致性能下降。我们提出了 **混合类别提示（mixup-class prompt）**，一种基于mixup的文本提示策略，它在文本提示层面融合多个类别标签，以生成多样化、鲁棒的合成数据。这种方法增强了泛化能力，并提高了PTQ中的优化稳定性。我们通过梯度范数和泛化误差分析提供了量化见解。在卷积神经网络（CNN）和视觉变换器（ViT）上的实验表明，我们的方法持续优于现有的DFQ方法（如GenQ）。此外，它在极低比特场景中推动了性能边界，在具有挑战性的2比特权重、4比特激活（W2A4）量化中实现了新的最先进准确率。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21947&amp;sa=D&amp;source=editors&amp;ust=1753881387617799&amp;usg=AOvVaw2oTdyYwbFz91nnomMG_GWR" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MemShare: 通过KV缓存重用实现大型推理模型的高效内存推理</div>
+                                <div><a href="https://www.google.com/url?q=https://arxiv.org/pdf/2507.21433&amp;sa=D&amp;source=editors&amp;ust=1753881387640213&amp;usg=AOvVaw2jJjWXeKzY47beT_KILpoe" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.21433 - MemShare: Memory Efficient Inference for Large Reasoning Models through KV Cache Reuse</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Kaiwen Chen, Xin Tan, Minchen Yu, Hong Xu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型推理模型（LRM）在数学推理和形式逻辑任务中取得了显著进展。然而，它们生成冗长思维链序列的倾向导致推理过程中巨大的内存开销。我们观察到，LRM 经常产生高度相似的中间推理步骤，这对应于各层之间相似的 KV 缓存状态。受此观察启发，我们提出了 MemShare，一种新颖的 KV 缓存管理方法，能有效减少内存开销。MemShare 采用协同过滤算法高效识别可重用的 KV 缓存块，并实现零拷贝缓存重用，从而显著减少内存开销，提高吞吐量，同时保持准确性。实验结果表明，与现有的 KV 缓存管理方法相比，MemShare 的吞吐量提高了高达 84.79%，同时保持了更高的准确性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://www.google.com/url?q=https://arxiv.org/abs/2507.21433&amp;sa=D&amp;source=editors&amp;ust=1753881387640100&amp;usg=AOvVaw0rNrSP2WsaFRLkrmbPQ45w" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
