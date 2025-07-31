@@ -1,0 +1,618 @@
+
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>学术速递 - 2025-07-31</title>
+                    <style>
+        /* --- General & Layout --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Arial", sans-serif; line-height: 1.6; color: #333; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        /* --- Config Panel --- */
+        .config-panel { background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .config-panel h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .toggle-header { cursor: pointer; user-select: none; }
+        .toggle-header::after { content: ' (点击展开/折叠)'; font-size: 0.75em; color: #6c757d; font-weight: normal; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #495057; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group input[type="date"], .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            display: inline-block; padding: 12px 20px; font-size: 1rem; font-weight: bold; text-align: center; color: #fff;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #0056b3; }
+        .btn-download { background-color: #28a745; margin-left: 10px; display: none; }
+        .btn-download:hover { background-color: #218838; }
+
+        /* --- Custom Calendar --- */
+        .calendar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-input {
+            cursor: pointer;
+            background-color: white;
+            user-select: none;
+        }
+        .calendar-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .calendar-input::-webkit-inner-spin-button,
+        .calendar-input::-webkit-clear-button {
+            display: none;
+        }
+        .calendar-widget {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+            display: none;
+            width: 280px;
+        }
+        .calendar-widget.show {
+            display: block;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            color: #007bff;
+        }
+        .calendar-nav:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .calendar-month-year {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #6c757d;
+            padding: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-day.has-report {
+            font-weight: bold;
+        }
+        .calendar-day.has-report::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        .calendar-day.selected.has-report::after {
+            background-color: white;
+        }
+        .calendar-day.today {
+            border: 2px solid #007bff;
+        }
+
+        /* --- Mobile Responsive Calendar --- */
+        @media (max-width: 768px) {
+            .calendar-widget {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            .calendar-day {
+                padding: 10px 6px;
+                font-size: 0.95em;
+            }
+            .calendar-nav {
+                padding: 8px 12px;
+                font-size: 1.4em;
+            }
+            .calendar-day-header {
+                font-size: 0.9em;
+                padding: 8px 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-widget {
+                width: calc(100vw - 20px);
+                padding: 8px;
+            }
+            .calendar-days {
+                gap: 1px;
+            }
+            .calendar-day {
+                padding: 8px 4px;
+            }
+        }
+
+        /* Ensure date input doesn't zoom on mobile */
+        input[type="date"] {
+            font-size: 16px;
+        }
+
+        /* --- Report Display --- */
+        #report-container h1, #report-container h2 { color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        #report-container h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #f2f2f2; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .paper-title-row { cursor: pointer; transition: background-color 0.2s; }
+        .paper-title-row:hover { background-color: #e9ecef; }
+        .paper-title-row.expanded { background-color: #e2e6ea; }
+        .paper-title { font-weight: bold; }
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+        .details-cell { padding: 20px 25px !important; background-color: #f8f9fa; border-left: 3px solid #007bff; }
+        .authors { font-style: italic; color: #555; margin-top: 8px; display: block; }
+        .abstract { margin-top: 10px; }
+        #status { text-align: center; font-size: 1.1em; padding: 20px; background-color: #e9ecef; border-radius: 5px; margin-top: 20px; display: none; }
+    </style>
+                </head>
+                <body>
+                    <div id="report-container-wrapper">
+                <div class="container" id="report-container">
+                    <h1>今日学术速递 (2025-07-31)</h1>
+                    <p id="intro">为您找到日期 2025-07-31 的数据。论文已为您整理成以下 4 个主题。点击论文标题可展开查看摘要。</p>
+                    <div id="clusters-content">
+                    <section>
+                        <h2>强化学习与智能体 (Reinforcement Learning and Agents)</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">RLVMR：通过可验证的元推理奖励进行强化学习，以构建鲁棒的长时程智能体</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22844" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22844 - RLVMR: Reinforcement Learning with Verifiable Meta-Reasoning Rewards for Robust Long-Horizon Agents</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Zijing Zhang, Ziyang Chen, Mingxiao Li, Zhaopeng Tu, Xiaolong Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">开发用于复杂、长时程任务的自主智能体是人工智能的核心目标。然而，主流的训练范式面临一个关键限制：仅为最终任务成功而优化的强化学习（RL）方法常常会强化有缺陷或低效的推理路径，我们称之为“低效探索”问题。这导致智能体变得脆弱且难以泛化，因为它们学会了寻找解决方案，却没有学会如何连贯地推理。为了解决这个问题，我们引入了RLVMR，一个新颖的框架，通过奖励可验证的元推理行为，将密集的、过程级别的监督整合到端到端的强化学习中。RLVMR使智能体能够明确标记其认知步骤，如规划、探索和反思，并为有助于有效解决问题的行为提供基于规则的程序化奖励。这些以过程为中心的奖励与最终结果信号相结合，并使用无评论家的策略梯度方法进行优化。在具有挑战性的ALFWorld和ScienceWorld基准测试中，RLVMR取得了新的SOTA结果，我们的7B模型在最困难的未见任务分割上达到了83.6%的成功率。我们的分析证实，这些增益源于推理质量的提高，包括冗余动作的显著减少和错误恢复能力的增强，从而产生了更鲁棒、高效和可解释的智能体。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22844" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">VL-Cogito：用于高级多模态推理的渐进式课程强化学习</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22607" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22607 - VL-Cogito: Progressive Curriculum Reinforcement Learning for Advanced Multimodal Reasoning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Ruifeng Yuan, Chenghao Xiao, Sicong Leng, Jianyu Wang, Long Li, Weiwen Xu, Hou Pong Chan, Deli Zhao, Tingyang Xu, Zhongyu Wei, Hao Zhang, Yu Rong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">强化学习已被证明在增强大型语言模型的推理能力方面行之有效。近期的研究工作已将此范式逐步扩展到多模态推理任务。由于多模态任务固有的复杂性和多样性，特别是在语义内容和问题表述方面，现有模型在不同领域和难度级别上的表现常常不稳定。为解决这些局限性，我们提出了VL-Cogito，一个通过新颖的多阶段渐进式课程强化学习（PCuRL）框架训练的高级多模态推理模型。PCuRL系统地引导模型完成难度递增的任务，从而显著提高其在各种多模态情境下的推理能力。该框架引入了两项关键创新：（1）在线难度软加权机制，在连续的强化学习训练阶段动态调整训练难度；（2）动态长度奖励机制，鼓励模型根据任务复杂性自适应地调节其推理路径长度，从而平衡推理效率与正确性。实验评估表明，VL-Cogito在涵盖数学、科学、逻辑和常识理解的主流多模态基准测试中，始终达到或超过现有以推理为导向的模型，验证了我们方法的有效性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22607" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">通过强化学习实现大语言模型的高效差分隐私微调</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22565" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22565 - Efficient Differentially Private Fine-Tuning of LLMs via Reinforcement Learning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Afshin Khadangi, Amir Sartipi, Igor Tchappi, Ramin Bahmani, Gilbert Fridgen</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">数据隐私与模型效用之间的紧张关系已成为在敏感语料库（包括医疗保健）上训练的大型语言模型（LLM）实际部署的决定性瓶颈。差分隐私随机梯度下降（DP-SGD）保证了形式化的隐私，但其代价是显著的：梯度被强制裁剪并用噪声扰动，降低了样本效率和最终准确性。已经提出了许多变体来缓和这种权衡，但它们都有一个共同的缺陷：它们的控制旋钮是硬编码的、全局的，并且对不断变化的优化环境无动于衷。因此，从业者被迫要么为了追求效用而过度花费隐私预算，要么为了保持在隐私限制内而接受平庸的模型。我们提出了RLDP，这是第一个将DP优化本身构建为一个适用于现代深度强化学习（RL）的闭环控制问题的框架。RLDP持续感知学习动态的丰富统计信息，并通过选择细粒度的每个参数的梯度裁剪阈值以及注入的高斯噪声的大小来采取行动。一个软演员-评论家（SAC）超策略在语言模型微调期间在线训练；它从头开始学习如何以及何时将隐私预算分配到最重要的地方。在对GPT2-small、Llama-1B、Llama-3B和Mistral-7B进行的1600多个消融实验中，RLDP实现了1.3-30.5%（平均5.4%）的困惑度降低和平均5.6%的下游效用增益。RLDP仅用13-43%的梯度更新预算（平均加速71%）就达到了每个基线的最终效用，同时遵守相同的（ε，δ）-DP合同，并表现出相等或更低的成员推断和金丝雀提取攻击的易感性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22565" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">一点自由大有裨益：生成模型下的强化学习经典与量子算法</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22854" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22854 - A Bit of Freedom Goes a Long Way: Classical and Quantum Algorithms for Reinforcement Learning under a Generative Model</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Andris Ambainis, Joao F. Doriguello, Debbie Lim</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">我们提出了新颖的经典和量子在线算法，用于学习有限期和无限期平均奖励马尔可夫决策过程（MDP）。我们的算法基于一种混合探索-生成强化学习（RL）模型，其中智能体可以不时地以生成式采样的方式自由与环境互动，即通过访问“模拟器”。通过在我们的学习算法中采用已知的经典算法和新的量子算法来近似生成模型下的最优策略，我们表明可以避免RL中的几种范式，如“面对不确定性时的乐观主义”和“后验采样”，而是直接计算和使用最优策略，这比以前的工作产生了更好的遗憾界。对于有限期MDP，我们的量子算法获得的遗憾界仅对时间步数T呈对数依赖，从而打破了O(√T)的经典障碍。这与Ganguly等人（arXiv'23）和Zhong等人（ICML'24）的先前量子工作的时间依赖性相匹配，但在其他参数（如状态空间大小S和动作空间大小A）上具有改进的依赖性。对于无限期MDP，我们的经典和量子界仍然保持O(√T)的依赖性，但具有更好的S和A因子。尽管如此，我们为无限期MDP提出了一种新的遗憾度量，相对于该度量，我们的量子算法具有poly(log(T))的遗憾，与经典算法相比呈指数级优化。最后，我们将所有结果推广到紧凑状态空间。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22854" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">使用基于注意力的Actor-Critic策略增强多智能体协作</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22782" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22782 - Enhancing Multi-Agent Collaboration with Attention-Based Actor-Critic Policies</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Hugo Garrido-Lestache, Jeremy Kedziora</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">本文介绍了团队注意力行动者-评论家（TAAC），一种旨在增强合作环境中多智能体协作的强化学习算法。TAAC采用集中式训练/集中式执行方案，在行动者和评论家中均融入了多头注意力机制。这种设计促进了动态的智能体间通信，允许智能体明确地查询队友，从而有效地管理联合行动空间的指数级增长，同时确保高度的协作。我们进一步引入了一个惩罚损失函数，以促进智能体之间多样化而又互补的角色。我们在模拟足球环境中评估了TAAC，并将其与代表其他多智能体范式的基准算法进行了比较，包括近端策略优化（PPO）和多智能体行动者-注意力-评论家。我们发现TAAC在多种指标（胜率、净胜球、Elo评分、智能体间连接性、平衡的空间分布以及频繁的战术互动如控球权交换）上表现出优越的性能和增强的协作行为。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22782" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">G-Core：一个简单、可扩展且均衡的RLHF训练器</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22789" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22789 - G-Core: A Simple, Scalable and Balanced RLHF Trainer</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Junyu Wu, Weiming Chang, Xiaotao Liu, Guanyou He, Haoqiang Hong, Boqi Liu, Hongtao Tian, Tao Yang, Yunsheng Shi, Feng Lin, Ting Yao</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">基于人类反馈的强化学习（RLHF）已成为训练大型语言模型（LLM）和扩散模型的日益流行的范式。虽然现有的RLHF训练系统已取得显著进展，但它们在扩展到多模态和扩散工作流以及适应动态工作负载方面常常面临挑战。特别是在处理复杂的RLHF流水线时，尤其是在涉及动态采样或生成式奖励建模的场景中，当前方法可能会遇到控制器可扩展性、灵活资源放置和高效编排方面的限制。在本文中，我们提出了\textbf{G-Core}，一个简单、可扩展且均衡的RLHF训练框架，旨在解决这些挑战。G-Core引入了并行控制器编程模型，实现了复杂RLHF工作流的灵活高效编排，避免了单一集中式控制器的瓶颈。此外，我们提出了一种动态放置方案，该方案自适应地划分资源和调度工作负载，即使在高度可变的训练条件下，也能显著减少硬件空闲时间并提高利用率。G-Core已成功训练出支持大规模用户群微信产品功能的模型，展示了其在真实世界场景中的有效性和鲁棒性。我们的结果表明，G-Core推动了RLHF训练的SOTA水平，为未来大规模、与人类对齐模型的研究和部署提供了坚实的基础。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22789" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>多模态生成与理解 (Multimodal Generation and Understanding)</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MoCHA：采用MoE连接器和分层组注意力的先进视觉语言推理</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22805" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22805 - MoCHA: Advanced Vision-Language Reasoning with MoE Connector and Hierarchical Group Attention</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Yuqi Pang, Bowen Yang, Yun Cao, Fan Rong, Xiaoyu Li, Chen He</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视觉大语言模型（VLLM）主要通过集成先进的视觉编码器和扩大视觉模型规模，来处理复杂和细粒度的视觉信息。然而，这些方法面临着高昂的训练和推理成本，以及在有效提取视觉细节、桥接跨模态信息方面的挑战。在这项工作中，我们提出了一个新颖的视觉框架MoCHA来解决这些问题。我们的框架集成了四个视觉骨干（即CLIP、SigLIP、DINOv2和ConvNeXt）以提取互补的视觉特征，并配备了一个稀疏的专家混合连接器（MoEC）模块，以动态选择针对不同视觉维度量身定制的专家。为了减轻MoEC模块编码的视觉信息的冗余或不足使用，我们进一步为编码的视觉特征设计了一个具有组内和组间操作以及自适应门控策略的分层组注意力（HGA）。我们在两个主流LLM（例如Phi2-2.7B和Vicuna-7B）上训练了MoCHA，并在各种基准上评估了它们的性能。值得注意的是，MoCHA在各种任务上都优于最先进的开源权重模型。例如，与CuMo（Mistral-7B）相比，我们的MoCHA（Phi2-2.7B）在POPE上提升了3.25%，表现出卓越的减轻幻觉能力，并在MME上提升了153分，展示了其遵循视觉指令的能力。最后，消融研究进一步证实了所提出的MoEC和HGA在提高MoCHA整体性能方面的有效性和鲁棒性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22805" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">时尚风潮！通过草图-文本配对实现多条件图像生成</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22627" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22627 - LOTS of Fashion! Multi-Conditioning for Image Generation via Sketch-Text Pairing</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Federico Girella, Davide Talon, Ziyue Liu, Zanxi Ruan, Yiming Wang, Marco Cristani</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">时尚设计是一个复杂的创作过程，融合了视觉和文本表达。设计师通过草图传达想法，定义空间结构和设计元素，并通过文本描述捕捉材料、纹理和风格细节。在本文中，我们提出了LOTS（LOcalized Text and Sketch for fashion image generation），一种基于草图-文本组合生成完整时尚造型的方法。LOTS利用全局描述与配对的局部化草图+文本信息进行条件控制，并引入了一种新颖的基于步骤的合并策略用于扩散模型自适应。首先，一个模块化的以配对为中心的表示法将草图和文本编码到一个共享的潜在空间中，同时保留独立的局部化特征；然后，一个扩散配对引导阶段通过在扩散模型的多步去噪过程中基于注意力的引导，整合局部和全局条件。为了验证我们的方法，我们在Fashionpedia的基础上发布了Sketchy，这是第一个为每张图片提供多个文本-草图配对的时尚数据集。定量结果显示，LOTS在全局和局部化指标上均达到了SOTA的图像生成性能，而定性示例和人类评估研究则突显了其前所未有的设计定制水平。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22627" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">面向盲比特流损坏视频恢复的视觉基础模型驱动框架</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22481" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22481 - Towards Blind Bitstream-corrupted Video Recovery via a Visual Foundation Model-driven Framework</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Tianyi Liu, Kejun Wu, Chen Cai, Yi Wang, Kim-Hui Yap, Lap-Pui Chau</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">在多媒体通信和存储系统中，视频信号是脆弱的，因为即使是轻微的比特流域损坏也可能导致显著的像素域退化。为了从损坏的输入中恢复忠实的时空内容，比特流损坏视频恢复最近已成为一个具有挑战性且研究不足的任务。然而，现有方法需要对每个损坏的视频帧进行耗时且劳动密集型的损坏区域标注，导致实际工作量巨大。此外，高质量的恢复仍然很困难，因为损坏帧中的部分局部残差信息可能会误导特征补全和后续内容恢复。在本文中，我们提出了第一个盲比特流损坏视频恢复框架，该框架将视觉基础模型与恢复模型相结合，适用于不同类型的损坏和比特流级别的提示。在该框架内，所提出的“检测任何损坏”（DAC）模型利用了视觉基础模型的丰富先验知识，同时结合了比特流和损坏知识，以增强损坏定位和盲恢复能力。此外，我们引入了一个新颖的“损坏感知特征补全”（CFC）模块，该模块根据对损坏的高层理解自适应地处理残差贡献。借助VFM引导的分层特征增强和“残差专家混合”（MoRE）结构中的高层协调，我们的方法抑制了伪影并增强了信息性残差。综合评估表明，所提出的方法在比特流损坏视频恢复中取得了出色的性能，而无需手动标记的掩码序列。所展示的有效性将有助于实现更好的用户体验、更广泛的应用场景以及更可靠的多媒体通信和存储系统。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22481" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">将视觉语言模型用作零样本Deepfake检测器</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22469" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22469 - Visual Language Models as Zero-Shot Deepfake Detectors</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Viacheslav Pirogov</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">当代利用GAN或扩散模型进行换脸的deepfake现象，在数字媒体、身份验证和众多其他系统中构成了重大且不断演变的威胁。大多数现有的deepfake检测方法依赖于训练专门的分类器来区分真实和篡改的图像，仅关注图像域，而没有结合任何可以增强鲁棒性的辅助任务。在本文中，受视觉语言模型（VLM）零样本能力的启发，我们提出了一种新颖的基于VLM的图像分类方法，然后评估其在deepfake检测中的应用。具体来说，我们利用了一个包含60,000张图像的新高质量deepfake数据集，我们的零样本模型在该数据集上表现优于几乎所有现有方法。随后，我们在流行的deepfake数据集DFDC-P上，比较了性能最佳的架构InstructBLIP与传统方法在两种场景下的性能：零样本和域内微调。我们的结果证明了VLM相对于传统分类器的优越性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22469" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">GVD：引导视频扩散模型进行可扩展的视频蒸馏</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22360" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22360 - GVD: Guiding Video Diffusion Model for Scalable Video Distillation</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Kunyang Li, Jeffrey A Chan Santiago, Sarinda Dhanesh Samarasinghe, Gaowen Liu, Mubarak Shah</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">为解决与大型视频数据集相关的更大计算和存储需求，视频数据集蒸馏旨在将时空信息捕获到一个显著更小的数据集中，使得在蒸馏数据上训练的性能与在所有数据上训练的性能相当。我们提出了GVD：引导视频扩散，这是第一种基于扩散的视频蒸馏方法。GVD联合蒸馏空间和时间特征，确保在不同动作中生成高保真度视频，同时捕获基本的运动信息。我们的方法具有多样性但代表性的蒸馏结果，在MiniUCF和HMDB51数据集上，对于每个类别5、10和20个实例（IPC）的设置，均显著优于先前的SOTA方法。具体来说，我们的方法在MiniUCF上仅使用总帧数的1.98%就达到了原始数据集性能的78.29%。此外，在HMDB51上仅使用3.30%的帧数就达到了73.83%的性能。在基准视频数据集上的实验结果表明，GVD不仅实现了SOTA的性能，而且还可以在不显著增加计算成本的情况下生成更高分辨率的视频和更高的IPC。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22360" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">Spec-VLA：用于视觉-语言-动作模型的带宽松接受条件的推测解码</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22424" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22424 - Spec-VLA: Speculative Decoding for Vision-Language-Action Models with Relaxed Acceptance</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Songsheng Wang, Rucheng Yu, Zhihang Yuan, Chao Yu, Feng Gao, Yu Wang, Derek F. Wong</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">视觉-语言-动作（VLA）模型通过利用视觉语言模型（VLM）的强大能力取得了显著进展。然而，VLM庞大的参数规模和自回归（AR）解码特性给VLA模型带来了巨大的计算需求。虽然推测解码（SD）通过引入高效的草稿和并行验证，允许在一次前向传播中生成多个令牌，从而在加速大型语言模型（LLM）方面显示出有效性，但其在VLA模型中的应用仍未被探索。本研究介绍了Spec-VLA，一个旨在加速VLA模型的SD框架。由于动作预测任务的难度和VLA模型的贪婪解码机制，直接将先进的SD框架应用于VLA预测任务仅能带来微小的速度提升。为了提高生成速度，我们提出了一种有效的机制，利用VLA模型的动作令牌所代表的相对距离来放宽接受条件。在不同测试场景下的实证结果证实了Spec-VLA框架的有效性，进一步的分析证实了我们所提策略的影响，这些策略将接受长度提高了44%，与OpenVLA基线相比实现了1.42倍的加速，且不影响成功率。Spec-VLA框架的成功凸显了推测执行在VLA预测场景中更广泛应用的的潜力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22424" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>大模型的对齐、安全与遗忘 (LLM Alignment, Safety, and Unlearning)</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">利用协同认知偏见绕过大语言模型的安全机制</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22564" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22564 - Exploiting Synergistic Cognitive Biases to Bypass Safety in LLMs</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xikang Yang, Biyu Zhou, Xuehai Tang, Jizhong Han, Songlin Hu</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）在广泛的任务中展示出令人印象深刻的能力，但其安全机制仍然容易受到利用认知偏见——即系统性地偏离理性判断——的对抗性攻击。与以往专注于提示工程或算法操纵的越狱方法不同，本研究强调了多重偏见交互在破坏LLM安全保障方面被忽视的力量。我们提出了CognitiveAttack，一个新颖的红队测试框架，系统地利用单一和组合的认知偏见。通过整合监督微调和强化学习，CognitiveAttack生成嵌入优化偏见组合的提示，有效绕过安全协议，同时保持高攻击成功率。实验结果揭示了30个不同LLM的显著漏洞，尤其是在开源模型中。与SOTA的黑盒方法PAP相比，CognitiveAttack的攻击成功率要高得多（60.1% vs. 31.6%），暴露了当前防御机制的关键局限性。这些发现突显了多重偏见交互是一种强大但未被充分探索的攻击向量。本研究通过连接认知科学和LLM安全，引入了一个新颖的跨学科视角，为构建更鲁棒和与人类对齐的AI系统铺平了道路。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22564" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">真实表征何时在欺骗性指令下发生翻转？</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22149" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22149 - When Truthful Representations Flip Under Deceptive Instructions?</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xianxuan Long, Yao Fu, Runchao Li, Mu Sheng, Haotian Yu, Xiaotian Han, Pan Li</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">大型语言模型（LLM）倾向于遵循恶意设计的指令生成欺骗性回应，这带来了安全挑战。与真实指令相比，欺骗性指令如何改变LLM的内部表征，除了输出分析之外，我们对此知之甚少。为了弥补这一差距，我们研究了在欺骗性指令与真实/中性指令下，这些表征何时以及如何“翻转”，例如从真实变为欺骗。我们分析了Llama-3.1-8B-Instruct和Gemma-2-9B-Instruct在事实核查任务上的内部表征，发现在所有条件下，模型的指令性真/假输出都可以通过基于内部表征的线性探针进行预测。此外，我们使用稀疏自动编码器（SAE）表明，与真实/中性表征（它们是相似的）相比，欺骗性指令会引起显著的表征转变，这种转变集中在早期到中期的层，并且即使在复杂的数据集上也能被检测到。我们还识别了对欺骗性指令高度敏感的特定SAE特征，并使用靶向可视化来确认不同的真实/欺骗表征子空间。我们的研究揭示了欺骗在特征和层级上的标志，为检测和减轻LLM中的指令性不诚实行为提供了新的见解。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22149" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">LoReUn：数据本身隐式提供线索以改进机器遗忘</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22499" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22499 - LoReUn: Data Itself Implicitly Provides Cues to Improve Machine Unlearning</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Xiang Li, Qianli Shen, Haonan Wang, Kenji Kawaguchi</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">近期的生成模型面临产生有害内容的重大风险，这凸显了机器遗忘（MU）作为一种消除不期望数据影响的关键技术的重要性。然而，现有的MU方法通常对所有要遗忘的数据赋予相同的权重，这使得难以有效遗忘某些比其他数据更难遗忘的数据。在本文中，我们通过实证证明，数据本身的损失可以隐式地反映其不同的难度。基于这一见解，我们引入了基于损失的重加权遗忘（LoReUn），这是一种简单而有效的即插即用策略，它在遗忘过程中动态地对数据进行重加权，且计算开销极小。我们的方法显著缩小了现有MU方法与精确遗忘在图像分类和生成任务中的差距，有效增强了在文本到图像扩散模型中防止有害内容生成的能力。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22499" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">量子启发的音频遗忘：迈向保护隐私的语音生物识别</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22208" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22208 - Quantum-Inspired Audio Unlearning: Towards Privacy-Preserving Voice Biometrics</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Shreyansh Pathak, Sonu Shreshtha, Richa Singh, Mayank Vatsa</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">支持语音的身份验证和音频生物识别系统的广泛采用，极大地增加了与敏感语音数据相关的隐私漏洞。遵守如GDPR的“被遗忘权”和印度的DPDP法案等隐私法规，要求从已训练的生物识别模型中定向且高效地擦除特定个体的语音签名。现有的为视觉数据设计的遗忘方法不足以处理音频信号的序列性、时序性和高维性，导致说话人和口音的擦除效果不佳或不完整。为解决此问题，我们引入了QPAudioEraser，一个量子启发的音频遗忘框架。我们的四阶段方法包括：（1）使用相消干涉进行权重初始化以消除目标特征，（2）基于叠加的标签变换以模糊类别身份，（3）一个最大化不确定性的量子损失函数，以及（4）受纠缠启发的混合相关权重以保留模型知识。在AudioMNIST、Speech Commands、LibriSpeech和Speech Accent Archive数据集上使用ResNet18、ViT和CNN架构进行的全面评估，验证了QPAudioEraser的卓越性能。该框架实现了目标数据的完全擦除（遗忘准确率为0%），同时对模型效用的影响极小，保留数据上的性能下降低至0.05%。在单类别、多类别、序列和口音级别的擦除场景中，QPAudioEraser始终优于传统基线，确立了所提出方法作为一种鲁棒的隐私保护解决方案。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22208" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section>
+                        <h2>生成模型与前沿应用 (Generative Models and Frontier Applications)</h2>
+                        <table>
+                            <thead><tr><th>论文 (Paper)</th></tr></thead>
+                            <tbody>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">用于文本语音对齐的自适应时长模型</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22612" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22612 - Adaptive Duration Model for Text Speech Alignment</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Junjie Cao</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">语音到文本的对齐是神经文本到语音（TTS）模型的关键组成部分。自回归TTS模型通常使用注意力机制在线学习这些对齐。然而，这些对齐往往很脆弱，常常无法泛化到长话语和领域外文本，导致漏词或重复词。大多数非自回归的端到端TTS模型依赖于从外部来源提取的时长，并使用额外的时长模型进行对齐。在本文中，我们提出了一个新颖的时长预测框架，该框架可以根据给定的文本提供折衷的音素级时长分布。在我们的实验中，与之前的基线模型相比，所提出的时长模型具有更精确的预测和条件适应能力。在数值上，它在对齐准确性上大约有11.3%的提升，并使零样本TTS模型的性能对提示音频和输入音频之间的不匹配更加鲁棒。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22612" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">MINR：结合掩码图像建模的隐式神经表示</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22404" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22404 - MINR: Implicit Neural Representations with Masked Image Modelling</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Sua Lee, Joonhun Lee, Myungjoo Kang</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">像掩码自编码器（MAE）这样的自监督学习方法在学习鲁棒的特征表示方面显示出巨大的潜力，特别是在基于图像重建的预训练任务中。然而，它们的性能通常强烈依赖于训练期间使用的掩码策略，并且在应用于分布外数据时可能会下降。为了解决这些限制，我们引入了掩码隐式神经表示（MINR）框架，该框架将隐式神经表示与掩码图像建模相结合。MINR学习一个连续函数来表示图像，从而能够实现更鲁棒和更具泛化性的重建，而不管掩码策略如何。我们的实验表明，MINR不仅在域内场景中优于MAE，而且在分布外设置中也表现更佳，同时降低了模型复杂性。MINR的多功能性扩展到各种自监督学习应用，证实了其作为现有框架的鲁棒且高效的替代方案的实用性。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22404" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">基于物理约束生成式机器学习的格陵兰地表物质平衡和地表温度高分辨率降尺度</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22485" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22485 - Physics-constrained generative machine learning-based high-resolution downscaling of Greenland's surface mass balance and surface temperature</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Nils Bochow, Philipp Hess, Alexander Robinson</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">准确、高分辨率的格陵兰冰盖地表物质平衡（SMB）和地表温度预测对于理解未来海平面上升至关重要，然而当前方法要么计算量巨大，要么仅限于粗糙的空间尺度。在此，我们引入一种基于一致性模型（CM）的新型物理约束生成建模框架，以在几个采样步骤内将低分辨率SMB和地表温度场的分辨率提高多达32倍（从160公里到5公里网格间距）。该CM在区域气候模型MARv3.12的月度输出上进行训练，并以冰盖地形和日照为条件。通过在推理过程中强制执行硬性守恒约束，我们确保在粗糙空间尺度上近似保留SMB和温度总和，并确保对极端气候状态的鲁棒泛化，无需重新训练。在测试集上，我们约束的CM对SMB的连续排序概率得分为6.31 mmWE，对地表温度为0.1 K，优于基于插值的降尺度方法。结合空间功率谱分析，我们证明了CM忠实地再现了跨空间尺度的可变性。我们进一步应用NorESM2地球系统模型的偏差校正输出作为我们CM的输入，以展示我们模型直接降尺度ESM场的潜力。我们的方法为冰盖模拟提供了真实、高分辨率的气候强迫，具有快速推理能力，并可轻松集成到地球系统和冰盖模型工作流中，以改进对格陵兰以及可能其他冰盖和冰川未来对海平面上升贡献的预测。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22485" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="paper-title-row">
+                            <td>
+                                <div class="paper-title">SAEL：利用大语言模型和自适应专家混合网络进行智能合约漏洞检测</div>
+                                <div><a href="https://arxiv.org/pdf/2507.22371" target="_blank" onclick="event.stopPropagation();" title="Download PDF">arXiv:2507.22371 - SAEL: Leveraging Large Language Models with Adaptive Mixture-of-Experts for Smart Contract Vulnerability Detection</a></div>
+                            </td>
+                        </tr>
+                        <tr class="details-row">
+                            <td class="details-cell">
+                                <strong>作者 (Authors):</strong>
+                                <div class="authors">Lei Yu, Shiqi Cheng, Zhirong Huang, Jingyuan Zhang, Chenjie Shen, Junyi Lu, Li Yang, Fengjun Zhang, Jiajia Ma</div>
+                                <strong style="margin-top:10px; display:block;">摘要 (Abstract):</strong>
+                                <div class="abstract">随着区块链安全问题的日益增多，智能合约漏洞检测已成为研究热点。现有的漏洞检测方法各有其局限性：1) 静态分析方法难以处理复杂场景。2) 基于专用预训练模型的方法在特定数据集上表现良好，但泛化能力有限。相比之下，通用大型语言模型（LLM）在适应新漏洞模式方面表现出令人印象深刻的能力。然而，与基于专用预训练模型的方法相比，它们在特定漏洞类型上的表现通常较差。我们还观察到，通用LLM生成的解释可以提供细粒度的代码理解信息，有助于提高检测性能。受这些观察的启发，我们提出了SAEL，一个基于LLM的智能合约漏洞检测框架。我们首先设计有针对性的提示来指导LLM识别漏洞并生成解释，这些解释作为预测特征。接下来，我们对CodeT5和T5应用提示调整，以处理合约代码和解释，增强任务特定性能。为了结合各种方法的优势，我们引入了一个自适应专家混合（Adaptive Mixture-of-Experts）架构。该架构通过一个门控网络动态调整特征权重，该网络使用TopK过滤和Softmax归一化选择相关特征，并结合多头自注意力机制来增强跨特征关系。这种设计通过梯度优化实现了LLM预测、解释特征和代码特征的有效集成。损失函数共同考虑了独立特征性能和整体加权预测。实验表明，SAEL在各种漏洞上的表现均优于现有方法。</div>
+                                <div style="margin-top: 15px;">
+                                    <a href="https://arxiv.org/abs/2507.22371" target="_blank">查看摘要页面 (Abs Page)</a>
+                                    <a href="javascript:void(0);" class="collapse-btn" style="margin-left: 20px;">折叠 (Collapse)</a>
+                                </div>
+                            </td>
+                        </tr>
+                            </tbody>
+                        </table>
+                    </section></div></div></div>
+                    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.paper-title-row').forEach(titleRow => {
+                const detailsRow = titleRow.nextElementSibling;
+                if (detailsRow) {
+                    titleRow.addEventListener('click', () => {
+                        titleRow.classList.toggle('expanded');
+                        detailsRow.classList.toggle('show');
+                    });
+                    const collapseBtn = detailsRow.querySelector('.collapse-btn');
+                    if (collapseBtn) {
+                        collapseBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            titleRow.classList.remove('expanded');
+                            detailsRow.classList.remove('show');
+                        });
+                    }
+                }
+            });
+        });</script>
+                </body>
+                </html>
