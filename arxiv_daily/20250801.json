@@ -1,224 +1,214 @@
 {
   "papers": [
     {
-      "id": "arXiv:2508.00782",
-      "title": "SpA2V: Harnessing Spatial Auditory Cues for Audio-driven Spatially-aware Video Generation",
-      "chinese_title": "SpA2V：利用空间听觉线索生成音频驱动的空间感知视频",
-      "authors": "Kien T. Pham, Yingqing He, Yazhou Xing, Qifeng Chen, Long Chen",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00782&sa=D&source=editors&ust=1754360525002754&usg=AOvVaw3BNaSd5kk4GkwzON2SQ8-Z",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00782&sa=D&source=editors&ust=1754360525002785&usg=AOvVaw2tdsQ9PsNIleU8F60RUd5C",
-      "chinese_abstract": "音频驱动的视频生成旨在合成与输入录音相符的逼真视频，这类似于人类通过听觉输入想象场景的能力。然而，现有方法主要侧重于探索语义信息，例如音频中存在的声源类别，这限制了它们生成具有准确内容和空间构图的视频的能力。相比之下，我们人不仅能自然地识别声源的语义类别，还能确定其深度编码的空间属性，包括位置和运动方向。这些有用的信息可以通过考虑声音固有物理特性（如响度或频率）衍生的特定空间指标来阐明。由于先前的方法很大程度上忽略了这一因素，我们提出了 SpA2V，这是第一个明确利用音频中的空间听觉线索来生成具有高语义和空间对应性视频的框架。SpA2V 将生成过程分解为两个阶段：1) 音频引导的视频规划：我们精心调整了一个最先进的多模态大语言模型（MLLM），用于一项新任务，即利用输入音频的空间和语义线索构建视频场景布局（VSL）。这作为一种中间表示，以弥合音频和视频模态之间的差距。2) 基于布局的视频生成：我们开发了一种高效且有效的方法，将 VSLs 作为条件引导无缝集成到预训练的扩散模型中，以免训练的方式实现基于 VSL 的视频生成。广泛的实验表明，SpA2V 在生成与输入音频在语义和空间上对齐的逼真视频方面表现出色。"
+      "id": "arXiv:2507.23704",
+      "title": "Enhanced Velocity Field Modeling for Gaussian Video Reconstruction",
+      "chinese_title": "用于高斯视频重建的增强速度场建模",
+      "authors": "Zhenyang Li, Xiaoyang Bai, Tongchen Zhang, Pengfei Shen, Weiwei Xu, Yifan Peng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23704&sa=D&source=editors&ust=1754364653392474&usg=AOvVaw3ed0bxXot9FsPXhvMLV0OO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23704&sa=D&source=editors&ust=1754364653392560&usg=AOvVaw29yKVtBzx7f6wBO23EvM5R",
+      "chinese_abstract": "摘要：高保真三维视频重建对于在虚拟和增强现实（VR/AR）中实现具有逼真运动的动态场景的实时渲染至关重要。3D高斯溅射的形变场范式因其深度形变网络强大的表示能力，在视频重建中已取得近乎照片般真实的效果。然而，在具有复杂运动和显著尺度变化的视频中，形变网络常对不规则的高斯轨迹过拟合，导致视觉质量不佳。此外，为静态场景重建设计的基于梯度的致密化策略不足以解决动态内容缺失的问题。鉴于这些挑战，我们提出了一种专为高斯视频重建量身定制的、由光流赋能的速度场建模方案，名为FlowGaussian-VR。它包含两个核心组件：一个支持基于光流优化的速度场渲染（VFR）管线，以及一个在动态区域调整高斯函数数量和大小的流辅助自适应致密化（FAD）策略。我们在包含挑战性运动场景的多个真实世界数据集上验证了我们模型在多视图动态重建和新视角合成方面的有效性，结果不仅显示了显著的视觉改进（PSNR增益超过2.5 dB）和动态纹理中更少的模糊伪影，还展示了正则化且可追踪的逐高斯轨迹。"
     },
     {
-      "id": "arXiv:2508.00701",
-      "title": "D3: Training-Free AI-Generated Video Detection Using Second-Order Features",
-      "chinese_title": "D3：使用二阶特征的免训练AI生成视频检测",
-      "authors": "Chende Zheng, Ruiqi suo, Chenhao Lin, Zhengyu Zhao, Le Yang, Shuai Liu, Minghui Yang, Cong Wang, Chao Shen",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00701&sa=D&source=editors&ust=1754360525006273&usg=AOvVaw2Ue9YC3UDUWgr8y-fJ5qqf",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00701&sa=D&source=editors&ust=1754360525006301&usg=AOvVaw3htcVSdaBJe0BMkXhFYzFX",
-      "chinese_abstract": "以Sora为代表的视频生成技术的演进，使得制作高保真AI生成视频变得越来越容易，引发了公众对合成内容传播的担忧。然而，现有的检测方法因对合成视频中时间伪影的探索不足而受到限制。为了弥合这一差距，我们通过牛顿力学下的二阶动力学分析建立了一个理论框架，随后扩展了专为时间伪影检测定制的二阶中心差分特征。基于这一理论基础，我们揭示了真实视频与AI生成视频在二阶特征分布上的根本差异。具体而言，我们提出了“差分之差检测”（D3），这是一种新颖的免训练检测方法，它利用了上述二阶时间差异。我们在4个开源数据集（Gen-Video, VideoPhy, EvalCrafter, VidProM）共40个子集上验证了我们D3方法的优越性。例如，在GenVideo上，D3的平均精度（mean Average Precision）比之前的最佳方法高出10.39%（绝对值）。关于时间成本和后处理操作的额外实验证明了D3卓越的计算效率和强大的鲁棒性能。我们的代码已在 https://github.com/Kuro-sudo/D3-Training-Free-AI-Generated-Video-Detection-Using-Second-Order-Features 上提供。"
+      "id": "arXiv:2507.23773",
+      "title": "SimuRA: Towards General Goal-Oriented Agent via Simulative Reasoning Architecture with LLM-Based World Model",
+      "chinese_title": "SimuRA：通过基于LLM世界模型的模拟推理架构实现通用目标导向智能体",
+      "authors": "Mingkai Deng, Jinyu Hou, Yilin Shen, Hongxia Jin, Graham Neubig, Zhiting Hu, Eric Xing",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23773&sa=D&source=editors&ust=1754364653378423&usg=AOvVaw1YmLfOCOsazitrGYk8YeCN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23773&sa=D&source=editors&ust=1754364653378644&usg=AOvVaw2LfzXFWfauxyqdv1tSW2dD",
+      "chinese_abstract": "摘要：基于大型语言模型（LLMs）构建的AI智能体前景广阔，但当前实践侧重于“一个任务一个智能体”的方法，这不仅在可扩展性和通用性上有所欠缺，还受到自回归LLM的根本限制。另一方面，人类是通用智能体，通过心智模拟其行动和计划的结果进行推理。为了迈向更通用、更强大的AI智能体，我们引入了SimuRA，一个用于通用智能体推的目标导向架构。基于对任何环境中优化智能体的原则性表述，SimuRA通过引入一个用于模拟规划的世界模型，克服了自回归推理的局限性。该通用世界模型使用LLM实现，能够利用自然语言概念丰富的潜在空间，在广泛的环境中进行灵活规划。在困难的网页浏览任务上的实验表明，SimuRA将航班搜索的成功率从0%提高到32.2%。特别是，基于世界模型的规划比自回归规划表现出高达124%的持续优势，证明了世界模型模拟作为一种推理范式的优越性。我们对基于LLM训练单个通用智能体模型，使其能在所有环境中表现出超智能的可能性感到兴奋。作为开端，我们将基于SimuRA和预训练LLM构建的网页浏览智能体作为研究演示，供公众测试。"
     },
     {
-      "id": "arXiv:2508.00632",
-      "title": "Multi-Agent Game Generation and Evaluation via Audio-Visual Recordings",
-      "chinese_title": "通过音视频记录进行多智能体游戏生成与评估",
-      "authors": "Alexia Jolicoeur-Martineau",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00632&sa=D&source=editors&ust=1754360524997736&usg=AOvVaw0dLOcUqbxLVLv-KOQcssHv",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00632&sa=D&source=editors&ust=1754360524997767&usg=AOvVaw01XDDUG6MqDFMnBPlXg3oC",
-      "chinese_abstract": "尽管AI在生成文本、音频、图像和视频方面表现出色，但创建像视频游戏这样的交互式音视频内容仍然具有挑战性。当前的大语言模型（LLM）可以生成JavaScript游戏和动画，但缺乏自动评估指标，并且难以处理通常需要人类团队花费数月时间（多阶段、多智能体）使用艺术家制作的资产才能完成的复杂内容。为了解决这些问题，我们构建了一个新的度量标准和一个多智能体系统。我们提出了AVR-Eval，这是一种使用音视频记录（AVR）对多媒体内容质量进行相对评估的度量标准。一个全模态模型（处理文本、视频和音频）比较两种内容的AVR，并由一个文本模型审查评估以确定优劣。我们表明AVR-Eval能够正确区分好的内容和损坏或不匹配的内容。我们构建了AVR-Agent，这是一个多智能体系统，可以从多媒体资产库（音频、图像、3D模型）中生成JavaScript代码。编码智能体选择相关资产，生成多个初始代码，使用AVR-Eval确定最佳版本，并通过来自AVR的全模态智能体反馈迭代改进它。我们使用AVR-Eval（内容A对B的胜率）对游戏和动画进行了实验。我们发现由AVR-Agent生成的内容相比于单次生成的内容具有显著更高的胜率。然而，模型在有效利用自定义资产和AVR反馈方面表现不佳，胜率没有提高。这揭示了一个关键差距：虽然人类能从高质资产和音视频反馈中受益，但当前的编码模型似乎没有那么有效地利用这些资源，突显了人类和机器内容创作方法之间的根本差异。"
+      "id": "arXiv:2507.23698",
+      "title": "Scalable Multi-Task Reinforcement Learning for Generalizable Spatial Intelligence in Visuomotor Agents",
+      "chinese_title": "可扩展多任务强化学习用于视觉-运动智能体的通用空间智能",
+      "authors": "Shaofei Cai, Zhancun Mu, Haiwen Xia, Bowei Zhang, Anji Liu, Yitao Liang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23698&sa=D&source=editors&ust=1754364653393016&usg=AOvVaw3SNsiu9PAFKqAvYoODFQY9",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23698&sa=D&source=editors&ust=1754364653393102&usg=AOvVaw1fLCjAFs_5t6yZR6jGKRmP",
+      "chinese_abstract": "摘要：尽管强化学习（RL）在语言建模方面取得了显著成功，但其胜利尚未完全转化为视觉-运动智能体。RL模型的一个主要挑战是它们倾向于对特定任务或环境过拟合，从而阻碍了在不同设置下获得可泛化的行为。本文通过证明在《我的世界》中经过RL微调的视觉-运动智能体可以实现对未见世界的零样本泛化，为这一挑战提供了初步答案。具体来说，我们探索了RL在增强3D世界中可化空间推理和交互能力方面的潜力。为了解决多任务RL表示中的挑战，我们分析并建立了跨视角目标规范，作为视觉-运动策略的统一多任务目标空间。此外，为克服手动任务设计的重大瓶颈，我们提出了在高度可定制的《我的世界》环境中自动合成任务，以进行大规模多任务RL训练，并构建了一个高效的分布式RL框架来支持此过程。实验结果表明，RL将交互成功率显著提高了4倍，并使空间推理能够在包括现实世界在内的不同环境中实现零样本泛化。我们的发现强调了在3D模拟环境中进行RL训练的巨大潜力，特别是那些适合大规模任务生成环境，对于显著提升视觉-运动智能体的空间推理能力至关重要。"
     },
     {
-      "id": "arXiv:2508.00312",
-      "title": "GV-VAD : Exploring Video Generation for Weakly-Supervised Video Anomaly Detection",
-      "chinese_title": "GV-VAD：探索用于弱监督视频异常检测的视频生成技术",
-      "authors": "Suhang Cai, Xiaohao Peng, Chong Wang, Xiaojie Cai, Jiangbo Qian",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00312&sa=D&source=editors&ust=1754360525013222&usg=AOvVaw2ey7L7-KYku1IdYqlFnU_N",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00312&sa=D&source=editors&ust=1754360525013253&usg=AOvVaw2cy-C19EWwfEFE0VIvRPhx",
-      "chinese_abstract": "视频异常检测（VAD）在智能监控等公共安全应用中扮演着关键角色。然而，现实世界中异常事件的稀有性、不可预测性和高昂的标注成，使得扩展VAD数据集变得困难，这限制了现有模型的性能和泛化能力。为了应对这一挑战，我们提出了一个生成式视频增强的弱监督视频异常检测（GV-VAD）框架，该框架利用文本条件的视频生成模型来产生语义可控且物理上合理的合成视频。这些虚拟视频被用于低成本地增强训练数据。此外，还采用了一种合成样本损失缩放策略来控制生成合成样本的影响，以实现高效训练。实验表明，该框架在UCF-Crime数据集上优于最先进的方法。代码可在 https://github.com/GavinTsai/GV-VAD 获取。"
+      "id": "arXiv:2507.23540",
+      "title": "A Unified Perception-Language-Action Framework for Adaptive Autonomous Driving",
+      "chinese_title": "用于自适应自动驾驶的统一感知-语言-行框架",
+      "authors": "Yi Zhang, Erik Leo Haß, Kuo-Yi Chao, Nenad Petrovic, Yinglei Song, Chengdong Wu, Alois Knoll",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23540&sa=D&source=editors&ust=1754364653398549&usg=AOvVaw0b8OQ6bdCh4aU_K4m3n2ZR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23540&sa=D&source=editors&ust=1754364653398639&usg=AOvVaw1f_Ttj2krxAhnEciWIjdnn",
+      "chinese_abstract": "摘要：自动驾驶系统在复杂、开放世界的环境中实现类人适应性、鲁棒性和可解释性方面面临重大挑战。这些挑战源于碎片化的架构、对新场景的泛化能力有限以及从感知中提取的语义不足。为了解决这些限制，我们提出了一个统一的感知-语言-行动（PLA）框架，该框架将多传感器融合（摄像头、激光雷达、雷达）与大型语言模型（LLM）增强的视觉-语言-行动（VLA）架构相结合，特别是一个由GPT-4.1驱动的推理核心。该架统一了低级感官处理与高级情境推理，将感知与基于自然语言的语义理解和决策制定紧密耦合，以实现情境感知、可解释且有安全边界的自动驾驶。在带有施工区的城市交叉口场景下的评估表明，该框架在轨迹跟踪、速度预测和自适应规划方面表现优越。结果凸显了语言增强认知框架在提升自动驾驶系统安全性、可解释性和可扩展性方面的潜力。"
     },
     {
-      "id": "arXiv:2508.00299",
-      "title": "Controllable Pedestrian Video Editing for Multi-View Driving Scenarios via Motion Sequence",
-      "chinese_title": "通过运动序列在多视角驾驶场景下实现可控的行人视频编辑",
-      "authors": "Danzhen Fu, Jiagao Hu, Daiguo Zhou, Fei Wang, Zepeng Wang, Wenhua Liao",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00299&sa=D&source=editors&ust=1754360525013903&usg=AOvVaw1SYAjyt0iL4s9BxMVgJF74",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00299&sa=D&source=editors&ust=1754360525013932&usg=AOvVaw0oGh9kycoOKzOHxRbFeF-4",
-      "chinese_abstract": "自动驾驶系统中的行人检测模型常常因为训练数据集中危险行人场景的表征不足而缺乏鲁棒性。为了解决这一局限，我们提出了一个新颖的框架，通过集成视频修复和人体运动控制技术，在多视角驾驶场景中实现可控的行人视频编辑。我们的方法首先在多个摄像头视图中识别行人感兴趣区域，以固定比例扩展检测边界框，然后将这些区域调整大小并拼接成一个统一的画布，同时保留跨视图的空间关系。接着，应用一个二元掩码来指定可编辑区域，在该区域内，行人编辑由姿态序列控制条件引导。这使得能够实现灵活的编辑功能，包括行人入、替换和移除。广泛的实验表明，我们的框架实现了高质量的行人编辑，具有很强的视觉真实感、时空连贯性和跨视图一致性。这些结果确立了所提方法作为多视角行人视频生成的一个鲁棒且通用的解决方案，在自动驾驶的数据增强和场景模拟方面具有广泛的应用潜力。"
+      "id": "arXiv:2507.23318",
+      "title": "FastDriveVLA: Efficient End-to-End Driving via Plug-and-Play Reconstruction-based Token Pruning",
+      "chinese_title": "FastDriveVLA：通过即插即用的基于重建的令牌剪枝实现高效的端到端驾驶",
+      "authors": "Jiajun Cao, Qizhe Zhang, Peidong Jia, Xuhui Zhao, Bo Lan, Xiaoan Zhang, Xiaobao Wei, Sixiang Chen, Zhuo Li, Yang Wang, Liyun Li, Xianming Liu, Ming Lu, Shanghang Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23318&sa=D&source=editors&ust=1754364653409167&usg=AOvVaw2GWPXQ3oL-3dg3H_1TuJX0",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23318&sa=D&source=editors&ust=1754364653409256&usg=AOvVaw3qsSg3qSPUhp3FcrOUNRb-",
+      "chinese_abstract": "摘要：视觉-语言-行动（VLA）模型在复杂场景理解和行动推理方面展现了巨大潜力，因此越来越多地被应用于端到端自动驾驶系统。然而，VLA模型的长视觉令牌（token）极大地增加了计算成本。当前视觉语言模型（VLM）中的视觉令牌剪枝方法要么依赖于视觉令牌相似性，要么依赖于视觉-文本注意力，但这两种方法在自动驾驶场景中均表现不佳。鉴于人类驾驶员在驾驶时会专注于相关的前景区域，我们认为保留包含这些前景信息的视觉令牌对于有效决策至关重要。受此启发，我们提出了FastDriveVLA，一个专为自动驾驶设计的、基于重建的新型视觉令牌剪枝框架。FastDriveVLA包含一个名ReconPruner的即插即用视觉令牌剪枝器，它通过MAE风格的像素重建来优先处理前景信息。我们设计了一种新颖的对抗性前景-背景重建策略来为VLA模型的视觉编码器训练ReconPruner。一旦训练完成，ReconPruner可以无缝应用于具有相同视觉编码器的不同VLA模型，无需重新训练。为了训练ReconPruner，我们还引入了一个名为nuScenes-FG的大规模数据集，包含24.1万个带有标注前景区域的图像-掩码对。我们的方法在nuScenes闭环规划基准测试中，在不同剪枝率下均取得了最先进的结果。"
     },
     {
-      "id": "arXiv:2508.00413",
-      "title": "DC-AE 1.5: Accelerating Diffusion Model Convergence with Structured Latent Space",
-      "chinese_title": "DC-AE 1.5：利用结构化潜在空间加速扩散模型的收敛",
-      "authors": "Junyu Chen, Dongyun Zou, Wenkun He, Junsong Chen, Enze Xie, Song Han, Han Cai",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00413&sa=D&source=editors&ust=1754360525012086&usg=AOvVaw0cJDwjsd7c146DEKnwQRWp",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00413&sa=D&source=editors&ust=1754360525012114&usg=AOvVaw1H-4bGguj-yglEWJNcQu6v",
-      "chinese_abstract": "我们推出了DC-AE 1.5，这是一个用于高分辨率扩散模型的全新深度压缩自编码器系列。增加自编码器的潜在通道数是提高其重建质量的一种非常有效的方法。然而，这会导致扩散模型的收敛速度变慢，尽管重建质量更好，但生成质量却更差。这个问题限制了潜在扩散模型的质量上限，并阻碍了具有更高空间压缩率的自编码器的使用。我们引入了两项关键创新来应对这一挑战：i) 结构化潜在空间，一种基于训练的方法，通过让前部潜在通道捕捉物体结构，后部潜在通道捕捉图像细节，来为潜在空间施加一个期望的通道级结构；ii) 增强扩散训练，一种在物体潜在通道上增加额外扩散训练目标的增强扩散训练策略，以加速收敛。借助这些技术，DC-AE 1.5比DC-AE实现了更快的收敛速度和更好的扩散缩放结果。在ImageNet 512x512上，DC-AE-1.5-f64c128的图像生成质量优于DC-AE-f32c32，同时速度快4倍。代码：https://github.com/mit-han-lab/DC-AE。"
+      "id": "arXiv:2507.23067",
+      "title": "FairReason: Balancing Reasoning and Social Bias in MLLMs",
+      "chinese_title": "FairReason：在多模态大语言模型中平衡推理能力与社会偏见",
+      "authors": "Zhenyu Pan, Yutong Zhang, Jianshu Zhang, Haoran Lu, Haozheng Luo, Yuwei Han, Philip S. Yu, Manling Li, Han Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23067&sa=D&source=editors&ust=1754364653388524&usg=AOvVaw1rHAuzF7_qfjMfivqc0q37",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23067&sa=D&source=editors&ust=1754364653388614&usg=AOvVaw3GxdN8IY36R8-XyC-qUA8Q",
+      "chinese_abstract": "摘要：多模态大型语言模型（MLLM）已在广泛的任务和模态中取得了最先进的成果。为了进一步提升其推理能力，近期的研究探索了先进的提示方案和后训练微调。尽管这些技术提高了逻辑准确性，但它们常常使模型的输出带有明显的社会偏见。因此，阐明推理能力的提升如何与偏见缓解相互作用——以及这两个目标是否内在权衡——仍然是一个开放且紧迫的研究问题。我们的研究首先在相同条件下对三种偏见缓解策略——监督式微调（SFT）、知识蒸馏（KD）和基于规则的强化学习（RL）——进行基准测试，确立它们各自的基线优势和劣势。在此基上，我们通过改变每种范式中去偏见和推理中心样本的比例，来描绘推理与偏见的权衡曲线。我们的扫描实验揭示了一个一致的“甜蜜点”：采用强化学习训练的约1:4混合比例，能将刻板印象分数降低10%，同时保留模型88%的原始推理准确率，为在MLLM中平衡公平性与能力提供了具体的指导。"
     },
     {
-      "id": "arXiv:2508.00784",
-      "title": "Unraveling Hidden Representations: A Multi-Modal Layer Analysis for Better Synthetic Content Forensics",
-      "chinese_title": "揭示隐藏表征：为更好的合成内容取证进行多模态层分析",
-      "authors": "Tom Or, Omri Azencot",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00784&sa=D&source=editors&ust=1754360524996686&usg=AOvVaw34o0IzA2Ttt4eS7RUyDGxK",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00784&sa=D&source=editors&ust=1754360524996794&usg=AOvVaw1MudSJK0x5Sh78lqRLSNL5",
-      "chinese_abstract": "摘要：生成模型在多个数据领域（包括图像和文本等）取得了显著成果。不幸的是，恶意用户利用合成媒体传播错误信息和散布深度伪造内容。因此，迫切需要鲁棒且稳定的伪造检测器，尤其是在每天都有新生成模型出的情况下。虽然大多数现有工作训练能够区分真实和伪造信息的分类器，但这类工具通常仅在同一生成器家族和数据模态内具有泛化能力，在其他生成类别和数据领域上效果不佳。为了实现通用分类器，我们建议使用大型预训练多模态模型来检测生成内容。我们有效地表明，这些模型的潜在编码自然地捕捉了区分真实与伪造的信息。基于这一观察，我们证明了在这些特征上训练的线性分类器可以在各种模态上达到最先进的结果，同时保持计算效率高、训练速度快，并且即使在少样本设置下也有效。我们的工作主要集中在音频和图像的伪造检测，其性能超过或匹配强基线方法的水平。"
+      "id": "arXiv:2507.23058",
+      "title": "Reference-Guided Diffusion Inpainting For Multimodal Counterfactual Generation",
+      "chinese_title": "用于多模态反事实生成的参考引导扩散修复",
+      "authors": "Alexandru Buburuzan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23058&sa=D&source=editors&ust=1754364653420954&usg=AOvVaw2pj_nXYtrORJmf4sUg4CuK",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23058&sa=D&source=editors&ust=1754364653421038&usg=AOvVaw26teD40Dw8rH8FwYiEXYDk",
+      "chinese_abstract": "摘要：安全关键型应用，如自动驾驶和医学图像分析，需要大量的多模态数据进行严格测试。由于收集真实世界数据的成本和复杂性，合成数据方法日益受到重视，但它们需要高度的真实性和可控性才能发挥作用。本文介绍了两种用于自动驾驶和医学图像分析中合成数据生成的新方法，分别为MObI和AnydoorMed。MObI是首个多模态物体修复（Multimodal Object Inpainting）框架，利用扩散模型在多种感知模态（同时在摄像头和激光雷达上展示）上生成真实且可控的物体修复。给定单个参考RGB图像，MObI能够在指定的三维位置，通过边界框引导，无缝地将物体插入到现有的多模态场景中，同时保持语义一致性和多模态连贯性。与仅依赖编辑掩码的传统修复方法不同，该方法使用三维边界框条件来确保准确的空间定位和逼真的缩放。AnydoorMed将此范式扩展到医学成像领域，专注于乳腺X光扫描的参考引导修复它利用基于扩散的模型对异常进行修复，并能出色地保留细节，维持参考异常的结构完整性，同时在语义上与周围组织融合。总之，这些方法表明，用于自然图像中参考引导修复的基础模型可以轻松适应不同的感知模态，为下一代能够构建高度真实、可控和多模态反事实场景的系统铺平了道路。"
     },
     {
-      "id": "arXiv:2508.00324",
-      "title": "R1-ACT: Efficient Reasoning Model Safety Alignment by Activating Safety Knowledge",
-      "chinese_title": "R1-ACT：通过激活安全知识实现高效的推理模型安全对齐",
-      "authors": "Yeonjun In, Wonjoong Kim, Sangwu Park, Chanyoung Park",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00324&sa=D&source=editors&ust=1754360524999523&usg=AOvVaw1Se4k6prcgfw2U_la6BXiI",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00324&sa=D&source=editors&ust=1754360524999551&usg=AOvVaw2N6Tvw_nilvwHUAka5cUUh",
-      "chinese_abstract": "尽管大型推理模型（LRM）在复杂任务上展现了令人印象深刻的能力，但最近的研究揭示，这些模型经常会执行用户的有害指令，引发了重大的安全关切。在本文中，我们探究了LRM安全风险的根本原因，并发现模型已经具备足够的安全知识，但在推理过程中未能激活它。基于这一洞察，我们提出了R1-Act，一种简单高效的后训练方法，通过结构化的推理过程明确触发安全知识。R1-Act在保持推理性能的同时，实现了强大的安全改进，超越了先前的对齐方法。值注意的是，它仅需1000个训练样本和在单个RTX A6000 GPU上90分钟的训练时间。在多个LRM骨干模型和尺寸上的广泛实验证明了我们方法的鲁棒性、可扩展性和实践效率。"
+      "id": "arXiv:2507.23010",
+      "title": "Investigating the Invertibility of Multimodal Latent Spaces: Limitations of Optimization-Based Methods",
+      "chinese_title": "探究多模态潜在空间的可逆性：基于优化方法的局限性",
+      "authors": "Siwoo Park",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23010&sa=D&source=editors&ust=1754364653422926&usg=AOvVaw0DuhuxeUjuK206TpUNFpxN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23010&sa=D&source=editors&ust=1754364653423014&usg=AOvVaw0NrEr1LaJbgUXTdfccScJF",
+      "chinese_abstract": "摘要：本文研究了特定任务人工智能（AI）模型中多模态潜在空间的反向能力和更广泛的效用。虽然这些模型在其设计的正向任务（如文本到图像生成、音频到文本转录）中表现出色，但它们在反向映射方面的潜力在很大程度上仍未被探索。我们提出了一个基于优化的框架，从期望的输出中推断输入特征，并将其双向应用于文本-图像（BLIP, Flux.1-dev）和文本-音频（Whisper-Large-V3, Chatterbox-TTS）模态。我们的核心假设是，虽然优化可以引导模型进行反向任务，但它们的多模态潜在空间不会持续支持具有语义意义和感知连贯性的反向映射。实验结果一致验证了这一假设。我们证明，尽管优化可以迫使模型产生在文本上与目标一致的输出（例如，文本到图像模型生成的图像能被图像字幕模型正确描述，或者ASR模型能准确转录优化后的音频），但这些反向生成的感知质是混乱且不连贯的。此外，当试图从生成模型中推断原始语义输入时，重建的潜在空间嵌入经常缺乏语义可解释性，与无意义的词汇标记对齐。这些发现突显了一个关键的局限性：主要为特定正向任务优化的多模态潜在空间，本身不具备支持稳健且可解释的反向映射所需的结构。我们的工作强调了进一步研究开发真正具有语义丰富性和可逆性的多模态潜在空间的必要性。"
     },
     {
-      "id": "arXiv:2508.00282",
-      "title": "Mind the Gap: The Divergence Between Human and LLM-Generated Tasks",
-      "chinese_title": "注意差距：人类与大语言模型生成的任务之间的分歧",
-      "authors": "Yi-Long Lu, Jiajun Song, Chunhui Zhang, Wei Wang",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00282&sa=D&source=editors&ust=1754360524999998&usg=AOvVaw2Qeepsn8GcA-9tEIG7uOLy",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00282&sa=D&source=editors&ust=1754360525000029&usg=AOvVaw24VTDBHSn8xmD0e3tx-3tS",
-      "chinese_abstract": "人类在内在动机的引导下，不断生成各种各样的任务。虽然由大型语言模型（LLM）驱动的生成式智能体旨在模拟这种复杂的行为但它们是否基于相似的认知原则运作仍不确定。为了解决这个问题，我们进行了一项任务生成实验，比较了人类的反应与LLM智能体（GPT-4o）的反应。我们发现，人类的任务生成始终受到心理驱动因素的影响，包括个人价值观（如对变化的开放性）和认知风格。即使将这些心理驱动因素明确提供给LLM，它也未能反映出相应的行为模式。它们生成的任务在社交性、物理性方面明显较差，并且在主题上偏向于抽象。有趣的是，虽然LLM的任务被认为更有趣和新颖，但这凸显了其语言能力与生成类似人类的、具身化的任务能力之间的脱节。我们得出结论，人类认知的价值驱动、具身化本质与LLM的统计模式之间存在核心差距，这凸显了将内在动机和物理接地融入更符合人类的智能体设计中的必要性。"
+      "id": "arXiv:2507.22920",
+      "title": "Discrete Tokenization for Multimodal LLMs: A Comprehensive Survey",
+      "chinese_title": "面向多模态大语言模型的离散化分词：一项综合综述",
+      "authors": "Jindong Li, Yali Fu, Jiahong Liu, Linxiao Cao, Wei Ji, Menglin Yang, Irwin King, Ming-Hsuan Yang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.22920&sa=D&source=editors&ust=1754364653433104&usg=AOvVaw27Y_FiUlxG9JPPUezZmii5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.22920&sa=D&source=editors&ust=1754364653433196&usg=AOvVaw3z7m2VmRjzA5fqpA6fodLd",
+      "chinese_abstract": "摘要：大型语言模型（LLM）的快速发展加剧了对有效机制的需求，以将连续的多模态数据转换为适合基于语言处理的离散表示。以向量量化（VQ）为核心方法的离散化分词（tokenization），既提供了计算效率，又与LLM架构兼容。尽管其重要性日益增加，但目前缺乏一篇全面综述来系统地审视基于LLM系统中的VQ技术。本工作填补了这一空白，首次提出了专为LLM设计的离散化分词方法的结构化分类法和分析。我们对跨越经典和现代范式的8种代表性VQ变体进行了分类，并分析了它们的算法原理、训练动态以及与LLM流水线的集成挑战。除了算法层面的研究，我们还从经典非LLM应用、基于LLM的单模态系统和基于LLM的多模态系统三个方面讨论了现有研究，强调了量化策略如何影响对齐、推理和生成性能。此外，我们识别了包括码本崩溃、梯度估计不稳定和特定模态编码约束在内的关键挑战。最后，我们讨论了新兴的研究方向，如动态和任务自适应量化、统一的分词框架以及受生物启发的码本学习。本综述弥合了传统向量量化与现代LLM应用之间的差距，为开发高效且可泛化的多模态系统提供了基础性参考。持续更新的版本可在此 https URL 查看。"
     },
     {
-      "id": "arXiv:2508.00500",
-      "title": "Pro2Guard: Proactive Runtime Enforcement of LLM Agent Safety via Probabilistic Model Checking",
-      "chinese_title": "Pro2Guard：通过概率模型检测对LLM智能体安全进行主动运行时强制",
-      "authors": "Haoyu Wang, Chris M. Poskitt, Jun Sun, Jiali Wei",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00500&sa=D&source=editors&ust=1754360524998450&usg=AOvVaw1RiggcYvCoDacMpJj7IysI",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00500&sa=D&source=editors&ust=1754360524998479&usg=AOvVaw2HOwbj6ZMqJ6NQQGvB5kRQ",
-      "chinese_abstract": "大型语言模型（LLM）智能体在机器人、虚拟助手和网页自动化等领域展现了强大的自主能力。然而，它们的随机行为带来了难以预见的重要安全风险。现有的基于规则的强制执行系统，如AgentSpec，专注于开发反应式安全规则，这些规则通常仅在不安全行为即将发生或已经发生时才作出响应。这些系统缺乏预见性，并且难以处理长时程依赖和分布偏移。为了解决这些局限性，我们提出了Pro2Guard，一个基于概率可达性分析的主动运行时强制框架。Pro2Guard将智能体行为抽象为符号状态，并从执行轨迹中学习一个离散时间马尔可夫链（DTMC）。在运行时，它通过估计到达不安全状态的概率来预测未来风险，在预测风险超过用户定义的阈值时，在违规发生前触发干预。通过结合语义有效性检查和利用PAC界，Pro2Guard在逼近潜在的真实模型的同时确保了统计可靠性。我们在两个安全关键领域对Pro2Guard进行了广泛评估：具身家居智能体和自动驾驶汽车。在具身智能体任务中，Pro2Guard使用低阈值能够提早对高达93.6%的不安全任务强制执行安全措施，而可配置模式（如反思）允许在安全与任务成功之间取得平衡，保持高达80.4%的任务完成率。在自动驾驶场景中，Pro2Gaurd实现了对交通违规和碰撞的100%预测，并能提前最38.66秒预测风险。"
+      "id": "arXiv:2507.22940",
+      "title": "Trustworthy Reasoning: Evaluating and Enhancing Factual Accuracy in LLM Intermediate Thought Processes",
+      "chinese_title": "可信推理：评估和增强LLM中间思维过程中的事实准确性",
+      "authors": "Rui Jiao, Yue Zhang, Jinku Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.22940&sa=D&source=editors&ust=1754364653425936&usg=AOvVaw0AMKcPjrS1o3FiXLAV2NVN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.22940&sa=D&source=editors&ust=1754364653426021&usg=AOvVaw2gW1d6Tfb59s1LLvNq-pw8",
+      "chinese_abstract": "摘要：我们提出了RELIANCE（为增强置信度而进行的逻辑完整性与准确性推理评估）框架，这是一个旨在解决大型语言模型（LLM）中一个关键漏洞的新型框架：即尽管最终答案正确，但在中间推理步骤中普遍存在事实不准确性。这种现象在医疗保健、法律分析和科学研究等高风险领域构成了重大风险，因为错误但自信呈现的推理可能误导用户做出危险的决策。我们的框架集成了三个核心组件：（1）一个专门的事实核查分类器，该分类器在反事实增强数据上进行训练，以检测推理链中微妙的事实不一致性；（2）一种组相对策略优化（GRPO）强化学习方法，通过多维奖励平衡事实性、连贯性和结构正确性；（3）一个机理可解释性模块，用于研究事实性改进在推理程中如何体现在模型激活中。对十个最先进模型的广泛评估揭示了令人担忧的模式：即使是像Claude-3.7和GPT-o1这样的领先模型，其推理事实准确率也分别只有81.93%和82.57%。RELIANCE显著增强了事实的鲁棒性（提升高达49.90%），同时在包括Math-500、AIME-2024和GPQA在内的挑战性基准上保持或提高了性能。此外，我们的激活层面分析为事实性增强如何重塑模型架构内的推理轨迹提供了可行的见解，为未来通过激活引导优化明确针对事实鲁棒性的训练方法奠定了基础。"
     },
     {
-      "id": "arXiv:2508.00159",
-      "title": "Model-Based Soft Maximization of Suitable Metrics of Long-Term Human Power",
-      "chinese_title": "基于模型的长期人类赋权适用指标的软最大化",
-      "authors": "Jobst Heitzig, Ram Potham",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00159&sa=D&source=editors&ust=1754360525000697&usg=AOvVaw0n77ANO27pMf4UrhDMstOX",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00159&sa=D&source=editors&ust=1754360525000726&usg=AOvVaw0azolMgL2FLRx7s8Z0DO63",
-      "chinese_abstract": "权力是AI安全中的一个关键概念：权力寻求作为一种工具性目标、人类突然或逐渐被剥夺权力、人机交互中的权力平衡以及国际AI治理。同时，作为追求多样化目标的能力，权力对于福祉至关重要。本文探讨了通过明确强制AI智能体赋予人类权力，并以期望的方式管理人类与AI智能体之间的权平衡，来促进安全与福祉的理念。我们采用一种有原则的、部分公理化的方法，设计了一个可参数化和可分解的目标函数，该函数代表了对人类权力的一个规避不平等和风险的长期聚合。它考虑了人类的有限理性和社会规范，并且至关重要的是，考虑了各种可能的人类目标。我们推导了通过反向归纳法计算该度量，或通过一种多智能体强化学习形式从给定的世界模型中近似该度量的算法。我们在多种典型情境中举例说明了（软性）最大化此度量的后果，并描述了它可能隐含的工具性子目标。我们审慎的评估是，软性最大化适用的人类权力聚合度量，可能构成一种有益于智能体AI系统的目标，比直接基于效用的目标更安全。"
+      "id": "arXiv:2507.23726",
+      "title": "Seed-Prover: Deep and Broad Reasoning for Automated Theorem Proving",
+      "chinese_title": "Seed-Prover：用于自动定理证明的深度与广度推理",
+      "authors": "Luoxin Chen, Jinming Gu, Liankai Huang, Wenhao Huang, Zhicheng Jiang, Allan Jie, Xiaoran Jin, Xing Jin, Chenggang Li, Kaijing Ma, Cheng Ren, Jiawei Shen, Wenlei Shi, Tong Sun, He Sun, Jiahui Wang, Siran Wang, Zhihong Wang, Chenrui Wei, Shufa Wei, Yonghui Wu, Yuchen Wu, Yihang Xia, Huajian Xin, Fan Yang, Huaiyuan Ying, Hongyi Yuan, Zheng Yuan, Tianyang Zhan, Chi Zhang, Yue Zhang, Ge Zhang, Tianyun Zhao, Jianqiu Zhao, Yichi Zhou, Thomas Hanwen Zhu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23726&sa=D&source=editors&ust=1754364653379553&usg=AOvVaw2ck6NGKsE5q77C2Dt-WhcE",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23726&sa=D&source=editors&ust=1754364653379652&usg=AOvVaw2UyC2fUaZVmc7yvw1oirz7",
+      "chinese_abstract": "摘要：大型语言模型（LLM）通过利用强化学习和长思维链，已展现出强大的数学推理能力，但由于在仅使用自然语言时缺乏明确的监督信号，它们在定理证明方面仍然面临困难。像Lean这样的专用领域特定语言通过对证明进行形式化验证提供了明确的监督，从而能够通过强化学习进行有效训练。在这项工作中，我们提出了Seed-Prover，一个引理式全证明推理模型。Seed-Prover可以根据Lean的反馈、已证明的引理和自我总结来迭代地优化其证明。为了解决IMO级别的竞赛问题，我们设计了三种测试时推理策略，以实现深度和广度推理。Seed-Prover证明了78.1%的形式化IMO历史问题，在MiniF2F上达到饱和，并在PutnamBench上取得了超过50%的成绩，大幅超越了先前的最先进水平。为了解决Lean中缺乏几何支持的问题，我们引入了一个几何推理引擎Seed-Geometry，其性能优于之前的形式化几何引擎。我们使用这两个系统参加了IMO 2025，并完全证明了6个问题中的5个。这项工作代表了自动数学推理领域的重大进展，展示了形式化验证与长思维链推理相结合的有效性。"
     },
     {
-      "id": "arXiv:2508.00414",
-      "title": "Cognitive Kernel-Pro: A Framework for Deep Research Agents and Agent Foundation Models Training",
-      "chinese_title": "Cognitive Kernel-Pro：一个用于深度研究智能体和智能体基础模型训练的框架",
-      "authors": "Tianqing Fang, Zhisong Zhang, Xiaoyang Wang, Rui Wang, Can Qin, Yuxuan Wan, Jun-Yu Ma, Ce Zhang, Jiaqi Chen, Xiyun Li, Hongming Zhang, Haitao Mi, Dong Yu",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00414&sa=D&source=editors&ust=1754360524998886&usg=AOvVaw25V8tq5XFnougDSy3_dZko",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00414&sa=D&source=editors&ust=1754360524998917&usg=AOvVaw2H9l6mWIi_hEgUcu7PsOAs",
-      "chinese_abstract": "通用人工智能智能体日益被认为是下一代人工智能的基础框架，能够实现复杂的推理、网络交互、编码和自主研究能力。然而，当前的智能体系统要么是闭源的，要么严重依赖各种付费API和专有工具，限制了研究社区的可访问性和可复现性。在这项工作中，我们提出了\\textbf{Cognitive Kernel-Pro}，一个完全开源且（在最大程度上）免费的多模块智能体框架，旨在推动高级AI智能体的开发和评估民主化。在Cognitive Kernel-Pro中，我们系统地研究了为智能体基础模型策划高质量训练数据的方法，重点关注在四个关键领域（网络、文件、代码和通用推理）构建查询、轨迹和可验证的答案。此外，我们探索了智能体测试时反思和投票的新策略，以增强智能体的鲁棒性和性能。我们在GAIA上评估了Cognitive Kernel-Pro，在开源和免费智能体中取得了最先进的结果。值得注意的是，我们的8B参数开源模型超过了WebDancer和WebSailor等先前的领先系统，为易于获取、高性能的AI智能体树立了新的性能标准。代码可在 https://github.com/TsinghuaCUKG/AgentKernel-Pro 获取。"
+      "id": "arXiv:2507.23261",
+      "title": "DynaSwarm: Dynamically Graph Structure Selection for LLM-based Multi-agent System",
+      "chinese_title": "DynaSwarm：于基于LLM的多智能体系统的动态图结构选择",
+      "authors": "Hui Yi Leong, Yuqing Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23261&sa=D&source=editors&ust=1754364653411748&usg=AOvVaw0WcD-Z3Y-hKjLkum0AmajR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23261&sa=D&source=editors&ust=1754364653411839&usg=AOvVaw114B4tEcIndZetFCOQNnV4",
+      "chinese_abstract": "摘要：当前的多智能体系统（MAS）框架通常依赖于手动设计和静态的协作图结构，这限制了其适应性和性能。为了解决这些限制，我们提出了DynaSwarm，一个通过两项关键创新来增强基于LLM的MAS的动态框架：（1）一个行动者-评论家强化学习（A2C）机制，用于优化图结构，比先前的RL方法具有更好的稳定性；（2）一个动态图选择器，通过参数高效的LLM微调，为每个输入样本自适应地选择最优的图结构。DynaSwarm消除了对僵化、一刀切的图构的需求，而是利用特定于样本的特性来动态地通过专门的智能体网络路由查询。（c）我们建议微调演示检索器，以充分利用上下文学习（ICL）的力量。在问答、数学推理和编码任务上的广泛实验表明，DynaSwarm在多个LLM骨干上始终优于最先进的单智能体和MAS基线。我们的发现凸显了在LLM MAS设计中，样本感知的结构灵活性的重要性。"
     },
     {
-      "id": "arXiv:2508.00271",
-      "title": "MetaAgent: Toward Self-Evolving Agent via Tool Meta-Learning",
-      "chinese_title": "MetaAgent：通过工具元学习实现自我进的智能体",
-      "authors": "Hongjin Qian, Zheng Liu",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00271&sa=D&source=editors&ust=1754360525000233&usg=AOvVaw1NPShDU4Usc_GLa-1Yj5y5",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00271&sa=D&source=editors&ust=1754360525000261&usg=AOvVaw1ydTvp2BzLVUxRB3RuYyTE",
-      "chinese_abstract": "在这项工作中，我们提出了MetaAgent，这是一种受“边做边学”原则启发的智能体范式，其中专业知识通过亲身实践和持续的自我提升来发展。MetaAgent从一个最小化的工作流程开始，仅配备基本的推理和自适应求助能力。当遇到知识鸿沟时，MetaAgent会生成自然语言的求助请求，这些请求由专门的工具路由器路由到最合适的外部工具。在解决任务的过程中，MetaAgent不断进行自我反思和答案验证，将可操作的经验提炼成简洁的文本，并动态地融入未来的任务情境中。此外，MetaAgent通过组织其工具使用历史，自主构建内部工具和持久的知识库，进一步增强了其检索和整合相关信息的能力。我们将这个持续的、数据驱动的过程称为\\textit{工具元学习}，通过这个过程，MetaAgent逐步完善其推理和工具使用策略，而无需更改模型参数或需要进一步的后训练。在包括GAIA、WebWalkerQA和BrowseCamp在内的具有挑战性的知识发现基准上进行评估，MetaAgent始终优于基于工作流程的基线，并达到或超过了端到端训练的智能体，展示了自我进化智能体系统在鲁棒、通用知识发现方面的潜力。我们的源代码在 https://github.com/h-qian/MetaAgent 提供。"
+      "id": "arXiv:2507.23682",
+      "title": "villa-X: Enhancing Latent Action Modeling in Vision-Language-Action Models",
+      "chinese_title": "villa-X：增强视觉-语言-行动模型中的潜在行动建模",
+      "authors": "Xiaoyu Chen, Hangxing Wei, Pushi Zhang, Chuheng Zhang, Kaixin Wang, Yanjiang Guo, Rushuai Yang, Yucen Wang, Xinquan Xiao, Li Zhao, Jianyu Chen, Jiang Bian",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23682&sa=D&source=editors&ust=1754364653393932&usg=AOvVaw1-FHPfA37cN_NZ336v7FA0",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23682&sa=D&source=editors&ust=1754364653394028&usg=AOvVaw25qrImpVnvW6WUIOtnkSGD",
+      "chinese_abstract": "摘要：视觉-语言-行动（VLA）模型已成为学习机器人操控策略的一种流行范式，这些策略能够遵循语言指令并泛化到新颖的场景。最近的工作已开始探索将潜在行动（两帧之间视觉变化的抽象表示）融入VLA预训练中。在本文中，我们介绍了villa-X，一个新颖的视觉-语言-潜在行动（ViLLA）框架，该框架推进了潜在行动建模，以学习可泛化的机器人操控策略。我们的方法改进了潜在行动的学习方式以及它们如何被整合到VLA预训练中。这些贡献共同使villa-X在包括SIMPLER和LIBERO在内的模拟环境中，以及在包括夹爪和灵巧手操控的两个真实世界机器人设置中取得了优越的性能。我们相信ViLLA范式具有巨大的潜力，而我们的villa-X为未来的研究提供了坚实基础。"
     },
     {
-      "id": "arXiv:2508.00378",
-      "title": "CoRGI: Verified Chain-of-Thought Reasoning with Visual Grounding",
-      "chinese_title": "CoRGI：带有视觉接地的可验证思维链推理",
-      "authors": "Shixin Yi, Lin Shang",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00378&sa=D&source=editors&ust=1754360524999327&usg=AOvVaw2YFh1V4oD7TY0tmg9au9Wn",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00378&sa=D&source=editors&ust=1754360524999358&usg=AOvVaw2QJlLUkZIkdKuKjvQ7wM6B",
-      "chinese_abstract": "思维链（CoT）提示在改善视觉语言模型（VLM）的推理能力方面显示出潜力，但它常常产生语言上流畅却缺乏视觉内容基础的解释。我们观察到，这种幻觉的部分原因是在多步推理过程中缺乏明确的验证机制。为了解决这个问题，我们提出了\\textbf{CoRGI}（\\textbf{C}hain \\textbf{o}f \\textbf{R}easoning with \\textbf{G}rounded \\textbf{I}nsights），一个将视觉验证引入推理过程的模块化框架。CoRGI遵循一个三阶段流程：首先生成一个文本推理链，然后通过一个专用模块（VEVM）为每个推理步骤提取支持性视觉证据，最后将文本理由与视觉证据合成为一个有根据的、经过证的答案。该框架可以与现有的VLM集成，无需端到端重新训练。我们在VCR基准上评估了CoRGI，发现在两个代表性的开源VLM骨干模型（Qwen-2.5VL和LLaVA-1.6）上，它提高了推理性能。消融研究证实了验证模块中每个步骤的贡献，而人工评估表明CoRGI能产生更真实、更有帮助的解释。我们还研究了视觉验证步骤的替代设计，并讨论了后验证框架的潜在局限性。这些发现凸显了将中间推理步骤植根于视觉证据中以增强多模态推理鲁棒性的重要性。"
+      "id": "arXiv:2507.23536",
+      "title": "From LLMs to Edge: Parameter-Efficient Fine-Tuning on Edge Devices",
+      "chinese_title": "从LLM到边缘：边缘设备上的参数高效微调",
+      "authors": "Georg Slamanig, Francesco Corti, Olga Saukh",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23536&sa=D&source=editors&ust=1754364653399044&usg=AOvVaw1nKwKyBMB_exbsFYzYZJQp",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23536&sa=D&source=editors&ust=1754364653399135&usg=AOvVaw3Glq3kLLYXT1_MmGt6tu6h",
+      "chinese_abstract": "摘要：参数高效微调（PEFT）方法通过最小化用于使模型适应下游任务的额外参数数量，来降低更新深度学习模型的计算成本。虽然在大语言模型（LLM）中得到了广泛研究，但其在边缘设备上使用的小型模型（如卷积神经网络）中的应用仍未得到充分探索。本文对通常部署在资源受限的边缘环境中卷积架构上的流行PEFT方法进行了基准测试和分析。我们评估了LoRA、DoRA和GaLore在更新标准和深度可分离卷积架构以处理分布偏移和适应未见类别方面的表现。我们利用最近提出的PyTorch分析器，比较了这些PEFT方法与传统微调方法在更新模型性能和计算成本上的差异。考虑到资源效率，我们研究了它们在不同秩维度下的更新行为。我们发现，所评估的PEFT方法在应用于深度可分离卷积架构时，其内存效率仅为应用于LLM时的一半。相反，当针对为边缘部署优化的卷积架构时，基于适配器的PEFT方法可以在模型更新期间将浮点运算（FLOPs）减少高达95%。这些见解为根据硬件限制、性能要求和应用需求选择PEFT方法提供了宝贵的指导。我们的代码已在线发布。"
     },
     {
-      "id": "arXiv:2508.00576",
-      "title": "MultiSHAP: A Shapley-Based Framework for Explaining Cross-Modal Interactions in Multimodal AI Models",
-      "chinese_title": "MultiSHAP：一个基于Shapley值的多模态AI模型跨模态交互解释框架",
-      "authors": "Zhanliang Wang, Kai Wang",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00576&sa=D&source=editors&ust=1754360524998216&usg=AOvVaw3gT3pxI7brw60MjUSGNcFF",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00576&sa=D&source=editors&ust=1754360524998246&usg=AOvVaw2viBDqFCPvh9jB60SIfFiP",
-      "chinese_abstract": "多模态人工智能模型在需要整合多种模态信息（如视觉和语言）的任务中取得了令人瞩目的性能。然而，它们的“黑箱”性质在需要可解释性和可信赖性的高风险应用中构成了主要障碍。如何解释多模态人工智能模型中的跨模态交互仍然是一个重大挑战。虽然现有的模型解释方法，如注意力图和Grad-CAM，能提供关于跨模态关系的粗略见解，但它们无法精确量化模态之间的协同效应，并且仅限于内部权重可访问的开源模型。在此，我们引入MultiSHAP，一个模型无关的可解释性框架，它利用沙普利交互指数将多模态预测归因于细粒度视觉和文本元素（如图像块和文本标记）之间的成对交互，同时适用于开源和源模型。我们的方法提供：（1）实例级解释，揭示单个样本的协同和抑制性跨模态效应——“为什么模型对这个输入做出特定预测”，以及（2）数据集级解释，揭示跨样本的通用交互模式——“模型如何跨模态整合信息”。在公共多模态基准上的实验证实，MultiSHAP忠实地捕捉了跨模态推理机制，而真实世界的案例研究展示了其实用价值。我们的框架可扩展至两种以上的模态，为解释复杂的多模态人工智能模型提供了一个通用解决方案。"
+      "id": "arXiv:2507.23091",
+      "title": "Moravec's Paradox: Towards an Auditory Turing Test",
+      "chinese_title": "莫拉维克悖论迈向听觉图灵测试",
+      "authors": "David Noever, Forrest McKee",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23091&sa=D&source=editors&ust=1754364653388041&usg=AOvVaw2a7uNajUt5bQTsaDmzx9si",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23091&sa=D&source=editors&ust=1754364653388123&usg=AOvVaw3Mk6HlqbTqCv0_bUi6ksFV",
+      "chinese_abstract": "摘要：本研究工作表明，当前的人工智能系统在人类能毫不费力完成的听觉任务上会遭遇灾难性的失败。受莫拉维克悖论（即对人类简单的任务对机器往往困难，反之亦然）的启发，我们引入了一个听觉图灵测试，包含七个类别的917个挑战：重叠语音、噪声中的语音、时间失真、空间音频、咖啡店噪声、电话失真和感知错觉。我们对包括GPT-4的音频能力和OpenAI的Whisper在内的最先进音频模型进行了评估，结果显示其失败率惊人地超过93%，即使是表现最好的型，在人类以7.5倍成功率（52%）解决的任务上，也仅实现了6.9%的准确率。这些结果暴露了AI系统在处理复杂听觉场景时的聚焦失败，特别是在选择性注意、噪声鲁棒性和情境适应方面。我们的基准测试不仅量化了人机听觉差距，还为这些失败发生的原因提供了见解，表明当前架构缺乏类人听觉场景分析的基本机制。传统音频验证码的设计突显了人类进化出而机器在多模态语言模型中未能选择的常见过滤器。这项工作建立了一个诊断框架，用于衡量迈向人类水平机器听觉的进展，并强调需要将选择性注意、基于物理的音频理解和情境感知集成到多模态AI系统中的新方法。"
     },
     {
-      "id": "arXiv:2508.00760",
-      "title": "MMBERT: Scaled Mixture-of-Experts Multimodal BERT for Robust Chinese Hate Speech Detection under Cloaking Perturbations",
-      "chinese_title": "MMBERT：用于在隐蔽扰动下鲁棒检测中文仇恨言论的可扩展混合专家多模态BERT",
-      "authors": "Qiyao Xue, Yuchen Dou, Ryan Shi, Xiang Lorraine Li, Wei Gao",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00760&sa=D&source=editors&ust=1754360525003265&usg=AOvVaw2Ttte3Q4dHs3kgMKbp0ekp",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00760&sa=D&source=editors&ust=1754360525003294&usg=AOvVaw3jrBxObeO4Uwq8qR7apVt6",
-      "chinese_abstract": "在中国社交网络上检测仇恨言论面临独特的挑战，特别是由于广泛使用旨在规避传统基于文本的检测系统的隐蔽技术。尽管大型语言模型（LLM）最近提高了仇恨言论的检测能力，但大多数现有工作都集中在英文数据集上，对中文环境下的多模态策略关注有限。在本研究中，我们提出了MMBERT，这是一种新颖的基于BERT的多模态框架，通过混合专家（MoE）架构集成了文本、语音和视觉模态。为了解决将MoE直接集成到基于BERT的模型中所带来的不稳定性，我们开发了一种渐进的三阶段训练范式。MMBERT包含特定模态的专家、一个共享的自注意力机制和一个基路由器的专家分配策略，以增强对对抗性扰动的鲁棒性。在几个中文仇恨言论数据集上的实证结果表明，MMBERT显著优于微调的基于BERT的编码器模型、微调的LLM以及使用上下文学习方法的LLM。"
+      "id": "arXiv:2507.23511",
+      "title": "MECAT: A Multi-Experts Constructed Benchmark for Fine-Grained Audio Understanding Tasks",
+      "chinese_title": "MECAT：一个用于细粒度音频理解任务的多专家构建基准",
+      "authors": "Yadong Niu, Tianzi Wang, Heinrich Dinkel, Xingwei Sun, Jiahao Zhou, Gang Li, Jizhong Liu, Xunying Liu, Junbo Zhang, Jian Luan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23511&sa=D&source=editors&ust=1754364653399952&usg=AOvVaw3DYgupxrLC9DnelLxXNdc5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23511&sa=D&source=editors&ust=1754364653400038&usg=AOvVaw3lh_GQvt0WLe412CxDepCC",
+      "chinese_abstract": "摘要：尽管大型音频-语言模型在开放式音频理解方面取得了进展，但它们仍然未能达到人类细致入微的理解水平。这一差距之所以持续存在，很大程度上是因为当前的基准测试受限于数据标注和评估指标，无法可靠地区分通用输出和高度详细的输出。为此，本工作引入了MECAT，一个用于细粒度音频理解任务的多专家构建基准。MECAT通过一个集成了专业专家模型分析与大型语言模型思维链推理的流程生成，提供了视角、细粒度的音频描述和开放集问答对。该基准辅以一种新颖的评估指标：DATE（Discriminative-Enhanced Audio Text Evaluation）。该指标通过结合单样本语义相似度和跨样本可辨别性，惩罚通用术语并奖励详细描述。我们还对最先进的音频模型进行了全面评估，为它们当前的能力和局限性提供了新的见解。数据和代码可在此 https URL 获取。"
     },
     {
-      "id": "arXiv:2508.00323",
-      "title": "Oedipus and the Sphinx: Benchmarking and Improving Visual Language Models for Complex Graphic Reasoning",
-      "chinese_title": "俄狄浦斯与斯芬克斯：复杂图形推理中视觉语言模型的基准测试与改进",
-      "authors": "Jianyi Zhang, Xu Ji, Ziyin Zhou, Yuchen Zhou, Shubo Shi, Haoyu Wu, Zhen Li, Shizhao Liu",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00323&sa=D&source=editors&ust=1754360524999769&usg=AOvVaw0Hfa6vIy9ZcOQhWN7Bm9Io",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00323&sa=D&source=editors&ust=1754360524999812&usg=AOvVaw1hG0Ru9q4m6qo2qbZDFVMN",
-      "chinese_abstract": "评估视觉语言模型（VLM在图形推理任务中的性能已成为一个重要的研究课题。然而，VLM在模拟人类水平的图形推理能力方面仍表现出明显不足，尤其是在复杂图形推理和抽象问题解决方面，这些方面的研究较少，且现有研究仅关注简单图形。为了评估VLM在复杂图形推理中的性能，我们提出了ReasonBench，这是第一个专注于结构化图形推理任务的评估基准，包含了来自真实智力测试的1613个问题。ReasonBench涵盖了与位置、属性、数量和多元素任务相关的推理维度，全面评估了VLM在空间、关系和抽象推理方面的能力。我们对11个主流VLM（包括闭源和开源模型）进行了基准测试，并揭示了当前模型的显著局限性。基于这些发现，我们提出了一种双重优化策略：图示推理链（DiaCoT）通过分解层次来增强推理的可解释性，而ReasonTune通过训练来增强模型推理的任务适应性，所有这些将VLM的性能提高了33.5%。所有实验数据和代码均在代码库中提供：https://github.com/scarecrow0/ReasonBench。"
+      "id": "arXiv:2507.23751",
+      "title": "CoT-Self-Instruct: Building high-quality synthetic prompts for reasoning and non-reasoning tasks",
+      "chinese_title": "CoT-Self-Instruct：为推理和非推理任务构建高质量的合成提示",
+      "authors": "Ping Yu, Jack Lanchantin, Tianlu Wang, Weizhe Yuan, Olga Golovneva, Ilia Kulikov, Sainbayar Sukhbaatar, Jason Weston, Jing Xu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23751&sa=D&source=editors&ust=1754364653379006&usg=AOvVaw01xBS5Hf4fFlRrlXnOCQZB",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23751&sa=D&source=editors&ust=1754364653379100&usg=AOvVaw1FhS2e9QKPBnzw-iW0zbxz",
+      "chinese_abstract": "摘要：我们提出了CoT-Self-Instruct，一种合成数据生成方法，该方法指导LLM首先基于给定的种子任务通过思维链（CoT）进行推理和规划，然后生成一个质量和复杂性相似的新合成提示用于LLM训练，最后通过自动度量筛选出高质量数据。在可验证的推理任务中，我们的合成数据在MATH500、AMC23、AIME24和GPQA-Diamond等数据集上的表现显著优于现有的训练数据集，如s1k和OpenMathReasoning。对于不可验证的指令遵循任务，我们的方法在AlpacaEval 2.0和Arena-Hard上的性能也超过了人类或标准自指令提示。"
     },
     {
-      "id": "arXiv:2508.00222",
-      "title": "RL-PLUS: Countering Capability Boundary Collapse of LLMs in Reinforcement Learning with Hybrid-policy Optimization",
-      "chinese_title": "RL-PLUS：通过混合策略优化对抗强化学习中大语言模型的能力边界坍塌",
-      "authors": "Yihong Dong, Xue Jiang, Yongding Tao, Huanyu Liu, Kechi Zhang, Lili Mou, Rongyu Cao, Yingwei Ma, Jue Chen, Binhua Li, Zhi Jin, Fei Huang, Yongbin Li, Ge Li",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00222&sa=D&source=editors&ust=1754360525000473&usg=AOvVaw0ZVoi6QwLTw_R2tBaEkkBV",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00222&sa=D&source=editors&ust=1754360525000502&usg=AOvVaw3wlkocsiKuU90623cfqq7G",
-      "chinese_abstract": "带可验证奖励的强化学习（RLVR）显著提升了大型语言模型（LLM）的复杂推理能力。然而，由于其固有的在线策略（on-policy）以及LLM巨大的动作空间和稀疏奖励，它难以突破基础LLM的固有能力边界。此外，RLVR可能导致能力边界坍塌，缩小LLM解决问题的范围。为了解决这个问题，我们提出了RL-PLUS，一种新颖的方法，它将内部探索（即思考）与外部数据（即学习）相结合，以实现更强的推理能力并超越基础模型的边界。RL-PLUS集成了两个核心组件：多重重要性采样（Multiple Importance Sampling）以解决来自外部数据的分布不匹配问题，以及一个基于探索的优势函数（Exploration-Based Advantage Function）来引导模型走向高价值、未探索的推理路径。我们提供了理论分析和广泛的实验来证明我们方法的优越性和泛化性。结果显示，RL-PLUS在六个数学推理基准上与现有RLVR方法相比取得了最先进的性能，并在六个分布外推理任务上表现出优越性能。它还在不同模型家族实现了一致且显著的增益，平均相对提升范围从21.1%到69.2%。此外，多个基准上的Pass@k曲线表明，RL-PLUS有效解决了能力边界坍塌问题。"
+      "id": "arXiv:2507.22928",
+      "title": "How does Chain of Thought Think? Mechanistic Interpretability of Chain-of-Thought Reasoning with Sparse Autoencoding",
+      "chinese_title": "思维是如何思考的？使用稀疏自编码对思维链推理进行机理可解释性分析",
+      "authors": "Xi Chen, Aske Plaat, Niki van Stein",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.22928&sa=D&source=editors&ust=1754364653430457&usg=AOvVaw3oxThJjTVLug8KEYzrfb7y",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.22928&sa=D&source=editors&ust=1754364653430545&usg=AOvVaw0vtcPjCfToS9unL9hwLJzD",
+      "chinese_abstract": "摘要：思维链（CoT）提示提升了大型语言模型在多步任务上的准确性，但生成的“思考”是否反映了真实的内部推理过程仍未解决。我们首次对CoT的忠实性进行了特征级别的因果研究。通过将稀疏自编码器与激活补丁（activation patching）相结合，我们从Pythia-70M和Pythia-2.8B模型中提取了单语义特征，而这些模型在CoT和普通（无CoT）提示下解决GSM8K数学问题。将一小组CoT推理特征交换到无CoT的运行中，显著提高了2.8B模型中的答案对数概率，但在70M模型中没有可靠效果，揭示了一个明显的规模阈值。在更大的模型中，CoT还导致了显著更高的激活稀疏性和特征可解释性分数，表明其内部计算更加模块化。例如，模型生成正确答案的置信度从1.2提高到4.3。我们引入了补丁曲线和随机特征补丁基线，表明有用的CoT信息不仅存在于前K个补丁中，而是广泛分布的。总的来说，我们的结果表明，CoT可以在高容量的LLM中诱导出更具可解释性的内部结构，验证了其作为一种结构化提示方法的作用。"
     },
     {
-      "id": "arXiv:2508.00046",
-      "title": "Benchmarking Partial Observability in Reinforcement Learning with a Suite of Memory-Improvable Domains",
-      "chinese_title": "使用一套内存可改进领域对强化学习中的部分可观测性进行基准测试",
-      "authors": "Ruo Yu Tao, Kaicheng Guo, Cameron Allen, George Konidaris",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00046&sa=D&source=editors&ust=1754360525020620&usg=AOvVaw2cRgUjIf_vYfYbwRh00VS6",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00046&sa=D&source=editors&ust=1754360525020649&usg=AOvVaw0XEkyy6IRT80Ct5wrFu_V9",
-      "chinese_abstract": "减轻部分可观测性是通用强化学习算法一项必要但具有挑战性的任务。为了提高算法减轻部分可观测性的能力，研究人员需要全面的基准来衡量进展。大多数处理部分可观测性的算法仅在具有简单状态混淆形式的基准上进行评估，例如特征屏蔽和高斯噪声。此类基准不能代表真实领域中出现的多种形式的部分可观测性，如视觉遮挡或未知的对手意图。我们认为，一个部分可观测的基准应具备两个关键属性。首先是其部分可观测性形式的覆盖范围，以确保算法的泛化能力。其次是在其他因素大致相等的情况下，拥有更多或更少状态信息的智能体之间存在较大的性能差距。这个差距意味着环境是内存可改进的：即领域中的性能增益来自于算法应对部分可观测性的能力，而非其他因素。我们介绍了在部分可观测性下对强化学习进行经验基准测试的最佳实践指南，以及开源库POBAX：JAX中的部分可观测基准。我们对各种环境中存在的部分可观测性类型进行了表征，并为我们的基准选择了代表性环境。这些环境包括定位与建图、视觉控制、游戏等。此外，我们表明这些任务都是内存可改进的，并且需要难以学习的记忆功能，为部分可观测性研究提供了具体信号。该框架包括推荐的超参数以及算法实现，以便快速、开箱即用地进行评估，还包括在JAX中实现的高性能环境，用于GPU可扩展的实验。"
+      "id": "arXiv:2507.23042",
+      "title": "Early Goal-Guided Multi-Scale Fusion for Real-Time Vision-Language Driving",
+      "chinese_title": "用于实时视觉-语言驾驶的早期目标引导多尺度融合",
+      "authors": "Santosh Patapati, Trisanth Srinivasan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23042&sa=D&source=editors&ust=1754364653421442&usg=AOvVaw3PJurYz0-bx61B7IrJdnue",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23042&sa=D&source=editors&ust=1754364653421523&usg=AOvVaw3zFmNDm1NOTaSMlXDBeoZT",
+      "chinese_abstract": "摘要：自动驾驶汽车必须在毫秒内做出反应，同时对道路几何结构和交通意图进行推理，以应对复杂情况。我们引入了NovaDrive，一个单分支的视觉-语言架构，它在单一分支中处理前置摄像头图像、高清地图瓦片、激光雷达深度和文本路径点。一个轻量级的、两阶段的交叉注意力模块首先将路径点令牌与高清地图对齐，然后在细粒度的图像和深度补丁上精炼注意力。结合一种新颖的平滑度损失函数，该函数不鼓励突然的转向和速度变化，这种设计消除了对循环记忆的需求。我们微调了一个11B参数的LLaMA-3.2视觉-语言骨干模型的顶层15层，以实现实时推理。在MD-NEX Outdoor基准测试的nuScenes/Waymo子集上，NovaDrive将成功率提高到84%（+4%），路径效率（SPL）提升至0.66（+0.11），并将碰撞频率从2.6%降低到1.2%（-1.4%），均优于先前的最先进技术。我们的消融实验证实，路径点令牌、部分VLM微调和交叉注意力融合各自对这些增益贡献最大。除了安全性，NovaDrive更短的路线（得益于新颖的平滑度损失）转化为更低的燃料或电池消耗，指向了更精简、更易于更新的驾驶技术栈。NovaDrive也可以扩展到其他具身AI领域。"
     },
     {
-      "id": "arXiv:2508.00017",
-      "title": "Generative Logic: A New Computer Architecture for Deterministic Reasoning and Knowledge Generation",
-      "chinese_title": "生成式逻辑：一种用于确定性推理和知识生成的新型计算机架构",
-      "authors": "Nikolai Sergeev",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00017&sa=D&source=editors&ust=1754360525022251&usg=AOvVaw2M5neifFtutdEIN-YbZ9jL",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00017&sa=D&source=editors&ust=1754360525022280&usg=AOvVaw3O0Myb6UmSojmD62MfwmD4",
-      "chinese_abstract": "我们提出生成式逻辑（Generative Logic, GL），一种确定性架构，它从用户提供的公理化定义（用一种极简的数学编程语言MPL编写）开始，并系统地探索其演绎邻域。定义被编译成一个由简单的逻辑块（LB）组成的分布式网格，这些逻辑块交换消息；每当多个表达式在某个推理规则下合一（unify）时，就会产生一个带有完整来源信息的新事实，从而产生可重放、可审计的证明图。一个原型软件实现将该工作流程实例化于一阶皮亚诺算术。仅从皮亚诺公理出发，GL枚举候选的蕴涵式，应用归一化和类型过滤器，并自动重构基础算术定律的机器可检查证明，包括加法的结合律和交换律、乘法的结合律和交换律以及分配律。生成的证明可导出为可导航的HTML，以便每个推理步骤都可以独立检查。我们勾勒了一条通往大规模并行实现的硬件-软件同设计路径，并描述了与概率模型（如大型语言模型LLM）的前瞻性集成，用于自动形式化和猜想播种。重现皮亚诺实验的Python和MPL代码，以及完整的HTML证明图，可在项目的GitHub仓库（https://github.com/nikolai-s/generative-logic）中找到，并永久存档于（https://zenodo.org/records/13444654）。我们欢迎社区的反馈与合作。"
-    },
-    {
-      "id": "arXiv:2508.00459",
-      "title": "Thinking Machines: Mathematical Reasoning in the Age of LLMs",
-      "chinese_title": "思维机器：大语言模型时代的数学推理",
-      "authors": "Andrea Asperti, Alberto Naibo, Claudio Sacerdoti Coen",
-      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.00459&sa=D&source=editors&ust=1754360524998661&usg=AOvVaw0L9wpY677vOe8oGMr6gmwq",
-      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.00459&sa=D&source=editors&ust=1754360524998689&usg=AOvVaw31w9w4nhG_tmvb6fJaTaHU",
-      "chinese_abstract": "大型语言模型（LLM）在结构化推理和符号任务中展现出卓越的能力，其中编码成为一个特别的强项。这一成功激发了人们将LLM应用于数学的日益增长的兴趣，无论是在非形式化问题解决还是形式化定理证明方面。然而，尽管编程和证明构建之间存在表面上的相似性，但在形式化数学方面的进展却要困难得多。这种差异引发了关于LLM如何“推理”、它们如何被监督以及它们是否在内部追踪计算或演绎状态概念的重要问题。在本文中，我们探讨了该学科的最新技术水平，重点关注近期的模型和基准，并探讨了机器学习与数学认知交叉领域的三个核心问题：（i）作为训练领域的非形式化数学与形式化数学之间的权衡；（ii）证明生成比代码合成更脆弱的深层原因；（iii）以及LLM是表示还是仅仅模仿了演进的逻辑状态概念的问题。我们的目标不是划定硬性界限，而是确定前限制所在，以及如何扩展这些限制。"
+      "id": "arXiv:2507.23735",
+      "title": "Distributed AI Agents for Cognitive Underwater Robot Autonomy",
+      "chinese_title": "用于认知水下机器人自主性的分布式AI智能体",
+      "authors": "Markus Buchholz, Ignacio Carlucho, Michele Grimaldi, Yvan R. Petillot",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2507.23735&sa=D&source=editors&ust=1754364653391945&usg=AOvVaw1fbWwar8Om4BxUZN-cKb3V",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2507.23735&sa=D&source=editors&ust=1754364653392037&usg=AOvVaw0KqD9TkKBeMCUD198eJEws",
+      "chinese_abstract": "摘要：在复杂、不可预测的环境中导航的机器人实现鲁棒的认知自主性，仍然是机器人学的一个根本挑战。本文介绍了水下机器人自组织自主性（UROSA），这是一个开创性的架构，它利用集成在机器人操作系统2（ROS 2）框架内的分布式大型语言模型AI智能体，为自主水下航行器（AUV）提供先进的认知能力。UROSA将认知分散到专门的AI智能体中，这些智能体负责多模态感知、自适应推理、动态任务规划和实时决策。核心创新包括：灵活的智能体动态调整其角色、利用向量数据库进行高效知识管理的检索增强生成、强化学习驱动的行为优化，以及用于运行时功能可扩展性的自主即时ROS 2节点生成。广泛的实证验证通过在模拟和真实世界部署的现实水下任务，证明了UROSA在处理意外场景、环境不确定性和新任务目标方面，相比传统基于规则的架构具有显著优势，显示出其良好的适应性和可靠性。这项工作不仅推动了水下自主技术的发展，还建立了一个可扩展、安全且多功能的认知机器人框架，能够推广到各种现实世界的应用中。"
     }
   ],
   "clusters": {
-    "AI生成内容与检测": [
-      "arXiv:2508.00782",
-      "arXiv:2508.00701",
-      "arXiv:2508.00632",
-      "arXiv:2508.00312",
-      "arXiv:2508.00299",
-      "arXiv:2508.00413",
-      "arXiv:2508.00784"
+    "LLM智能体与强化学习": [
+      "arXiv:2507.23773",
+      "arXiv:2507.23698",
+      "arXiv:2507.23261",
+      "arXiv:2507.23735",
+      "arXiv:2507.23726"
     ],
-    "LLM智能体、对齐与安全": [
-      "arXiv:2508.00324",
-      "arXiv:2508.00282",
-      "arXiv:2508.00500",
-      "arXiv:2508.00159",
-      "arXiv:2508.00414",
-      "arXiv:2508.00271"
+    "多模态模型与自主驾驶": [
+      "arXiv:2507.23540",
+      "arXiv:2507.23318",
+      "arXiv:2507.23042",
+      "arXiv:2507.23682",
+      "arXiv:2507.22920",
+      "arXiv:2507.23010"
     ],
-    "多模态推理与理解": [
-      "arXiv:2508.00378",
-      "arXiv:2508.00576",
-      "arXiv:2508.00760",
-      "arXiv:2508.00323"
+    "生成式AI、三维视觉与音频": [
+      "arXiv:2507.23704",
+      "arXiv:2507.23058",
+      "arXiv:2507.23091",
+      "arXiv:2507.23511"
     ],
-    "强化学习与高级AI理论": [
-      "arXiv:2508.00222",
-      "arXiv:2508.00046",
-      "arXiv:2508.00017",
-      "arXiv:2508.00459"
+    "LLM对齐、高效训练与可解释性": [
+      "arXiv:2507.22940",
+      "arXiv:2507.23067",
+      "arXiv:2507.23751",
+      "arXiv:2507.23536",
+      "arXiv:2507.22928"
     ]
   }
 }
