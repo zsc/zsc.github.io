@@ -668,56 +668,146 @@
         });
         
         const fetchAndParseGoogleSheet = async (url) => {
-            showStatus('1/4: 正在抓取 Google Sheet 数据...');
-            // We use a CORS proxy to bypass browser restrictions on fetching cross-origin content.
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`
+            showStatus('1/5: 正在抓取 Google Sheet 数据...');
             
             try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`无法抓取数据，服务器响应: ${response.status}`);
-                const htmlText = await response.text();
+                // Extract the published sheet ID from the URL
+                const sheetIdMatch = url.match(/\/d\/e\/([^\/]+)/);
+                if (!sheetIdMatch) throw new Error('无法从URL中提取Sheet ID');
+                const sheetId = sheetIdMatch[1];
                 
-                showStatus('2/4: 正在解析 HTML 表格...');
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlText, 'text/html');
-
-                const table = doc.querySelector('.waffle');
-                if (!table) throw new Error('在返回的HTML中未找到 .waffle 表格。');
-
-                const papers = [];
-                const rows = table.querySelectorAll('tbody tr');
-
-                // Skip header row (index 0)
-                for (let i = 1; i < rows.length; i++) {
-                    const cells = rows[i].querySelectorAll('td');
-                    if (cells.length < 7) continue; // Ensure row has enough data
-
-                    const paper = {
-                        id: cells[0].textContent.trim(),
-                        title: cells[1].textContent.trim(),
-                        authors: cells[2].textContent.trim(),
-                        subjects: cells[3].textContent.trim(),
-                        abstract: cells[4].textContent.trim(),
-                        abs_link: cells[5].querySelector('a')?.href || '',
-                        pdf_link: cells[6].querySelector('a')?.href || ''
-                    };
-                    // Only add papers with a valid ID and title
-                    if (paper.id && paper.title) {
-                        papers.push(paper);
+                // First, fetch the main page to get the sheet mapping
+                const mainUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pubhtml`;
+                const mainProxyUrl = `https://corsproxy.io/?${encodeURIComponent(mainUrl)}`;
+                
+                showStatus('正在获取可用的数据表列表...');
+                const mainResponse = await fetch(mainProxyUrl);
+                if (!mainResponse.ok) throw new Error(`无法获取主页面，服务器响应: ${mainResponse.status}`);
+                
+                const mainHtml = await mainResponse.text();
+                
+                // Extract all sheet information from the JavaScript in the page
+                const itemsMatch = mainHtml.match(/var items = \[\];(.+?)var sheetsViewport/s);
+                if (!itemsMatch) throw new Error('无法从页面中提取数据表信息');
+                
+                // Parse the sheet items
+                const sheetItems = [];
+                const itemRegex = /name: "([^"]+)".*?gid: "(\d+)"/g;
+                let match;
+                while ((match = itemRegex.exec(itemsMatch[1])) !== null) {
+                    sheetItems.push({
+                        name: match[1],
+                        gid: match[2]
+                    });
+                }
+                
+                if (sheetItems.length === 0) throw new Error('未找到任何数据表');
+                
+                // Get the date from the report date input
+                const selectedDate = reportDateInput.value;
+                let targetSheet = null;
+                
+                if (selectedDate) {
+                    // Try to find exact match for selected date
+                    targetSheet = sheetItems.find(item => item.name === selectedDate);
+                }
+                
+                // If no exact match or no date selected, try to find the most recent sheet
+                if (!targetSheet) {
+                    // Get today's date
+                    const today = new Date();
+                    const todayString = createDateString(
+                        today.getFullYear(),
+                        today.getMonth() + 1,
+                        today.getDate()
+                    );
+                    
+                    // Try to find today's sheet first
+                    targetSheet = sheetItems.find(item => item.name === todayString);
+                    
+                    // If not found, find the most recent sheet
+                    if (!targetSheet) {
+                        // Sort sheets by date (newest first)
+                        const sortedSheets = sheetItems.sort((a, b) => {
+                            return new Date(b.name) - new Date(a.name);
+                        });
+                        targetSheet = sortedSheets[0];
                     }
                 }
-                if (papers.length === 0) throw new Error('解析完成，但未提取到任何论文数据。请检查表格格式。');
+                
+                if (!targetSheet) throw new Error('无法确定要使用的数据表');
+                
+                showStatus(`2/5: 正在获取 ${targetSheet.name} 的数据...`);
+                
+                // Fetch the specific sheet using its GID
+                const sheetUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pubhtml/sheet?headers=false&gid=${targetSheet.gid}`;
+                const sheetProxyUrl = `https://corsproxy.io/?${encodeURIComponent(sheetUrl)}`;
+                
+                const sheetResponse = await fetch(sheetProxyUrl);
+                if (!sheetResponse.ok) throw new Error(`无法获取数据表，服务器响应: ${sheetResponse.status}`);
+                
+                const sheetHtml = await sheetResponse.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(sheetHtml, 'text/html');
+                
+                // Find the table with class 'waffle'
+                const table = doc.querySelector('.waffle');
+                if (!table) throw new Error(`在 ${targetSheet.name} 的数据中未找到表格`);
+                
+                showStatus(`3/5: 正在解析 ${targetSheet.name} 的表格数据...`);
+                const papers = parseTableData(table);
+                
+                if (!papers || papers.length === 0) {
+                    throw new Error(`${targetSheet.name} 的表格中没有找到论文数据`);
+                }
+                
+                showStatus(`已成功获取 ${targetSheet.name} 的数据 (${papers.length} 篇论文)`);
                 return papers;
-
+                
             } catch (error) {
                 showStatus(`抓取或解析失败: ${error.message}`, true);
                 console.error(error);
                 return null;
             }
         };
+        
+        // Helper function to parse table data
+        const parseTableData = (table) => {
+            const papers = [];
+            const rows = table.querySelectorAll('tbody tr');
+            
+            // Skip header row and freezebar row
+            for (let i = 0; i < rows.length; i++) {
+                // Skip rows that are freezebar cells
+                if (rows[i].querySelector('.freezebar-cell')) continue;
+                
+                const cells = rows[i].querySelectorAll('td');
+                if (cells.length < 7) continue; // Ensure row has enough data
+                
+                // Skip header row by checking if first cell contains "ID"
+                if (cells[0].textContent.trim() === 'ID') continue;
+                
+                const paper = {
+                    id: cells[0].textContent.trim(),
+                    title: cells[1].textContent.trim(),
+                    authors: cells[2].textContent.trim(),
+                    subjects: cells[3].textContent.trim(),
+                    abstract: cells[4].textContent.trim(),
+                    abs_link: cells[5].querySelector('a')?.href || '',
+                    pdf_link: cells[6].querySelector('a')?.href || ''
+                };
+                
+                // Only add papers with a valid arXiv ID and title
+                if (paper.id && paper.id.startsWith('arXiv:') && paper.title) {
+                    papers.push(paper);
+                }
+            }
+            
+            return papers;
+        };
 
         const processWithGemini = async (papers, interest, apiKey) => {
-            showStatus(`3/4: 已提取 ${papers.length} 篇论文，正在调用 Gemini AI 进行筛选、翻译和聚类...`);
+            showStatus(`4/5: 已提取 ${papers.length} 篇论文，正在调用 Gemini AI 进行筛选、翻译和聚类...`);
             
             if (!window.GoogleGenerativeAI) {
                 showStatus('Gemini AI SDK未能加载。请检查网络连接或浏览器控制台。', true);
@@ -787,7 +877,7 @@ ${JSON.stringify(papers)}
         };
 
         const renderReport = (data, dateString) => {
-            showStatus('4/4: 正在渲染报告...');
+            showStatus('5/5: 正在渲染报告...');
 
             const { papers: papersData, clusters: clustersData } = data;
             
