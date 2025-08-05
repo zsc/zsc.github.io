@@ -334,7 +334,7 @@
     <script type="importmap">
     {
         "imports": {
-            "@google/generai": "https://esm.run/@google/generative-ai"
+            "@google/genai": "https://esm.run/@google/genai"
         }
     }
     </script>
@@ -342,7 +342,7 @@
     <script src="prompts.js"></script>
 
     <script type="module">
-        import { GoogleGenerativeAI } from "@google/generai";
+        import { GoogleGenAI } from "@google/genai";
 
         const apiKeyInput = document.getElementById('apiKeyInput');
         const arxivInput = document.getElementById('arxivInput');
@@ -770,7 +770,7 @@
             
             if (!genAI) {
                 try {
-                    genAI = new GoogleGenerativeAI(apiKey);
+                    genAI = new GoogleGenAI({apiKey: apiKey});
                 } catch (e) {
                     statusBar.textContent = `API Key 初始化失败: ${e.message}`;
                     return;
@@ -815,24 +815,30 @@
                 let pdfBase64 = arrayBufferToBase64(pdfArrayBuffer);
                 
                 statusBar.textContent = `[${id}] PDF（${pdfSize} MB）正在发送至 Gemini API (${selectedModel}) 进行摘要...`;
-                const model = genAI.getGenerativeModel({ model: selectedModel });
                 
-                const result = await model.generateContent([
-                    customPrompt,
-                    {
-                        inlineData: {
-                            mimeType: 'application/pdf',
-                            data: pdfBase64
+                const result = await genAI.models.generateContent({
+                    model: selectedModel,
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: customPrompt },
+                                {
+                                    inlineData: {
+                                        mimeType: 'application/pdf',
+                                        data: pdfBase64
+                                    }
+                                }
+                            ]
                         }
-                    }
-                ]);
+                    ]
+                });
 
                 // Clear the PDF data after sending to API
                 pdfArrayBuffer = null;
                 pdfBase64 = null;
 
-                const response = result.response;
-                const summaryText = response.text();
+                const summaryText = result.text;
 
                 papers[id].status = 'success';
                 papers[id].summary = summaryText;
