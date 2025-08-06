@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.03680",
+      "title": "Agent Lightning: Train ANY AI Agents with Reinforcement Learning",
+      "chinese_title": "Agent Lightning：使用强化学习训练任意AI智能体",
+      "authors": "Xufang Luo, Yuge Zhang, Zhiyuan He, Zilong Wang, Siyun Zhao, Dongsheng Li, Luna K. Qiu, Yuqing Yang",
+      "abs_link": "https://arxiv.org/abs/2508.03680",
+      "pdf_link": "https://arxiv.org/pdf/2508.03680",
+      "chinese_abstract": "我们提出了 Agent Lightning，一个灵活且可扩展的框架，它能够为任何 AI 智能体启用基于强化学习（RL）的大语言模型（LLM）训练。与现有方法将 RL 训练与智能体紧密耦合或依赖于带掩码的序列拼接不同，Agent Lightning 实现了智能体执行与训练的完全解耦，允许与通过多种方式开发的现有智能体（例如，使用 LangChain、OpenAI Agents SDK、AutoGen 等框架，或从头构建）进行无缝集成，且几乎无需修改代码。通过将智能体执行建模为马尔可夫决策过程，我们定义了一个统一的数据接口，并提出了一种分层 RL 算法 LightningRL，其中包含一个信用分配模块，使我们能够将任意智能体生成的轨迹分解为训练转移。这使得 RL 能够处理复杂的交互逻辑，例如多智能体场景和动态工作流。在系统设计方面，我们引入了一种训练-智能体分离架构，并将智能体可观察性框架引入智能体运行时，提供了一个标准化的智能体微调接口。在文本到SQL、检索增强生成和数学工具使用等任务上的实验表明，该框架取得了稳定、持续的改进，展示了其在真实世界智能体训练和部署方面的潜力。"
+    },
+    {
+      "id": "arXiv:2508.03058",
+      "title": "VRPO: Rethinking Value Modeling for Robust RL Training under Noisy Supervision",
+      "chinese_title": "VRPO：在噪声监督下为稳健的强化学习训练重新思考价值建模",
+      "authors": "Dingwei Zhu, Shihan Dou, Zhiheng Xi, Senjie Jin, Guoqiang Zhang, Jiazheng Zhang, Junjie Ye, Mingxu Chai, Enyu Zhou, Ming Zhang, Caishuang Huang, Yunke Zhang, Yuran Wang, Tao Gui",
+      "abs_link": "https://arxiv.org/abs/2508.03058",
+      "pdf_link": "https://arxiv.org/pdf/2508.03058",
+      "chinese_abstract": "在真实世界环境中，基于人类反馈的强化学习（RLHF）常常受到噪声或不完美的奖励监督的影响，这削弱了策略的稳定性和泛化能力。这种噪声可能导致模型在优势估计过程中忽略关键词。虽然先前的工作主要集中在奖励去噪或过滤不良数据上，但它们往往忽略了价值模型在策略优化中的关键作用。在这项工作中，我们证明了一个强大的价值模型对于通过吸收不稳定信号和实现更可靠的优势估计来减轻噪声至关重要。我们提出了VRPO，一个以价值为中心的框架，用于在噪声监督下进行稳健的PPO训练。VRPO结合了两个核心设计：（1）由一个冻结语言型的熵和困惑度引导的辅助损失，以及（2）一个变分信息瓶颈。这些机制增强了价值模型在优势估计过程中过滤噪声和捕捉上下文中关键词的能力，将其从一个被动的预测器转变为一个主动的噪声调节器。在数学推理、科学问答和多轮对话等任务上，使用基于规则和基于模型的噪声奖励进行的实验表明，VRPO始终优于PPO和GRPO基线模型。我们的研究结果强调了价值模型在RLHF中常被忽视的重要性，并为在嘈杂的真实世界环境中进行稳健的策略优化提供了一种有原则且实用的方法。"
+    },
+    {
+      "id": "arXiv:2508.03682",
+      "title": "Self-Questioning Language Models",
+      "chinese_title": "自问自答的语言模型",
+      "authors": "Lili Chen, Mihir Prabhudesai, Katerina Fragkiadaki, Hao Liu, Deepak Pathak",
+      "abs_link": "https://arxiv.org/abs/2508.03682",
+      "pdf_link": "https://arxiv.org/pdf/2508.03682",
+      "chinese_abstract": "大语言模型能否在没有外部数据的情况下，通过生成自己的问题和答案来提升自己？我们假设一个预训练的语言模型，仅通过一个指定主题（例如，代数应用题）并要求模型生成自己问题的提示，就能提高其推理能力。为此，我们提出了自问自答语言模型（SQLM）：一个非对称的自我博弈框架，其中一个提议者（proposer）被给予主题并生成一个问题给一个解决者（solver），解决者尝试回答它。提议者和解决者都通过强化学习进行训练。如果问题不太容易也不太难，提议者会获得奖励；而解决者则根据多数投票（在没有真实答案的情况下作为正确性的代理）获得奖励。对于编码任务，提议者可以生成用于验证的单元测试。我们在三个基准上研究了这个非对称自我博弈框架：三位数乘法、OMEGA基准中的代数问题，以及Codeforces中的编程问题。通过不断生成更有趣的问题并尝解决它们，语言模型可以在不访问任何精选训练数据集的情况下，在下游基准上取得进步。"
+    },
+    {
+      "id": "arXiv:2506.16119",
+      "title": "FastInit: Fast Noise Initialization for Temporally Consistent Video Generation",
+      "chinese_title": "FastInit: 用于时序一致视频生成的快速噪声初始化",
+      "authors": "Chengyu Bai, Yuming Li, Zhongyu Zhao, Jintao Chen, Peidong Jia, Qi She, Ming Lu, Shanghang Zhang",
+      "abs_link": "https://arxiv.org/abs/2506.16119",
+      "pdf_link": "https://arxiv.org/pdf/2506.16119",
+      "chinese_abstract": "随着扩散模型的发展，视频生成取得了显著进展；然而，实现高时间一致性仍然是一项具有挑战性的任务。最近，FreeInit 指出了训练与推理之间的差距，并引入了一种在推理过程中迭代优化初始噪声的方法。然而，迭代优化显著增加了视频生成的计算成本。在本文中，我们介绍了 FastInit，一种快速噪声初始化方，无需进行迭代优化。FastInit 学习一个视频噪声预测网络（VNPNet），该网络将随机噪声和文本提示作为输入，通过单次前向传播生成优化后的噪声。因此，FastInit 极大地提高了视频生成的效率，同时实现了帧间的高度时间一致性。为了训练 VNPNet，我们创建了一个大规模数据集，其中包含文本提示、随机噪声和优化后噪声的配对。在各种文本到视频模型上的大量实验表明，我们的方法持续提高了生成视频的质量和时间一致性。FastInit 不仅在视频生成方面提供了实质性的改进，还提供了一个可以直接在推理过程中应用的实用解决方案。代码和数据集将会发布。"
+    },
+    {
+      "id": "arXiv:2508.03543",
+      "title": "EmoSteer-TTS: Fine-Grained and Training-Free Emotion-Controllable Text-to-Speech via Activation Steering",
+      "chinese_title": "EmoSteer-TTS: 通过激活引导实现细粒度、免训练的情感可控文本转音",
+      "authors": "Tianxin Xie, Shan Yang, Chenxing Li, Dong Yu, Li Liu",
+      "abs_link": "https://arxiv.org/abs/2508.03543",
+      "pdf_link": "https://arxiv.org/pdf/2508.03543",
+      "chinese_abstract": "近年来，文本转语音（TTS）技术取得了巨大进步。然而，大多数现有的TTS系统只提供粗略和僵化的情感控制，通常通过离散的情感标签或精心制作的详细情感文本提示来实现，这使得细粒度的情感操控要么无法实现，要么不稳定。这些模型还需要大量高质量的数据集进行训练。为了解决这些局限性，我们提出了EmoSteer-TTS，一种新颖的免训练方法，通过激活引导来实现细粒度的语音情感控制（转换、插值、擦除）。我们首先通过经验观察到，修改基于流匹配的TTS模型内部激活的一部分，可以有效地改变合成语音的情感基调。基于这一发现，我们开发了一种免训练且高效的算法，包括激活提取、情感标记搜索和推理时引导，该算法可以无缝集成到各种预训练模型中（例如，F5-TTS、CosyVoice2和E2-TTS）。此外，为了导出有效的引导向量，我们构建了一个包含不同说话人的精选情感语音数据集。大量实验表明，EmoSteer-TTS能够实现细粒度、可解释和连续的语音情感控制，其性能优于当前最先进（SOTA）的方法。据我们所知，这是首个在TTS中实现免训练和连续细粒度情感控制的方法。"
+    },
+    {
+      "id": "arXiv:2508.03480",
+      "title": "VideoGuard: Protecting Video Content from Unauthorized Editing",
+      "chinese_title": "VideoGuard: 保护视频内容免遭未经授权的编辑",
+      "authors": "Junjie Cao, Kaizhou Li, Xinchun Yu, Hongxiang Li, Xiaoping Zhang",
+      "abs_link": "https://arxiv.org/abs/2508.03480",
+      "pdf_link": "https://arxiv.org/pdf/2508.03480",
+      "chinese_abstract": "随着生成技术的飞速发展，当前的生成模型能够生成高保真度的数字内容，并能以可控的方式对其进行编辑。然而，恶意分子可能会滥用这些能力进行误导性活动。尽管现有研究已尝试保护照片图像免受生成模型的操纵，但在保护视频内容编辑方面仍存在显著差距。为了弥补这一差距，我们提出了一种名为 VideoGuard 的保护方法，可以有效地保护视频免受未经授权的恶意编辑。这种保护是通过巧妙地引入几乎无法察觉的扰动来实现的，这些扰动会干扰目标生成扩散模型的正常功能。由于视频帧之间的冗余以及视频扩散模型中的帧间注意力机制，简单地将基于图像的保护方法分别应用于每个视频帧无法保护视频免遭未经授权的编辑。为了应对上述挑战，我们采用联合帧优化，将所有视频帧视为一个优化实体。此外，我们提取视频运动信息并将其融入优化目标中。因此，这些改动可以有效地迫使模型产生不合理且不一致的输出。我们提供了一个化这种扰动的流程。最后，我们使用客观和主观指标来证明我们方法的有效性，结果表明 VideoGuard 的保护性能优于所有基线方法。"
+    },
+    {
+      "id": "arXiv:2508.03254",
+      "title": "V.I.P. : Iterative Online Preference Distillation for Efficient Video Diffusion Models",
+      "chinese_title": "V.I.P.：用于高效视频扩散模型的迭代式在线偏好蒸馏",
+      "authors": "Jisoo Kim, Wooseok Seo, Junwan Kim, Seungho Park, Sooyeon Park, Youngjae Yu",
+      "abs_link": "https://arxiv.org/abs/2508.03254",
+      "pdf_link": "https://arxiv.org/pdf/2508.03254",
+      "chinese_abstract": "随着在资源受限环境中部署文本到视频（T2V）模型的兴趣日益增长，降低其高计算成本已变得至关重要，这导致了在保持性能的同时对剪枝和知识蒸馏方法进行了广泛研究。然而，现有的蒸馏方法主要依赖于监督微调（SFT），这通常会导致模式崩溃，因为容量减小的剪枝模型无法接匹配教师模型的输出，最终导致质量下降。为了应对这一挑战，我们提出了一种有效的蒸馏方法 ReDPO，它集成了 DPO 和 SFT。我们的方法利用 DPO 来引导学生模型专注于仅恢复目标属性，而不是被动地模仿教师模型，同时利用 SFT 来增强整体性能。我们还提出了 V.I.P.，一个用于筛选和策划高质量配对数据集的新颖框架，以及一种用于校准训练的逐步在线方法。我们在两个领先的 T2V 模型 VideoCrafter2 和 AnimateDiff 上验证了我们的方法，分别实现了 36.2% 和 67.5% 的参数减少，同时保持甚至超越了完整模型的性能。进一步的实验证明了 ReDPO 和 V.I.P. 框架在实现高效和高质量视频生成方面的有效性。我们的代码和视频可在 https://... 获取。"
+    },
+    {
+      "id": "arXiv:2508.03123",
+      "title": "Fine-Tuning Text-to-Speech Diffusion Models Using Reinforcement Learning with Human Feedback",
+      "chinese_title": "使用带人类反馈的强化学习微调文本到语音扩散模型",
+      "authors": "Jingyi Chen, Ju Seung Byun, Micha Elsner, Pichao Wang, Andrew Perrault",
+      "abs_link": "https://arxiv.org/abs/2508.03123",
+      "pdf_link": "https://arxiv.org/pdf/2508.03123",
+      "chinese_abstract": "扩散模型能产生高保真度的语音，但由于去噪步骤较长以及在建模语调和节奏方面存在挑战，因此在实时应用中效率不高。为了改进这一点，我们提出了扩散损失引导策略优化（DLPO），一个用于TTS扩散模型的RLHF框架。DLPO将原始训练损失整合到奖励函数中，在保留生成能力的同时减少了低效率。通过使用自然度得分作为反馈，DLPO将奖励优化与扩散模型的结构对齐，从而提高了语音质量。我们在WaveGrad 2（一个非自回归的基于扩散的TTS模型）上评估了DLPO。结果显示，在客观指标（UTMOS 3.65, NISQA 4.02）和主观评估中均有显著提升，DLPO生成的音频在67%时间里更受偏好。这些发现证明了DLPO在实时、资源有限的环境中实现高效、高质量扩散TTS的潜力。"
+    },
+    {
+      "id": "arXiv:2508.02849",
+      "title": "SecoustiCodec: Cross-Modal Aligned Streaming Single-Codecbook Speech Codec",
+      "chinese_title": "SecoustiCodec：跨模态对齐的流式单码本语音编解码器",
+      "authors": "Chunyu Qiang, Haoyu Wang, Cheng Gong, Tianrui Wang, Ruibo Fu, Tao Wang, Ruilong Chen, Jiangyan Yi, Zhengqi Wen, Chen Zhang, Longbiao Wang, Jianwu Dang, Jianhua Tao",
+      "abs_link": "https://arxiv.org/abs/2508.02849",
+      "pdf_link": "https://arxiv.org/pdf/2508.02849",
+      "chinese_abstract": "语音编解码器是统一语音和文本语言模型的关键桥梁。现有的编解码方法在语义编码方面面临若干挑战，例如残留的副语言信息（如音色、情感）、语义完整性不足、重构能力有限以及不支持流式处理。为了应对这些挑战，我们提出了SecoustiCodec，一种跨模对齐的低比特率流式语音编解码器，它在单一码本空间中解耦了语义和副语言信息。为确保语义完整性和重构保真度，我们引入了副语言编码来弥合语义和声学编码之间的信息鸿沟。提出了一种基于VAE（变分自编码器）和FSQ（有限标量量化）的纯语义高效量化方法。该方法在保持高码本利用率的同时，缓解了词元（token）的长尾分布问题。提出了一种基于对比学习的语义解耦方法，该方法在联合多模态帧级空间中对齐文本和语音，有效去除了语义编码中的副语言信息。提出了一种声学约束的多阶段优化策略，以确保鲁棒和稳定的收敛。实验结果表明，SecoustiCodec在0.27/1 kbps比特率下实现了1.77/2.58的最先进（SOTA）重构质量（PESQ）。SecoustiCodec的代码和模型权重将在同行评审完成后开源。我们已经开源了SecoustiCodec的演示、代码和模型权重。"
+    },
+    {
+      "id": "arXiv:2508.03009",
+      "title": "Enhancing Long Video Question Answering with Scene-Localized Frame Grouping",
+      "chinese_title": "通过场景定位的帧分组增强长视频问答",
+      "authors": "Xuyi Yang, Wenhao Zhang, Hongbo Jin, Lin Liu, Hongbo Xu, Yongwei Nie, Fei Yu, Fei Ma",
+      "abs_link": "https://arxiv.org/abs/2508.03009",
+      "pdf_link": "https://arxiv.org/pdf/2508.03009",
+      "chinese_abstract": "当前的多模态大语言模型（MLLMs）在长视频理解方面通常表现不佳，这主要是由于资源限制，使其无法处理所有视频帧及其相关信息。高效提取相关信息成为一项具有挑战性的任务。现有的框架和评估任务侧重于从大量不相关的帧中识别包含核心对象的特定帧，这与实际应用的实际需求不符。为了解决这个问题，我们提出了一个新的视频问答任务场景——SceneQA，它强调基于场景的细节感知和推理能力。并且我们开发了LVSQA数据集来支持SceneQA任务，该数集基于从LVBench中精心挑选的视频构建，并包含一个新的问答对集合，以促进对MLLMs在长视频中场景感知能力的更公平评估。受人类认知的启发，我们提出了一种名为SLFG的新方法。SLFG的核心思想是将单个帧组合成语义上连贯的场景帧。通过利用场景定位方法和动态帧重组机制，SLFG显著增强了现有MLLMs在长视频中的理解能力。SLFG无需修改原始模型架构，并具有出色的即插即用性。实验结果表明，该方法在多个长视频基准测试中表现出色。代码和数据集将在 https://... 发布。"
+    },
+    {
+      "id": "arXiv:2508.03173",
+      "title": "Geoint-R1: Formalizing Multimodal Geometric Reasoning with Dynamic Auxiliary Constructions",
+      "chinese_title": "Geoint-R1: 通过动态辅助结构形式化多模态几何推理",
+      "authors": "Jingxuan Wei, Caijun Jia, Qi Chen, Honghao He, Linzhuang Sun, Conghui He, Lijun Wu, Bihui Yu, Cheng Tan",
+      "abs_link": "https://arxiv.org/abs/2508.03173",
+      "pdf_link": "https://arxiv.org/pdf/2508.03173",
+      "chinese_abstract": "数学几何推理对于科学发现和教育发展至关重要，需要精确的逻辑和严格的形式化验证。尽管多模态大语言模型（MLLMs）的最新进展改善了推理任务，但现有模型通常在形式化几何推理方面表现不佳，尤其是在动态构建和验证辅助几何元素时。为了应对这些挑战，我们引入了 Geoint-R1，一个多模态推理框架，旨在从文本描述和视觉图表中生成可形式化验证的几何解决方案。Geoint-R1 独特地集成了辅助元素构建、以 Lean4 表示的形式化推理以及交互式可视化。为了系统地评估和推进形式化几何推理，我们提出了 Geoint 基准，包含 1,885 个严格标注的几何问题，涵盖平面几何、空间几何和立体几何等多个主题。每个问题都包括结构化的文本注释、用于辅助结构构建的精确 Lean4 代码以及由专家证的详细解题步骤。大量实验表明，Geoint-R1 显著优于现有的多模态和数学专用推理模型，尤其是在需要明确构建辅助元素的挑战性问题上。"
+    },
+    {
+      "id": "arXiv:2508.03613",
+      "title": "Goedel-Prover-V2: Scaling Formal Theorem Proving with Scaffolded Data Synthesis and Self-Correction",
+      "chinese_title": "Goedel-Prover-V2：通过支架式数据合成和自我修正扩展形式化定理证明",
+      "authors": "Yong Lin, Shange Tang, Bohan Lyu, Ziran Yang, Jui-Hui Chung, Haoyu Zhao, Lai Jiang, Yihan Geng, Jiawei Ge, Jingruo Sun, Jiayun Wu, Jiri Gesi, Ximing Lu, David Acuna, Kaiyu Yang, Hongzhou Lin, Yejin Choi, Danqi Chen, Sanjeev Arora, Chi Jin",
+      "abs_link": "https://arxiv.org/abs/2508.03613",
+      "pdf_link": "https://arxiv.org/pdf/2508.03613",
+      "chinese_abstract": "我们介绍 Goedel-Prover-V2，这是一系列开源语言模型，在自动定理证明领域树立了新的技术标杆。该方法建立在标准的专家迭和强化学习流程之上，并融合了三项关键创新：（1）支架式数据合成：我们生成难度递增的合成任务，以训练模型掌握日益复杂的定理；（2）验证器引导的自我修正：我们使模型能够利用 Lean 编译器的反馈来迭代地修正其证明；（3）模型平均：我们合并模型检查点，以缓解训练后期模型输出多样性下降的问题。我们的小型模型 Goedel-Prover-V2-8B 在 MiniF2F 上的 pass@32 达到了 84.6%，在相同指标下优于 DeepSeek-Prover-V2-671B，尽管其模型大小仅为后者的 1/80。我们的旗舰模型 Goedel-Prover-V2-32B 在标准模式下 MiniF2F 上的 pass@32 达到了 88.1%，在自我修正模式下达到了 90.4%，大幅超越了之前的最优水平。此外，我们的旗舰模型在 PutnamBench 上以 pass@184 解决了 86 个问题，在开源模型排行榜上名列第一，超过了 DeepSeek-Prover-V2-671B 以 pass@1024 解决 47 个问题的记录，且模型大小和计算预算显著更小。在其发布时（2025年7-8月），Goedel-Prover-V2 在所有开源定理证明器中取得了最强的综合性能。在受限的测试时计算预算下，它也跻身于性能最高的模型之列——包括已公开性能的闭源系统。我们的模型、代码和数据均已在 https://... 发布。"
+    },
+    {
+      "id": "arXiv:2508.03351",
+      "title": "VLMQ: Efficient Post-Training Quantization for Large Vision-Language Models via Hessian Augmentation",
+      "chinese_title": "VLMQ：通过Hessian增强实现大型视觉语言模型的高效训练后量化",
+      "authors": "Yufei Xue, Yushi Huang, Jiawei Shao, Jun Zhang",
+      "abs_link": "https://arxiv.org/abs/2508.03351",
+      "pdf_link": "https://arxiv.org/pdf/2508.03351",
+      "chinese_abstract": "训练后量化（PTQ）已成为一种有效压缩大型模型并在不重新训练的情况下加速其推理的方法。虽然PTQ在大型语言模型（LLM）的背景下已得到广泛研究，但其在视觉语言模型（VLM）中的适用性仍未得到充分探索。在本文中，我们指出了VLM的模态差异（即有限的文本词元与过多且冗余的视觉词元）。然而，现有的基于Hessian的LLM PTQ方法在量化过程中对所有词元一视同仁，导致应用于VLM时性能严重下降。受此观察启发，我们提出了一种专为VLM量身定制的新型重要性感知的PTQ框架，称为VLMQ。具体而言，为解决视觉词元冗余问题，VLMQ 1）优化一个重要性感知的目标函数，该函数产生一个带有词元级重要性因子的增强Hessian矩阵，同时保持与并行化权重更新的兼容性；以及 2）通过单个轻量级的块级反向传播计算这些因子，并由与词元级扰动的理论联系指导，从而确保效率和有效性。在8个基准测试中对0.5B到32B参数的VLM进行的广泛评估表明，我们的VLMQ具有最先进（SOTA）的性能，尤其是在低比特设置下。例如，在2比特量化下，它在MME-RealWorld上实了16.45%的显著提升。"
+    },
+    {
+      "id": "arXiv:2508.03332",
+      "title": "Exploring Layer-wise Information Effectiveness for Post-Training Quantization in Small Language Models",
+      "chinese_title": "探索小型语言模型中逐层信息有效性以进行训练后量化",
+      "authors": "He Xiao, Qingyao Yang, Dirui Xie, Wendong Xu, Wenyong Zhou, Haobo Liu, Zhengwu Liu, Ngai Wong",
+      "abs_link": "https://arxiv.org/abs/2508.03332",
+      "pdf_link": "https://arxiv.org/pdf/2508.03332",
+      "chinese_abstract": "拥有数十亿参数的大型语言模型通常资源过剩：许多层贡献的独特信息很少，却在推理过程中占据了主要的内存和能耗。我们提出了LieQ，一个由度量驱动的训练后量化框架，旨在解决在极端低比特压缩下维持7B以下模型准确性的关键挑战。我们的方法引入了三个互补的逐层诊断指标——困惑度下降、表示紧凑度和Top-k能量增益——这些指标揭示了各层之间的典分工，从而实现了无需梯度更新的自动比特宽度分配。与在2-3比特精度下遭受严重准确性下降的现有方法不同，LieQ实现了最先进的压缩-准确性权衡：在Qwen3-4B上，它在2.05比特量化下恢复了FP16基线性能的95.9%，在七个零样本推理任务中平均优于GPTQ 19.7%，优于AWQ 18.1%。应用于LLaMA3.2-3B时，LieQ在2.07比特精度下保持了98.2%的基线准确性，同时实现了4倍的内存减少，为在资源受限的边缘设备上部署小型语言模型建立了新的范式。"
+    },
+    {
+      "id": "arXiv:2508.03527",
+      "title": "MoKA: Mixture of Kronecker Adapters",
+      "chinese_title": "MoKA：克罗内克适配器混合模型",
+      "authors": "Mohammadreza Sadeghi, Mahsa Ghazvini Nejad, MirHamed Jafarzadeh Asl, Yu Gu, Yuanhao Yu, Masoud Asgharian, Vahid Partovi Nia",
+      "abs_link": "https://arxiv.org/abs/2508.03527",
+      "pdf_link": "https://arxiv.org/pdf/2508.03527",
+      "chinese_abstract": "参数高效微调（PEFT）对于降低大型语言模型（LLM）的计算开销至关重要。低秩系列适配器通常用于有效控制参数大小，同时保持LLM的生成能力。然而，由于秩约束导致的表达能力有限，常常限制了它们在复杂任务上的性能。我们提出了克罗内克适配器混合模型（MoKA），这是新一代的克罗内克适配器，通过将权重更新建模为克罗内克乘积的混合来解决这一局限性。我们提出的适配器利用了一个门控机制来衡量每个克罗内克因子的重要性，从而实现更具表达力的自适应。此外，MoKA实现了秩的灵活性，在参数效率和准确性之间提供了更好的权衡。为了确保硬件效率，我们使用标准矩阵运算重新表述了克罗内克计算，从而可以在GPU优化的硬件上无缝部署。我们在使用LLaMA2-7B和LLaMA3-8B模型的低比特量化版本上，对指令微调和常识推理任务进行了广泛的实验。MoKA不仅优于PEFT基线，还将可训练参数数量减少了高达27倍，实现了性能和参数效率之间的最先进权衡。"
+    },
+    {
+      "id": "arXiv:2508.03018",
+      "title": "Beyond Policy Optimization: A Data Curation Flywheel for Sparse-Reward Long-Horizon Planning",
+      "chinese_title": "超越策略优化：用于稀疏奖励长时程规划的数据策展飞轮",
+      "authors": "Yutong Wang, Pengliang Ji, Kaixin Li, Baolong Bi, Tao Feng, Guillaume Sartoretti",
+      "abs_link": "https://arxiv.org/abs/2508.03018",
+      "pdf_link": "https://arxiv.org/pdf/2508.03018",
+      "chinese_abstract": "大型语言推理模型在静态任务上取得了显著成功，但它们在交互环境中的多轮智能体规划应用面临两个根本性挑战。首先，棘手的信用分配问题使得传统强化学习在稀疏奖励设置中无效。其次，冗长的、逐步推理历史的计算开销是巨大的。为了应对这些挑战，我们提出了BPO，一个三阶段框架（引导、外推和精炼），它建了一个自我改进的数据飞轮，以开发用于长时程、稀疏奖励环境的稳健推理模型。我们的框架首先使用所提出的规划四元数与长短思维链融合来引导高效推理。然后，通过复杂度分层的课程学习外推到分布外任务。最后，模型通过仅在由奖励门控拒绝采样选择的经验上学习来进行迭代精炼。在ALFWorld、ScienceWorld和WebShop上的实验表明，我们的方法以显著的词元效率实现了最先进的性能，为智能体规划中的推理模型提供了新的范例。"
+    },
+    {
+      "id": "arXiv:2508.03402",
+      "title": "SCFlow: Implicitly Learning Style and Content Disentanglement with Flow Models",
+      "chinese_title": "SCFlow：利用流模型隐式学习风格与内容解耦",
+      "authors": "Pingchuan Ma, Xiaopei Yang, Yusong Li, Ming Gui, Felix Krause, Johannes Schusterbauer, Björn Ommer",
+      "abs_link": "https://arxiv.org/abs/2508.03402",
+      "pdf_link": "https://arxiv.org/pdf/2508.03402",
+      "chinese_abstract": "由于语义重叠和人类感知的主观性，在视觉模型中明确解耦风格和内容仍然具有挑战性。现有方法通过生成或判别目标来提出分离，但它们仍然面临解耦交织概念的内在模糊性。因此，我们提出一个问题：我们是否可以通过学习可逆地合并风格和内容来绕过显式解耦，从而使分离自然出现？我们提出了 SCFlow，一个流匹配框架，用于学习纠缠表示和解耦表示之间的双向映射。我们的方法基于三个关键见解：1) 仅训练合并风格和内容（一个明确定义的任务）即可实现可逆解耦，而无需显式监督；2) 流匹配可以桥接任意分布，避免了扩散模型和归一化流的限制性高斯先验；3) 我们整理了一个包含 510,000 个样本（51 种风格 × 10,000 个内容样本）的合成数据集，通过系统的风格-内容配对来模拟解耦。除了可控生成任务，我们证明了 SCFlow 在零样本设置下可以泛化到 ImageNet-1k 和 WikiArt，并取得了有竞争力的性能，这突出表明解耦是从可逆的合并过程中自然产生的。"
+    },
+    {
+      "id": "arXiv:2508.03481",
+      "title": "Draw Your Mind: Personalized Generation via Condition-Level Modeling in Text-to-Image Diffusion Models",
+      "chinese_title": "画你所想：通过文本到图像扩散模型中的条件级建模实现个性化生成",
+      "authors": "Hyungjin Kim, Seokho Ahn, Young-Duk Seo",
+      "abs_link": "https://arxiv.org/abs/2508.03481",
+      "pdf_link": "https://arxiv.org/pdf/2508.03481",
+      "chinese_abstract": "文本到图像（T2I）扩散模型中的个性化生成旨在以最少的用户干预，自然地将个人用户偏好融入生成过程。然而，现有研究主要依赖于使用大规模模型的提示级建模，由于T2I扩散模型的输入词元容量有限，这常常导致个性化不准确。为了解决这些局限性，我们提出了DrUM，一种新颖的方法，它将用画像与基于Transformer的适配器相结合，通过潜在空间中的条件级建模实现个性化生成。DrUM在大型数据集上表现出强大的性能，并能无缝地与开源文本编码器集成，使其与广泛使用的基础T2I模型兼容，而无需额外的微调。"
+    },
+    {
+      "id": "arXiv:2508.03365",
+      "title": "When Good Sounds Go Adversarial: Jailbreaking Audio-Language Models with Benign Inputs",
+      "chinese_title": "当好声音变为对抗性：利用良性输入越狱音频-语言模型",
+      "authors": "Bodam Kim, Hiskias Dingeto, Taeyoun Kwon, Dasol Choi, DongGeon Lee, Haon Park, JaeHoon Lee, Jongho Shin",
+      "abs_link": "https://arxiv.org/abs/2508.03365",
+      "pdf_link": "https://arxiv.org/pdf/2508.03365",
+      "chinese_abstract": "随着大型语言模型日益融入日常生活，音频已成为人机交互的关键界面。然而，这种便利性也带来了新的漏洞，使音频成为对手潜在的攻击面。我们的研究引入了WhisperInject，一个两阶段的对抗性音频攻击框架，可以操纵最先进的音频语言模型生成有害内容。我们的方法在音频输入中使用难以察觉的扰动，这些扰动对人类听众来说仍然是良性的。第一阶段使用一种新颖的基于奖励的优化方法，即带投影梯度下降的强化学习（RL-PGD），来引导目标模型规避其自身的安全协议并生成有害的本地响应。这个本地有害响应随后成为第二阶段“载荷注入”的目标，在该阶段我们使用投影梯度下降（PGD）来优化嵌入到良性音频载体（如天气查询或问候信息）中的微小扰动。在严格的StrongREJECT、LlamaGuard以及人类评估安全评估框架下进行验证，我们的实验在Qwen2.5-Omni-3B、Qwen2.5-Omni-7B和Phi-4-Multimodal上的成功率超过86%。我们的工作展示了一类新的、实际的、音频原生的威胁，超越了理论上的漏洞利用，揭示了一种可行且隐蔽的操纵AI行为的方法。"
+    },
+    {
+      "id": "arXiv:2508.03012",
+      "title": "Tool-integrated Reinforcement Learning for Repo Deep Search",
+      "chinese_title": "用于代码库深度搜索的工具集成强化学习",
+      "authors": "Zexiong Ma, Chao Peng, Qunhong Zeng, Pengfei Gao, Yanzhen Zou, Bing Xie",
+      "abs_link": "https://arxiv.org/abs/2508.03012",
+      "pdf_link": "https://arxiv.org/pdf/2508.03012",
+      "chinese_abstract": "问题定位，即识别需要修改以解决软件问题的代码位置，是软件开发中一项关键但具有挑战性的任务。自然语言问题描述与错误代码之间的语义鸿沟需要通过代码依赖进行复杂的多跳推理。现有的基于LLM的智能体试图通过集成代码库检索工具来解决这个问题。然而，这将问题定位转变为一项我们称之为“代码库深度搜索”的艰巨任务，该任务要求LLM在多步推理和导航过程中有效利用各种代码库检索工具。为了应对这一挑战，我们提出了ToolTrain，一个两阶段的工具集成训练框架，结合了拒绝采样的监督微调和工具集成的强化学习，以增强LLM使用检索工具进行问题定位的能力。实验结果表明，经过ToolTrain训练的模型达到了最先进的性能，我们的32B模型在函数级定位上甚至超过了Claude-3.7。结果还表明，改进的定位性能可以转化为更好的端到端问题解决性能。这进一步证明了针对问题定位的训练是改进自动化软件开发的一种可行且有效的策略。"
+    }
+  ],
+  "clusters": {
+    "生成模型：视频、音频与语音": [
+      "arXiv:2506.16119",
+      "arXiv:2508.03543",
+      "arXiv:2508.03480",
+      "arXiv:2508.03254",
+      "arXiv:2508.03123",
+      "arXiv:2508.02849",
+      "arXiv:2508.03402",
+      "arXiv:2508.03481"
+    ],
+    "LLM智能体与强化学习": [
+      "arXiv:2508.03680",
+      "arXiv:2508.03058",
+      "arXiv:2508.03682",
+      "arXiv:2508.03018",
+      "arXiv:2508.03012",
+      "arXiv:2508.03009"
+    ],
+    "模型压缩与效率优化": [
+      "arXiv:2508.03351",
+      "arXiv:2508.03332",
+      "arXiv:2508.03527"
+    ],
+    "AI赋能科学与形式推理": [
+      "arXiv:2508.03173",
+      "arXiv:2508.03613",
+      "arXiv:2508.03365"
+    ]
+  }
+}
