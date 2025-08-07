@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.04700",
+      "title": "SEAgent: Self-Evolving Computer Use Agent with Autonomous Learning from Experience",
+      "chinese_title": "SEAgent: 通过经验自主学习的自进化计算机使用智能体",
+      "authors": "Zeyi Sun, Ziyu Liu, Yuhang Zang, Yuhang Cao, Xiaoyi Dong, Tong Wu, Dahua Lin, Jiaqi Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04700&sa=D&source=editors&ust=1754584042611085&usg=AOvVaw1bLtI3du6Q04AywXJ6f3v4",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04700&sa=D&source=editors&ust=1754584042611241&usg=AOvVaw1ZsidRiQ78mL35xObYwkeP",
+      "chinese_abstract": "摘要：将大型视觉语言模型（LVLMs）用作计算机使用智能体（CUAs）已取得重大突破，这主要由人工标注数据驱动。然而，这些模型在面对新颖和专业化的软件时，尤其是在缺乏人工标注的情况下，往往表现不佳。为应对这一挑战，我们提出了SEAgent，一个智能体化的自进化框架，使CUAs能够通过与不熟悉的软件交互来自主进化。具体来说，SEAgent赋予计算机使用智能体通过经验学习自主掌握新颖软件环境的能力，智能体在其中探索新软件，通过迭代试错进行学习，并逐步解决从简单到复杂自动生成的任务。为实现此目标，我们设计了一个用于逐步轨迹评估的世界状态模型，以及一个能生成日益多样和具有挑战性任务的课程生成器。智能体的策略通过经验学习进行更新，包括对失败动作的对抗性模仿和对成功动作的组相对策略优化（GRPO）。此外，我们引入了一种从专家到通才的训练策略，该策略整合了专家智能体的个体经验见解，从而促进了一个能够持续自主进化的更强大的通用CUA的开发。这个统一的智能体最终在其专业软件上实现了超越个体专家智能体集合的性能。我们OS-World内的五个新颖软件环境中验证了SEAgent的有效性。我们的方法相较于一个有竞争力的开源CUA（即UI-TARS），在成功率上实现了23.2%的显著提升，从11.3%提高到34.5%。"
+    },
+    {
+      "id": "arXiv:2508.04652",
+      "title": "LLM Collaboration With Multi-Agent Reinforcement Learning",
+      "chinese_title": "基于多智能体强化学习的大语言模型协作",
+      "authors": "Shuo Liu, Zeyu Liang, Xueguang Lyu, Christopher Amato",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04652&sa=D&source=editors&ust=1754584042611496&usg=AOvVaw1iVxeYFLU9_KddJvuyXD8O",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04652&sa=D&source=editors&ust=1754584042611557&usg=AOvVaw2KoswJ-3ulzo6D42K_Yder",
+      "chinese_abstract": "摘要：在多智能体系统（MAS）中，已经有大量工作用于建模和解决具有多个交互智能体的问题。然而，大多数大语言模型（LLMs）是独立预训练的，并未专门为协调进行优化。现有的LLM微调框架依赖于个体奖励，这需要为每个智能体设计复杂的奖励机制以鼓励协作。为了应对这些挑战，我们将LLM协作建模为一个合作式多智能体强化学习（MARL）问题。我们基于当前LLMs的强化学习方法以及MARL技术，开发了一种多智能体、多轮次的算法——多智能体组相对策略优化（MAGRPO）来解决该问题。我们在LLM写作和编码协作上的实验表明，使用MAGRPO微调MAS能使智能体通过有效合作高效地生成高质量的响应。我们的方法为将其他MARL方法应用于LLMs打开了大门，并指出了相关的挑战。"
+    },
+    {
+      "id": "arXiv:2508.04460",
+      "title": "From \"Aha Moments\" to Controllable Thinking: Toward Meta-Cognitive Reasoning in Large Reasoning Models via Decoupled Reasoning and Control",
+      "chinese_title": "从“顿悟时刻”到可控思考：通过解耦推理与控制实现大型推理模型元认知推理",
+      "authors": "Rui Ha, Chaozhuo Li, Rui Pu, Sen Su",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04460&sa=D&source=editors&ust=1754584042613269&usg=AOvVaw34GgrU45XTTUDjPCe8a3eO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04460&sa=D&source=editors&ust=1754584042613329&usg=AOvVaw3gsTY1lEkReKMBR9GwLhCG",
+      "chinese_abstract": "摘要：大型推理模型（LRMs）通过自发地表现出诸如逐步推理、反思和回溯等认知行为（通常被称为“顿悟时刻”），展示了其在复杂推理方面的潜在能力。然而，这种涌现行为仍然是无序且不可控的，常常导致“过度思考”，即模型在得出可靠结论后仍继续生成冗余的推理内容。这导致了过高的计算成本和增加的延迟，限制了LRM的实际部署。根本原因在于缺乏内在的调节机制，因为当前模型无法监控并自适应地管理其推理过程，以决定何时继续、回溯或止。为了解决这个问题，我们提出了元认知推理框架（MERA），该框架明确地将思考过程解耦为独立的推理和控制两个部分，从而能够独立优化控制策略。具体而言，MERA包含一个基于接管的数据构建机制，该机制在推理过程中识别关键决策点，并将控制信号的创建委托给辅助的LLM，从而实现了高质量推理-控制数据的构建。此外，通过监督微调实现了一种结构化的推理-控制分离，使模型能够生成明确的轨迹并获得初步的元认知控制能力。最后，MERA采用了控制段策略优化（CSPO），该方法将分段的组相对策略优化（GRPO）与控制掩蔽机制相结合，以优化控制行为的学习，同时最大限度地减少不相关内容的干扰。在各种推理基准上的实验表明，使用MERA训练的模型在推理效率和准确性上都有所提升。"
+    },
+    {
+      "id": "arXiv:2508.04278",
+      "title": "Large Language Model's Multi-Capability Alignment in Biomedical Domain",
+      "chinese_title": "生物医学领域大语言模型的多能力对齐",
+      "authors": "Wentao Wu, Linqing Chen, Hanmeng Zhong, Weilei Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04278&sa=D&source=editors&ust=1754584042616172&usg=AOvVaw22BJc8X1NfFkp2lNGOJQ2G",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04278&sa=D&source=editors&ust=1754584042616233&usg=AOvVaw0RdKQ79KWlHLTBl01QxM0m",
+      "chinese_abstract": "摘要：BalancedBio是一个理论基础扎实的参数高效生物医学推理框架，旨在解决领域特定AI对齐中的多能力整合问题。它建立了生物医学多能力收敛定理，证明了正交梯度空间对于防止能力间干扰以实现安全部署至关重要。关键创新包括：（1）医学知识驱动的合成生成（MKGSG），通过临床工作流程约束和医学本体验证扩展了Source2Synth，以确保事实准确性和安全性；（2）能力知的组相对策略优化，推导出最优的混合奖励权重以在强化学习中保持正交性，并使用一个结合了规则和模型评分的奖励模型，该模型适应生物医学任务。数学分析证明了帕累托最优收敛，并能在不同能力间保持性能。该框架在其参数级别上取得了最先进的结果：领域专业知识（BIOMED-MMLU 80.95%，比基线+15.32%），推理能力（61.94%，+7.75%），指令遵循（67.95%，+6.44%），以及整合能力（86.7%，+18.5%）。理论上的安全保障包括能力保持和临床准确性的界限。实际部署中，成本降低78%，诊断准确率提高23%，临床医生接受度达到89%。这项工作为生物医学AI对齐提供了一种有原则的方法论，实现了具备必要安全性和可靠性的高效推理，其0.5B参数模型版本将予以发布。"
+    },
+    {
+      "id": "arXiv:2508.04524",
+      "title": "RAIDX: A Retrieval-Augmented Generation and GRPO Reinforcement Learning Framework for Explainable Deepfake Detection",
+      "chinese_title": "RAIDX：一个用于可解释性Deepfake检测的检索增强生成与GRPO强化学习框架",
+      "authors": "Tianxiao Li, Zhenglin Huang, Haiquan Wen, Yiwei He, Shuchang Lyu, Baoyuan Wu, Guangliang Cheng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04524&sa=D&source=editors&ust=1754584042629519&usg=AOvVaw3AUahYh4od4JNX9KGtqA-l",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04524&sa=D&source=editors&ust=1754584042629580&usg=AOvVaw1Uf_l_S-RPSmZeq7ida2iT",
+      "chinese_abstract": "摘要：AI生成模型的迅速发展使得超现实图像的创建成为可能，并通过广泛的错误信息带来了伦理风险。当前的deepfake检测方法，无论是针对特定人脸还是通用AI生成的检测器，都将检测视为一个分类任务，缺乏解释其决策的透明度。尽管一些基于LLM的方法提供了可解释性，但它们存在分析粒度粗、依赖劳动密集型注的问题。本文介绍了RAIDX（检索增强图像Deepfake检测与可解释性），一个新颖的deepfake检测框架，它集成了检索增强生成（RAG）和组相对策略优化（GRPO），以提高检测准确性和决策的可解释性。具体来说，RAIDX利用RAG引入外部知识以提高检测准确性，并采用GRPO来自主生成细粒度的文本解释和显著性图，从而无需大量的人工标注。在多个基准测试上的实验表明，RAIDX在识别真伪图像、提供文本描述和显著性图形式的可解释理由方面表现出色，达到了最先进的检测性能，同时提高了deepfake识别的透明度。RAIDX是第一个协同RAG和GRPO的统一框架，解决了准确性和可解释性方面的关键空白。我们的代码和模型将公开发布。"
+    },
+    {
+      "id": "arXiv:2508.04182",
+      "title": "Hacking Hallucinations of MLLMs with Causal Sufficiency and Necessity",
+      "chinese_title": "利用因果充分性与必要性破解多模大语言模型的幻觉",
+      "authors": "Peizheng Guo, Jingyao Wang, Wenwen Qiang, Huijie Guo, Changwen Zheng, Jiahuan Zhou, Gang Hua",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04182&sa=D&source=editors&ust=1754584042643700&usg=AOvVaw2UNrO_vkWz1vKSbUeYgRn4",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04182&sa=D&source=editors&ust=1754584042643762&usg=AOvVaw1ARUUB_yKyV0Jyp5Bu3BLZ",
+      "chinese_abstract": "摘要：多模态大语言模型（MLLMs）在各种视觉-语言任务中展现了令人印象深刻的能力。然而，它们可能会产生幻觉——即生成与输入图像或文本在语义上不一致的输出。通过因果分析，我们发现：（i）遗漏型幻觉可能是由于未能充分捕捉必要的因果因素所致；（ii）捏造型幻觉很可能是由于模型被非因果线索误导所致。为应对这些挑战，我们提出了一个由因果完备性指导的新型强化学习框架，该框架同时虑了词元（token）的因果充分性和因果必要性。具体而言，我们通过评估每个词元的独立贡献和反事实的不可或缺性，来定义一个词元级的因果完备性奖励。此奖励被用于在GRPO优化框架内构建一个基于因果信息的优势函数，从而鼓励模型关注那些对于准确生成既具有因果充分性又具有因果必要性的词元。在多个基准数据集和任务上的实验结果表明，我们的方法能有效减轻MLLMs中的幻觉现象。"
+    },
+    {
+      "id": "arXiv:2508.04138",
+      "title": "COPO: Consistency-Aware Policy Optimization",
+      "chinese_title": "COPO: 一致性感知的策略优化",
+      "authors": "Jinghang Han, Jiawei Chen, Hang Shao, Hao Ma, Mingcheng Li, Xintian Shen, Lihao Zheng, Wei Chen, Tao Wei, Lihua Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04138&sa=D&source=editors&ust=1754584042644661&usg=AOvVaw0s7GXTgS7avHNbCb-s2l5T",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04138&sa=D&source=editors&ust=1754584042644722&usg=AOvVaw0eNTKKh3hA4WHn5XebnmkB",
+      "chinese_abstract": "摘要：强化学习显著增强了大型语言模型（LLMs）在复杂问题解决任务中的推理能力。近期，DeepSeek R1的推出激发了人们对利用基于规则的奖励作为一种低成本替代方案来计算优势函数和指导策略优化的浓厚兴趣。然而，在许多复制和扩展工作中观察到的一个普遍挑战是，当单个提示下的多个采样响应收敛到相同的结果时（无论正确与否），基于组的优势函数会退化为零。这导致梯度消失，使得相应的样本对学习无效，最终限制了训练效率和下游性能。为解决此问题，我们提出了一个一致性感知的策略优化框架，该框架引入了一个基于结果一致性的结构化全局奖励。基于此的全局损失确保了即使模型输出表现出高度的组内一致性，训练过程仍能接收到有意的学习信号，从而从全局角度鼓励生成正确且自洽的推理路径。此外，我们引入了一种基于熵的软混合机制，该机制自适应地平衡局部优势估计与全局优化，从而在整个训练过程中实现探索与收敛之间的动态转换。我们的方法在奖励设计和优化策略方面都引入了多项关键创新。我们通过在多个数学推理基准上取得的显著性能提升来验证其有效性，凸显了所提框架的鲁棒性和普遍适用性。该工作的代码已在 https URL 发布。"
+    },
+    {
+      "id": "arXiv:2508.04280",
+      "title": "Enhancing Vision-Language Model Training with Reinforcement Learning in Synthetic Worlds for Real-World Success",
+      "chinese_title": "在合成世界中通过强化学习增强视觉-语言模型训练以实现真实世界成功",
+      "authors": "George Bredis, Stanislav Dereka, Viacheslav Sinii, Ruslan Rakhimov, Daniil Gavrilov",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04280&sa=D&source=editors&ust=1754584042638426&usg=AOvVaw0t6w6RdsMf6XUzVxSp74f9",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04280&sa=D&source=editors&ust=1754584042638488&usg=AOvVaw23T5Vj_672wVC0rIRgrDeO",
+      "chinese_abstract": "摘要：交互式多模态智能体必须将原始视觉观察转化为连贯的、以语言为条件的动作序列——这是当前视觉-语言模型（VLMs）仍然缺乏的能力。早期的强化学习（RL）工作原则上可以赋予VLMs此类技能，但它们很少测试学习到的行为是否能泛化到训练模拟器之外，并且它们依赖于脆弱的超参数调整或具有低状态可变性的密集奖励环境。我们引入了视觉-语言解耦演员-评论家（VL-DAC），这是一种轻量级、无超参数的RL算法。VL-DAC对动作词元（action tokens）应用PPO更新，同时仅在环境步骤级别学习价值函数：据我们所知，这种安排以前未在大型VLMs或LLMs中探索过。这简单的解耦消除了不稳定的加权项，并实现了更快、更可靠的收敛。我们仅使用VL-DAC在一个低成本模拟器（MiniWorld、Gym-Cards、ALFWorld或WebShop）中训练单个VLM，就已经产生了广泛泛化的策略：在BALROG（以游戏为中心的智能体控制）上相对提升+50%，在VSI-Bench最难部分（空间规划）上相对提升+5%，在VisualWebBench（网页导航）上提升+2%，所有这些都未降低通用的图像理解准确性。这些结果首次证明，一个简单的RL算法可以完全在廉价的合成世界中训练VLMs，同时在真实图像的智能体、空间推理和网页导航基准上实现可观的收益。"
+    },
+    {
+      "id": "arXiv:2508.03864",
+      "title": "Evo-MARL: Co-Evolutionary Multi-Agent Reinforcement Learning for Internalized Safety",
+      "chinese_title": "Evo-MARL：用于内置安全性的协同进化多智能体强化学习",
+      "authors": "Zhenyu Pan, Yiting Zhang, Yutong Zhang, Jianshu Zhang, Haozheng Luo, Yuwei Han, Dennis Wu, Hong-Yu Chen, Philip S. Yu, Manling Li, Han Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.03864&sa=D&source=editors&ust=1754584042621358&usg=AOvVaw0qDUCQVCTFM43x5iSh7LKT",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.03864&sa=D&source=editors&ust=1754584042621470&usg=AOvVaw3fP9LzfL1h6CTLUEq3xPkG",
+      "chinese_abstract": "摘要：基于多模态大语言模型构建的多智能体系统（MAS）展现出强大的协作能力和性能。然而，它们日益增长的开放性和交互复杂性带来了严重风险，特别是越狱和对抗性攻击。现有的防御措施通常依赖于外部的防护模块，例如专门的安全智能体来处理不安全的行为。不幸的是，这种模式面临两个挑战：（1）独立的智能体提供的保护有限；（2）它们的独立性导致了单点故障——一旦被攻破，整个系统的安全性就会崩溃。简单地增加防护智能体的数量会一步增加成本和复杂性。为了应对这些挑战，我们提出了Evo-MARL，一种新颖的多智能体强化学习（MARL）框架，它能使所有任务智能体共同获得防御能力。Evo-MARL并非依赖外部安全模块，而是训练每个智能体同时执行其主要功能并抵抗对抗性威胁，从而在不增加系统开销或单点故障的情况下确保鲁棒性。此外，Evo-MARL将进化搜索与参数共享的强化学习相结合，以协同进化攻击者和防御者。这种对抗性训练范式内化了安全机制，并在协同演化的威胁下持续增强MAS的性能。实验表明，Evo-MARL将攻击成功率降低了高达22%，同时在推理任务上的准确率提升了高达5%——证明了安全性和实用性可以共同提高。"
+    },
+    {
+      "id": "arXiv:2508.04451",
+      "title": "Automatic LLM Red Teaming",
+      "chinese_title": "自动化大语言模型红队演练",
+      "authors": "Roman Belaire, Arunesh Sinha, Pradeep Varakantham",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04451&sa=D&source=editors&ust=1754584042632316&usg=AOvVaw1GhL-TalFY-0W5Ohx4ERKN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04451&sa=D&source=editors&ust=1754584042632384&usg=AOvVaw3SadIc1cdXkjUWaGpfuEZT",
+      "chinese_abstract": "摘要：红队演练对于识别漏洞和建立对当前LLM的信任至关重要。然而，当前针对大型语言模型（LLMs）的自动化方法依赖于脆弱的提示模板或单轮攻击，未能捕捉到现实世界中对抗性对话的复杂交互性质。我们提出了一种新的范式：训练一个AI来策略性地“攻破”另一个AI。通过将红队演练形式化为马尔可夫决策过程（MDP）并采用分层强化学习（RL）框架，我们有效地解决了固有的稀疏奖励和长时程挑战。我们的生成式智能体通过细粒度的、词元级别的伤害奖励来学习连贯的、多轮的攻击策略，从而能够发现现有基线法遗漏的微妙漏洞。这种方法设定了新的技术水平，从根本上将LLM红队演练重塑为一个动态的、基于轨迹的过程（而非一步测试），这对于稳健的AI部署至关重要。"
+    },
+    {
+      "id": "arXiv:2508.03700",
+      "title": "MagicGUI: A Foundational Mobile GUI Agent with Scalable Data Pipeline and Reinforcement Fine-tuning",
+      "chinese_title": "MagicGUI：一个具备可扩展数据流水线和强化微调的基础移动GUI智能体",
+      "authors": "Liujian Tang, Shaokang Dong, Yijia Huang, Minqi Xiang, Hongtao Ruan, Bin Wang, Shuo Li, Zhihui Cao, Hailiang Pang, Heng Kong, He Yang, Mingxu Chai, Zhilin Gao, Xingyu Liu, Yingnan Fu, Jiaming Liu, Tao Gui, Xuanjing Huang, Yu-Gang Jiang, Qi Zhang, Kang Wang, Yunke Zhang, Yuran Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.03700&sa=D&source=editors&ust=1754584042668357&usg=AOvVaw34FvGZRNwr_d4GTJnowJ1y",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.03700&sa=D&source=editors&ust=1754584042668419&usg=AOvVaw2rKTO5HcixSPRN_AjbUsTD",
+      "chinese_abstract": "摘要：本文介绍了MagicGUI，一个旨在解决真实世界移动图形用户界面（GUI）环境中感知、定位和推理方面关键挑战的基础性移动GUI智能体。该框架基于以下六个关键组成部分：（1）一个全面且准确的数据集，通过可扩展的GUI数据流水线构建，该流水线汇集了迄今为止最大、最多样化的以GUI为中心的多模态数据，来源包括开源代码库、自动化爬取和有针对性的手动标注；（2）增强的感知和定位能力，促进了细粒度的多模态对齐，用于UI元素引用、定位和屏幕理解；（3）一个全面统一的动作空间，涵盖了基本的UI操作和复杂的交互意图，以支持人机交互；（4）面向规划的推理机制，使模型能够将复杂的用户指令分解为顺序动作，并带有明确的中间元规划推理；（5）一个迭代式的阶段训练过程，结合了在780万样本上的大规模持续预训练和利用空间增强复合奖励及双重过滤策略的强化微调；（6）在自有的Magic-RICH基准和十多个公共基准上均具有竞争力的性能，在GUI感知和智能体任务上均取得了优越的表现，同时在实际的移动GUI场景中展示了强大的泛化能力和真实世界部署潜力，如图1所示。"
+    },
+    {
+      "id": "arXiv:2508.04195",
+      "title": "NVSpeech: An Integrated and Scalable Pipeline for Human-Like Speech Modeling with Paralinguistic Vocalizations",
+      "chinese_title": "NVSpeech：一个用于带副语言发声的类人语音建模的集成可扩展流程",
+      "authors": "Huan Liao, Qinke Ni, Yuancheng Wang, Yiheng Lu, Haoyue Zhan, Pengyuan Xie, Qiang Zhang, Zhizheng Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04195&sa=D&source=editors&ust=1754584042643357&usg=AOvVaw1l7dk4IcoeR6Gh2Sy4smYX",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04195&sa=D&source=editors&ust=1754584042643430&usg=AOvVaw0r6sKvqlOMHQt2drDTpe0x",
+      "chinese_abstract": "摘要：副语言发声——包括笑声、呼吸等非言语声音，以及“嗯”、“哦”等词汇化的插入语——是自然口语交流中不可或缺的一部分。尽管它们在传达情感、意图和互动线索方面很重要，但在传统的自动语音识别（ASR）和文本到语音（TTS）系统中，这些线索很大程度上被忽略了。我们提出了NVSpeech，一个集成的、可扩展的流程，它连接了副语言发声的识别与合成，涵盖了数据集构建、ASR建模和可控TTS。（1）我们引入了一个手动标注的数据集，包含48,430个人类口语话语，涵盖18个词级别的副语言类别。（2）我们开发了能感知副语言的ASR模型，该模型将副语言线索视为可在线解码的词元（例如，“你真有趣[笑声]”），从而实现了词汇和非言语内容的联合转录该模型随后被用于自动标注一个大型语料库，这是首个大规模的中文数据集，包含174,179句话语（573小时），具有词级对齐和副语言线索。（3）我们在人工标注和自动标注的数据上微调了零样本TTS模型，以实现对副语言发声的显式控制，允许在任意词元位置进行上下文感知的插入，以合成类人的语音。通过统一副语言发声的识别与生成，NVSpeech为普通话的表达性语音建模提供了第一个开放的、大规模的、词级标注的流程，以一种可扩展和可控的方式集成了识别与合成。数据集和音频演示可在 https URL 查看。"
+    },
+    {
+      "id": "arXiv:2508.04228",
+      "title": "LayerT2V: Interactive Multi-Object Trajectory Layering for Video Generation",
+      "chinese_title": "LayerT2V：用于视频生成的交互式多对象轨迹分层",
+      "authors": "Kangrui Cen, Baixuan Zhao, Yi Xin, Siqi Luo, Guangtao Zhai, Xiaohong Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04228&sa=D&source=editors&ust=1754584042640939&usg=AOvVaw3oUNwUhx0c7qYmw4GoRK-K",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04228&sa=D&source=editors&ust=1754584042640997&usg=AOvVaw1J2ME5I3ldfiGqo8kNG24r",
+      "chinese_abstract": "摘要：在文本到视频（T2V）生成中控制对象运动轨迹是一个具有挑战性且相对未被充分探索的领域，尤其是在涉及多个运动对象的场景中。T2V领域中的大多数社区模型和数据集都是为单对象运动设计的，这限制了当前生成模型在多对象任务中的性能。此外，现有的T2V运动控制方法要么不支持多对象运动场景，要么在对象轨迹相交时性能严重下降，这主要是由于碰撞区域的语义冲突所致。为了解决这些限制，我们引入了LayerT2V，这是第一种通过逐层合成背景和前景对象来生成视频的方法。这种分层生成方式能够在视频中灵活集成多独立元素，将每个元素放置在不同的“层”上，从而促进连贯的多对象合成，并增强对生成过程的控制。大量的实验表明，LayerT2V在生成复杂多对象场景方面具有优越性，在mIoU和AP50指标上比最先进（SOTA）方法分别提高了1.4倍和4.5倍。项目页面和代码可在 https URL 查看。"
+    },
+    {
+      "id": "arXiv:2508.04099",
+      "title": "DET-GS: Depth- and Edge-Aware Regularization for High-Fidelity 3D Gaussian Splatting",
+      "chinese_title": "DET-GS：用于高保真3D高斯泼溅的深度与边缘感知正则化",
+      "authors": "Zexu Huang, Min Xu, Stuart Perry",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04099&sa=D&source=editors&ust=1754584042646827&usg=AOvVaw2uZRJn_KpluadaQlW-aiFt",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04099&sa=D&source=editors&ust=1754584042646885&usg=AOvVaw3k_9Hf7B8CUYiQO6WUDC19",
+      "chinese_abstract": "摘要：3D高斯泼溅3DGS）代表了高效和高保真新视角合成领域的一项重大进步。尽管最近取得了进展，但在稀疏视角条件下实现准确的几何重建仍然是一个根本性挑战。现有方法通常依赖于非局部深度正则化，这种方法无法捕捉精细结构，并且对深度估计噪声高度敏感。此外，传统的平滑方法忽略了语义边界，不加选择地降低了重要的边缘和纹理，从而限制了重建的整体质量。在这项工作中，我们提出了DET-GS，一个用于3D高斯泼溅的统一深度和边缘感知正则化框架。DET-GS引入了一个分层的几何深度监督框架，该框架自适应地强制执行多层次的几何一致性，显著增强了结构保真度和对深度估计噪声的鲁棒性。为了保留场景边界，我们设计了一种由Canny边缘检测衍生的语义掩码引导的边缘感知深度正则化。此外，我们引入了一种RGB引导的边缘保留全变分损失，该损失选择性地平滑同质区，同时严格保留高频细节和纹理。大量实验表明，DET-GS在几何精度和视觉保真度方面均取得了显著改进，在稀疏视角新视角合成基准测试中优于最先进（SOTA）的方法。"
+    },
+    {
+      "id": "arXiv:2508.04663",
+      "title": "HierarchicalPrune: Position-Aware Compression for Large-Scale Diffusion Models",
+      "chinese_title": "HierarchicalPrune：面向大规模扩散模型的位置感知压缩",
+      "authors": "Young D. Kwon, Rui Li, Sijia Li, Da Li, Sourav Bhattacharya, Stylianos I. Venieris",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04663&sa=D&source=editors&ust=1754584042624007&usg=AOvVaw0JnqYKLeej9I2o2jIVgXyU",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04663&sa=D&source=editors&ust=1754584042624072&usg=AOvVaw1c9sQky-moO_q8H5SDKNCO",
+      "chinese_abstract": "摘要：最先进的文本到图像扩散模型（DMs）实现了卓越的质量，但其巨大的参数规模（80-110亿）给在资源受限设备上的推理带来了重大挑战。在本文中，我们提出了HierarchicalPrune，一个新颖的压缩框架，其基础是一个关键观察：扩散模型的模块表现出不同的功能层次，早期模块建立语义结构，而后期模块处理纹理细节。HierarchicalPrune协同结合了三种技术：（1）分层位置剪枝，根据位置层次识别并移除不太重要的后期模块；（2）位置权重保留，系统性地保护对语义结构完整性至关重要的模型早期部分；以及（3）敏感度引导的蒸馏，根据我们发现的模块级敏感度变化调整知识传递的强度。因此，我们的框架将十亿级规模的扩散模型带入了一个更适合设备上推理的范围，同时保持了输出图像的质量。具体来说，当与INT4权重 quantization 结合时，HierarchicalPrune实现了77.5-80.4%的内存占用减少（例如，从15.8 GB减少到3.2 GB）和27.9-38.0%的延迟减少（在服务器和消费级GPU上测量），而GenEval得分和HPSv2得分相比原始模型仅有最低2.6%和7%的下降。最后但同样重要的是，我们与85名参与者进行的全面用户研究表明，HierarchicalPrune保持了与原始模型相当的感知质量，同时显著优于先前的工作。"
+    },
+    {
+      "id": "arXiv:2508.03760",
+      "title": "FlashCommunication V2: Bit Splitting and Spike Reserving for Any Bit Communication",
+      "chinese_title": "FlashCommunication V2：通过比特拆分和峰值保留实现任意比特通信",
+      "authors": "Qingyuan Li, Bo Zhang, Hui Kang, Tianhao Xu, Yulei Qian, Yuchen Xie, Lin Ma",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.03760&sa=D&source=editors&ust=1754584042660639&usg=AOvVaw370yPrbncq3rj4gTv8gxMS",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.03760&sa=D&source=editors&ust=1754584042660698&usg=AOvVaw1PZniygi0XKcQ-XKjEFMTs",
+      "chinese_abstract": "摘要：如今，通信瓶颈已成为大型语言模型（LLMs）分布式训练和部署中的一个关键挑战。本文介绍了FlashCommunication V2，一种新颖的通信范式，能够以任意比特宽度实现高效的跨GPU传输。其核心创新在于提出的比特拆分和峰值保留技术，这些技术解决了低比特量化的挑战。比特拆分将不规则的比特宽度分解为基本单元，确保与硬件能力的兼容性，从而能够以任何比特宽度进行传输。另一方面，峰值保留将数值异常值（即最小值和最大值）保留为浮点数，这缩小了动态数值范围，并将量化极限推至2比特，同时损失可接受。FlashCommunication V2显著增强了通信系统的灵活性和资源利用率。通过精心的软硬件协同设计，它在基于NVLink和PCIe的架构上均提供了强大的性能和减少的开销，在AllReduce中实现了最高3.2倍的加速，在All2All通信中实现了2倍的加速。"
+    },
+    {
+      "id": "arXiv:2508.04149",
+      "title": "Difficulty-Based Preference Data Selection by DPO Implicit Reward Gap",
+      "chinese_title": "基于DPO隐式奖励差距的难度偏好数据选择",
+      "authors": "Xuan Qi, Rongwu Xu, Zhijing Jin",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04149&sa=D&source=editors&ust=1754584042644304&usg=AOvVaw3c1unlgmNnuETx1lKLjblr",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04149&sa=D&source=editors&ust=1754584042644363&usg=AOvVaw0jVNGccJXIB7WOo9_uvCUE",
+      "chinese_abstract": "摘要：使大型语言模型（LLMs）与人类偏好对齐是人工智能研究中的一个关键挑战。虽然像基于人类反馈的强化学习（RLHF）和直接偏好优化（DPO）等方法被广泛使用，但它们通常依赖于庞大且昂贵的偏好数据集。当前的研究缺乏专门针对偏好数据的高质量数据选择方法。在这项工作中，我们引入了一种新颖的基于难度的偏好数据集选择策略，该策略基于DPO的隐式奖励机制。通过选择DPO隐式奖励差距较小的偏好数据样本（这些样本代表了更具挑战性的案例），我们提高了数据效率和模型对齐效果。我们的方法在多个数据集和对齐任务上始终优于五个强大的基线方法，仅用10%的原始数据就实现了卓越的性能。这种有原则、高效的选择方法为在资源有限的情况下扩展LLM对齐提供了一个有前途的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.03741",
+      "title": "Latent Knowledge Scalpel: Precise and Massive Knowledge Editing for Large Language Models",
+      "chinese_title": "潜知识手术刀：大语言模型的精准大规模知识编辑",
+      "authors": "Xin Liu, Qiyang Song, Shaowen Xu, Kerou Zhou, Wenbo Jiang, Xiaoqi Jia, Weijuan Zhang, Heqing Huang, Yakai Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.03741&sa=D&source=editors&ust=1754584042662745&usg=AOvVaw2TteRKI7DnMhhcuYh5Nzz1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.03741&sa=D&source=editors&ust=1754584042662805&usg=AOvVaw2hFh1Hg5BGceH8jwouH-H-",
+      "chinese_abstract": "摘要：大型语言模型（LLMs）常常会保留预训练中不准确或过时的信息，导致在推理过程中出现错误的预测或带有偏见的输出。虽然现有的模型编辑方法可以应对这一挑战，但它们在同时编辑大量事实信息方面存在困难，并可能损害模型的通用能力。在本文中，我们的实证研究表明，编辑LLMs的内部表示并以类似于编辑自然语言输入的方式替换实体是可行的。基于这一见解，我们引入了“潜知识手术刀”（Latent Knowledge Scalpel，LKS），这是一个LLM编辑器，它通过一个轻量级的超网络来操纵特定实体的潜在知识，以实现精确和大规模的编辑。在Llama-2和Mistral上进行的实验表明，即使同时编辑的数量达到10,000条，LKS仍能有效地执行知识编辑，同时保持被编辑LLMs的通用能。代码可在以下网址获取：https URL。"
+    },
+    {
+      "id": "arXiv:2508.04472",
+      "title": "Zero-Residual Concept Erasure via Progressive Alignment in Text-to-Image Model",
+      "chinese_title": "通过文本到图像模型中的渐进式对齐实现零残差概念擦除",
+      "authors": "Hongxu Chen, Zhen Wang, Taoran Mei, Lin Li, Bowei Zhu, Runshi Li, Long Chen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04472&sa=D&source=editors&ust=1754584042631584&usg=AOvVaw2BQtgSCVf9siM9a8322QRD",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04472&sa=D&source=editors&ust=1754584042631658&usg=AOvVaw3Pog7PcWIbZr8aIEK57Sgs",
+      "chinese_abstract": "摘要：概念擦除旨在防止预训练的文本到图像模型生成与语义上有害的概念（即目标概念）相关的内容，正受到越来越多的关注。最先进的方法将此任务表述为一个优化问题：它们将所有目标概念与语义上无害的锚点概对齐，并应用闭式解相应地更新模型。虽然这些闭式方法是高效的，但我们认为现有方法有两个被忽视的局限性：1）由于“非零对齐残差”，它们常常导致不完全的擦除，尤其是在文本提示相对复杂时。2）由于它们总是将参数更新集中在少数深层，可能会导致生成质量下降。为了解决这些问题，我们提出了一种新颖的闭式方法ErasePro：它旨在实现更完全的概念擦除并更好地保持整体生成质量。具体来说，ErasePro首先在优化目标中引入一个严格的零残差约束，确保目标概念和锚点概念特征之间的完美对齐，从而实现更完全的擦除。其次，它采用一种渐进的、逐层更新的策略，从浅层到深层逐步将目标概念的特征转移到锚点概念的特征。随着深度的增加，所需的参数变化减小，从而减少了在敏感深层中的偏差并保持了生成质量。在不同的概念擦除任务（包括实例、艺术风格和裸露内容擦除）上的实证结果证明了我们ErasePro方法的有效性。"
+    },
+    {
+      "id": "arXiv:2508.03772",
+      "title": "GTPO: Trajectory-Based Policy Optimization in Large Language Models",
+      "chinese_title": "GTPO：大语言模型中基于轨迹的策略优化",
+      "authors": "Marco Simoni, Aleksandar Fontana, Giulio Rossolini, Andrea Saracino",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.03772&sa=D&source=editors&ust=1754584042658952&usg=AOvVaw0sc0rXGbGsZNqYFbAXR_ZD",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.03772&sa=D&source=editors&ust=1754584042659011&usg=AOvVaw3gDfFwaK0d94pbziRtOzEV",
+      "chinese_abstract": "摘要：基于策略的优化如今已广泛应用于语言模型的训练和对齐，其中最新且有效的方法之一是组相对策略优化（GRPO）。本文揭示并分析了GRPO的两个主要局限性：（i）某些词元（token）频繁出现在具有正负两种奖励补全中，导致冲突的梯度更新，这可能降低它们的输出概率，即使它们对于维持正确的结构至关重要；（ii）负奖励的补全可能会惩罚置信度高的响应，并将模型决策转向不太可能的词元，从而逐渐拉平输出分布并降低学习效果。为了解决这些问题并提供一种更稳定有效的策略优化策略，我们引入了GTPO（基于组相对轨迹的策略优化）。GTPO能识别冲突词元，即在不同补全中相同位置出现但奖励相反的词元，通过跳过负向更新来保护它们，同时放大正向更新。为了进一步防止策略崩溃，GTPO会过滤掉熵超过可证明阈值的补全。与GRPO不同，GTPO不依赖KL散度正则化，从而在训练期间无需参考模型，但仍能确保更高的训练稳定性和改进的性能。这一点已通过在GSM8K、MATH和AIME 2024基准测试上的多次实验得到验证。"
+    }
+  ],
+  "clusters": {
+    "强化学习与智能体": [
+      "arXiv:2508.04700",
+      "arXiv:2508.04652",
+      "arXiv:2508.03864",
+      "arXiv:2508.04280",
+      "arXiv:2508.03700",
+      "arXiv:2508.04451"
+    ],
+    "LLM策略优化与对齐": [
+      "arXiv:2508.04460",
+      "arXiv:2508.04278",
+      "arXiv:2508.04182",
+      "arXiv:2508.04138",
+      "arXiv:2508.03772",
+      "arXiv:2508.04149"
+    ],
+    "多模态生成与3D视觉": [
+      "arXiv:2508.04195",
+      "arXiv:2508.04228",
+      "arXiv:2508.04099",
+      "arXiv:2508.04524",
+      "arXiv:2508.04663"
+    ],
+    "模型效率与编辑": [
+      "arXiv:2508.03760",
+      "arXiv:2508.03741",
+      "arXiv:2508.04472"
+    ]
+  }
+}
