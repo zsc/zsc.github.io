@@ -1,0 +1,216 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.05613",
+      "title": "Cooper: Co-Optimizing Policy and Reward Models in Reinforcement Learning for Large Language Models",
+      "chinese_title": "Cooper：面向大语言模型的强化学习中策略与奖励模型的协同优化",
+      "authors": "Haitao Hong, Yuchen Yan, Xingyu Wu, Guiyang Hou, Wenqi Zhang, Weiming Lu, Yongliang Shen, Jun Xiao",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05613&sa=D&source=editors&ust=1754651367151675&usg=AOvVaw1FniIvvG1vQ4xvNVcLE7u1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05613&sa=D&source=editors&ust=1754651367151704&usg=AOvVaw1ujYFu6yP8DJMsudz0ZRO0",
+      "chinese_abstract": "大语言模型（LLM）在推理任务中表现出卓越的性能，其中强化学习（RL）是增强其推理能力的关键算法。目前，存在两种主流的奖励范式：基于模型的奖励和基于规则的奖励。然，这两种方法都存在局限性：基于规则的奖励缺乏鲁棒性，而基于模型的奖励容易受到奖励利用（reward hacking）的影响。为解决这些问题，我们提出了Cooper（协同优化策略模型与奖励模型），一个联合优化策略模型和奖励模型的强化学习框架。Cooper在识别正确响应时利用了基于规则奖励的高精度，并动态构建和选择正负样本对以持续训练奖励模型。这种设计增强了鲁棒性并降低了奖励利用的风险。为了进一步支持Cooper，我们引入了一种混合标注策略，可以高效准确地为奖励模型生成训练数据。我们还提出了一种基于参考的奖励建模范式，其中奖励模型将参考答案作为输入。基于此设计，我们训练了一个名为VerifyRM的奖励模型，在VerifyBench上相比同等规模的其他模型取得了更高的准确率。我们使用VerifyRM和Cooper进行了强化学习。实验表明，Cooper不仅缓解了奖励利用问，还提升了端到端的强化学习性能，例如，在Qwen2.5-1.5B-Instruct模型上平均准确率提升了0.54%。我们的研究结果表明，动态更新奖励模型是 combating 奖励利用的有效方法，为更好地将奖励模型集成到强化学习中提供了参考。"
+    },
+    {
+      "id": "arXiv:2508.05612",
+      "title": "Shuffle-R1: Efficient RL framework for Multimodal Large Language Models via Data-centric Dynamic Shuffle",
+      "chinese_title": "Shuffle-R1: 通过以数据为中心的动态洗牌实现多模态大语言模型的高效强化学习框架",
+      "authors": "Linghao Zhu, Yiran Guan, Dingkang Liang, Jianzhong Ju, Zhenbo Luo, Bin Qin, Jian Luan, Yuliang Liu, Xiang Bai",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05612&sa=D&source=editors&ust=1754651367151893&usg=AOvVaw0f6npkrK95op1ufZ_g4QGR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05612&sa=D&source=editors&ust=1754651367151926&usg=AOvVaw1EsqaPAwE4R8ygbcq5_mHe",
+      "chinese_abstract": "强化学习（RL）已成为增强多模态大语言模型（MLLM）推理能力的有效后训练范式。然而，当前的强化学习流程常常因两个未被充分探讨的问题而导致训练效率低下：优势崩溃（Advantage Collapsing），即一个批次中的大部分优势值集中在零附近；以及部署沉默（Rollout Silencing），即贡献非零梯度的部署（rollout）比例随时间递减。这些问题导致次优的梯度更新，并阻碍了长期的学习效率。为了解决这些问题，我们提出了Shuffle-R1，一个简单而有原则的框架，通过动态重构轨迹采样和批次组合来提高强化学习微调的效率。它引入了（1）成对轨迹采样（Pairwise Trajectory Sampling），选择具有较大优势值的高对比度轨迹以提高梯度信号质量；以及（2）基于优势的轨迹洗牌（Advantage-based Trajectory Shuffle），通过有信息的批次重排来增加有价值部署的曝率。在多个推理基准上的实验表明，我们的框架以极小的开销持续优于强大的强化学习基线。这些结果凸显了以数据为中心的适应性调整对于在多模态大语言模型中实现更高效强化学习训练的重要性。"
+    },
+    {
+      "id": "arXiv:2508.05387",
+      "title": "Echo: Decoupling Inference and Training for Large-Scale RL Alignment on Heterogeneous Swarms",
+      "chinese_title": "Echo：在异构集群上实现大规模强化学习对齐的推理与训练解耦",
+      "authors": "Jie Xiao, Shaoduo Gan, Changyuan Fan, Qingnan Ren, Alfred Long, Yuchen Zhang, Rymon Yu, Eric Yang, Lynn Ai",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05387&sa=D&source=editors&ust=1754651367156438&usg=AOvVaw2alYXtPx08JoMcGqCI4E1k",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05387&sa=D&source=editors&ust=1754651367156469&usg=AOvVaw1nMpFVDv11MNIUMkLWAViX",
+      "chinese_abstract": "现代基于强化学（RL）的大语言模型（LLM）后训练方法将轨迹采样和策略优化部署在同一个GPU集群上，迫使系统在推理和训练工作负载之间切换。这种串行的上下文切换违反了当今分布式训练系统底层的单程序多数据（SPMD）假设。我们介绍了Echo，这是一个RL系统，它在异构的“推理”和“训练”集群之间清晰地解耦了这两个阶段，同时保持了统计效率。Echo引入了两种轻量级同步协议：一种是顺序拉取模式，在每次API调用时刷新采样器权重以实现最小偏差；另一种是异步推拉模式，通过回放缓冲区流式传输带有版本标签的部署数据以最大化硬件利用率。在地理上分布的集群上，使用Qwen3-4B、Qwen2.5-7B和Qwen3-32B训练三个代表性的RL工作负载，Echo在收敛速度和最终奖励上与完全同地部署的Verl基线相当，同时将轨迹生成任务卸载到商用边缘硬件上。这些有前景的结果表明，用于LLM的大规RL可以利用去中心化的异构资源实现数据中心级别的性能。"
+    },
+    {
+      "id": "arXiv:2508.05011",
+      "title": "Towards Hallucination-Free Music: A Reinforcement Learning Preference Optimization Framework for Reliable Song Generation",
+      "chinese_title": "迈向无幻觉音乐：一种用于可靠歌曲生成的强化学习偏好优化框架",
+      "authors": "Huaicheng Zhang, Wei Tan, Guangzheng Li, Yixuan Zhang, Hangting Chen, Shun Lei, Chenyu Yang, Zhiyong Wu, Shuai Wang, Qijun Huang, Dong Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05011&sa=D&source=editors&ust=1754651367172211&usg=AOvVaw0jbgZ7zsNQ0dLa0qLlY4H2",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05011&sa=D&source=editors&ust=1754651367172263&usg=AOvVaw1D-7IrhVQprNEEGssuZhcd",
+      "chinese_abstract": "近年来，基于音频的生成式语言模型的发展加速了人工智能驱动的歌词到歌曲的生成。然而，这些模型经常受内容幻觉的困扰，产生的输出与输入歌词不符，从而破坏了音乐的连贯性。目前的监督式微调（SFT）方法受限于被动的标签拟合，自我提升能力有限，且在缓解幻觉方面效果不佳。为了解决这一核心挑战，我们提出了一种新颖的强化学习（RL）框架，利用偏好优化来控制幻觉。我们的主要贡献包括：（1）通过音素错误率（PER）计算和基于规则的过滤构建了一个强大的幻觉偏好数据集，以捕捉与人类期望的一致性；（2）在RL框架内实现并评估了三种不同的偏好优化策略：直接偏好优化（DPO）、近端策略优化（PPO）和组相对策略优化（GRPO）。DPO采用离策略方式增强正面令牌的可能性，实现了7.4%的显著PER降低。PPO和GRPO采用在策略方法，训练一个基于PER的奖励模型，通过奖励最大化和KL正则化迭代优化序列，分别使PER降低了4.9%和4.7%。全面的客观和主观评估证实，我们的方法在保持音乐质量的同时有效抑制了幻觉。至关重要的是，这项工作为歌词到歌曲生成中的幻觉控制提供了一个系统的、基于RL的解决方案。该框架的可移植性也为音乐风格遵循和音乐性增强释放了潜力，为未来生成式歌曲研究开辟了新途径。"
+    },
+    {
+      "id": "arXiv:2508.05254",
+      "title": "CF3: Compact and Fast 3D Feature Fields",
+      "chinese_title": "CF3: 紧凑且快速的3D特征场",
+      "authors": "Hyunjoon Lee, Joonkyu Min, Jaesik Park",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05254&sa=D&source=editors&ust=1754651367160751&usg=AOvVaw0zZ_-KGbb4kHWYrHpufHdj",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05254&sa=D&source=editors&ust=1754651367160780&usg=AOvVaw0ohs7kt-GXUuvNjVP8-VNu",
+      "chinese_abstract": "3D高斯溅射（3DGS）已开始融合来自2D基础模型的丰富信息。然而，大多数方法依赖于自下而上的优过程，将原始2D特征视为基准真值，从而增加了计算成本。我们提出了一种自上而下的流程，用于构建紧凑且快速的3D高斯特征场，即CF3。我们首先利用预训练的高斯函数，对多视图2D特征进行快速的加权融合。这种方法使得可以直接在提升后的特征上训练每个高斯的自编码器，而不是在2D域中训练自编码器。结果，自编码器能更好地与特征分布对齐。更重要的是，我们引入了一种自适应稀疏化方法，该方法在修剪和合并冗余高斯的同时优化特征场的各项高斯属性，从而构建出既高效又保留几何细节的表示。与Feature-3DGS相比，我们的方法仅使用5%的高斯函数就实现了具有竞争力的3D特征场。"
+    },
+    {
+      "id": "arXiv:2508.04968",
+      "title": "UGOD: Uncertainty-Guided Differentiable Opacity and Soft Dropout for Enhanced Sparse-View 3DGS",
+      "chinese_title": "UGOD：用于增强稀疏视角3DGS的不确定性引的可微分不透明度和软丢弃",
+      "authors": "Zhihao Guo, Peng Wang, Zidong Chen, Xiangyu Kong, Yan Lyu, Guanyu Gao, Liangxiu Han",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04968&sa=D&source=editors&ust=1754651367173798&usg=AOvVaw0VWQFwsMYUvhtagq9-JRSS",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04968&sa=D&source=editors&ust=1754651367173832&usg=AOvVaw3Wf1m93Ei4X2tARXPH0KWX",
+      "chinese_abstract": "3D高斯溅射（3DGS）因其通过3D高斯投影和混合实现的高级渲染效率，已成为新视角合成（NVS）的一种有竞争力的方法。然而，在大多数3DGS方法中，高斯函数在渲染时被同等加权对待，这使得它们容易过拟合，尤其是在稀疏视角场景中。为了解决这个问题，我们研究了高斯函数的自适应加权如何影响渲染质量，这通过我们提出的学习不确定性来表征。这种学习到的不确定性有两个关键作用：首先，它在保3DGS流程完整性的同时，引导高斯不透明度的可微分更新；其次，不确定性经过软可微分丢弃正则化，该正则化策略性地将原始不确定性转化为连续的丢弃概率，这些概率控制着最终用于渲染的高斯投影和混合过程。在广泛使用的数据集上的大量实验结果表明，我们的方法在稀疏视角3D合成方面优于竞争对手，与现有的稀疏视角方法相比，在大多数数据集中用更少的高斯函数实现了更高质量的重建，例如，与DropGaussian相比，我们的方法在MipNeRF 360数据集上的PSNR提高了3.27%。"
+    },
+    {
+      "id": "arXiv:2508.05187",
+      "title": "Refining Gaussian Splatting: A Volumetric Densification Approach",
+      "chinese_title": "精炼高斯溅射：一种体积致密化方法",
+      "authors": "Mohamed Abdul Gafoor, Marius Preda, Titus Zaharia",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05187&sa=D&source=editors&ust=1754651367165175&usg=AOvVaw31ePQnw-h3LA6K2_NSj5M1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05187&sa=D&source=editors&ust=1754651367165229&usg=AOvVaw3m7bRdr6vaO0t_6XlYo6Uu",
+      "chinese_abstract": "在3D高斯溅射（3DGS）中实现高质量的新视角合成通常取决于有效的点基元管理。其底层的自适应密度控制（ADC）过程通过自动化致密化和修剪来解决此问题。然而，原始的3DGS致密化策略显示出关键的缺点。为解决此问题，本文中我们引入了一种新的密度控制方法，该方法利用与每个高斯函数相关的惯性体积来指导精炼过程。此外，我们研究了传统的运动恢复结构（SfM）和深度图像匹配（DIM）方法对点云初始化的影响。在Mip-NeRF 360数据集上进行的大量实验评估表明，我们的方法在重建质量上超过了3DGS，在各种场景中均表现出令人鼓舞的性能。"
+    },
+    {
+      "id": "arXiv:2508.05383",
+      "title": "StructVRM: Aligning Multimodal Reasoning with Structured and Verifiable Reward Models",
+      "chinese_title": "StructVRM：利用结构化可验证奖励模型对齐多模态推理",
+      "authors": "Xiangxiang Zhang, Jingxuan Wei, Donghong Zhong, Qi Chen, Caijun Jia, Cheng Tan, Jinming Gu, Xiaobo Qin, Zhiping Liu, Liang Hu, Tong Sun, Yuchen Wu, Zewei Sun, Chenwei Lou, Hua Zheng, Tianyang Zhan, Changbao Wang, Shuangzhi Wu, Zefa Lin, Chang Guo, Sihang Yuan, Riwei Chen, Shixiong Zhao, Yingping Zhang, Gaowei Wu, Bihui Yu, Jiahui Wu, Zhehui Zhao, Qianqian Liu, Ruofeng Tang, Xingyue Huang, Bing Zhao, Mengyang Zhang, Youqiang Zhou",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05383&sa=D&source=editors&ust=1754651367145162&usg=AOvVaw05xUepCb_ubs9OumWDVodx",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05383&sa=D&source=editors&ust=1754651367145222&usg=AOvVaw1UII6zX9kaf4Dq8-JNsHJ5",
+      "chinese_abstract": "现有的视觉语言模型在处理复杂的多问题推理任务时常常遇到困难，在这些任务中，部分正确性对于有效学习至关重要。传统的奖励机制为整个响应提供单一的二元分数，这种方式过于粗糙，无法指导模型解决包含多个子部分的复杂问题。为了解决这个问题，我们引入了StructVRM，这是一种将多模态推理与结构化和可验证奖励模型对齐的方法。其核心是一个基于模型的验证器，该验证器经过训练，可提供细粒度的、子问题级别的反馈，评估语义和数学等价性，而不是依赖于僵硬的字符串匹配。这使得在以前难以处理的问题格式中，可以进行细致的部分学分评分。大量的实验证明了StructVRM的有效性。我们训练的模型Seed-StructVRM在12个公开的多模态基准测试中的6个以及我们新策划的高难度STEM-Bench上均取得了最先进的性能。StructVRM的成功验证了使用结构化、可验证的奖励进行训练是提升多模态模型在复杂、真实世界理领域能力的一种非常有效的方法。"
+    },
+    {
+      "id": "arXiv:2508.05004",
+      "title": "R-Zero: Self-Evolving Reasoning LLM from Zero Data",
+      "chinese_title": "R-Zero：从零数据自进化的推理大语言模型",
+      "authors": "Chengsong Huang, Wenhao Yu, Xiaoyang Wang, Hongming Zhang, Zongxia Li, Ruosen Li, Jiaxin Huang, Haitao Mi, Dong Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05004&sa=D&source=editors&ust=1754651367172444&usg=AOvVaw0wWKr0F01mX4vhzd821wB3",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05004&sa=D&source=editors&ust=1754651367172477&usg=AOvVaw1hJFo9fI5qhcHwsk04nBmH",
+      "chinese_abstract": "自进化大语言模型（LLM）通过自主生成、提炼并从自身经验中学习，为通往超级智能提供了一条可扩展的路径。然而，现有的训练此类模型的方法仍然严重依赖于大量人工策划的任务和标签，通常通过微调或强化学习实现，这构成了推动人工智能系统超越人类智能能力的根本瓶颈。为了克服这一限制，我们引入了R-Zero，一个完全自主的框架，可以从头开始生成自己的训练数据。从单个基础LLM开始，R-Zero初始化两个具有不同角色的独立模型：一个挑战者和一个解决者。这些模型被分开优化并通过互动共同进化：挑战者因提出接近解决者能力边缘的任务而获得奖励，而解决者因解决由挑战者提出的日益困难的任务而获得奖励。这一过程在没有任何预先存在的任务和标签的情况下，产生了一个有针对性的、自我改进的课程。实验证明，R-Zero显著提高了不同骨干LLM的推理能力，例如，在数学推理基准上将Qwen3-4B-Base提升了+6.49，在通用领域推理基准上提升了+7.54。"
+    },
+    {
+      "id": "arXiv:2508.05496",
+      "title": "InfiAlign: A Scalable and Sample-Efficient Framework for Aligning LLMs to Enhance Reasoning Capabilities",
+      "chinese_title": "InfiAlign：一个可扩展且样本高效的框架，用于对齐LLM以增强推理能力",
+      "authors": "Shuo Cai, Su Lu, Qi Zhou, Kejing Yang, Zhijie Sang, Congkai Xie, Hongxia Yang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05496&sa=D&source=editors&ust=1754651367143064&usg=AOvVaw29mVqVhqmf_99vrLgVPoYW",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05496&sa=D&source=editors&ust=1754651367143100&usg=AOvVaw1Xe1IbAW-UGixxeeOUmapr",
+      "chinese_abstract": "大型语言模型（LLM）在广泛的复杂任务上展现出令人印象深刻的推理能力。然而，通过后训练来增强这些能力仍然是资源密集型的，特别是在数据和计算成本方面。尽管最近的研究试图通过选择性数据整理来提高样本效率，但现有方法通常依赖于启发式或特定于任务的策略，这阻碍了可扩展性。在这项工作中，我们介绍了InfiAlign，一个可扩展且样本高效的后练框架，它将监督微调（SFT）与直接偏好优化（DPO）相结合，以对齐LLM以增强推理能力。InfiAlign的核心是一个强大的数据选择管道，它使用多维质量指标从开源推理数据集中自动筛选高质量的对齐数据。该管道在大幅减少数据需求的同时实现了显著的性能提升，并且可以扩展到新的数据源。当应用于Qwen2.5-Math-7B-Base模型时，我们的SFT模型实现了与DeepSeek-R1-Distill-Qwen-7B相当的性能，而仅使用了大约12%的训练数据，并展示了在不同推理任务上的强大泛化能力。通过应用DPO获得了额外的改进，在数学推理任务中取得了特别显著的收益。该模型在AIME 24/25基准测试中平均提高了3.89%。我们的结果突显了将有原则的数据选择与全阶段后训练相结合的有效性，为以可扩展和数据高效的方式对齐大型推理模型提供了一个实用的解决方案。模型检查点可在此https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.04853",
+      "title": "Provable Post-Training Quantization: Theoretical Analysis of OPTQ and Qronos",
+      "chinese_title": "可证明的训练后量化：OPTQ和Qronos的理论分析",
+      "authors": "Haoyu Zhang, Shihao Zhang, Ian Colbert, Rayan Saab",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.04853&sa=D&source=editors&ust=1754651367177293&usg=AOvVaw2opB-h7TyTR-vjgRpSkKqe",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.04853&sa=D&source=editors&ust=1754651367177339&usg=AOvVaw0R6mgu9KX17r4Srjsbb80G",
+      "chinese_abstract": "训练后量化（PTQ）已成为降低现代深度神经网络（包括大型语言模型LLM）内存和计算成本的关键工具。在众多PTQ算法中，OPTQ框架（也称为GPTQ）因其计算效率和强大的实证性能而成为领先方法。然而，尽管被广泛采用，OPTQ缺乏严格的量化理论保证。本文首次为OPTQ的确定性和随机性变体，以及最近相关的先进PTQ算法Qronos，提供了量化的误差界。我们分析了OPTQ的迭代过程如何引入量化误差，并推导出了非渐近的2-范数误差界，该误差界明确依赖于校准数据和OPTQ使用的正则化参数。我们的分析为一些实用的设计选择提供了理论依据，包括广泛使用的按范数递减排序特征的启发式方法，以及为选择正则化参数提供了指导。对于随机性变体，我们建立了更强的无穷范数误差界，这能够控制所需的量化字母表，并且对于下游层和非线性部分特别有用。最后，我们将分析扩展到Qronos，为其确定性和随机性变体提供了新的理论界，有助于解释其在经验上的优势。"
+    },
+    {
+      "id": "arXiv:2508.05239",
+      "title": "Pruning Large Language Models by Identifying and Preserving Functional Networks",
+      "chinese_title": "通过识别和保留功能网络来修剪大语言模型",
+      "authors": "Yiheng Liu, Junhao Ning, Sichen Xia, Xiaohui Gao, Ning Qiang, Bao Ge, Junwei Han, Xintao Hu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05239&sa=D&source=editors&ust=1754651367161640&usg=AOvVaw3FneraZ-1VdVQnUqiREUqJ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05239&sa=D&source=editors&ust=1754651367161670&usg=AOvVaw3NuFHxadbBGkJhjj1P8oM_",
+      "chinese_abstract": "结构化剪枝是压缩大型语言模型（LLM）以减少GPU内存消耗和加速推理速度的代表性技术之一。它在提高LLM在实际应用中的效率方面具有重要的实用价值。当前的结构化剪枝方法通常依赖于评估结构单元的重要性并剪枝重要性较低的单元。这些方法大多忽略了对LLM功能至关重要的人工神经元之间的相互作用和协作，导致LLM的宏观功能架构被破坏，从而导致剪枝性能下降。受人工神经网络与人脑功能神经网络之间内在相似性的启发，我们在这项研究中通过识别和保留LLM内部的能网络来缓解这一挑战并提出剪枝LLM的方法。为实现这一目标，我们将LLM视为一个数字大脑，并将其分解为功能网络，类似于在神经影像数据中识别功能性脑网络。之后，通过保留这些功能网络中的关键神经元来对LLM进行剪枝。实验结果表明，该方法可以成功识别和定位LLM中的功能网络和关键神经元，从而实现高效的模型剪枝。我们的代码可在 https URL 上获取。"
+    },
+    {
+      "id": "arXiv:2508.05207",
+      "title": "SpectroStream: A Versatile Neural Codec for General Audio",
+      "chinese_title": "SpectroStream：一种用于通用音频的多功能神经编解码器",
+      "authors": "Yunpeng Li, Kehang Han, Brian McWilliams, Zalan Borsos, Marco Tagliasacchi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05207&sa=D&source=editors&ust=1754651367163862&usg=AOvVaw26F7vQ_MiW2uw8KIYn0LTq",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05207&sa=D&source=editors&ust=1754651367163895&usg=AOvVaw3wdw7q9mqzfiVyXHaZREI6",
+      "chinese_abstract": "我们提出了SpectroStream，一种全频带多通道神经音频编解码器。作为广受认可的SoundStream的后继者，SpectroStream将其能力扩展到24 kHz单声道音频之外，并能在4-16 kbps的比特率下实现48 kHz立体声音乐的高质量重建。这是通过一种新的神经架构实现的，该架构利用音频在时频域的表示，从而带来更好的音频质量，尤其是在更高的采样率下。该模型还采用了一种延迟融合策略来处理多通道音频，这对于平衡每个通道的声学质量和跨通道的相位一致性至关重要。"
+    },
+    {
+      "id": "arXiv:2508.05473",
+      "title": "Embedding Alignment in Code Generation for Audio",
+      "chinese_title": "音频代码生成中的嵌入对齐",
+      "authors": "Sam Kouteili, Hiren Madhu, George Typaldos, Mark Santolucito",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05473&sa=D&source=editors&ust=1754651367154080&usg=AOvVaw0yA6kGfOj4H6EMBp9QcfLz",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05473&sa=D&source=editors&ust=1754651367154115&usg=AOvVaw2bJQ5dyK5oFZVuAaECQlY9",
+      "chinese_abstract": "由大语言模型（LLM）驱动的代码生成有潜力彻底改变创意编码领域，例如现场编码（live-coding），它使用户能够专注于结构性主题而非语法细节。在这类领域中，当向LLM发出提示时，用户可能会受益于考虑多个不同的代码候选项，以更好地实现他们的音乐意图。然而，代码生成模型在呈现独特多样的代码候选项方面存在困难，并且无法直接洞察代码的音频输出。为了更好地建立代码候选项与所生成音频之间的关系，我们研究了代码和音频嵌入空间之间映射的拓扑结构。我们发现代码和音频嵌入之间并不存在简单的线性关系，但我们通过构建一个预测型对此进行了补充，该模型表明可以学习到一个嵌入对齐图。为了实现音乐上多样化的输出，我们提出了一个模型，该模型能根据给定的代码预测输出音频的嵌入，从而构建一个代码-音频嵌入对齐图。"
+    },
+    {
+      "id": "arXiv:2508.05170",
+      "title": "Posterior-GRPO: Rewarding Reasoning Processes in Code Generation",
+      "chinese_title": "Posterior-GRPO：在代码生成中奖励推理过程",
+      "authors": "Lishui Fan, Yu Zhang, Mouxiang Chen, Zhongxin Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05170&sa=D&source=editors&ust=1754651367165576&usg=AOvVaw0C0a6__GXFimBdu7ay1702",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05170&sa=D&source=editors&ust=1754651367165644&usg=AOvVaw3Y2T7fdlEXcyOz3n7Rmd4I",
+      "chinese_abstract": "强化学习（RL）显著推动了大型语言模型（LLM）的代码生成能力。然而，当前的范式依赖于来自测试用的基于结果的奖励，忽略了中间推理过程的质量。虽然直接监督推理过程是一个有前景的方向，但它极易受到奖励利用（reward hacking）的影响，即策略模型学会在不改善最终结果的情况下利用推理奖励信号。为了解决这个问题，我们引入了一个统一的框架，可以在强化学习期间有效地整合推理过程的质量。首先，为了进行推理评估，我们开发了LCB-RB，这是一个包含优劣推理过程偏好对的基准。其次，为了准确评分推理质量，我们引入了一种基于优化-退化（OD-based）的奖励模型训练方法。该方法通过系统地优化和退化初始推理路径，沿着精心策划的推理质量维度（如事实准确性、逻辑严谨性和连贯性），生成高质量的偏好对。一个使用此方法训练的7B参数奖励模型在LCB-RB上达到了最先进（SOTA）的性能，并能很好地泛化到其他基准。最后，我们引入了Posterior-GRPO（P-GRPO），一种新颖的强化学习方法，它将基于过程的奖励与任务成功相关联。通过选择性地仅对成功结果的推理过程应用奖励，P-GRPO有效地减轻了奖励利用，并将模型的内部推理与最终代码的正确性对齐。一个使用P-GRPO训练的7B参数模型在各种代码生成任务上取得了优越的性能，比仅基于结果的基线提高了4.5%，达到了与GPT-4-Turbo相当的性能。我们通过将其扩展到数学任务，进一步证明了我们方法的通用性。我们的模型、数据集和代码都已公开。"
+    },
+    {
+      "id": "arXiv:2508.05619",
+      "title": "The Missing Reward: Active Inference in the Era of Experience",
+      "chinese_title": "缺失的奖励：经验时代的主动推理",
+      "authors": "Bo Wen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05619&sa=D&source=editors&ust=1754651367141312&usg=AOvVaw134wqOqY_CGz-SEZFIPTM0",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05619&sa=D&source=editors&ust=1754651367141373&usg=AOvVaw2e9Kx5QwXfNsxooOnaSxWB",
+      "chinese_abstract": "本文认为，主动推理（AIF）为开发能够在没有持续人类奖励工程的情况下从经验中学习的自主AI智能体提供了关键基础。随着AI系统开始耗尽高质量的训练数据，并依赖日益庞大的人力来进行奖励设计，当前范式面临着严重的可扩展性挑战，这可能阻碍向真正自主智能的进展。提出“经验时代”，即智能体从自我生成的数据中学习，是向前迈出的有希望的一步。然而，这一愿景仍然依赖于广泛的人类奖励函数工程，实际上是将瓶颈从数据策划转移到了奖励策划。这突显了我们所识别的“具身能动性差距”（grounded-agency gap）：当代AI系统无法自主地根据变化的环境制定、调整和追求目标。我们提出AIF可以通过用最小化自由能的内在驱动力取代外部奖励信号来弥合这一差距，允许智能体通过一个统一的贝叶斯目标自然地平衡探索与利用。通过将大语言模型作为生成式世界模型与AIF的原则性决策框架相结合，我们可以创造出能够高效地从经验中学习，同时与人类价值观保持一致的智能体。这种综合提供了一条引人注目的路径，通往能够在遵守计算和物理约束的同时自主发展的AI系统。"
+    },
+    {
+      "id": "arXiv:2508.05615",
+      "title": "Test-Time Reinforcement Learning for GUI Grounding via Region Consistency",
+      "chinese_title": "通过区域一致性实现GUI定位的测试时强化学习",
+      "authors": "Yong Du, Yuchen Yan, Fei Tang, Zhengxi Lu, Chang Zong, Weiming Lu, Shengpei Jiang, Yongliang Shen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05615&sa=D&source=editors&ust=1754651367151225&usg=AOvVaw1aGpErfmzDAmswnoSM2CZB",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05615&sa=D&source=editors&ust=1754651367151254&usg=AOvVaw0RaE56QSxfa_rrGKlIlQ5c",
+      "chinese_abstract": "图形用户界面（GUI）定位，即将自然语言指令映射到精确屏幕坐标的任务，是自主GUI智能体的基础。虽然现有方法通过大量的监督训练或带标签奖励的强化学习取得了优异的性能，但它们仍然受到像素级标注成本和可用性的限制。我们观察到，当模型为同一GUI元素生成多个预测时，空间重叠模式揭示了可以指导更准确本地化的隐式置信度信号。利用这一见解，我们提出了GUI-RC（区域一致性），一种测试时扩展方法，它从多个采样预测中构建空间投票网格，以识别模型显示最高一致性的共识区域。在没有任何训练的情况下，GUI-RC在ScreenSpot基准测试中将各种架构的准确率提高了2-3%。我们进一步引入了GUI-RCPO（区域一致性策略优化），它将这些一致性模式转化为测试时强化学习的奖励。通过计算每个预测与集体共识的对齐程度，GUI-RCPO使模型能够在推理过程中迭代地优化其在未标记数据上的输出。大量实验证明了我们方法的通用性：GUI-RC将Qwen2.5-VL-3B-Instruct在ScreenSpot-v2上的准确率从80.11%提升到83.57%，而GUI-RCPO通过自监督优化进一步将其提高到85.14%。我们的方法揭示了测试时扩展和测试时强化学习在GUI定位方面的未开发潜力，为实现更鲁棒和数据高效的GUI智能体提供了一条有前景的道路。"
+    },
+    {
+      "id": "arXiv:2508.05294",
+      "title": "Towards Embodied Agentic AI: Review and Classification of LLM- and VLM-Driven Robot Autonomy and Interaction",
+      "chinese_title": "迈向具身智能体AI：基于LLM和VLM驱动的机器人自主性与交互的综述与分类",
+      "authors": "Sahar Salimpour, Lei Fu, Farhad Keramat, Leonardo Militano, Giovanni Toffetti, Harry Edelman, Jorge Peña Queralta",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05294&sa=D&source=editors&ust=1754651367159570&usg=AOvVaw3N6T-WJ1PYTkEJGfxxli8X",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05294&sa=D&source=editors&ust=1754651367159633&usg=AOvVaw0J6VzOYvfBOJHYgmb5PJmI",
+      "chinese_abstract": "基础模型，包括大型语言模型（LLM）和视觉语言模型（VLM），最近为机器人自主性和人机交互界面开辟了新方法。与此同时，视觉-语言-行为模型（VLA）或大型行为模型（LBM）正在增强机器人系统的灵活性和能力。本综述论文专注于那些朝着智能体应用和架构发展的研究。这包括初步探索使用GPT风格接口进行工具调用的工作，以及更复杂的系统，其中AI智能体扮演协调者、规划者、感知执行者或通用接口的角色。这类智能体架构允许机器人对自然语言指令进行推理、调用API、规划任务序列或协助操作和诊断。除了经过同行评审的研究外，由于该领域的快速发展，我们还重点介并收录了社区驱动的项目、ROS包和工业框架，这些都显示出新兴的趋势。我们提出了一个用于分类模型集成方法的分类法，并对当今文献中智能体在不同解决方案中所扮演的角色进行了比较分析。"
+    },
+    {
+      "id": "arXiv:2508.05405",
+      "title": "DeepPHY: Benchmarking Agentic VLMs on Physical Reasoning",
+      "chinese_title": "DeepPHY：在物理推理方面对具身视觉语言模型进行基准测试",
+      "authors": "Xinrun Xu, Pi Bu, Ye Wang, Börje F. Karlsson, Ziming Wang, Tengtao Song, Qi Zhu, Jun Song, Zhiming Ding, Bo Zheng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05405&sa=D&source=editors&ust=1754651367144460&usg=AOvVaw2M43wJERBcUovGttOfFH2s",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05405&sa=D&source=editors&ust=1754651367144519&usg=AOvVaw3fQ-pVGrcqx70LmtrgZwx2",
+      "chinese_abstract": "尽管视觉语言模型（VLM）展现出强大的感知能和令人印象深刻的视觉推理能力，但它们在复杂动态环境中难以关注细节和进行精确的行动规划，导致性能不佳。现实世界的任务通常需要复杂的交互、高级的空间推理、长期规划和持续的策略优化，这通常需要理解目标场景的物理规则。然而，在真实场景中评估这些能力通常成本过高。为了弥合这一差距，我们引入了DeepPHY，这是一个新颖的基准框架，旨在通过一系列具有挑战性的模拟环境，系统地评估VLM对基本物理原理的理解和推理能力。DeepPHY集成了多个不同难度级别的物理推理环境，并包含了细粒度的评估指标。我们的评估发现，即使是目前最先进的VLM，也难以将描述性的物理知识转化为精确的、可预测的控制。"
+    },
+    {
+      "id": "arXiv:2508.05492",
+      "title": "MoMA: A Mixture-of-Multimodal-Agents Architecture for Enhancing Clinical Prediction Modelling",
+      "chinese_title": "MoMA：一用于增强临床预测建模的多模态智能体混合架构",
+      "authors": "Jifan Gao, Mahmudur Rahman, John Caskey, Madeline Oguss, Ann O'Rourke, Randy Brown, Anne Stey, Anoop Mayampurath, Matthew M. Churpek, Guanhua Chen, Majid Afshar",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05492&sa=D&source=editors&ust=1754651367153831&usg=AOvVaw1GrVx15wDiDcF37z_fGpeY",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05492&sa=D&source=editors&ust=1754651367153899&usg=AOvVaw3_KIWz2qQbIlDIcdEwjmmk",
+      "chinese_abstract": "与单模态数据相比，多模态电子健康记录（EHR）数据为患者健康状况提供了更丰富、互补的见解。然而，由于庞大的数据需求，有效整合多种数据模态以进行临床预测建模仍然具有挑战性。我们引入了一种新颖的架构，即多模态智能体混合（MoMA），旨在利用多个大型语言模型（LLM）智能体，使用多模态EHR数据执行临床预测任。MoMA采用专门的LLM智能体（“专家智能体”）将非文本模态，如医学图像和实验室结果，转换为结构化的文本摘要。这些摘要与临床笔记一起，由另一个LLM（“聚合器智能体”）组合生成统一的多模态摘要，然后由第三个LLM（“预测器智能体”）使用该摘要产生临床预测。通过在三个使用真实世界数据集的预测任务上评估MoMA，这些任务具有不同的模态组合和预测设置，MoMA的表现优于当前最先进的方法，突显了其在各种任务中增强的准确性和灵活性。"
+    }
+  ],
+  "clusters": {
+    "大模型强化学习与对齐": [
+      "arXiv:2508.05613",
+      "arXiv:2508.05612",
+      "arXiv:2508.05387",
+      "arXiv:2508.05496",
+      "arXiv:2508.05170"
+    ],
+    "Agent智能体与自主学习": [
+      "arXiv:2508.05004",
+      "arXiv:2508.05619",
+      "arXiv:2508.05615",
+      "arXiv:2508.05294"
+    ],
+    "3D视觉与生成": [
+      "arXiv:2508.05254",
+      "arXiv:2508.04968",
+      "arXiv:2508.05187"
+    ],
+    "多模态理解与生成": [
+      "arXiv:2508.05383",
+      "arXiv:2508.05405",
+      "arXiv:2508.05492",
+      "arXiv:2508.05011",
+      "arXiv:2508.05207",
+      "arXiv:2508.05473"
+    ],
+    "模型效率与量化": [
+      "arXiv:2508.04853",
+      "arXiv:2508.05239"
+    ]
+  }
+}
