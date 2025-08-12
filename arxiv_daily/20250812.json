@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.06169",
+      "title": "UW-3DGS: Underwater 3D Reconstruction with Physics-Aware Gaussian Splatting",
+      "chinese_title": "UW-3DGS：基于物理感知高斯溅射的水下三维重建",
+      "authors": "Wenpeng Xing, Jie Chen, Zaifeng Yang, Changting Lin, Jianfeng Dong, Chaochao Chen, Xun Zhou, Meng Han",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06169&sa=D&source=editors&ust=1754972428097097&usg=AOvVaw3s966B5iqvqJcmCrA151HO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06169&sa=D&source=editors&ust=1754972428097352&usg=AOvVaw1wvlDHixSil7exzf8W5kw7",
+      "chinese_abstract": "水下三维场景重建面临着光吸收、散射和浑浊带来的严峻挑战，这些因素会降低神经辐射场（NeRF）等传统方法的几何和颜色保真度。尽管像SeaThru-NeRF这样的NeRF扩展模型引入了基于物理的模型，但它们对多层感知机（MLP）的依赖限制了在模糊环境中的效率和空间分辨率。我们引入了UW-3DGS，这是一个新颖的框架，它将3D高斯溅射（3DGS）技术应用于鲁棒的水下重建。关键创新包括：（1）一个即插即用的可学习水下图像形成模块，使用基于体素的回归来处理空间变化的衰减和后向散射；（2）一个物理感知不确定性剪枝（PAUP）分支，通过不确定性评分自适应地移除噪声浮动高斯点，确保生成无伪影的几何结构。该流程分为训练和渲染两个阶段。在训练阶段，噪声高斯点与水下参数一起进行端到端优化，并由PAUP剪枝和散射建模进行引导。在渲染阶段，精炼的高斯点生成无介质效应的清晰无衰减辐射图像（URI），而学到的物理模型则能生成具有精确光传输的逼真水下图像（UWI）。在SeaThru-NeRF和UWBundle数据集上的实验表明，该方法性能优越，在SeaThru-NeRF上实现了27.604的PSNR、0.868的SSIM和0.104的LPIPS，并减少了约65%的浮动伪影。"
+    },
+    {
+      "id": "arXiv:2508.06136",
+      "title": "Roll Your Eyes: Gaze Redirection via Explicit 3D Eyeball Rotation",
+      "chinese_title": "转动你的眼球：通过显式3D眼球旋转实现注视重定向",
+      "authors": "YoungChan Choi, HengFei Wang, YiHua Cheng, Boeun Kim, Hyung Jin Chang, YoungGeun Choi, Sang-Il Choi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06136&sa=D&source=editors&ust=1754972428100340&usg=AOvVaw1gPOGwUibYN67NZMbMswZw",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06136&sa=D&source=editors&ust=1754972428100484&usg=AOvVaw32Icz-1rjATcZy-D7hLDG-",
+      "chinese_abstract": "我们提出了一个利用显式3D眼球结构的新型3D注视重定向框架。现有的注视重定向方法通常基于神经辐射场（NeRF），通过体积渲染使用隐式神经表示。与这些NeRF方法不同，其中3D表示的旋转和平移并未被显式建模我们引入了一个专用的3D眼球结构，使用3D高斯溅射（3DGS）来表示眼球。我们的方法通过显式旋转和平移3D眼球结构，生成能够忠实再现所需注视方向的照片级逼真图像。此外，我们提出了一个自适应形变模块，能够复制眼部周围微妙的肌肉运动。通过在ETH-XGaze数据集上进行的实验，我们证明了我们的框架能够生成多样化的新颖注视图像，与先前的最先进方法相比，在图像质量和注视估计准确性方面均取得了更优异的成果。"
+    },
+    {
+      "id": "arXiv:2508.05950",
+      "title": "A 3DGS-Diffusion Self-Supervised Framework for Normal Estimation from a Single Image",
+      "chinese_title": "一个用于单图像法线估计的3DGS-扩散自监督框架",
+      "authors": "Yanxing Liang, Yinghui Wang, Jinlong Yang, Wei Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05950&sa=D&source=editors&ust=1754972428121296&usg=AOvVaw2XwPGP3fsrDgNcqwS6fEhj",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05950&sa=D&source=editors&ust=1754972428121466&usg=AOvVaw2cIMa7yPI30UnMcIylDmt-",
+      "chinese_abstract": "从单张图像估计法线仍然面临空间维度信息缺失的挑战。最近基于扩散的方法在2D到3D隐式映射方面展现了巨大潜力，但它们依赖于数据驱动的统计先验，并缺少对光与表面相互作用的显式建模，导致多视角法线方向冲突。此外，扩散模型的离散采样机制导致可微渲染重建模块中的梯度不连续，使得3D几何误差无法反向传播到法线生成网络，从而迫使现有方法依赖于密集的法线标注。本文提出了SINGAD，一个新颖的自监督框架，通过3D高斯溅射引导的扩散从单张图像进行法线估计。通过集成物理驱动的光-交互建模和基于可微渲染的重投影策略，我们的框架直接将3D几何误差转化为法线优化信号，解决了多视角几何不一致和数据赖的挑战。具体来说，该框架构建了一个光-交互驱动的3DGS重参数化模型，以生成符合光传输原理的多尺度几何特征，确保了多视角法线的一致性。在条件扩散模型中设计了一个跨域特征融合模块，嵌入几何先验以约束法线生成，同时保持精确的几何误差传播。此外，引入了一种可微的3D重投影损失策略进行自监督优化，该策略最小化重建图像与输入图像之间的几何误差，从而消除了对带标注法线数据集的依赖。在Google Scanned Objects数据集上的定量评估表明，我们的方法在多个指标上均优于最先进的方法。"
+    },
+    {
+      "id": "arXiv:2508.06098",
+      "title": "MeanAudio: Fast and Faithful Text-to-Audio Generation with Mean Flows",
+      "chinese_title": "MeanAudio：使用均值流实现快速且高保真的文本到音频生成",
+      "authors": "Xiquan Li, Junxi Liu, Yuzhe Liang, Zhikang Niu, Wenxi Chen, Xie Chen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06098&sa=D&source=editors&ust=1754972428104561&usg=AOvVaw1uZoasmJ7NJVbGSKDdKE5p",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06098&sa=D&source=editors&ust=1754972428104705&usg=AOvVaw1c8B-rwrq6XAMuF84ZdrgH",
+      "chinese_abstract": "近期基于扩散和流模型的进展显著推动了文本到音频生成（TTA）技术的发展。尽管在合成质量和可控性方面取得了巨大成功，但当前的TTA系统仍然受困于推理速度慢的问题，这极大地限制了它们的实际应用。本文介绍了MeanAudio，一种专为快速且高保真的文本到音频生成量身定制的新型MeanFlow（均值流）模型。MeanAudio基于Flux风格的潜在变换器构建，在训练过程中回归平均速度场，通过直接从流轨迹的起点映射到终点来实现快速生成。通过将无分类器指导（CFG）融入训练目标，MeanAudio在引导采样过程中不产生额外成本。为了进一步定训练，我们提出了一种带有流场混合的“瞬时到均值”课程学习策略，该策略鼓励模型首先学习基础的瞬时动态，然后逐渐适应均值流。这一策略对于提高训练效率和生成质量至关重要。实验结果表明，MeanAudio在单步音频生成方面达到了最先进的性能。具体来说，它在单块NVIDIA RTX 3090上实现了0.013的实时因子（RTF），比SOTA的基于扩散的TTA系统快了100倍。此外，MeanAudio在多步生成方面也表现出强大的性能，能够在连续的合成步骤中实现平滑和连贯的过渡。"
+    },
+    {
+      "id": "arXiv:2508.05978",
+      "title": "DAFMSVC: One-Shot Singing Voice Conversion with Dual Attention Mechanism and Flow Matching",
+      "chinese_title": "DAFMSVC：结合双重注意力机制和流匹配的单样本歌声转换",
+      "authors": "Wei Chen, Binzhu Sha, Dan Luo, Jing Yang, Zhuo Wang, Fan Fan, Zhiyong Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05978&sa=D&source=editors&ust=1754972428117071&usg=AOvVaw3X_XUzj5hgyQ_lNtp-x_QE",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05978&sa=D&source=editors&ust=1754972428117253&usg=AOvVaw1Ku6YhRIOMS7K5q9PmTk94",
+      "chinese_abstract": "歌声转换（SVC）旨在将源演唱者的音色转换为目标演唱者的音色，同时保持旋律和歌词不变。任意到任意（any-to-any）SVC的核心挑战在于如何在不降低质量的情况下，将未见过的说话人音色适应到源音频中。现有方法要么面临音色泄漏问题，要么在生成的音频中无法实现令人满意的音色相似度和质量。为了解决这些挑战，我们提出了DAFMSVC，其中来自源音频的自监督学习（SSL）特征被替换为来自目标音频的最相似SSL特征，以防止音色泄漏。它还集成了一个双重交叉注意力机制，用于自适应地融合说话人嵌入、旋律和语言内容。此外，我们引入了一个流匹配模块，于从融合后的特征高质量地生成音频。实验结果表明，DAFMSVC显著增强了音色相似度和自然度，在主观和客观评估中均优于最先进的方法。"
+    },
+    {
+      "id": "arXiv:2508.06372",
+      "title": "SpeakerLM: End-to-End Versatile Speaker Diarization and Recognition with Multimodal Large Language Models",
+      "chinese_title": "SpeakerLM：使用多模态大语言模型实现端到端的多功能说话人日志和识别",
+      "authors": "Han Yin, Yafeng Chen, Chong Deng, Luyao Cheng, Hui Wang, Chao-Hong Tan, Qian Chen, Wen Wang, Xiangang Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06372&sa=D&source=editors&ust=1754972428076217&usg=AOvVaw2KfYqIXEl9KukHEdrYYrdR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06372&sa=D&source=editors&ust=1754972428076390&usg=AOvVaw0U0m6_bxYhkoQ5p4eVqyGb",
+      "chinese_abstract": "说话人日志和识别（SDR）任务旨在预测音频片段中“谁在何时了什么”，这在会议转录和对话系统等各种现实世界的多说话人场景中是一项至关重要的任务。现有的SDR系统通常采用级联框架，结合了说话人日志（SD）和自动语音识别（ASR）等多个模块。这种级联系统存在一些局限性，例如错误传播、难以处理重叠语音，以及缺乏联合优化来探索SD和ASR任务之间的协同作用。为了解决这些局限性，我们引入了SpeakerLM，一个统一的多模态大语言模型，用于以端到端的方式联合执行SD和ASR。此外，为了适应多样化的现实世界场景，我们将灵活的说话人注册机制集成到SpeakerLM中，使其能够在不同的说话人注册设置下进行SDR。SpeakerLM是在大规模真实数据上采用多阶段训练策略逐步开发的。广泛的实验表明，SpeakerLM展示了强大的数据扩展能力和泛化能力，在领域内和领域外的公共SDR基准测试中均优于最先进的级联基线。此外，实验结果表明，所提出的说话人注册机制有效地确保了SpeakerLM在不同说话人注册条件和不同注册说话人数量下的鲁棒SDR性能。"
+    },
+    {
+      "id": "arXiv:2508.06214",
+      "title": "Reparameterization Proximal Policy Optimization",
+      "chinese_title": "重参数化近端策略优化",
+      "authors": "Hai Zhong, Xun Wang, Zhuoran Li, Longbo Huang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06214&sa=D&source=editors&ust=1754972428091714&usg=AOvVaw1JSTjPEA82KWK_B7rlYfQI",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06214&sa=D&source=editors&ust=1754972428091853&usg=AOvVaw313o9ihrs-j1yn4cFaS5EZ",
+      "chinese_abstract": "重参数化策略梯度（RPG）通过利用可微分动态模型来提高样本效率，是一种很有前途的方法。然而，一个关键的障碍是其训练的不稳定性，高方差的梯度可能会破坏学习过程。为了解决这个问题，我们从近端策略优化（PPO）获得灵感，PPO使用一个代理目标函数来在无模型设置中实现稳定的样本重用。我们首先建立了这个代理目标函数与RPG之间的联系，这一点在很大程度上尚未被探索且并非易事。然后，我们通过证明一个类PPO代理目标函数的重参数化梯度可以通过时间反向传播高效计算来弥合这一差距。基于这一关键见解，我们提出了重参数化近端策略优化（RPO），一种稳定且样本高效的基于RPG的方法。RPO通过优化一个为RPG量身定制的裁剪代理目标函数，实现了多轮稳定的样本重用，同时通过库尔贝克-莱布勒（KL）散度正则化进一步稳定，并与现有的方差缩减方法完全兼容。我们在一些具有挑战性的运动和操作任务上评估了RPO，实验证明我们的方法实现了卓越的样本效率和强大的性能。"
+    },
+    {
+      "id": "arXiv:2508.05838",
+      "title": "Integrating Vision Foundation Models with Reinforcement Learning for Enhanced Object Interaction",
+      "chinese_title": "整合视觉基础模型与强化学习以增强物体交互能力",
+      "authors": "Ahmad Farooq, Kamran Iqbal",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05838&sa=D&source=editors&ust=1754972428127618&usg=AOvVaw0v5Q0Ge-KNPRFfiXwPtNHh",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05838&sa=D&source=editors&ust=1754972428127757&usg=AOvVaw36VMwHC9SKfhJu0PxRmkvD",
+      "chinese_abstract": "本文提出了一种新颖的方法，将视觉基础模型与强化学习相结合，以增强在模拟环境中的物体交互能力。通过将Segment Anything Model (SAM) 和 YOLOv5 与在 AI2-THOR 模拟环境中运行的近端策略优化 (PPO) 智能体相结合，我们使智能体能够更有效地感知和与物体交互。我们在四个不同的室内厨房环境中进行了全面的实验，结果表明，与没有高级感知能力的基线智能体相比，物体交互成功率和导航率均有显著提高。结果显示，平均累积奖励增加了68%，物体交互成功率提高了52.5%，导航效率提高了33%。这些发现凸显了将基础模型与强化学习整合用于复杂机器人任务的潜力，为更复杂、更有能力的自主智能体铺平了道路。"
+    },
+    {
+      "id": "arXiv:2508.06108",
+      "title": "GCHR : Goal-Conditioned Hindsight Regularization for Sample-Efficient Reinforcement Learning",
+      "chinese_title": "GCHR：用于样本高效强化学习的目标条件事后正则化",
+      "authors": "Xing Lei, Wenyan Yang, Kaiqiang Ke, Shentao Yang, Xuetao Zhang, Joni Pajarinen, Donglin Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06108&sa=D&source=editors&ust=1754972428103107&usg=AOvVaw0phSMrxbyxyr9ozDcbs7hQ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06108&sa=D&source=editors&ust=1754972428103250&usg=AOvVaw1hNIhlkOu054tkKnNyLQpt",
+      "chinese_abstract": "在稀疏奖励下的目标条件强化学习（GCRL）仍然是强化学习中的一个基本挑战。尽管事后经验回放（HER）通过用达成的目标重新标记收集到的轨迹显示出了潜力，但我们认为仅靠轨迹重新标记并未能充分利用离策略GCRL方法中可用的经验，导致样本效率有限。在本文中，我们提出了事后目标条件正则化（HGR），这是一种基于事后目标生成动作正则化先验的技术。当与事后自模仿正则化（HSR）相结合时，我们的方法使得离策略RL算法能够最大化经验利用率。与采用HER和自模仿技术的现有GCRL方法相比，我们的事后正则化实现了显著更高效的样本重用和最佳性能，这一点我们在一些导航和操作任务中进行了经验性证明。"
+    },
+    {
+      "id": "arXiv:2508.06041",
+      "title": "DP-LLM: Runtime Model Adaptation with Dynamic Layer-wise Precision Assignment",
+      "chinese_title": "DP-LLM：具有动态逐层精度分配的运行时模型适应",
+      "authors": "Sangwoo Kwon, Seong Hoon Seo, Jae W. Lee, Yeonhong Park",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06041&sa=D&source=editors&ust=1754972428109789&usg=AOvVaw1CaF5_E6ayjYQZv5Wll1qv",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06041&sa=D&source=editors&ust=1754972428109946&usg=AOvVaw3QgjHRh8XD46XFCPaIT1sw",
+      "chinese_abstract": "我们如何才能有效地处理设备端大语言模型（LLM）中具有不同运行时约束（如延迟和准确性）的查询？多尺度量化通过叠加量化到不同位宽的多个模型变体，实现了LLM的内存高效运行时模型自适应，从而解决了这一挑战。然而，一个重要问题仍未解决：如何正确配置模型以匹配目标精度或延迟？虽然混合精度提供了一个有前景的解决方案，但我们通过利用一个关键观察——即每一层的敏感性在解码迭代过程中动态变化——来进一步推进。基于这一见解，我们引入了DP-LLM，一种根据输入值动态为每一层分配精度的创新机制。DP-LLM为LLM中的每个线性层增加了一个精度选择器，该选择器在运行时使用轻量级误差估计器和通过微调学到的阈值来确定位宽。在多个模型和基准测试上的实验结果表明，DP-LLM实现了卓越的性能-延迟权衡，优于以往的方法。"
+    },
+    {
+      "id": "arXiv:2508.06038",
+      "title": "Fourier-VLM: Compressing Vision Tokens in the Frequency Domain for Large Vision-Language Models",
+      "chinese_title": "Fourier-VLM：在频域中压缩大型视觉语言模型的视觉令牌",
+      "authors": "Huanyu Wang, Jushi Kai, Haoli Bai, Lu Hou, Bo Jiang, Ziwei He, Zhouhan Lin",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06038&sa=D&source=editors&ust=1754972428110626&usg=AOvVaw2xsRtgkkboMYgRLUQE2St0",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06038&sa=D&source=editors&ust=1754972428110764&usg=AOvVaw19KOYdqq-lnDQ2d3vprVm8",
+      "chinese_abstract": "视觉-语言模型（VLM）通常将文本指令中预定义的图像占位符令牌（<image>）替换为来自图像编码器的视觉特征，从而构成骨干大语言模型（LLM）的输入。然而，大量的视觉令牌显著增加了上下文长度，导致高计算开销和推理延迟。虽然以前的工作通过仅选择重要的视觉特征或利用可学习的查询来减少令牌数量来缓解这一问题，但它们通常会牺牲性能或引入大量额外成本。为此，我们提出了Fourier-VLM，一种简单而高效的方法，它在频域中压缩视觉表示。我们的方法受到以下观察的启发：视觉编码器输出的视觉特征在低频分量中表现出集中的能量。利用这一点，我们使用二维离散余弦变换（DCT）对视觉特征应用低通滤波器。值得注意的是，DCT通过快速傅里叶变换（FFT）算子高效计算，时间复杂度为 O(n log n)，从而最小了额外的计算成本，同时没有引入任何附加参数。在各种基于图像的基准测试中进行的大量实验表明，Fourier-VLM在LLaVA和Qwen-VL架构上均实现了具有强大泛化能力的竞争性性能。至关重要的是，与LLaVA-v1.5相比，它将推理FLOPs减少了高达83.8%，并将生成速度提高了31.2%，凸显了其卓越的效率和实用性。"
+    },
+    {
+      "id": "arXiv:2508.05954",
+      "title": "Bifrost-1: Bridging Multimodal LLMs and Diffusion Models with Patch-level CLIP Latents",
+      "chinese_title": "Bifrost-1：使用补丁级CLIP潜变量连接多模态大语言模型和扩散模型",
+      "authors": "Han Lin, Jaemin Cho, Amir Zadeh, Chuan Li, Mohit Bansal",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05954&sa=D&source=editors&ust=1754972428120504&usg=AOvVaw2W0OSIl-e2Tp1bBJ4D2j92",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05954&sa=D&source=editors&ust=1754972428120674&usg=AOvVaw02S99hJVDn8FcYCayRTbHy",
+      "chinese_abstract": "在不损害大型语言模型（LLM）强大推理能力的情况下，将高保真视觉合成能力集成到其中越来越受到关注。现有的直接训练LLM或连接LLM与扩散模型的方法通常训练成本高昂，因为骨干LLM在预训练期间没有见过图像表示。我们提出了Bifrost-1，一个统一的框架，它使用补丁级（patch-level）CLIP图像嵌入作为潜变量来连接预训练的多模态LLM（MLLM）和扩散模型，这些潜变量与MLLM的CLIP视觉编码器天然对齐。这些补丁级图像嵌入通过对其ControlNet进行轻量级适配，被集成到扩散模型中。为了保留MLLM的原始多模态推理能力，我们在预测补丁级图像嵌入时，为MLLM配备了一个从原始MLLM参数初始化的视觉生成分支。通过使用补丁级CLIP潜变量无缝集成预训练的MLLM和扩散模型，我们的框架能够以显著的训练效率实现高保真可控的图像生成。我们的实表明，Bifrost-1在视觉保真度和多模态理解方面，与先前方法相比取得了相当或更好的性能，并且训练期间的计算量大幅降低。我们还提供了全面的消融研究，证明了我们设计选择的有效性。"
+    },
+    {
+      "id": "arXiv:2508.06226",
+      "title": "GeoLaux: A Benchmark for Evaluating MLLMs' Geometry Performance on Long-Step Problems Requiring Auxiliary Lines",
+      "chinese_title": "GeoLaux：一个用于评估多模态大语言模型在需要辅助线的长步骤几何问题上性能的基准",
+      "authors": "Yumeng Fu, Jiayin Zhu, Lingling Zhang, Bo Zhao, Shaoxuan Ma, Yushun Zhang, Yanrui Wu, Wenjun Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06226&sa=D&source=editors&ust=1754972428046337&usg=AOvVaw18TbYF3ICzgTmk04TdPl19",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06226&sa=D&source=editors&ust=1754972428046578&usg=AOvVaw3G82jlpQs6ObSMToqhffYg",
+      "chinese_abstract": "几何问题求解（GPS）要求模型掌握图表理解、逻辑推理、知识应用、数值计算和辅助线构建。这给多模态大语言模型（MLLM）带来了重大挑战。然而，现有的评估MLLM几何技能的基准忽略了辅助线构建，并且缺乏细粒度的过程评估，因此不足以评估MLLM的长步骤推理能力。为了弥补这些差距，我们提出了GeoLaux基准，包含2186个几何问题，涵盖了计算题和证明题。值得注意的是，这些问题平均需要6.51个推理步骤，最多需要24个步骤，其中41.8%的问题需要构建辅助线。基于该数据集，我们设计了一种新颖的五维评估策略，评估答案正确性、过程正确性、过程质量、辅助线影响和错误原因。对13个领先的MLLM（包括思维模型和非思维模型）进行的广泛实验得出了三个关键发现：首先，模型在扩展的推理步骤中表现出显著的性能下降（九个模型的性能下降超过50%）。其次，与计算问题相比，MLLM在解决证明问题时倾向于走捷径。第三，模型缺乏辅助线意识，而增强这种能力对整体几何推理能力的提升尤其有益。这些发现确立了GeoLaux既是评估MLLM在辅助线长步骤几何推理方面的基准，也是能力提升的指南。我们的数据集和代码包含在补充材料中，并将公开发布。"
+    },
+    {
+      "id": "arXiv:2508.06249",
+      "title": "In-Training Defenses against Emergent Misalignment in Language Models",
+      "chinese_title": "针对语言模型中涌现性失调的训练中防御",
+      "authors": "David Kaczér, Magnus Jørgenvåg, Clemens Vetter, Lucie Flek, Florian Mai",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06249&sa=D&source=editors&ust=1754972428088897&usg=AOvVaw3QSL2l8ZD0LeIiMjMe41E5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06249&sa=D&source=editors&ust=1754972428089069&usg=AOvVaw1s-6t6TPDva2l8MLy8gVT4",
+      "chinese_abstract": "微调让实践者能够为新领域重新利用已对齐的大语言模型（LLM），但最近的研究揭示了涌现性失调（EMA）问题：即使是小范围的、针对特定领域的微调，也可能在远超目标领域的范围内引发有害行为。即便在模型权重被隐藏在微调API之后的情况下，这也让攻击者无意中接触到一个广泛失调的模型，而这种方式仅从微调数据本身很难被检测到。我们首次对EMA的训练中防御措施进行了系统性研究，这些措施对于通过API提供微调服务的提供商而言是实用的。我们研究了四种训练正则化干预措施：（i）朝向安全参考模型的KL散度正则化，（ii）特征空间中的ℓ2距离，（iii）投影到安全子空间（SafeLoRA），以及（iv）穿插少量来自通用指令微调数据集的安全训练样本。我们首先评估了这些方法在四个恶意的、引发EMA的任务中的涌现性失调效果。其次，我们评估了这些方法良性任务的影响。最后，我们讨论了涌现性失调研究中的开放问题。"
+    },
+    {
+      "id": "arXiv:2508.06026",
+      "title": "Temporal Self-Rewarding Language Models: Decoupling Chosen-Rejected via Past-Future",
+      "chinese_title": "时间自奖励语言模型：通过过去-未来解耦“选择-拒绝”对",
+      "authors": "Yidong Wang, Xin Wang, Cunxiang Wang, Junfeng Fang, Qiufeng Wang, Jianing Chu, Xuran Meng, Shuxun Yang, Libo Qin, Yue Zhang, Wei Ye, Shikun Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06026&sa=D&source=editors&ust=1754972428112033&usg=AOvVaw247cfz5Dbu8PkIIPRzowKe",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06026&sa=D&source=editors&ust=1754972428112176&usg=AOvVaw2YGnlmRHJBDwprkgwQl4Fa",
+      "chinese_abstract": "自奖励语言模型提出了一种架构，其中大语言模型（LLM）既生成响应，又通过“LLM作为裁判”的提示方式评估自己的输出，从而通过迭代的直接偏好优化（DPO）动态提升其生成能力。然而，我们的分析揭示了现有自奖励范式的一个关键局限性：被选择和被拒绝响应的同步改进，逐渐缩小了对比样本之间的表征差异，从而削弱了有效的偏好学习。我们提出了“时间自奖励语言模型”，该模型策略性地协调过去、现在和未来的模型生成，以维持学习信号。我们的双阶段框架引入了：（1）锚定拒绝——使用过去的初始模型的输出固定被拒绝的响应；以及（2）未来引导的选择——使用下一代模型的预测动态地筛选被选择的样本。在三个模型家族（Llama, Qwen, Mistral）和不同模型尺寸（Llama3B/8B/70B）上的广泛实验表明，与使用相同计算资源的自奖励方法相比，使用我们的方法进行训练可获得显著的改进。例如，Llama3.1-8B使用我们的方法在AlpacaEval 2.0上达到了29.44的胜率，比自奖励基线（19.69）高出9.75。值注意的是，即使我们没有专门收集此类训练数据，我们的方法在数学推理（GSM8K）、基于知识的问答（ARC, TruthfulQA）和代码生成（HumanEval）等任务的分布外泛化能力也表现出优越性。"
+    },
+    {
+      "id": "arXiv:2508.06457",
+      "title": "ScamAgents: How AI Agents Can Simulate Human-Level Scam Calls",
+      "chinese_title": "ScamAgents：人工智能代理如何模拟人类水平的诈骗电话",
+      "authors": "Sanket Badhe",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06457&sa=D&source=editors&ust=1754972428064391&usg=AOvVaw0lEf4xtaLfH3Wq0Qmy28KG",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06457&sa=D&source=editors&ust=1754972428064578&usg=AOvVaw1dCDp0ddtYQITIEg-AdjuA",
+      "chinese_abstract": "大型语言模型（LLM）展示了令人印象深刻的流畅性和推理能力，但其被滥用的潜力也引发了越来越多的担忧。在本文中，我们介绍了ScamAgent一个基于LLM构建的自主多轮代理，能够生成高度逼真的诈骗电话脚本，模拟真实世界的欺诈场景。与以往关注单次提示滥用的工作不同，ScamAgent能够维护对话记忆，动态适应模拟的用户响应，并在对话的多个回合中采用欺骗性的说服策略。我们表明，当前的LLM安全护栏，包括拒绝机制和内容过滤器，对此类基于代理的威胁是无效的。即使是具有强大提示级别保护措施的模型，当提示被分解、伪装或在代理框架内增量传递时，也可能被绕过。我们进一步演示了如何使用现代文本到语音系统将诈骗脚本转换为逼真的语音通话，从而完成一个全自动的诈骗流程。我们的发现凸显了对多轮安全审计、代理级别控制框架以及检测和破坏由生成式AI驱动的对话欺骗的新方法的迫切需求。"
+    },
+    {
+      "id": "arXiv:2508.06269",
+      "title": "OM2P: Offline Multi-Agent Mean-Flow Policy",
+      "chinese_title": "OM2P：离线多智能体均值流策略",
+      "authors": "Zhuoran Li, Xun Wang, Hai Zhong, Longbo Huang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06269&sa=D&source=editors&ust=1754972428085543&usg=AOvVaw0EnvNnOdgpQziXlIXZH_w6",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06269&sa=D&source=editors&ust=1754972428085695&usg=AOvVaw1M0duzLvUtSpavZevJkKS8",
+      "chinese_abstract": "生成模型，特别是基于扩散和流的模型，在离线多智能体强化学习中展现出巨大潜力。然而，将强大的生成模型集成到这个框架中带来了独特的挑战。特别是，基于扩散和流的策略由于其迭代生成过程而导致采样效率低下，使其在时间敏感或资源受限的场景中不切实际。为了解决这些困难，我们提出了OM2P（离线多智能体均值流策略），一种新颖的离线MARL算法，以实现高效的单步动作采样。为了解决生成目标与奖励最大化间的错位问题，我们引入了一种奖励感知的优化方案，该方案将精心设计的均值流匹配损失与Q函数监督相结合。此外，我们设计了一种广义时间步长分布和一种无导数估计策略，以减少内存开销并提高训练稳定性。在Multi-Agent Particle和MuJoCo基准上的实证评估表明，OM2P取得了优越的性能，GPU内存使用量减少高达3.8倍，训练时间加速高达10.8倍。我们的方法是首个成功将均值流模型集成到离线MARL中的方法，为在协作多智能体环境中实现实用和可扩展的生成策略铺平了道路。"
+    },
+    {
+      "id": "arXiv:2508.06318",
+      "title": "Mixture of Experts Guided by Gaussian Splatters Matters: A new Approach to Weakly-Supervised Video Anomaly Detection",
+      "chinese_title": "高斯溅射引导的专家混合模型至关重要：一种弱监督视频异常检测的新方法",
+      "authors": "Giacomo D'Amicantonio, Snehashis Majhi, Quan Kong, Lorenzo Garattoni, Gianpiero Francesca, François Bremond, Egor Bondarev",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06318&sa=D&source=editors&ust=1754972428082920&usg=AOvVaw14DCBXkKj6c1eJO1Ro11Kl",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06318&sa=D&source=editors&ust=1754972428083099&usg=AOvVaw1LM_2D6yUl1Lg8WWuXjBpf",
+      "chinese_abstract": "由于异常事件的多样性和带标签数据的有限可用性，视频异常检测（VAD）是一项具有挑战性的任务。在弱监督视频异常检测（WSVAD）范式下，训练期间仅提供视频级标签，而预测则在帧级别进行。尽管最先进的模型在处理简单异常（如爆炸）方面表现良好，但它们在处理复杂的现实世界事件（如商店盗窃）时遇到了困难。这种困难源于两个关键问题：（1）当前模型无法解决异常类型的多样性，因为它们使用共享模型处理所有类别，忽略了特定类别的特征；（2）弱监督信号缺乏精确的时间信息，限制了捕捉与正常事件混合的细微异常模式的能力。为了应对这些挑战，我们提出了高斯溅射引导的专家混合模型（GS-MoE），这是一个新颖的框架，采用一组专家模型，每个模型专门捕捉特定类型的异常。这些专家由一个时间高斯溅射损失函数引导，使模型能够利用时间一致性并增强弱监督。高斯溅射方法通过关注最可能包含异常事件的时间段，鼓励对异常进行更精确和全面的表示。来自这些专业专家的预测通过专家混合机制进行整合，以模拟不同异常模式之间的复杂关系。我们的方法在UCF-Crime数据集上实现了91.58%的AUC，达到了最先进的性能，并在XD-Violence和MSAD数据集上展示了优越的结果。通过利用特定类别的专业知识和时间引导，GS-MoE为弱监督下的VAD设立了新的基准。"
+    },
+    {
+      "id": "arXiv:2508.06074",
+      "title": "ME$^3$-BEV: Mamba-Enhanced Deep Reinforcement Learning for End-to-End Autonomous Driving with BEV-Perception",
+      "chinese_title": "ME$^3$-BEV：用于端到端自动驾驶的Mamba增强深度强化学习与鸟瞰图感知",
+      "authors": "Siyi Lu, Run Liu, Dongsheng Yang, Lei He",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.06074&sa=D&source=editors&ust=1754972428052298&usg=AOvVaw3c_VabqdYDRe9utL3aiOIF",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.06074&sa=D&source=editors&ust=1754972428052443&usg=AOvVaw0GwzUCGCAWNnwQw54ACw2b",
+      "chinese_abstract": "自动驾驶系统在感知复杂环境和做出实时决策方面面临巨大挑战。传统的模块化方法虽然具有可解释性，但存在误差传播和协调问题，而端到端学习系统可以简化设计，但面临计算瓶颈。本文提出了一种使用深度强化学习（DRL）的自动驾驶新方法，该方法集成了鸟瞰图（BEV）感知以增强实时决策能力。我们引入了`Mamba-BEV`模型，这是一种高效的时空特征提取网络，它将基于BEV的感知与Mamba框架相结合用于时间特征建模。这种集成使得系统能够在一个统一的坐标系中编码车辆周围环境和道路特征，并准确地建模长程依赖关系。在此基础上，我们提出了`ME$^3$-BEV`框架，该框架利用`Mamba-BEV`模型作为端到端DRL的特征输入，在动态城市驾驶场景中实现了卓越的性能。我们通过语义分割可视化高维特征，进一步增强了模型的可解释性，从而深入了解了学习到的表示。在CARLA模拟器上的大量实验表明，`ME$^3$-BEV`在包括碰撞率和轨迹准确性在内的多个指标上均优于现有模型，为实时自动驾驶提供了一个有前景的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.05731",
+      "title": "InfiGUI-G1: Advancing GUI Grounding with Adaptive Exploration Policy Optimization",
+      "chinese_title": "InfiGUI-G1：通过自适应探索策略优化推进GUI定位",
+      "authors": "Yuhang Liu, Zeyu Liu, Shuanghe Zhu, Pengxiang Li, Congkai Xie, Jiasheng Wang, Xueyu Hu, Xiaotian Han, Jianbo Yuan, Xinyao Wang, Shengyu Zhang, Hongxia Yang, Fei Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.05731&sa=D&source=editors&ust=1754972428060923&usg=AOvVaw3gJRfXSaul8Wp4sXnGmmO6",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.05731&sa=D&source=editors&ust=1754972428061138&usg=AOvVaw09GpbR5aX8M_eoFA9GBvGK",
+      "chinese_abstract": "多模态大语言模型（MLLM）的出现推动了使用纯视觉输入在图形用户界面（GUI）上操作的自主智能体的发展。一个根本性的挑战是如何稳健地将自然语言指令进行定位（grounding）。这需要精确的空间对齐，即准确地定位每个元素的位置坐标，更关键的是，需要正确的语义对齐，即将指令匹配到功能上合适的UI元素。尽管带可验证奖励的强化学习（RLVR）已被证明能有效改善这MLLM的空间对齐能力，但我们发现低效的探索会成为语义对齐的瓶颈，阻碍模型学习困难的语义关联。为了解决这个探索问题，我们提出了自适应探索策略优化（AEPO），一个新的策略优化框架。AEPO采用多答案生成策略来强制进行更广泛的探索，然后由一个基于效率eta=U/C第一性原理推导出的、具有理论依据的自适应探索奖励（AER）函数来引导。我们经过AEPO训练的模型，InfiGUI-G1-3B和InfiGUI-G1-7B，在多个具有挑战性的GUI定位基准上创造了新的最先进结果，在旨在测试泛化和语义理解的基准上，相对于朴素的RLVR基线实现了高达9.0%的显著相对改进。资源可在此https URL获取。"
+    }
+  ],
+  "clusters": {
+    "3D场景生成与理解": [
+      "arXiv:2508.06169",
+      "arXiv:2508.06136",
+      "arXiv:2508.05950",
+      "arXiv:2508.06318"
+    ],
+    "强化学习与自主智能体": [
+      "arXiv:2508.06214",
+      "arXiv:2508.05838",
+      "arXiv:2508.06108",
+      "arXiv:2508.06269",
+      "arXiv:2508.06074"
+    ],
+    "多模态与音频生成": [
+      "arXiv:2508.06098",
+      "arXiv:2508.05978",
+      "arXiv:2508.06372",
+      "arXiv:2508.06038",
+      "arXiv:2508.05954",
+      "arXiv:2508.06226",
+      "arXiv:2508.05731"
+    ],
+    "大语言模型对齐与效率": [
+      "arXiv:2508.06041",
+      "arXiv:2508.06249",
+      "arXiv:2508.06026",
+      "arXiv:2508.06457"
+    ]
+  }
+}
