@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.08601",
+      "title": "Yan: Foundational Interactive Video Generation",
+      "chinese_title": "炎：基础交互式视频生成",
+      "authors": "Yan Team",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08601&sa=D&source=editors&ust=1755095313262202&usg=AOvVaw2PEa1Grehq_7JhZOw3zyqb",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08601&sa=D&source=editors&ust=1755095313262239&usg=AOvVaw2V0XpMH34-VFPT5PWmpYp5",
+      "chinese_abstract": "我们提出了“炎”（Yan），一个用于交互式视频生成的基础框架，涵盖了从模拟、生成到编辑的整个流程。具体来说，“炎”包含三个核心模块。AAA级模拟：我们设计了一个高度压缩、低延迟的3D-VAE，并结合了基于KV缓存的移位窗口去噪推理过程，实现了实时的1080P/60FPS交互式模拟。多模态生成：我们引入了一种分层自回归字幕方法，将特定于游戏的识注入到开放领域的多模态视频扩散模型（VDM）中，然后将VDM转变为一个逐帧、动作可控、实时的无限交互式视频生成器。值得注意的是，当文本和视觉提示来自不同领域时，该模型表现出强大的泛化能力，使其能够根据用户提示灵活地融合和组合跨领域的风格与机制。多粒度编辑：我们提出了一个混合模型，它明确地将交互机制模拟与视觉渲染解耦，从而能够在交互过程中通过文本进行多粒度的视频内容编辑。总的来说，“炎”提供了这些模块的集成，将交互式视频生成从孤立的功能推向一个全面的、由人工智能驱动的交互式创作范式，为下一代创意工具、媒体和娱乐铺平了道路。项目页面位于：此 https URL。"
+    },
+    {
+      "id": "arXiv:2508.08487",
+      "title": "MAViS: A Multi-Agent Framework for Long-Sequence Video Storytelling",
+      "chinese_title": "MAViS：一个用于长序列视频故事叙述的多智能体框架",
+      "authors": "Qian Wang, Ziqi Huang, Ruoxi Jia, Paul Debevec, Ning Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08487&sa=D&source=editors&ust=1755095313268652&usg=AOvVaw2_funYqII2utCrszfSTse9",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08487&sa=D&source=editors&ust=1755095313268690&usg=AOvVaw31qU_po0dJjLzIAaJ2q5Ph",
+      "chinese_abstract": "尽管近期取得了进展，长序列视频生成框架仍然存在显著的局限性：辅助能力差、视觉质量欠佳以及表达能力有限。为了缓解这些问题，我们提出了MAViS，一个用于长序列视频故事叙述的端到端多智能体协作框架。MAViS在多个阶段协调专门的智能体，包括剧本写作、镜头设计、角色建模、关键帧生成、视频动画和音频生成。在每个阶段，智能体都遵循3E原则——探索（Explore）、审查（Examine）和增强（Enhance）——以确保中间输出的完整性考虑到当前生成模型的能力限制，我们提出了剧本写作指南，以优化剧本与生成工具之间的兼容性。实验结果表明，MAViS在辅助能力、视觉质量和视频表达能力方面均达到了最先进的水平。其模块化框架进一步使其能够与各种生成模型和工具进行扩展。仅需用户简短的提示，MAViS就能够制作出高质量、富有表现力的长序列视频故事，为用户丰富灵感和创造力。据我们所知，MAViS是唯一一个提供多模态设计输出——带有叙事和背景音乐的视频——的框架。"
+    },
+    {
+      "id": "arXiv:2508.09131",
+      "title": "Training-Free Text-Guided Color Editing with Multi-Modal Diffusion Transformer",
+      "chinese_title": "使用多模态扩散Transformer实现免训练的文本引导颜色编辑",
+      "authors": "Zixin Yin, Xili Dai, Ling-Hao Chen, Deyu Zhou, Jianan Wang, Duomin Wang, Gang Yu, Lionel M. Ni, Heung-Yeung Shum",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09131&sa=D&source=editors&ust=1755095313241893&usg=AOvVaw3bpRF44HOCFVwMxfXTPhxP",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09131&sa=D&source=editors&ust=1755095313241929&usg=AOvVaw3eS_qpZt-KE0g6lrvejvbu",
+      "chinese_abstract": "图像和视频中基于文本引导的颜色编辑是一个基础但尚未解决的问题，它要求对颜色属性进行精细操控，包括反照率、光源颜色和环境光照，同时保持几何、材料属性和光-物质相互作用的物理一致性。现有的免训练方法在各种编辑任务中具有广泛的适用性，但在精确颜色控制方面存在困难，并且常常在编辑区域和非编辑区域引入视觉不一致性。在这项工作中，我们提出了ColorCtrl，一种利用现代多模态扩散Transformer（MM-DiT）的注意力机制的免训练颜色编辑方法。通过对注意力图和值令牌进行有针对性的操作，将结构和颜色解耦，我们的方法能够现准确且一致的颜色编辑，并能进行词级别的属性强度控制。我们的方法仅修改由提示指定的预期区域，而保持无关区域不变。在SD3和FLUX.1-dev上的大量实验表明，ColorCtrl在编辑质量和一致性方面均优于现有的免训练方法，并达到了最先进的性能。此外，我们的方法在一致性方面超过了FLUX.1 Kontext Max和GPT-4o Image Generation等强大的商业模型。当扩展到像CogVideoX这样的视频模型时，我们的方法展现出更大的优势，特别是在保持时间连贯性和编辑稳定性方面。最后，我们的方法还能泛化到如Step1X-Edit和FLUX.1 Kontext dev等基于指令的编辑扩散模型，进一步证明了其多功能性。"
+    },
+    {
+      "id": "arXiv:2508.08957",
+      "title": "QAMRO: Quality-aware Adaptive Margin Ranking Optimization for Human-aligned Assessment of Audio Generation Systems",
+      "chinese_title": "QAMRO：用于音频生成系统人类对齐评估的质量感知适应边界排序优化",
+      "authors": "Chien-Chun Wang, Kuan-Tang Huang, Cheng-Yeh Yang, Hung-Shin Lee, Hsin-Min Wang, Berlin Chen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08957&sa=D&source=editors&ust=1755095313247034&usg=AOvVaw3hmCzeyFEFaVk4jwFZheCb",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08957&sa=D&source=editors&ust=1755095313247071&usg=AOvVaw2dUrwk7Lzynd8aln4gTLhS",
+      "chinese_abstract": "评估音频生成系统，包括文本到音乐（TTM）、文本到语音（TTS）和文本到音频（TTA），由于人类感知的的主观性和多维性，仍然具有挑战性。现有方法将平均意见得分（MOS）预测视为一个回归问题，但标准的回归损失忽略了感知判断的相对性。为了解决这一局限性，我们引入了QAMRO，一个新颖的质量感知自适应边界排序优化框架，它无缝地整合了不同视角的回归目标，旨在突出感知差异并优先考虑准确的评。我们的框架利用了如CLAP和Audiobox-Aesthetics等预训练的音频-文本模型，并且专门在官方的AudioMOS Challenge 2025数据集上进行训练。它在所有维度上都表现出与人类评估的卓越对齐，显著优于强大的基线模型。"
+    },
+    {
+      "id": "arXiv:2508.08924",
+      "title": "EGGCodec: A Robust Neural Encodec Framework for EGG Reconstruction and F0 Extraction",
+      "chinese_title": "EGGCodec：一个用于EGG重建和基频提取的鲁棒神经编解码框架",
+      "authors": "Rui Feng, Yuang Chen, Yu Hu, Jun Du, Jiahong Yuan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08924&sa=D&source=editors&ust=1755095313248015&usg=AOvVaw1oKsXJ-0pvgJ_vfd-s9sfN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08924&sa=D&source=editors&ust=1755095313248052&usg=AOvVaw1DlNNnflavo-sz9RAoph1c",
+      "chinese_abstract": "本文介绍了EGGCodec，一个专为电声门图（EGG）信号重建和基频（F0提取而设计的鲁棒神经编解码框架。我们提出了一种多尺度频域损失函数，以捕捉原始和重建EGG信号之间细微的关系，并辅以时域相关性损失来提高泛化能力和准确性。与传统直接从特征中提取F0的Encodec模型不同，EGGCodec利用重建的EGG信号，这些信号与F0的对应关系更紧密。通过移除传统的GAN判别器，我们在不牺牲效率的情况下简化了EGGCodec的训练过程，仅带来了微不足道的性能下降。在一个广泛使用的包含EGG的数据集上进行训练后，大量评估表明EGGCodec的性能优于最先进的F0提取方案，将平均绝对误差（MAE）从14.14赫兹降低到13.69赫兹，并将发声决策错误率（VDE）提高了38.2%。此外，广泛的消融实验验证了EGGCodec中每个组件的贡献。"
+    },
+    {
+      "id": "arXiv:2508.08909",
+      "title": "Compass-Thinker-7B Technical Report",
+      "chinese_title": "Compass-Thinker-7B 技术报告",
+      "authors": "Anxiang Zeng, Haibo Zhang, Kaixiang Mo, Long Zhang, Shuman Liu, Yanhui Huang, Yawen Liu, Yuepeng Sheng, Yuwei Huang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08909&sa=D&source=editors&ust=1755095313230416&usg=AOvVaw3V69RpRlzGYMAMS0YSAOBN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08909&sa=D&source=editors&ust=1755095313230450&usg=AOvVaw0a_2mpvKlq4TuZOKtMpqsM",
+      "chinese_abstract": "摘要：最近类似R1-Zero的研究进一步证明，推理扩展赋予了大型语言模型（LLMs）前所未有的推理能力，而强化学习是激发其复杂推理的核心技术。然而，直接在超大规模模型上进行强化学习实验涉及高昂的计算成本和资源需求，带来了巨大的风险。我们提出了Compass-Thinker-7B模型，旨在以较少的计算资源和成本探索强化学习的潜力，并为更大模型的强化学习方案提供见解。Compass-Thinker-7B是通过一个专门设计的强化学习管道从一个源模型训练而来。我们为强化学习管道策划了一个包含3万个可验证数学问题的数据集。通过为不同阶段配置不同难度分布的数据和训练设置，模型的潜力被逐步释放，训练效率也得到了提高。广泛的评估表明，Compass-Thinker-7B拥有卓越的推理潜力，在数学方面取得了优于同等规模强化学习模型的性能。在具有挑战性的AIME2024评估中，Compass-Thinker-7B达到了40%的准确率。"
+    },
+    {
+      "id": "arXiv:2508.08882",
+      "title": "Reducing Cognitive Load in Multi-Agent Reinforcement Learning for Mathematical Problem Solving: Decoupling Reasoning and Code Generation",
+      "chinese_title": "降低多智能体强化学习在数学问题求解中的认知负荷：解耦推理与代码生成",
+      "authors": "Dayu Wang, Jiaye Yang, Weikang Li, Jiahui Liang, Yang Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08882&sa=D&source=editors&ust=1755095313230736&usg=AOvVaw0fzfk6gZM9ZO0AhcscDA6O",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08882&sa=D&source=editors&ust=1755095313230773&usg=AOvVaw2RoTg2PdkCkL7e7DRrlMMK",
+      "chinese_abstract": "当前集成了工具的数学推理系统通常采用单智能体范式，即一个大型语言模型在集成的工作流中处理问题推理、代码生成和代码执行。虽然这种设计简化了协调，但我们假设它会带来认知负荷干扰，因为智能体必须将长时程的推理与精确的程序合成交织在一起。我们通过对一个纯推理智能体和一个推理加代码智能体进行受控比较，验证了这一假设，发现后者尽管具备工具调用能力，但产生的正确推理路径明显更少。为了解决这个问题，我们提出了一个双智能体混合框架：一个推理智能体执行逐步的问题分解，一个代码智能体处理代码生成和执行。训练结合了模仿学习和强化学习：代码智能体因匹配中间的真实程序而获得强奖励，因有效执行而获得较弱奖励；而推理智能体主要通过最终答案的准确性进行优化，并使用优势估计来评估中间步骤的贡献。这种解耦的角色设计减少了认知干扰，并促进了稳定的推理-编码协调。"
+    },
+    {
+      "id": "arXiv:2508.08982",
+      "title": "Unsupervised Skill Discovery as Exploration for Learning Agile Locomotion",
+      "chinese_title": "作为探索的无监督技能发现用于学习敏捷运动",
+      "authors": "Seungeun Rho, Kartik Garg, Morgan Byrd, Sehoon Ha",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08982&sa=D&source=editors&ust=1755095313246023&usg=AOvVaw1ZH0eovyVT2iS5FviYqp4Y",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08982&sa=D&source=editors&ust=1755095313246059&usg=AOvVaw2AGENQBWoyq7yv20Lsv-4S",
+      "chinese_abstract": "探索对于使足式机器人学习能够克服各种障碍的敏捷运动行为至关重要。然而，这种探索本质上具有挑战性，我们通常依赖于大量的奖励工程、专家演示或课程学习——所有这些都限制了泛化能力。在这项工作中，我们提出了“作为探索的技能发现”（SDAX），这是一种新颖的学习框架，显著减少了人工工程的投入。SDAX利用无监督的技能发现来自主获取克服障碍的多样化技能库。为了在训练过程中动态调节探索水平，SDAX采用了一个双层优化过程，自主调整探索的程度。我们证明，SDAX使四足机器人能够获得高度敏捷的行为，包括爬行、攀爬、跳跃以及执行复杂的机动动作，如从垂直墙壁上跳下。最后，我们将学习到的策略部署到真实硬件上，验证了其成功地迁移到了现实世界。"
+    },
+    {
+      "id": "arXiv:2508.08486",
+      "title": "Beyond Ordinal Preferences: Why Alignment Needs Cardinal Human Feedback",
+      "chinese_title": "超越序数偏好：为什么对齐需要基数人类反",
+      "authors": "Parker Whitfill, Stewy Slocum",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08486&sa=D&source=editors&ust=1755095313237464&usg=AOvVaw2efaqARw0kIIjtwnD_iGpW",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08486&sa=D&source=editors&ust=1755095313237501&usg=AOvVaw2dwsXOEmzYF9vje1QgxWOW",
+      "chinese_abstract": "大型语言模型（LLMs）的对齐技术依赖于优化基于偏好的目标函数——这些偏好通常以对两个响应进行序数、二元选择的形式被引出。近期的工作主要集中在提高标签质量或减轻特定偏见，但我们发现了一个更根本的局限性：这些方法收集了错误类型的数据。我们证明了一个不可能性结果：任何仅依赖序数比较的算法都无法系统性地恢复出最受偏好的模型。直观地说，序数数据缺乏解决权衡所需的信息——例如，在一个提示中修正一个事实错误与在另一个提示中改进风格间的权衡。我们表明，选择最优模型需要恢复对模型（而不仅仅是响应）的偏好，而这只能通过关于响应质量的基数反馈来识别。为了解决这个问题，我们使用支付意愿引出法（一种来自实验经济学的成熟工具）收集并公开发布了一个包含25,000个基数判断的数据集。在经验上，我们发现将基数反馈纳入偏好微调中，可以使模型优先考虑高影响力的改进，并在下游基准测试（如Arena-Hard）中超越仅使用序数的方法。"
+    },
+    {
+      "id": "arXiv:2508.09019",
+      "title": "Activation Steering for Bias Mitigation: An Interpretable Approach to Safer LLMs",
+      "chinese_title": "激活值引导用于偏见缓解：一种可解释的更安全LLM方法",
+      "authors": "Shivam Dubey",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09019&sa=D&source=editors&ust=1755095313229170&usg=AOvVaw2eJTNiaFNJQ_Sukiwnw29Q",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09019&sa=D&source=editors&ust=1755095313229205&usg=AOvVaw3Ks9VYDPaOM2cPHeOIiFUg",
+      "chinese_abstract": "随着大型语言模型（LLM）越来越多地融入社会系统，它们延续和放大有害偏见的风险成为一个关键的安全问题。传统的偏见缓解方法通常依赖于数据过滤或事后输出审核，这些方法将模型视为一个不透明的黑箱。在这项工作中，我们引入了一个完整的、端到端的系统，该系统使用来自机理可解释性的技术，直接在模型的内部运作中识别并主动缓解偏见。我们的方法包括两个主要阶段。首先，我们在模型的内部激活值上训练线性“探针”，以检测各种偏见（如性别、种族、年龄）的潜在表示。我们在 `gpt2-large` 上的实验表明，这些探针能够以近乎完美的准确率识别出带偏见的内容，并揭示偏见表示在模型的后期层次中最为显著。其次，我们利用这些发现，通对比模型对有偏见和中性陈述的激活模式来计算“引导向量”。在推理过程中加入这些向量，我们可以实时主动地引导模型的生成过程，避免产生有害的、刻板印象的或有偏见的内容。我们展示了这种激活值引导技术的有效性，表明它成功地将有偏见的补全内容改变为更中性的替代方案。我们将我们的工作呈现为一个稳健且可复现的系统，为构建更安全、更负责任的LLM提供了一种更直接、更可解释的方法。"
+    },
+    {
+      "id": "arXiv:2508.09123",
+      "title": "OpenCUA: Open Foundations for Computer-Use Agents",
+      "chinese_title": "OpenCUA: 面向计算机使用智能体的开放基础",
+      "authors": "Xinyuan Wang, Bowen Wang, Dunjie Lu, Junlin Yang, Tianbao Xie, Junli Wang, Jiaqi Deng, Xiaole Guo, Yiheng Xu, Chen Henry Wu, Zhennan Shen, Zhuokai Li, Ryan Li, Xiaochuan Li, Junda Chen, Boyuan Zheng, Peihang Li, Fangyu Lei, Ruisheng Cao, Yeqiao Fu, Dongchan Shin, Martin Shin, Jiarui Hu, Yuyan Wang, Jixuan Chen, Yuxiao Ye, Danyang Zhang, Dikang Du, Hao Hu, Huarong Chen, Zaida Zhou, Yipu Wang, Heng Wang, Diyi Yang, Victor Zhong, Flood Sung, Y.Charles, Zhilin Yang, Tao Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09123&sa=D&source=editors&ust=1755095313227715&usg=AOvVaw15xumtL3NrPoD97-NMNqor",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09123&sa=D&source=editors&ust=1755095313227788&usg=AOvVaw2SOjBBvOKVk4a_8PGifivP",
+      "chinese_abstract": "视觉语言模型已展现出作为计算机使用智能体（CUA）的强大能力，能够自动化各种计算机任务。随着其商业潜力日益增长，最强大的CUA系统的关键细节仍然是闭源的。由于这些智能体将越来越多地介入数字互动并代表我们执行重要的决策，研究社区需要开放的CUA框架来研究其能力、局限性和风险。为了弥补这一差距，我们提出了OpenCUA，一个用于扩展CUA数据和基础模型的综合性开源框架。我们的框架包括：（1）一个无缝捕捉人类计算机使用演示的标注基础设施；（2）AgentNet，首个跨越3个操作系统和200多个应用程序及网站的大规模计算机使用任务数据集；（3）一个可扩展的流水线，能将演示转化为带有反思性长思维链推理的状态-动作对，随着数据规模的扩大，性能持续稳健提升。我们的端到端智能体模型在各类CUA基准测试中表现出色。特别是，OpenCUA-32B在OSWorld-Verified上实现了34.8%的平均成功率，在开源模型中创造了新的最高水平（SOTA），并超越了OpenAI的CUA（GPT-4o）。进一步分析证实，我们的方法在不同领域间具有良好的泛化能力，并且能从增加的测试时计算中显著受益。我们发布了我们的标注工具、数据集、代码和模型，为未来的CUA研究构建开放的基础。"
+    },
+    {
+      "id": "arXiv:2508.08688",
+      "title": "STELAR-VISION: Self-Topology-Aware Efficient Learning for Aligned Reasoning in Vision",
+      "chinese_title": "STELAR-VISION：面向视觉对齐推理的自拓扑感知高效学习",
+      "authors": "Chen Li, Han Zhang, Zhantao Yang, Fangyi Chen, Zihan Wang, Anudeepsekhar Bolimera, Marios Savvides",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08688&sa=D&source=editors&ust=1755095313233172&usg=AOvVaw1ZBei0HCzimZ8fARk8PtPJ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08688&sa=D&source=editors&ust=1755095313233207&usg=AOvVaw0MKzPgG9W8ssw3jsmqPRvx",
+      "chinese_abstract": "视觉语言模型（VLM）在推理方面取得了显著进展，但它们常常在复杂的多模态任务中遇到困难，并且倾向于生成过于冗长的输出。一个关键的限制是它们依赖于思维链（CoT）推理，尽管许多任务可以从树状或图状等替代拓扑结构中受益。为了解决这个问题，我们引入了STELAR-Vision，一个用于拓扑感推理的训练框架。其核心是TopoAug，一个用多样化拓扑结构丰富训练的合成数据管道。我们使用监督微调和强化学习，以后训练的方式对Qwen2VL模型进行训练，同时兼顾准确性和效率。此外，我们提出了“节俭学习”（Frugal Learning），该方法在最小化准确率损失的情况下减少输出长度。在MATH-V和VLM-S2H上，STELAR-Vision的准确率比其基础模型提高了9.7%，并超过了更大的Qwen2VL-72B-Instruct模型7.3%。在五个分布外基准测试中，它比Phi-4-Multimodal-Instruct高出多达28.4%，比LLaMA-3.2-11B-Vision-Instruct高出多达13.2%，展示了强大的泛化能力。与仅使用链式训练相比，我们的方法在分布内数据集上实现了4.3%的整体准确率提升，并在所有分布外基准测试中持续表现更优。我们已经发布了数据集，代码也将可用。"
+    },
+    {
+      "id": "arXiv:2508.08816",
+      "title": "Efficient Agent: Optimizing Planning Capability for Multimodal Retrieval Augmented Generation",
+      "chinese_title": "高效智能体：优化多模态检索增强生成的规划能力",
+      "authors": "Yuechen Wang, Yuming Qiao, Dan Meng, Jun Yang, Haonan Lu, Zhenyu Yang, Xudong Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08816&sa=D&source=editors&ust=1755095313231470&usg=AOvVaw2UK_Y4tJQqjPqr2dWMbjrc",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08816&sa=D&source=editors&ust=1755095313231507&usg=AOvVaw1RQ7Rk44dJaMzlZfR-SMy4",
+      "chinese_abstract": "多模态检索增强生成（mRAG）已成为解决多模态大语言模型（MLLMs）在新闻分析和热门话题等真实场景中时间局限性的一个有前景的解决方案。然而，现有方法通常存在检索策略僵化和视觉信息利用不足的问题。为了弥补这一差距，我们提出了E-Agent，一个具有两项关键创新的智能体框架：一个经过训练的mRAG规划器，能够基于上下文理动态协调多模态工具；以及一个采用工具感知执行序列的任务执行器，以实现优化的mRAG工作流。E-Agent采用一次性mRAG规划策略，可在实现高效信息检索的同时，最大限度地减少冗余的工具调用。为了严格评估mRAG系统的规划能力，我们引入了真实世界mRAG规划（RemPlan）基准。这个新颖的基准包含依赖检索和不依赖检索两种问题类型，并系统地标注了每个实例所需的基本检索工具。该基准明确的mRAG规划注释和多样化的问题设计，通过模拟需要动态mRAG决策的真实场景，增强了其实用性。在RemPlan和三个已建立的基准上的实验证明了E-Agent的优越性：与最先进的mRAG方法相比，准确率提高了13%，同时减少了37%的冗余搜索。"
+    },
+    {
+      "id": "arXiv:2508.09129",
+      "title": "BrowseMaster: Towards Scalable Web Browsing via Tool-Augmented Programmatic Agent Pair",
+      "chinese_title": "BrowseMaster：通过工具增强的程序化智能体对实现可扩展的网页浏览",
+      "authors": "Xianghe Pang, Shuo Tang, Rui Ye, Yuwen Du, Yaxin Du, Siheng Chen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09129&sa=D&source=editors&ust=1755095313227242&usg=AOvVaw0M8vU1JJUsUAZ6qvlmsSpq",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09129&sa=D&source=editors&ust=1755095313227337&usg=AOvVaw3Cl9BCAkwSVOaYa37dFBPv",
+      "chinese_abstract": "在庞大且不断增长的数字环境中进行有效的信息搜寻，需要在广泛搜索和战略推理之间取得平衡。当前基于大型语言模型（LLM）的智能体由于在搜索广度和推理深度上的限制，难以实现这种平衡。缓慢的串行查询限制了相关来源的覆盖范围，而嘈杂的原始输入则干扰了多步推理的连续性。为了应对这些挑战，我们提出了BrowseMaster，一个围绕程序化增强的规划器-执行器智能体对构建的可扩展框架。规划根据任务约束制定并调整搜索策略，而执行器则进行高效、有针对性的检索，为规划器提供简洁、相关的证据。这种分工在保持连贯、长远推理的同时，维持了广泛而系统的探索，克服了限制现有智能体的权衡问题。在具有挑战性的中英文基准上的大量实验表明，BrowseMaster持续优于开源和专有基线，在BrowseComp-en上得分30.0，在BrowseComp-zh上得分46.5，这证明了其在复杂、重推理的大规模信息搜寻任务中的强大能力。"
+    },
+    {
+      "id": "arXiv:2508.08997",
+      "title": "Intrinsic Memory Agents: Heterogeneous Multi-Agent LLM Systems through Structured Contextual Memory",
+      "chinese_title": "内在记忆智能体：通过结构化上下文记忆实现异构多智能体LLM系统",
+      "authors": "Sizhe Yuen, Francisco Gomez Medina, Ting Su, Yali Du, Adam J. Sobey",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08997&sa=D&source=editors&ust=1755095313229501&usg=AOvVaw3Pwe_7sHqosPdG7bz7nKrc",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08997&sa=D&source=editors&ust=1755095313229536&usg=AOvVaw3aSKHVaR9LxCx202TlBssI",
+      "chinese_abstract": "基于大型语言模型（LLM）的多智能体系统在复杂协作问题解决方面展现出巨大潜力，但它们面临着由上下文窗口限制引起的基本挑战，这些限制损害了记忆一致性、角色遵守和程序完整性。本文介绍了内在记忆智能体，这是一个新颖的框架，通过结构化的、随智能体输出内在地演变的智能体特定记忆来解决这些限制。具体而言，我们的方法维护与角色对齐的记忆模板，这些模板在关注任务相关信息的同时，保留了专门的视角。我们在PDDL数据集上对我们的方法进行了基准测试，将其性能与现有的最先进多智能体记忆方法进行比较，结果显示在最高令牌效率下性能提升了38.6%。在复杂的数据管设计任务上进行了额外评估，我们证明了我们的方法在比较可扩展性、可靠性、可用性、成本效益和文档这5个指标时能产生更高质量的设计，并附有改进的定性证据。我们的研究结果表明，通过结构化的内在方法解决记忆限制可以提高多智能体LLM系统在结构化规划任务上的能力。"
+    },
+    {
+      "id": "arXiv:2508.08712",
+      "title": "A Survey on Parallel Text Generation: From Parallel Decoding to Diffusion Language Models",
+      "chinese_title": "并行文本生成综述：从并行解码到扩散语言模型",
+      "authors": "Lingzhe Zhang, Liancheng Fang, Chiming Duan, Minghua He, Leyi Pan, Pei Xiao, Shiyu Huang, Yunpeng Zhai, Xuming Hu, Philip S. Yu, Aiwei Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08712&sa=D&source=editors&ust=1755095313258372&usg=AOvVaw2o0auJrORigpHSQUHjNK0t",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08712&sa=D&source=editors&ust=1755095313258409&usg=AOvVaw279OgXANIIxhx5UCJx3xbY",
+      "chinese_abstract": "文本生成已成为现代大型语言模型（LLM）的核心能力，支撑着广泛的下游应用。然而，大多数现有LLM依赖于自回归（AR）生成，即基于先前生成的上下文逐个生成令牌，这导致由于其固有的顺序性而生成速度受限。为应对这一挑战，越来越多的研究人员开始探索并行文本生成——这是一类旨在打破逐令牌生成瓶颈并提高推理效率的广泛技术。尽管兴趣日益浓厚，但对于哪些具体技术构成并行文本生成以及它们如何提高推理性能，仍缺乏全面的分析。为弥补这一差距，我们对并行文本生成方法进行了系统性综述。我们将现有方法分为基于AR和非基于AR的范式，并对每个类别中的核心技术进行了详细审查。在此分类法的基础上，我们评估了它们在速度、质量和效率方面的理论权衡，并探讨了它们与替代加速策略相结合和比较的潜力。最后，基于我们的发现，我们突出了近期的进展，指出了开放的挑战，并为并行文本生成的未来研究勾勒出有前景的方向。"
+    },
+    {
+      "id": "arXiv:2508.08446",
+      "title": "OverFill: Two-Stage Models for Efficient Language Model Decoding",
+      "chinese_title": "OverFill：用于高效语言模型解码的两阶段模型",
+      "authors": "Woojeong Kim, Junxiong Wang, Jing Nathan Yan, Mohamed Abdelfattah, Alexander M. Rush",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08446&sa=D&source=editors&ust=1755095313238097&usg=AOvVaw1RbX-giSoXfzpTcoP2wBr3",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08446&sa=D&source=editors&ust=1755095313238134&usg=AOvVaw1fUnjP3Kd33K3q9d9EUAD-",
+      "chinese_abstract": "大型语言模型（LLMs）在各种任务中表现出色，但由于推理成本高昂，面临着重大的部署挑战。LLM推理包括预填充（算密集型）和解码（内存密集型）两个阶段，其中解码阶段在长序列中尤其主导延迟。尽管计算特性不同，当前的仅解码器模型对这两个阶段的处理方式是统一的。我们提出了OverFill，它将这两个阶段解耦以优化准确性与效率的权衡。OverFill以一个完整模型开始进行预填充，并行处理系统和用户输入。然后，它切换到一个密集的剪枝模型，同时顺序生成令牌。通过在预填充阶段利用更多的计算资源，OverFill在延迟开销最小的情况下提高了生成质量。我们的3B到1B的OverFill配置在标准基准测试中平均比1B剪枝模型性能高出83.2%，而8B到3B的配置比3B剪枝模型高出79.2%。OverFill的性能与从头开始训练的同等规模模型相匹配，同时使用的训练数据要少得多。我们的代码已在此 https URL 上提供。"
+    },
+    {
+      "id": "arXiv:2508.08795",
+      "title": "A Dual-Axis Taxonomy of Knowledge Editing for LLMs: From Mechanisms to Functions",
+      "chinese_title": "LLM知识编辑的双轴分类法：从机制到功能",
+      "authors": "Amir Mohammad Salehoof, Ali Ramezani, Yadollah Yaghoobzadeh, Majid Nili Ahmadabadi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08795&sa=D&source=editors&ust=1755095313232102&usg=AOvVaw1iBtCYfbpmIHObmR8lNNxM",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08795&sa=D&source=editors&ust=1755095313232136&usg=AOvVaw2U_3yYP362xVpsIE7SKv_-",
+      "chinese_abstract": "大型语言模型（LLM）从大型文本语料库中获取了大量知识，但这些信息可能会变得过时或不准确。由于重新训练的计算成本高昂，知识编辑提供了一种高效的替代方案——在不进行完全重新训练的情况下修改内部知识。这些方法旨在精确更新事实，同时保持模型的整体能力。虽然现有的综述主要关注编辑的机制（例如，参数更改与外部记忆），但它们常常忽略了被编辑知识的功能。本综述引入了一种新颖的、互补的基于功能的分类法，以提供更全面的视角。我们研究了不同机制如何应用于各种知识类型——事实性、时间性、概念性、常识性和社会性知识——并强调了编辑效果如何依赖于目标知识的性质。通过沿着这两个轴组织我们的回顾，我们描绘了当前的格局，概述了现有方法的优缺点，正式定义了问题，调查了评估任务和数据集，并以开放的挑战和未来的方向作为总结。"
+    },
+    {
+      "id": "arXiv:2508.08718",
+      "title": "Generative Modeling for Robust Deep Reinforcement Learning on the Traveling Salesman Problem",
+      "chinese_title": "用于旅行商问题鲁棒深度强化学习的生成建模",
+      "authors": "Michael Li, Eric Bae, Christopher Haberland, Natasha Jaques",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08718&sa=D&source=editors&ust=1755095313257691&usg=AOvVaw01KvvqWd0vHO0xHwFD4rOx",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08718&sa=D&source=editors&ust=1755095313257728&usg=AOvVaw0qIy6VOz3kHMcN-BYFxMdX",
+      "chinese_abstract": "旅行商问题（TSP）是一个经典的NP难组合优化任务，具有众多实际应用。经典的启发式求解器可以在小规模问题实例上获得接近最优的性能，但对于更大的问题则变得计算上难以处理。现实世界的物流问题，如动态重新规划最后一英里配送路线，要求求解器具有快速的推理时间，这促使研究人员研究专门的神经网络求解器。然而，神经网络难以泛化到它们训练所用的合成数据之外。特别是，我们表明存在一些在实践中很现实的TSP分布，这些分布也持续导致现有神经方法出现糟糕的最坏情况性能。为了解决这种分布鲁棒性问题，我们提出了组合优化与生成采样（COGS），其中训练数据从一个生成式TSP模型中采。我们表明，COGS在TSP训练分布空间中提供了更好的数据覆盖和插值。我们还提出了TSPLib50，一个包含现实分布的TSP样本的数据集，它测试了现实世界的泛化能力，而没有将此问题与实例大小混淆。我们在各种合成数据集以及TSPLib50上评估了我们的方法，并与最先进的神经基线进行了比较。我们证明了COGS提高了分布鲁棒性，其中大部分性能增益来自于最坏情况场景。"
+    },
+    {
+      "id": "arXiv:2508.08940",
+      "title": "Train Long, Think Short: Curriculum Learning for Efficient Reasoning",
+      "chinese_title": "长训练，短思考：面向高效推理的课程学习",
+      "authors": "Hasan Abed Al Kader Hammoud, Kumail Alhamoud, Abed Hammoud, Elie Bou-Zeid, Marzyeh Ghassemi, Bernard Ghanem",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.08940&sa=D&source=editors&ust=1755095313247688&usg=AOvVaw2H5BRgopaZ9WwNxCCtJSUF",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.08940&sa=D&source=editors&ust=1755095313247727&usg=AOvVaw0l37QRgY8nfK8CjbpzLxmA",
+      "chinese_abstract": "最近关于增强大型语言模型（LLMs）推理能力的研究引入了显式长度控制，作为在保持准确性的同时限制计算成本的一种手段。然而，现有方法依赖于固定长度的训练预算，这未能利用学习过程中从探索到压缩的自然进展。在这项工作中，我们提出了一种使用组相对策略优化（GRPO）进行长度控制推理的课程学习策略。我们的方法从宽松的令牌预算开始，并在训练过程中逐渐收紧，鼓励模型首先发现有效的解决策略，然后将其提炼成更简洁的推理轨迹。我们通过一个平衡三个信号的奖励函数来增强GRPO：任务正确性（通过验证器反馈）、长度效率和格式遵循（通过结构化标签）。在GSM8K、MATH500、SVAMP、College Math和GSM+上的实验表明，在相同的最终预算下，基课程的训练始终优于固定预算的基线，实现了更高的准确性和显著提高的令牌效率。我们进一步对奖励权重和衰减计划设计的影响进行了消融研究，表明渐进式约束是训练高效推理模型的强大归纳偏见。我们的代码和检查点发布在：此 https URL。"
+    }
+  ],
+  "clusters": {
+    "多模态与视频/音频生成": [
+      "arXiv:2508.08601",
+      "arXiv:2508.08487",
+      "arXiv:2508.09131",
+      "arXiv:2508.08957",
+      "arXiv:2508.08924",
+      "arXiv:2508.09123",
+      "arXiv:2508.08688",
+      "arXiv:2508.08816"
+    ],
+    "强化学习与LLM智能体": [
+      "arXiv:2508.08909",
+      "arXiv:2508.08882",
+      "arXiv:2508.08982",
+      "arXiv:2508.09129",
+      "arXiv:2508.08997",
+      "arXiv:2508.08718"
+    ],
+    "LLM对齐、可解释性与编辑": [
+      "arXiv:2508.08486",
+      "arXiv:2508.09019",
+      "arXiv:2508.08795"
+    ],
+    "高效生成与推理": [
+      "arXiv:2508.08712",
+      "arXiv:2508.08446",
+      "arXiv:2508.08940"
+    ]
+  }
+}
