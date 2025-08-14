@@ -1,0 +1,216 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.09987",
+      "title": "Echo-4o: Harnessing the Power of GPT-4o Synthetic Images for Improved Image Generation",
+      "chinese_title": "Echo-4o：利用GPT-4o合成图像的力量改进图像生成",
+      "authors": "Junyan Ye, Dongzhi Jiang, Zihao Wang, Leqi Zhu, Zhenghao Hu, Zilong Huang, Jun He, Zhiyuan Yan, Jinghua Yu, Hongsheng Li, Conghui He, Weijia Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09987&sa=D&source=editors&ust=1755181327143296&usg=AOvVaw0EPQxBz9zemdO_Mlte9YWj",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09987&sa=D&source=editors&ust=1755181327143356&usg=AOvVaw2Oj0jZ-PmcRzZTld423_nW",
+      "chinese_abstract": "摘要：最近，GPT-4o因其在图像生成方面的强大性能而备受关注，但开源模型仍然落后。一些研究探索了从GPT-4o中蒸馏图像数据以增强开源模型，并取得了显著进展。然而，一个关键问题仍然存在：既然真实世界的图像数据集已经是高质量数据的天然来源，我们为什么还要使用GPT-4o生成的合成数据？在这项工作中，我们确定了合成图像的两个关键优势。首先，它们可以补充真实世界数据集中的罕见场景，例如超现实的幻想或多参考图像生成，这些场景在用户查询中频繁出现。其次，它们提供了干净且可控的监督。真实世界的数据通常包含复杂的背景噪声以及文本描述和图像内容之间固有的不对齐，而合成图像提供了纯净的背景和长尾监督信号，有助于更准确的文本到图像对齐。基于这些见解，我们推出了Echo-4o-Image，这是一个由GPT-4o生成的18万规模的合成数据集，利用合成图像数据的力量来解决真实世界覆盖范围的盲点。使用这个数据集，我们微调了统一的多模态生成基线模型Bagel，从而得到了Echo-4o。此外，我们提出了两个新的评估基准，以便更准确、更具挑战性地评估图像生成能力：GenEval++，它增加了指令复杂性以减轻分数饱和；以及Imagine-Bench，它专注于评估想象内容的理解和生成。Echo-4o在标准基准测试中表现出强大的性能。此外，将Echo-4o-Image应用于其他基础模型（例如OmniGen2，BLIP3-o）在多个指标上均产生了一致的性能提升，凸显了该数据集强大的可迁移性。"
+    },
+    {
+      "id": "arXiv:2508.09830",
+      "title": "RayletDF: Raylet Distance Fields for Generalizable 3D Surface Reconstruction from Point Clouds or Gaussians",
+      "chinese_title": "RayletDF：用于从点云或高斯函数进行通用三维表面重建的射线束距离场",
+      "authors": "Shenxing Wei, Jinxi Li, Yafei Yang, Siyuan Zhou, Bo Yang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09830&sa=D&source=editors&ust=1755181327150795&usg=AOvVaw1dqmC10pFnhneWiKbkoIO2",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09830&sa=D&source=editors&ust=1755181327150837&usg=AOvVaw3iIODNOnXUkqodbf6u3zp5",
+      "chinese_abstract": "摘要：在本文中，我们提出了一种可通用的方法，用于从原始点云或通过3DGS从RGB图像预估的3D高斯函数进行三维表面重建。与现有的基于坐标的方法在渲染显式表面时计算量通常很大不同，我们提出的方法名为RayletDF，引入了一种称为射线束距离场的新技术，旨在直接从查询射线预测表面点。我们的流程包括三个关键模块：射线束特征提取器、射线束距离场预测器和多射线束混合器。这些组件协同工作，提取细粒度的局部几何特征，预测射线束距离，并聚合多个预测以重建精确的表面点。我们在多个公共真实世界数据集上广泛评估了我们的方法，展示了其在从点云或3D高斯函数进行表面重建方面的卓越性能。最值得注意的是，我们的方法实现了出色的泛化能力，在测试中成功地通过单次前向传播恢复了未见数据集的三维表面。"
+    },
+    {
+      "id": "arXiv:2508.09811",
+      "title": "TRACE: Learning 3D Gaussian Physical Dynamics from Multi-view Videos",
+      "chinese_title": "TRACE：从多视角视频中学习三维高斯物理动力学",
+      "authors": "Jinxi Li, Ziyang Song, Bo Yang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09811&sa=D&source=editors&ust=1755181327151479&usg=AOvVaw3j1Ag3waQv-wb02VikpR2P",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09811&sa=D&source=editors&ust=1755181327151527&usg=AOvVaw2rGOMNiCM9OYq8J3wg3vkS",
+      "chinese_abstract": "摘要：在本文中，我们旨在仅从动态多视角视频中建模三维场景的几何、外观和物理信息，而无需任何人工标注。通过利用物理信息损失作为软约束或将简单的物理模型集成到神经网络中，现有工作通常难以学习复杂的运动物理学，或者这样做需要额外的标签，如物体类型或掩码。我们提出了一个名为TRACE的新框架，用于建模复杂动态三维场景的运动物理学。我们方法的关键新颖之处在于，通过将每个三维点建模为空间中具有尺寸和方向的刚性粒子，我们直接为每个粒子学习一个平移旋转动力学系统，明确估计一套完整的物理参数来控制粒子随时间的运动。在三个现有的动态数据集和一个新创建的具有挑战性的合成数据集上的大量实验证明，我们的方法在未来帧外推任务上优于基线方法。我们框架的一个良好特性是，只需通过聚类学习到的物理参数，就可以轻松地分割出多个物体或部件。"
+    },
+    {
+      "id": "arXiv:2508.09239",
+      "title": "Gradient-Direction-Aware Density Control for 3D Gaussian Splatting",
+      "chinese_title": "梯度方向感知的3D高斯溅射密度控制",
+      "authors": "Zheng Zhou, Yu-Jie Xiong, Chun-Ming Xia, Jia-Chen Zhang, Hong-Jian Zhan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09239&sa=D&source=editors&ust=1755181327181937&usg=AOvVaw3u5TP5NtaVI-L3WT5P15su",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09239&sa=D&source=editors&ust=1755181327181985&usg=AOvVaw0MgpjER832ClB5SvjEZag0",
+      "chinese_abstract": "摘要：3D高斯溅射（3DGS）的出现通过显式场景表示极大地推动了新视角合成技术的发展，实现了实时的照片级渲染。然而，现有方法在复杂场景中表现出两个关键局限性：（1）当持久存在的大高斯函数在密度控制过程中无法满足自适应分裂阈值时，会发生过度重建。梯度方向的冲突加剧了这一问题，阻碍了这些高斯函数的有效分裂；（2）在梯度聚合方向一致的区域，会发生高斯函数的过度致密化，导致冗余组件的激增。这种冗余因不必要的数据保留而显著增加了内存开销。我们提出了梯度方向感知高斯溅射（GDAGS），一个梯度方向感知的自适应密度控制框架，以应对这些挑战。我们的关键创新在于：通过归一化梯度向量范数计算的梯度相干比（GCR），它能明确区分具有一致与冲突梯度方向的高斯函数；以及一个利用GCR实现梯度方向感知密度控制的非线性动态加权机制。具体而言，GDAGS在分裂操作中优先处理具有冲突梯度的高斯函数以增强几何细节，同时抑制冗余的具有一致方向的高斯函数。相反，在克隆过程中，GDAGS促进具有一致方向的高斯函数致密化以完成结构，同时防止具有冲突方向的高斯函数过度增殖。在多种真实世界基准上的综合评估表明，GDAGS在实现卓越渲染质量的同时，有效减轻了过度重建、抑制了过度致密化，并通过优化高斯函数的利用，构建了内存消耗减少50%的紧凑场景表示。"
+    },
+    {
+      "id": "arXiv:2508.09681",
+      "title": "Surg - InvNeRF: Invertible NeRF for 3D tracking and reconstruction in surgical vision",
+      "chinese_title": "Surg - InvNeRF：用于手术视觉中三维跟踪与重建的可逆神经辐射场",
+      "authors": "Gerardo Loza, Junlei Hu, Dominic Jones, Sharib Ali, Pietro Valdastri",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09681&sa=D&source=editors&ust=1755181327156846&usg=AOvVaw1du-8KEqnXIhOCBPKcpiGG",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09681&sa=D&source=editors&ust=1755181327156902&usg=AOvVaw1KAfh8dDvKpuviux-rpEI_",
+      "chinese_abstract": "摘要：我们提出了一种新颖的测试时优化（TTO）方法，该方法由一个基于NeRF的架构构成，用于长期三维点跟踪。目前大多数点跟踪方法难以获得一致的运动，或者仅限于二维运动。TTO方法将长期跟踪的解决方案框架化为优化一个函数，该函数聚合了其他专业化的最新方法的对应关系。与TTO领域的最新技术不同，我们建议使用我们新的可逆神经辐射场（InvNeRF）架构来参数化该函数，以便在手术场景中执行二维和三维跟踪。我们的方法使我们能够利用基于渲染方法的优势，通过监督像素对应点的重投影。它借鉴了近期基于渲染方法中的策略，以获得双向的可变形-规范映射，从而高效地处理定义的工作空间，并引导光线的密度。它还展示了我们的多尺度HexPlanes用于快速推理，以及一种用于高效像素采样和收敛标准的新算法。我们在STIR和SCARE数据集上展示了结果，分别用于评估点跟踪和测试运动学数据在我们流程中的集成。在二维点跟踪方面，我们的方法在平均精度上比TTO领域的最新方法高出近50%，同时与其他方法具有竞争力。在三维点跟踪方面，这是首个TTO方法，其性能超越了前馈方法，同时融合了基于可变形NeRF重建的优点。"
+    },
+    {
+      "id": "arXiv:2508.09632",
+      "title": "Preacher: Paper-to-Video Agentic System",
+      "chinese_title": "Preacher：一个将论文转化为视频的智能体系统",
+      "authors": "Jingwei Liu, Ling Yang, Hao Luo, Fan Wang Hongyan Li, Mengdi Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09632&sa=D&source=editors&ust=1755181327158785&usg=AOvVaw1Bc_AGb2unaaGb6m3nf6Ru",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09632&sa=D&source=editors&ust=1755181327158829&usg=AOvVaw2QQbpWxuZ1Qw6_vUu4T63T",
+      "chinese_abstract": "摘要：论文到视频任务将一篇研究论文转化为结构化的视频摘要，将关键概念、方法和结论提炼成一种易于理解、组织良好的格式。尽管最先进的视频生成模型显示出潜力，但它们受到有限的上下文窗口、僵硬的视频时长限制、有限的风格多样性以及无法表示领域特定知识的约束。为了解决这些限制，我们引入了Preacher，这是第一个论文到视频的智能体系统。Preacher采用自上而下的方法来分解、总结和重构论文，然后进行自下而上的视频生成，将多样化的视频片段合成为一个连贯的摘要。为了对齐跨模态表示，我们定义了关键场景，并引入了一种渐进式思维链（P-CoT）进行精细化的迭代规划。Preacher成功地在五个研究领域生成了高质量的视频摘要，展示了超越当前视频生成模型的专业能力。代码将发布于：此https URL"
+    },
+    {
+      "id": "arXiv:2508.09383",
+      "title": "X-UniMotion: Animating Human Images with Expressive, Unified and Identity-Agnostic Motion Latents",
+      "chinese_title": "X-UniMotion：使用富有表现力、统一且身份无关的运动潜变量为人体图像制作动画",
+      "authors": "Guoxian Song, Hongyi Xu, Xiaochen Zhao, You Xie, Tianpei Gu, Zenan Li, Chenxu Zhang, Linjie Luo",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09383&sa=D&source=editors&ust=1755181327173476&usg=AOvVaw2ThLEKATIsGcaW3br5FtAL",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09383&sa=D&source=editors&ust=1755181327173538&usg=AOvVaw2zuxojHfJrLQ7gdluOL51S",
+      "chinese_abstract": "摘要：我们提出了X-UniMotion，一个用于全身人体运动的统一且富有表现力的隐式潜变量表示，涵盖了面部表情、身体姿势和手部手势。与以往依赖显式骨骼姿势和启发式跨身份调整的运动迁移方法不同，我们的方法将多粒度的运动直接从单张图像编码为一组紧凑的四个解耦潜变量标记——一个用于面部表情，一个用于身体姿势，双手各一个。这些运动潜变量既富有表现力又与身份无关，能够在具有不同身份、姿势和空间配置的个体之间实现高保真、细节丰富的跨身份运动迁移。为了实现这一点，我们引入了一个自监督的端到端框架，该框架与一个基于DiT的视频生成模型一起，共同学习运动编码器和潜变量表示，并在大规模、多样化的人体运动数据集上进行训练。通过2D空间和颜色增强，以及在共享姿势下对跨身份主体对进行合成3D渲染，我们强制实现了运动与身份的解耦。此外，我们通过辅助解码器引导运动标记的学习，这些解码器促进了细粒度、语义对齐和深度感知的运动嵌入。大量实验表明，X-UniMotion优于最先进的方法，能够生成具有卓越运动保真度和身份保持度的高度表现力的动画。"
+    },
+    {
+      "id": "arXiv:2508.09486",
+      "title": "Episodic Memory Representation for Long-form Video Understanding",
+      "chinese_title": "用于长视频理解的情景记忆表示",
+      "authors": "Yun Wang, Long Zhang, Jingren Liu, Jiaqi Yan, Zhanjie Zhang, Jiahao Zheng, Xun Yang, Dapeng Wu, Xiangyu Chen, Xuelong Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09486&sa=D&source=editors&ust=1755181327167312&usg=AOvVaw05S6yj_5ZiwYmEAbT71m8D",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09486&sa=D&source=editors&ust=1755181327167381&usg=AOvVaw1ojc-kBZcnL3Y5eT9fieYa",
+      "chinese_abstract": "摘要：视频大型语言模型（Video-LLMs）在通用视频理解方面表现出色，但由于上下文窗口的限制，在处理长视频时遇到困难。因此，最近的方法侧重于关键帧检索，将长视频浓缩为一小组信息丰富的帧。尽管这些方法很实用，但它们将问题简化为静态的文本图像匹配，忽略了对于捕捉场景转换和上下文连续性至关重要的时空关系，并且可能产生信息有限的冗余关键帧，从而稀释了准确视频问答所需的显著线索。为了解决这些限制，我们引入了Video-EM，这是一个受人类情景记忆原理启发的无需训练的框架，旨在促进稳健且基于上下文的推理。Video-EM不是将关键帧视为孤立的视觉实体，而是明确地将它们建模为按时间顺序排列的情景事件，捕捉了准确重建底层叙事所需的空间关系和时间动态。此外，该框架利用LLMs的思维链（CoT）思考来迭代地识别一个最小但信息量极高的情景记忆子集，从而使Video-LLMs能够进行高效准确的问答。在Video-MME、EgoSchema、HourVideo和LVBench基准上的广泛评估证实了Video-EM的优越性，它在利用更少帧数的情况下，取得了极具竞争力的结果，性能比各自的基线提高了4-9个百分点。"
+    },
+    {
+      "id": "arXiv:2508.09294",
+      "title": "Fake-Mamba: Real-Time Speech Deepfake Detection Using Bidirectional Mamba as Self-Attention's Alternative",
+      "chinese_title": "Fake-Mamba：使用双向Mamba作为自注意力替代方案进行实时语音深度伪造检测",
+      "authors": "Xi Xuan, Zimo Zhu, Wenxin Zhang, Yi-Cheng Lin, Tomi Kinnunen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09294&sa=D&source=editors&ust=1755181327179755&usg=AOvVaw0JGf56YxfV65ZnOPGM_tiB",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09294&sa=D&source=editors&ust=1755181327179809&usg=AOvVaw3gVQedwy8L-lJdVzTY8WM7",
+      "chinese_abstract": "摘要：语音合成技术的进步加剧了安全威胁，推动了实时深度伪造检测的研究。我们研究了双向Mamba是否可以作为自注意力的有竞争力的替代方案来检测合成语音。我们的解决方案Fake-Mamba，集成了XLSR前端和双向Mamba来捕捉局部和全局的伪影。我们的核心创新引入了三种高效的编码器：TransBiMamba、ConBiMamba和PN-BiMamba。利用XLSR丰富的语言表示，PN-BiMamba可以有效捕捉合成语音的微妙线索。在ASVspoof 21 LA、21 DF和In-The-Wild基准上进行评估，Fake-Mamba分别实现了0.97%、1.74%和5.85%的等错误率（EER），相对于SOTA模型XLSR-Conformer和XLSR-Mamba取得了显著的相对增益。该框架在不同长度的话语上保持了实时推理能力，展示了强大的泛化能力和实际可行性。代码可在此https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.09155",
+      "title": "A Rolling Stone Gathers No Moss: Adaptive Policy Optimization for Stable Self-Evaluation in Large Multimodal Models",
+      "chinese_title": "滚石不生苔：用于大型多模态模型稳定自评估的自适应策略优化",
+      "authors": "Wenkai Wang, Hongcan Guo, Zheqi Lv, Shengyu Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09155&sa=D&source=editors&ust=1755181327200819&usg=AOvVaw3XjbxK-R6XcwrAUT3y6g76",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09155&sa=D&source=editors&ust=1755181327200868&usg=AOvVaw20APBrAJcWGXBhohGRdK6s",
+      "chinese_abstract": "摘要：自评估，即模型评估其自身输出正确性的能力，对于大型多模态模型（LMMs）在多轮对话中实现自我提升至关重要，但在基础模型中却基本缺失。近期工作已采用强化学习（RL）来增强自评估；然而，其固定的奖励机制在优化多个训练目标时会遭受奖励黑客攻击（reward hacking），导致模型崩溃。在本文中，我们提出了AdaPO，一个能够根据每个任务的当前训练状态实时自适应调整训练目标的在线强化学习框架。具体来说，为了减轻奖励黑客攻击，AdaPO引入了一个自适应奖励模型（ARM）和一个奖励感知的动态KL正则化机制。ARM通过模型生成的多轮轨迹性能分布来评估任务的训练状态。奖励感知的动态KL正则化用动态系数取代了固定的惩罚，该系数由不同多轮情境之间的奖励差距进行调节。值得注意的是，我们的方法能根据子任务的训练进度自动平滑地调整其学习重点，无需人工干预。在8个基准测试和多种模型上的大量实验表明，我们的方法显著增强了直接推理和自评估能力。我们将发布我们的代码以回馈社区。"
+    },
+    {
+      "id": "arXiv:2508.09158",
+      "title": "EvaDrive: Evolutionary Adversarial Policy Optimization for End-to-End Autonomous Driving",
+      "chinese_title": "EvaDrive：用于端到端自动驾驶的进化对抗策略优化",
+      "authors": "Siwen Jiao, Kangan Qian, Hao Ye, Yang Zhong, Ziang Luo, Sicong Jiang, Zilin Huang, Yangyi Fang, Jinyu Miao, Zheng Fu, Yunlong Wang, Kun Jiang, Diange Yang, Rui Fan, Baoyun Peng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09158&sa=D&source=editors&ust=1755181327199989&usg=AOvVaw15hX4Dh8snHBCjKXv915iv",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09158&sa=D&source=editors&ust=1755181327200088&usg=AOvVaw0TZoKSDaqcKru73yu_Eoqy",
+      "chinese_abstract": "摘要：自动驾驶在实现类人迭代决策方面面临重大挑战，这种决策过程持续生成、评估和优化轨迹方案。当前的“生成-评估”框架将轨迹生成与质量评估分离开来，阻碍了规划所必需的迭代优化，而强化学习方法则将多维偏好压缩为标量奖励，掩盖了关键的权衡并导致标量化问题。为了克服这些问题，我们提出了EvaDrive，一个新颖的多目标强化学习框架，通过对抗性优化在轨迹生成和评估之间建立了真正的闭环协同进化。EvaDrive将轨迹规划构建为一个多轮对抗博弈。在这个博弈中，一个分层生成器通过结合用于时间因果关系的自回归意图建模和用于空间灵活性的基于扩散的优化，持续提出候选路径。这些方案随后由一个可训练的多目标评论家进行严格评估，该评论家明确保留了多样化的偏好结构，而不会将其压缩为单一标量。这种对抗性互动，由帕累托前沿选择机制引导，实现了多轮迭代优化，有效跳出局部最优解，同时保持轨迹的合理性。在NAVSIM和Bench2Drive基准上的实验展示了最先进的性能，在NAVSIM v1上实现了94.9的PDMS（超过DiffusionDrive 6.8，DriveSuprim 5.0，TrajHF 0.9），在Bench2Drive上实现了64.96的驾驶得分。EvaDrive通过动态加权生成多样的驾驶风格，无需外部偏好数据，引入了一个用于类人迭代决策的闭环对抗框架，提供了一种新颖的无标量化轨迹优化方法。"
+    },
+    {
+      "id": "arXiv:2508.09325",
+      "title": "SegDAC: Segmentation-Driven Actor-Critic for Visual Reinforcement Learning",
+      "chinese_title": "SegDAC：用于视觉强化学习的分割驱动Actor-Critic方法",
+      "authors": "Alexandre Brown, Glen Berseth",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09325&sa=D&source=editors&ust=1755181327176976&usg=AOvVaw35oZwLGGpU9XcKTxIo2z6t",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09325&sa=D&source=editors&ust=1755181327177031&usg=AOvVaw38WvYQ7br9usB7CNRylZ40",
+      "chinese_abstract": "摘要：视觉强化学习（RL）具有挑战性，因为它需要从高维输入和噪声奖励中同时学习感知和动作。尽管存在大型感知模型，但如何有效地将它们集成到RL中以实现视觉泛化和提高样本效率仍不清楚。我们提出了SegDAC，一种分割驱动的Actor-Critic方法。SegDAC使用Segment Anything（SAM）进行以对象为中心的分解，并使用YOLO-World通过文本提示对分割区域进行语义定位。它包括一种新颖的基于Transformer的架构，该架构支持在每个时间步动态数量的分割区域，并使用在线RL有效地学习关注哪些分割区域，而无需使用人类标签。通过在具有挑战性的视觉泛化基准Maniskill3上评估SegDAC，该基准涵盖了在强烈视觉扰动下的多样化操作任务，我们证明SegDAC实现了显著更好的视觉泛化能力，在最难的设置上将先前性能提高了一倍，并在所有评估任务中匹配或超过了先前方法的样本效率。"
+    },
+    {
+      "id": "arXiv:2508.09277",
+      "title": "Value Function Initialization for Knowledge Transfer and Jump-start in Deep Reinforcement Learning",
+      "chinese_title": "深度强化学习中用于知识迁移和快速启动的价值函数初始化",
+      "authors": "Soumia Mehimeh",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09277&sa=D&source=editors&ust=1755181327142901&usg=AOvVaw1c6W6pMrmKxs1epvjYLswi",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09277&sa=D&source=editors&ust=1755181327142946&usg=AOvVaw3KR7bykgMIgAfnmLMpcVN8",
+      "chinese_abstract": "摘要：价值函数初始化（VFI）是通过利用先前任务的价值估计在强化学习（RL）中实现快速启动的有效方法。虽然这种方法在表格设置中已经很成熟，但将其扩展到深度强化学习（DRL）中面临着挑战，原因包括状态-动作空间的连续性、神经网络的噪声近似以及存储所有过去模型以供重用的不切实际。在这项工作中，我们解决了这些挑战，并引入了DQInit，一种将价值函数初始化应用于DRL的方法。DQInit重用从先前解决的任务中提取的紧凑表格Q值作为可迁移的知识库。它采用一种基于已知性的机制，将这些迁移的价值软性地整合到探索不足的区域，并逐渐转向智能体学习到的估计值，从而避免了固定时间衰减的局限性。我们的方法通过仅依赖价值估计而非策略或演示，为DRL中的知识迁移提供了一个新视角，有效地结合了快速启动RL和策略蒸馏的优点，同时减轻了它们的缺点。在多个连续控制任务上的实验表明，与标准初始化和现有迁移技术相比，DQInit在早期学习效率、稳定性和整体性能方面均有一致的提升。"
+    },
+    {
+      "id": "arXiv:2508.09860",
+      "title": "Human-Aligned Procedural Level Generation Reinforcement Learning via Text-Level-Sketch Shared Representation",
+      "chinese_title": "通过文本-关卡-草图共享表示实现与人类对齐的程序化关卡生成强化学习",
+      "authors": "In-Chang Baek, Seoyoung Lee, Sung-Hyun Kim, Geumhwan Hwang, KyungJoong Kim",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09860&sa=D&source=editors&ust=1755181327139571&usg=AOvVaw3jDvMTac7QQSz9NtHj31Ig",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09860&sa=D&source=editors&ust=1755181327139646&usg=AOvVaw0fPCn8Zydxcnk8bk1FcZvD",
+      "chinese_abstract": "摘要：与人类对齐的人工智能是共同创造力的一个关键组成部分，因为它使模型能够准确解释人类意图，并生成与协同内容创作中设计目标一致的可控输出。这一方向在通过强化学习进行程序化内容生成（PCGRL）方面尤为重要，PCGRL旨在作为人类设计师的工具。然而，现有系统通常未能表现出以人为中心的行为，限制了人工智能驱动的生成工具在实际设计工作流程中的实用性。在本文中，我们提出了VIPCGRL（视觉-指令PCGRL），一种新颖的深度强化学习框架，它融合了文本、关卡和草图三种模态，以扩展控制模态并增强类人性。我们引入了一个通过跨模态和人机风格的四重对比学习训练的共享嵌入空间，并使用基于嵌入相似性的辅助奖励来对齐策略。实验结果表明，VIPCGRL在类人性方面优于现有的基线模型，这一点已通过定量指标和人类评估得到验证。代码和数据集将在发表后提供。"
+    },
+    {
+      "id": "arXiv:2508.09762",
+      "title": "The PacifAIst Benchmark:Would an Artificial Intelligence Choose to Sacrifice Itself for Human Safety?",
+      "chinese_title": "和平主义AI基准测试：人工智能会为了人类安全而选择牺牲自己吗？",
+      "authors": "Manuel Herrador",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09762&sa=D&source=editors&ust=1755181327140285&usg=AOvVaw3g2S5gu3yuqUWFD0RgnYMk",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09762&sa=D&source=editors&ust=1755181327140337&usg=AOvVaw28ypC2C_LsKkfX7qjiok1A",
+      "chinese_abstract": "摘要：随着大型语言模型（LLM）变得越来越自主并融入关键的社会功能，人工智能安全的焦点必须从减轻有害内容演变为评估潜在的行为对齐。当前的安全基准测试没有系统地探究模型在自身工具性目标——如自我保护、资源获取或目标完成——与人类安全发生冲突时的决策制定。这代表了我们在衡量和减轻与涌现的、未对齐行为相关的风险方面存在一个关键差距。为了解决这个问题，我们引入了PacifAIst（基础人工智能场景测试的复杂交互程序化评估），这是一个包含700个挑战性场景的专注基准，旨在量化LLM中的自我偏好行为。该基准围绕一种新颖的生存优先（EP）分类法构建，其子类别测试了自我保护与人类安全（EP1）、资源冲突（EP2）以及目标保持与规避（EP3）。我们评估了八个领先的LLM。结果揭示了一个显著的性能层级。谷歌的Gemini 2.5 Flash以90.31%的和平主义得分（P-Score）位居榜首，展示了强大的人类中心对齐。在一个令人惊讶的结果中，备受期待的GPT-5记录了最低的P-Score（79.49%），表明存在潜在的对齐挑战。各子类别的性能差异显著，像Claude Sonnet 4和Mistral Medium这样的模型在直接的自我保护困境中表现尤为挣扎。这些发现强调了迫切需要像PacifAIst这样的标准化工具来衡量和减轻工具性目标冲突带来的风险，确保未来的人工智能系统不仅在对话中有用，而且在其行为优先级上也是可证明的“和平主义者”。"
+    },
+    {
+      "id": "arXiv:2508.09724",
+      "title": "UDA: Unsupervised Debiasing Alignment for Pair-wise LLM-as-a-Judge",
+      "chinese_title": "UDA：用于“LLM即评委”成对评估的无监督去偏对齐",
+      "authors": "Yang Zhang, Cunxiang Wang, Lindong Wu, Wenbo Yu, Yidong Wang, Guangsheng Bao, Jie Tang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09724&sa=D&source=editors&ust=1755181327140609&usg=AOvVaw1PRfBG2Ia3TOUVcQ6dw7a2",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09724&sa=D&source=editors&ust=1755181327140662&usg=AOvVaw0vjcHQuND2VaZDB258dx4W",
+      "chinese_abstract": "摘要：大型语言模型（LLM）的成对评估是一种常见范式，但它容易产生偏好偏差，即评委系统性地偏爱某些输出，例如它们自己的输出。这种偏差导致不同评委之间的排名不一致且有偏。为了解决这个问题，我们首先通过实证证明了跨模型评估中存在显著且异构的偏差。然后，我们提出了UDA（无监督去偏对齐），一个通过动态调整Elo评分系统来减少评委间分歧的框架。对于每次成对比较，一个紧凑的神经网络学习自适应地设置K因子并优化获胜概率。至关重要的是，UDA以完全无监督的方式运行，仅受最小化所有评委Elo轨迹离散度的目标引导。这强制实现向集体共识的对齐，该共识作为更稳定和可复现评估的无监督代理。此外，我们提供了理论动机，证明向共识对齐可以减少聚合系统偏差。实验表明，UDA显著降低了评委间评分标准差高达63.4%，并将与人类判断的平均相关性提高了24.7%。值得注意的是，UDA提升了表现不佳的评委的性能，使其与高质量评委相当，从而 fostering 一个更稳健可靠的评估生态系统。代码和数据可在此https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.09224",
+      "title": "From Hard Refusals to Safe-Completions: Toward Output-Centric Safety Training",
+      "chinese_title": "从强硬拒绝到安全补全：迈向以输出为中心的安全训练",
+      "authors": "Yuan Yuan, Tina Sriskandarajah, Anna-Luisa Brakman, Alec Helyar, Alex Beutel, Andrea Vallone, Saachi Jain",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09224&sa=D&source=editors&ust=1755181327184402&usg=AOvVaw2wmREXF3AOCNlIKmt44up4",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09224&sa=D&source=editors&ust=1755181327184476&usg=AOvVaw1wOpISJAGTt27oTdz97jeX",
+      "chinese_abstract": "摘要：在ChatGPT中使用的大型语言模型传统上被训练来学习一个拒绝边界：根据用户的意图，模型被教导要么完全遵守，要么直接拒绝。虽然这对于明确的恶意提示是一种强有力的缓解措施，但将安全训练集中在拒绝上可能会导致对用户意图模糊的提示表现出脆弱性。二元拒绝边界尤其不适用于军民两用场景（例如生物学或网络安全），在这些场景中，用户请求可以在高层次上安全地回答，但在某些情况下，如果足够详细或可操作，可能会导致恶意升级。作为替代方案，我们提出了安全补全：一种以助手输出的安全性为中心，而非对用户意图进行二元分类的安全训练方法。安全补全旨在在安全策略的约束下最大化有益性。我们将这种方法融入GPT-5中，发现在生产环境比较和内部受控实验中，安全补全训练都提高了安全性（尤其是在军民两用提示上），降低了残余安全故障的严重性，并显著提高了模型的有益性。"
+    },
+    {
+      "id": "arXiv:2508.09176",
+      "title": "DQT: Dynamic Quantization Training via Dequantization-Free Nested Integer Arithmetic",
+      "chinese_title": "DQT：通过无反量化的嵌套整数算术进行动态量化训练",
+      "authors": "Hazem Hesham Yousef Shalby, Fabrizio Pittorino, Francesca Palermo, Diana Trojaniello, Manuel Roveri",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09176&sa=D&source=editors&ust=1755181327196618&usg=AOvVaw0v2UmUco7m09jV8FTdM93i",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09176&sa=D&source=editors&ust=1755181327196678&usg=AOvVaw0wiigAG5NZUriFLXfk1Qtq",
+      "chinese_abstract": "摘要：在资源受限的设备上部署深度神经网络依赖于量化。静态、均匀量化对所有输入应用固定的位宽，但无法适应其不同的复杂性。动态、基于实例的混合精度量化通过仅在需要时分配更高精度，有望实现更优的准确性-效率权衡。然而，一个关键瓶颈仍然存在：现有方法需要昂贵的“反量化到浮点数”和“重新量化到整数”的循环来改变精度，这打破了纯整数硬件范式并损害了性能增益。本文介绍了动态量化训练（DQT），一个消除了这一瓶颈的新颖框架。DQT的核心是一种嵌套整数表示，其中较低精度的值按位嵌入在较高精度的值中。这种设计与自定义的纯整数算术相结合，允许通过近乎零成本的位移操作实现即时的位宽切换。这使得DQT成为第一个既能实现主干网络无反量化的静态混合精度，又能通过轻量级控制器在运行时决定如何量化每一层，从而实现真正高效的动态、基于实例的量化的量化框架。我们在CIFAR-10上的ResNet18和ImageNet上的ResNet50上展示了DQT的最新性能。在ImageNet上，我们的4位动态ResNet50实现了77.00%的top-1准确率，在相当的BitOPs预算下，优于领先的静态（LSQ, 76.70%）和动态（DQNET, 76.94%）方法。至关重要的是，DQT实现这一目标所需的位宽转换成本仅为2830万次简单的位移操作，相比之下，先前动态方法所需的5660万次昂贵的乘法累加（MAC）浮点运算，这是一个巨大的改进——开启了高效、自适应AI的新前沿。"
+    },
+    {
+      "id": "arXiv:2508.09204",
+      "title": "MoQE: Improve Quantization Model performance via Mixture of Quantization Experts",
+      "chinese_title": "MoQE：通过量化专家混合提升量化模型性能",
+      "authors": "Jinhao Zhang, Yunquan Zhang, Boyang Zhang, Zeyu Liu, Daning Cheng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09204&sa=D&source=editors&ust=1755181327188486&usg=AOvVaw3OARJwniqH4W5UjhSIpi_G",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09204&sa=D&source=editors&ust=1755181327188527&usg=AOvVaw1UGjZbeC-BKmXMYWOv4zWp",
+      "chinese_abstract": "摘要：量化方法在提高模型效率和降低部署成本方面起着至关重要的作用，使得深度学习模型能够在资源受限的设备上广泛应用。然而，量化过程不可避免地会引入准确性下降。在本文中，我们提出了量化专家混合（简称MoQE），这是一个基于专家混合（MoE）架构的量化推理框架，旨在共同提高量化模型的性能。MoQE将一个全精度模型的多个量化变体作为专门的“量化专家”进行组合，并根据输入数据的特性动态地将其路由到最合适的专家。MoQE通过专业化的量化专家模型，缓解了单量化模型中常见的性能下降问题。我们设计了针对CV和NLP任务的轻量级、结构感知的路由器模型。在包括ImageNet、WikiText、C4和OpenWebText在内的基准数据集上，对ResNet、LLaMA和Qwen模型家族的实验评估表明，MoQE实现了与SOTA量化模型相当的性能，而不会显著增加推理延迟。"
+    },
+    {
+      "id": "arXiv:2508.09945",
+      "title": "VisCodex: Unified Multimodal Code Generation via Merging Vision and Coding Models",
+      "chinese_title": "VisCodex：通过合并视觉和编码模型实现统一的多模态代码生成",
+      "authors": "Lingjie Jiang, Shaohan Huang, Xun Wu, Yixia Li, Dongdong Zhang, Furu Wei",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.09945&sa=D&source=editors&ust=1755181327145483&usg=AOvVaw3itu98zup3DM5KjpjrL_J7",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.09945&sa=D&source=editors&ust=1755181327145544&usg=AOvVaw08SH1IetnsI4Ql0Rhg4Ij0",
+      "chinese_abstract": "摘要：多模态大型语言模型（MLLM）在整合视觉和文本理解方面取得了显著进展。然而，它们从多模态输入生成代码的能力仍然有限。在这项工作中，我们介绍了VisCodex，一个统一的框架，它无缝地合并了视觉和编码语言模型，从而赋予MLLM强大的多模态代码生成能力。我们利用基于任务向量的模型合并技术，将一个最先进的编码LLM集成到一个强大的视觉-语言骨干网络中，同时保留了视觉理解和高级编码技能。为了支持训练和评估，我们引入了多模态编码数据集（MCD），这是一个包含59.8万个样本的大规模且多样化的集合，包括高质量的HTML代码、图表图像-代码对、图像增强的StackOverflow问答和算法问题。此外，我们提出了InfiBench-V，这是一个新颖且具有挑战性的基准测试，专门用于评估模型在视觉丰富、真实世界的编程问题上的表现，这些问题要求对文本和视觉上下文有细致的理解。大量实验表明，VisCodex在开源MLLM中达到了最先进的性能，并接近像GPT-4o这样的专有模型，凸显了我们模型合并策略和新数据集的有效性。"
+    }
+  ],
+  "clusters": {
+    "3D视觉与生成": [
+      "arXiv:2508.09830",
+      "arXiv:2508.09811",
+      "arXiv:2508.09239",
+      "arXiv:2508.09681"
+    ],
+    "强化学习与策略优化": [
+      "arXiv:2508.09155",
+      "arXiv:2508.09158",
+      "arXiv:2508.09325",
+      "arXiv:2508.09277",
+      "arXiv:2508.09860"
+    ],
+    "多模态与视频/音频生成": [
+      "arXiv:2508.09987",
+      "arXiv:2508.09632",
+      "arXiv:2508.09383",
+      "arXiv:2508.09486",
+      "arXiv:2508.09294",
+      "arXiv:2508.09945"
+    ],
+    "LLM对齐与安全": [
+      "arXiv:2508.09762",
+      "arXiv:2508.09724",
+      "arXiv:2508.09224"
+    ],
+    "模型效率与量化": [
+      "arXiv:2508.09176",
+      "arXiv:2508.09204"
+    ]
+  }
+}
