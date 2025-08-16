@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.10881",
+      "title": "ToonComposer: Streamlining Cartoon Production with Generative Post-Keyframing",
+      "chinese_title": "ToonComposer: 使用生成式后期关键帧技术简化卡通制作流程",
+      "authors": "Lingen Li, Guangzhi Wang, Zhaoyang Zhang, Yaowei Li, Xiaoyu Li, Qi Dou, Jinwei Gu, Tianfan Xue, Ying Shan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10881&sa=D&source=editors&ust=1755340733636054&usg=AOvVaw1frafj-SMExi4SxmiLVKIE",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10881&sa=D&source=editors&ust=1755340733636122&usg=AOvVaw3gWGzoqF72T0Ez3RuiSRvA",
+      "chinese_abstract": "传统的卡通和动漫制作涉及关键帧、中间帧和上色等阶段，需要大量的人工劳动。尽管最近人工智能取得了进展，但现有方法通常分开处理这些阶段，导致误差累积和伪影。例如，中间帧方法难以处理大幅度运动，而上色方则需要密集的每帧草图。为了解决这些问题，我们引入了ToonComposer，这是一个将中间帧和上色统一到单个后期关键帧阶段的生成模型。ToonComposer采用稀疏草图注入机制，利用关键帧草图提供精确控制。此外，它使用一种带有空间低秩适配器的卡通自适应方法，将现代视频基础模型调整到卡通领域，同时保持其时间先验的完整性。ToonComposer仅需一张草图和一帧彩色参考帧即可在稀疏输入下表现出色，同时还支持在任何时间位置使用多张草图进行更精确的运动控制。这种双重能力减少了人工工作量并提高了灵活性，为艺术家在真实场景中提供了强大支持。为了评估我们的模型，我们还创建了PKBench，这是一个包含手绘草图的基准，用于模拟真实世界的使用案例。我们的评估表明，ToonComposer在视觉质量、运动一致性和制作效率方面均优于现有方法，为AI辅助卡通制作提供更优越、更灵活的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.10774",
+      "title": "Video-BLADE: Block-Sparse Attention Meets Step Distillation for Efficient Video Generation",
+      "chinese_title": "Video-BLADE：块稀疏注意力结合步骤蒸馏实现高效视频生成",
+      "authors": "Youping Gu, Xiaolong Li, Yuhao Hu, Bohan Zhuang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10774&sa=D&source=editors&ust=1755340733641764&usg=AOvVaw0hat1dRVZ2kjSPEQOTitmm",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10774&sa=D&source=editors&ust=1755340733641842&usg=AOvVaw0Nm9fdy9GbUwljGQSwxtSq",
+      "chinese_abstract": "扩散变换器目前在高质量视频生成领域处于领先地位，但其缓慢的迭代去噪过程和长序列下高昂的二次方注意力成本造成了显著的推理瓶颈。尽管步骤蒸馏和稀疏注意力机制作为独立的加速策略都显示出潜力，但有效结合这些方法带来了关键挑战——无训练的集成效果不佳，而在步骤蒸馏后单独训练稀疏注意力又需要极其昂贵的高质量视频数据。为了克服这些限制，我们提出了BLADE，一个创新的无数据联合训练框架，该框架引入了：(1) 一种自适应块稀疏注意力（ASA）机制，用于动态生成内容感知的稀疏掩码，以将计算集中在显著的时空特征上；以及(2) 一种基于轨迹分布匹配（TDM）的稀疏感知步骤蒸馏范式，它直接将稀疏性融入蒸馏过程，而不是将其视为一个独立的压缩步骤，从而实现了快速收敛。我们在CogVideoX-5B和Wan2.1-1.3B等文本到视频模型上验证了BLADE。我们的框架在不同规模的模型上都展示了显著的效率提升。在Wan2.1-1.3B上，BLADE相对于50步基线实现了14.10倍的端到端推理加速。此外，在像CogVideoX-5B这样具有短视频序列长度的模型上，我们的框架也提供了8.89倍的稳健加速。至关重要的是，加速的同时还伴随着持续的质量提升。在VBench-2.0基准测试中，BLADE将CogVideoX-5B的得分提升至0.569（从0.534），将Wan2.1-1.3B的得分提升至0.570（从0.563），这些结果在人类评估中也得到了更高的评价。我们的代码和模型权重已公开发布。"
+    },
+    {
+      "id": "arXiv:2508.10771",
+      "title": "AEGIS: Authenticity Evaluation Benchmark for AI-Generated Video Sequences",
+      "chinese_title": "AEGIS：用于AI生成视频序列真实性评估的基准",
+      "authors": "Jieyu Li, Xin Zhang, Joey Tianyi Zhou",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10771&sa=D&source=editors&ust=1755340733642339&usg=AOvVaw3jusy9IboGe4DBo2Xw8cRW",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10771&sa=D&source=editors&ust=1755340733642420&usg=AOvVaw0snMYKz2leEzs6TiLka-hL",
+      "chinese_abstract": "近年来，AI生成内容的进步催生了高度逼真的合成视频，给社会信任和数字完整性带来了严重风险。现有的视频真实性检测基准通常存在真实感有限、规模不足和复杂性不够的问题，无法有效评估现代视觉语言模型应对复杂伪造的能力。为了解决这一关键差距，我们引入了AEGIS，这是一个新颖的大规模基准，专门用于检测超现实且语义细微的AI生成视频。AEGIS包含超过10,000个经过严格筛选的真实和合成视频，这些视频由包括Stable Video Diffusion、CogVideoX-5B、KLing和Sora在内的多种最先进的生成模型生成，涵盖了开源和专有架构。特别地，AEGIS还包含了经过鲁棒性评估增强的特殊构建的挑战性子集。此外，我们提供了跨越语义-真实性描述、运动特征和低级视觉特征的多模态注释，以促进真实性检测并支持多模态融合和伪造定位等下游任务。使用先进视觉语言模型进行的大量实验表明，在AEGIS最具挑战性的子集上，模型的检测能力有限，凸显了该数据集越现有模型当前泛化能力的独特性和现实性。总而言之，AEGIS建立了一个不可或缺的评估基准，从根本上推动了开发真正稳健、可靠、广泛泛化的视频真实性检测方法的研究，以应对现实世界的伪造威胁。我们的数据集可在指定网址获取。"
+    },
+    {
+      "id": "arXiv:2508.10507",
+      "title": "Multi-Sample Anti-Aliasing and Constrained Optimization for 3D Gaussian Splatting",
+      "chinese_title": "用于3D高斯溅射的多样本抗锯齿与约束优化",
+      "authors": "Zheng Zhou, Jia-Chen Zhang, Yu-Jie Xiong, Chun-Ming Xia",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10507&sa=D&source=editors&ust=1755340733654759&usg=AOvVaw3Dd0mALn_LsXm4Qk1hq_aX",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10507&sa=D&source=editors&ust=1755340733654867&usg=AOvVaw10D2K8gvizqs5EiBorNDLu",
+      "chinese_abstract": "3D高斯溅射（3D Gaussian splatting）的最新进展显改善了实时新视角合成，然而，场景优化过程中几何约束不足常常导致精细细节的重建模糊，尤其是在具有高频纹理和尖锐不连续性的区域。为了解决这个问题，我们提出了一个集成了多样本抗锯齿（MSAA）与双重几何约束的综合优化框架。我们的系统通过自适应混合四个子样本来计算像素颜色，有效减少了高频分量中的混叠伪影。该框架引入了两种约束：(a) 一种自适应加权策略，通过动态梯度分析优先处理重建不足的区域；(b) 梯度微分约束，在物体边界处强制执行几何正则化。这种有针对性的优化使模型能够优先将计算资源分配给需要精细化的关键区域，同时保持全局一致性。在多个基准上进行的大量实验评估表明，我们的方法在细节保留方面达到了最先进的性能，特别是在保留高频纹理和尖锐不连续性方面，同时保持了实时渲染效率。定量指标和感知研究证实，与基线方法相比，我们的方法在结构相似性（SSIM）和感知质量（LPIPS）方面均取得了统计上显著的改进。"
+    },
+    {
+      "id": "arXiv:2508.10875",
+      "title": "A Survey on Diffusion Language Models",
+      "chinese_title": "扩散语言模型综述",
+      "authors": "Tianyi Li, Mingda Chen, Bowei Guo, Zhiqiang Shen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10875&sa=D&source=editors&ust=1755340733636800&usg=AOvVaw1MD0i8jVIw36xKFQnZjw0k",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10875&sa=D&source=editors&ust=1755340733636857&usg=AOvVaw1c2xzWPkeqCK1I1-Zyyi8z",
+      "chinese_abstract": "扩散语言模型（DLMs）正迅速成为主流自回归（AR）范式的一种强大且有前景的替代方案。通过迭代去噪过程并行生成词元，DLMs在降低推理延迟和捕捉双向上下文方面具有内在优势，从而能够对生成过程进行细粒度控制。在实现数倍加速的时，近期的进展已使DLMs的性能与自回归模型相当，使其成为各种自然语言处理任务的有力选择。在这篇综述中，我们对当前的DLM领域进行了全面的概述。我们追溯了其演变过程及其与自回归和掩码语言模型等其他范式的关系，并涵盖了基础原理和最先进的模型。我们的工作提供了最新的、全面的分类法以及对当前技术的深入分析，从预训练策略到先进的后训练方法。本综述的另一个贡献是全面回顾了DLM的推理策略和优化，包括解码并行性、缓存机制和生成质量的改进。我们还重点介绍了DLM多模态扩展的最新方法，并阐述了其在各种实际场景中的应用。此外，我们的讨论还涉及DLM的局限性和挑战，包括效率、长序列处理和基础设施要求，同时为在这一快速发展的领域持续取得进展指明了未来的研究方向。项目GitHub可在指定网址获取。"
+    },
+    {
+      "id": "arXiv:2508.10559",
+      "title": "Fake Speech Wild: Detecting Deepfake Speech on Social Media Platform",
+      "chinese_title": "Fake Speech Wild：在社交媒体平台上检测深度伪造语音",
+      "authors": "Yuankun Xie, Ruibo Fu, Xiaopeng Wang, Zhiyong Wang, Ya Li, Zhengqi Wen, Haonnan Cheng, Long Ye",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10559&sa=D&source=editors&ust=1755340733651595&usg=AOvVaw1IwJ-iQTEYoHoP89-VA0ta",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10559&sa=D&source=editors&ust=1755340733651686&usg=AOvVaw05xNedrtJfU_3ROy987_w1",
+      "chinese_abstract": "语音生成技术的飞速发展导致了深度伪造语音在社交媒体平台上的广泛传播。虽然深度伪造音频对抗措施（CMs）在公共数据集上取得了不错的成果，但在跨领域场景中其性能显著下降。为了推进用于真实世界深度伪造检测的对抗措施，我们首先提出了Fake Speech Wild（FSW）数据集，其中包含来自四个不同媒体平台（重点是社交媒体）的254小时真实和深度伪造音频。作为对抗措施，我们使用公共数据集和先进的基于自监督学习（SSL）的CMs建立了一个基准，以评估当前CMs在真实世界场景中的表现。我们还评估了数据增强策略在增强CMs检测社交媒体上深度伪造语音的鲁棒性方面的有效性。最后，通过增强公共数据集并结合FSW训练集，我们显著提升了真实世界深度伪造音频检测性能，在所有评估集上实现了3.54%的平均等错误率（EER）。"
+    },
+    {
+      "id": "arXiv:2508.10436",
+      "title": "Alternating Approach-Putt Models for Multi-Stage Speech Enhancement",
+      "chinese_title": "用于多阶段语音增强的交替式Approach-Putt模型",
+      "authors": "Iksoon Jeong, Kyung-Joong Kim, Kang-Hun Ahn",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10436&sa=D&source=editors&ust=1755340733659367&usg=AOvVaw1-rNUVXI3QETtJ_4zwWRCH",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10436&sa=D&source=editors&ust=1755340733659453&usg=AOvVaw2AMYQwO184xNblgoKIJHiC",
+      "chinese_abstract": "使用人工神经网络进行语音增强旨在从带噪语音信号中去除噪声，同时保留语音内容。然而，语音增强网络常常会给语音信号引入失真，即所谓的“伪影”，这会降低音频质量。在这项工作中，我们提出了一个后处理神经网络，旨在减轻语音增强模型引入的伪影。受高尔夫中“开球”（Approach）后进行“推杆”（Putt）的类比启发，我们将我们的模型命名为PuttNet。我们证明，在语音增强模型和提出的Putt模型之间交替使用，可以改善语音质量，这通过感知质量得分（PESQ）、客观可懂度（STOI）和背景噪声侵入性（CBAK）得分来衡量。此外，我们通过图形分析说明了为什么这种交替方法优于单独重复应用任一模型。"
+    },
+    {
+      "id": "arXiv:2508.10009",
+      "title": "Beyond Hard Sharing: Efficient Multi-Task Speech-to-Text Modeling with Supervised Mixture of Experts",
+      "chinese_title": "超越硬共享：利用监督式专家混合模型实现高效多任务语音转文本建模",
+      "authors": "Hojun Jin, Eunsoo Hong, Ziwon Hyung, Sungjun Lim, Seungjin Lee, Keunseok Cho",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10009&sa=D&source=editors&ust=1755340733683511&usg=AOvVaw36_yFIynOpqE2i5EuPTESX",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10009&sa=D&source=editors&ust=1755340733683564&usg=AOvVaw1hbxitiyHAnm2hqaZYgE-W",
+      "chinese_abstract": "硬参数共享是在不同任务间联合训练单一模型的常用策略。然而，这常常导致任务间的干扰，从而影响整体模型性能。为了解决这个问题，我们提出了一种简单而有效的监督式专家混合（S-MoE）模型。与传统的专家混合模型不同，S-MoE通过使用殊的引导标记将每个任务路由到其指定的专家，从而无需训练门控函数。通过将每个任务分配给一个独立的前馈网络，S-MoE克服了硬参数共享的局限性。我们进一步将S-MoE应用于语音到文本模型，使其能够处理混合带宽的输入，同时联合执行自动语音识别（ASR）和语音翻译（ST）。实验结果表明，所提出的S-MoE是有效的，当应用于编码器和解码器时，词错误率（WER）相对提高了6.35%。"
+    },
+    {
+      "id": "arXiv:2508.10769",
+      "title": "Modeling Human Responses to Multimodal AI Content",
+      "chinese_title": "建模人类对多模态AI内容的反应",
+      "authors": "Zhiqi Shen, Shaojing Fan, Danni Xu, Terence Sim, Mohan Kankanhalli",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10769&sa=D&source=editors&ust=1755340733625525&usg=AOvVaw13xvvaRiBOkeqQT5jdqoOe",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10769&sa=D&source=editors&ust=1755340733625580&usg=AOvVaw1EsKbqnp9s6XgBIxbQ6rvY",
+      "chinese_abstract": "随着AI生成内容的普及，错误信息的风险也随之增加。虽然以往的研究主要集中在识别内容是否真实，但关于这类内容如何影响人类感知和行为的研究却少之又少。在交易或股票市场等领域，预测人们的反应（例如，一条新闻帖子是否会病毒式传播）可能比验证其事实准确性更为关键。为了解决这个问题，我们采用以人为中心的方法，并引入了MhAIM数据集，该数据集包含154,552个在线帖子（其中111,153个为AI生成），从而能够对人们如何回应AI生成内容进行大规模分析。我们的人类研究表明，当帖子同时包含文本和视觉内容时，尤其是在两者之间存在不一致的情况下，人们更善于识别AI内容。我们提出了三个新指标：可信度、影响力和开放度，以量化用户如何判断和参与在线内容。我们推出了T-Lens这是一个基于LLM的智能体系统，旨在通过整合预测的人类对多模态信息的反应来回答用户查询。其核心是HR-MCP（人类反应模型上下文协议），建立在标准化的模型上下文协议（MCP）之上，可以与任何LLM无缝集成。这种集成使得T-Lens能更好地与人类反应对齐，从而增强了解释性和交互能力。我们的工作提供了实证见解和实用工具，为LLM赋予了人类感知能力。通过强调AI、人类认知和信息接收之间复杂的相互作用，我们的研究结果为减轻AI驱动的错误信息风险提供了可行的策略。"
+    },
+    {
+      "id": "arXiv:2508.10552",
+      "title": "When Language Overrules: Revealing Text Dominance in Multimodal Large Language Models",
+      "chinese_title": "当语言主导一切：揭示多模态大语言模型中的文本主导现象",
+      "authors": "Huyu Wu, Meng Tang, Xinhan Zheng, Haiyun Jiang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10552&sa=D&source=editors&ust=1755340733653235&usg=AOvVaw3g09GT8nehdmfQZN7y0z-Z",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10552&sa=D&source=editors&ust=1755340733653319&usg=AOvVaw2EAh5L2eChFDY15ctHXzKo",
+      "chinese_abstract": "多模态大语言模型（MLLMs）在各种多模态任务中展示了卓越的能力。然而，这些模型存在一个核心问题，即文本主导（text dominance）：它们在推理时严重依赖文本，而对其他模态的利用不足。虽然先前的工作在视觉-语言任务中已经认识到这一现象，并常将其归因于数据偏差或模型架构。在本文中，我们首次对跨多种数据模态（包括图像、视频、音频、时间序列和图）的文本主导现象进行了系统性研究。为了衡量这种不平衡，我们提出了两个评估指标：模态主导指数（MDI）和注意力效率指数（AEI）。我们的综合分析显示，文本主导在所有测试的模态中都既显著又遍。我们的深入分析确定了三个根本原因：非文本模态中严重的词元冗余导致的注意力稀释、融合架构设计的影响，以及隐含偏向文本输入的任务表述。此外，我们提出了一种简单的词元压缩方法，能有效重新平衡模型的注意力。例如，将此方法应用于LLaVA-7B，其MDI从10.23急剧降低到一个均衡的0.86。我们的分析和方法论框架为开发更公平、更全面的多模态语言模型奠定了基础。"
+    },
+    {
+      "id": "arXiv:2508.10494",
+      "title": "A Unified Multi-Agent Framework for Universal Multimodal Understanding and Generation",
+      "chinese_title": "用于通用多模态理解与生成的统一多智能体框架",
+      "authors": "Jiulin Li, Ping Huang, Yexin Li, Shuo Chen, Juewen Hu, Ye Tian",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10494&sa=D&source=editors&ust=1755340733655889&usg=AOvVaw2Mqzyt2wXpO9E3cvW3sfPr",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10494&sa=D&source=editors&ust=1755340733656004&usg=AOvVaw3rySz2zRtdE9ylSgFQPIiu",
+      "chinese_abstract": "现实世界的多模态应用通常需要“任意到任意”的能力，即能够在文本、图像、音频和视频等多种模态之间进行理解和生成。然而，整合自回归语言模型（LLM）的推理优势和扩散模型的高保真生成能力仍然是一个挑战。现有方法依赖于固定的流水线或紧密耦合的架构，限制了其灵活性和可扩展性。我们提出了MAGUS（多智能体引导的统一多模态系统），这是一个模块化框架，通过两个解耦的阶段——认知（Cognition）和审议（Deliberation）——来统一多模态的理解和生成。MAGUS支持在一个共享的文本工作空间内进行符号化的多智能体协作。在认知阶段，三个角色化的多模态LLM智能体——感知者（Perceiver）、规划者（Planner）和反思者（Reflector）——进行协作对话，以执行结构化的理解和规划。审议阶段则采用一种增长感知搜索（Growth-Aware Search）机制，以相互促进的方式协调基于LLM的推理和基于扩散的生成。MAGUS支持即插即用的可扩展性、可伸缩的任意到任意模态转换以及语义对齐——所有这些都无需联合训练。在包括图像、视频和音频生成以及跨模态指令遵循在内的多个基准测试上的实验表明，MAGUS的性能优于强大的基线模型和最先进的系统。值得注意的是，在MME基准测试中，MAGUS的性能超过了强大的闭源模型GPT-4o。"
+    },
+    {
+      "id": "arXiv:2508.10729",
+      "title": "EgoCross: Benchmarking Multimodal Large Language Models for Cross-Domain Egocentric Video Question Answering",
+      "chinese_title": "EgoCross：用于跨域第一人称视角视频问答的多模态大语言模型基准测试",
+      "authors": "Yanjun Li, Yuqian Fu, Tianwen Qian, Qi'ao Xu, Silong Dai, Danda Pani Paudel, Luc Van Gool, Xiaoling Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10729&sa=D&source=editors&ust=1755340733644891&usg=AOvVaw2-EK9IWx4c1M5sjaoRJygg",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10729&sa=D&source=editors&ust=1755340733645005&usg=AOvVaw2JydzKAU0FcY4iuiWEuSvn",
+      "chinese_abstract": "多模态大语言模型（MLLMs）的最新进展极大地推动了第一人称视角视频问答（EgocentricQA）领域的发展。然而，现有的基准和研究主要局限于烹饪和清洁等常见的日常活动。相比之下，真实世界的部署不可避免地会遇到领域偏移，即目标领域在视觉风格和语义内容上都有显著不同。为了弥补这一差距，我们引入了EgoCross，这是一个旨在评估MLLMs在EgocentricQA中跨域泛化能力的综合基准。EgoCross涵盖了四个多样化且具有挑战性的领域，包括手术、工业、极限运动和动物视角，代表了现实且具有高影响力的应用场景。它含跨越798个视频片段的约1000个问答对，涵盖四个关键的问答任务：预测、识别、定位和计数。每个问答对都提供开放式问答（OpenQA）和封闭式问答（CloseQA）两种格式，以支持细粒度的评估。广泛的实验表明，大多数现有的MLLMs，无论是通用的还是第一人称视角专用的，都难以泛化到日常生活之外的领域，这凸显了当前模型的局限性。此外，我们进行了一些初步研究，例如微调和强化学习，以探索潜在的改进方法。我们希望EgoCross及其附带的分析能为推动领域自适应、鲁棒的第一人称视角视频理解奠定基础。数据和代码将在此网址发布。"
+    },
+    {
+      "id": "arXiv:2508.10530",
+      "title": "Diversity First, Quality Later: A Two-Stage Assumption for Language Model Alignment",
+      "chinese_title": "先多样性，后质量：语言模型对齐的两阶段假设",
+      "authors": "Zetian Sun, Dongfang Li, Baotian Hu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10530&sa=D&source=editors&ust=1755340733627772&usg=AOvVaw3Hab0-dXIB5HM5EKgZn6bp",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10530&sa=D&source=editors&ust=1755340733627830&usg=AOvVaw04I9OGKXJjGIlrDOATKVHd",
+      "chinese_abstract": "将语言模型（LMs）与人类偏好对齐对于构建可靠的AI系统至关重要。这个问题通常被表述为优化一个LM策略，以最大化反映人类偏好的预期奖励。最近，直接偏好优化（DPO）被提出作为一种LM对齐方法，它直接从静态偏好数据中优化策略，并通过结合在线策略采样（即在训练循环中生成的偏好候选项）来进一步改进LM对齐。然而，我们发现在线策略数据并非总是最优的，静态和在线策略偏好候选项之间出现了系统性的效果差异。例如，与静态数据相比，在线策略数据对Llama-3的效果可以达到3倍，而对Zephyr的效果则为0.4倍。了解释这一现象，我们提出了对齐阶段假设，该假设将对齐过程分为两个不同阶段：偏好注入阶段，该阶段受益于多样化的数据；以及偏好微调阶段，该阶段偏好高质量的数据。通过理论和实证分析，我们刻画了这些阶段的特征，并提出了一种有效算法来识别它们之间的界限。我们在5个模型（Llama、Zephyr、Phi-2、Qwen、Pythia）和2种对齐方法（DPO、SLiC-HF）上进行了实验，以证明对齐阶段假设和边界测量的普适性。"
+    },
+    {
+      "id": "arXiv:2508.10548",
+      "title": "Stabilizing Long-term Multi-turn Reinforcement Learning with Gated Rewards",
+      "chinese_title": "使用门控奖励稳定长期多轮强化学习",
+      "authors": "Zetian Sun, Dongfang Li, Zhuoen Chen, Yuhuai Qin, Baotian Hu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10548&sa=D&source=editors&ust=1755340733653710&usg=AOvVaw0C-NUcBq0iP63ln5h-9R_6",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10548&sa=D&source=editors&ust=1755340733653838&usg=AOvVaw23vrCk-qSpbnc58SUp653l",
+      "chinese_abstract": "长周期强化学习（RL）任务中的奖励稀疏性仍然是一个重大挑战，而现有的基于结果的奖励塑造方法在定义有意义的即时奖励方面存在困难，通常会引入偏差或需要明确的任务分解。作为替代方案，基于验证的奖励塑造使用逐步评判器，但即时奖励与长期目标之间的不一致可能导致奖励投机（reward hacking）和次优策略。在这项工作中，我们在软件工程（SWE）任务的背景下解决这个问题，其中多轮推理和基于规则的验证至关重要。我们引入了面向软件工程的强化学习框架（SWE-oriented RL Framework），这是一个支持多轮交互、基于docker的执行和可定制奖励函数的统一系统。此外，我们提出了门控奖励累积（G-RA），这是一种新颖的方法，仅当高层（长期奖励达到预定义阈值时才累积即时奖励，从而确保RL优化的稳定性。在SWE-bench Verified和kBench上的实验表明，G-RA能够提高完成率（分别从47.6%提高到93.8%和从22.0%提高到86.0%）和修改率（分别从19.6%提高到23.8%和从12.0%提高到42.0%），同时避免了由奖励不一致引起的策略退化。我们的研究结果强调了在长周期RL中平衡奖励累积的重要性，并提供了一个实用的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.10340",
+      "title": "Multi-Agent Trust Region Policy Optimisation: A Joint Constraint Approach",
+      "chinese_title": "多智能体信任区域策略优化：一种联合约束方法",
+      "authors": "Chak Lam Shek, Guangyao Shi, Pratap Tokekar",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10340&sa=D&source=editors&ust=1755340733631626&usg=AOvVaw1sNNivX-WufAktg7FHTpOo",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10340&sa=D&source=editors&ust=1755340733631681&usg=AOvVaw0pYidVfuvZYsWW1ZHaYO4A",
+      "chinese_abstract": "多智能体强化学习（MARL）要求交互中的智能体之间进行协调且稳定的策略更新。异构智能体信任区域策略优化（HATRPO）利用库尔贝克-莱布勒（KL）散度来强制执行每个智能体的信任区域约束，以稳定训练过程。然而，为每个智能体分配相同的KL阈值可能导致更新缓慢且陷入局部最优，尤其是在异构环境中。为了解决这一局限性，我们提出了两种分配KL散度阈值的方法：HATRPO-W，一种基于Karush-Kuhn-Tucker（KKT）的方法，在全局KL约束下优化阈值分配；以及HATRPO-G，一种贪婪算法，根据改进与散度的比率对智能体进行优先级排序。通过将序贯策略优化与约束阈值调度相结合，我们的方法在异构智能体环境中实现了更灵活、更有效的学习。实验结果表明，我们的方法显著提升了HATRPO的性能，在各种MARL基准测中实现了更快的收敛速度和更高的最终奖励。具体而言，HATRPO-W和HATRPO-G在最终性能上取得了相当的改进，均超过22.5%。值得注意的是，HATRPO-W还表现出更稳定的学习动态，这体现在其较低的方差上。"
+    },
+    {
+      "id": "arXiv:2508.10293",
+      "title": "Promoting Efficient Reasoning with Verifiable Stepwise Reward",
+      "chinese_title": "通过可验证的逐步奖励促进高效推理",
+      "authors": "Chuhuai Yue, Chengqi Dong, Yinan Gao, Hang He, Jiajun Chai, Guojun Yin, Wei Lin",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10293&sa=D&source=editors&ust=1755340733632372&usg=AOvVaw2H5hhE85VEB9-b5LnJhacd",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10293&sa=D&source=editors&ust=1755340733632450&usg=AOvVaw3FbAgh4S040yrouCJAz_-e",
+      "chinese_abstract": "大型推理模型（LRM）最近在复杂推理任务中取得了显著进展，这得益于带有可验证奖励的化学习。然而，LRM常常存在过度思考（overthinking）的问题，在简单问题上消耗过多计算资源，从而降低了效率。现有的高效推理方法通常需要准确的任务评估来预设令牌预算或选择推理模式，这限制了它们的灵活性和可靠性。在这项工作中，我们重新审视了过度思考的本质，并发现鼓励有效步骤同时惩罚无效步骤是解决该问题的关键。为此，我们提出了一种新颖的基于规则的可验证逐步奖励机制（VSRM），该机制根据推理轨迹中中间状态的表现来分配奖励。这种方法直观，并且自然地契合了推理任务的逐步特性。我们在包括AIME24和AIME25在内的标准数学推理基准上进行了广泛实验，将VSRM与PPO和Reinforce++相结合。结果表明，我们的方法在保持原有推理性能的同时，显著减少了输出长度，实现了效率与准确性之间的最佳平衡。对训练前后过度思考频率和pass@k分数的进一分析表明，我们的方法确实有效地抑制了无效步骤并鼓励了有效推理，从根本上缓解了过度思考问题。所有代码将在论文被接收后发布。"
+    },
+    {
+      "id": "arXiv:2508.10839",
+      "title": "Reinforced Language Models for Sequential Decision Making",
+      "chinese_title": "用于序贯决策的强化语言模型",
+      "authors": "Jim Dilkes, Vahid Yazdanpanah, Sebastian Stein",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10839&sa=D&source=editors&ust=1755340733638582&usg=AOvVaw2Az2aqe-VAJ0ZpxUxzyVZN",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10839&sa=D&source=editors&ust=1755340733638638&usg=AOvVaw00FyPHif4qfnwcXtEjsbjS",
+      "chinese_abstract": "大型语言模型（LLMs）在作为序贯决策智能体方面显示出潜力，但由于依赖于大型、计算成本高昂的模型，其应用常常受限。这使得改进小型模型的需求日益迫切，然而现有的后训练方法是为单轮交互设计的，无法处理多步智能体任务中的信用分配问题。为了解决这个问题，我们引入了多步组相对策略优化（MS-GRPO），这是一种新的用于后训练LLM智能体的算法，其理论基础是文本介导随机博弈（TSMG）和语言-智能体策略（LAP）框架。在信用分配方面，MS-GRPO将整个回合的累积奖励归因于每个独立的回合步骤。我们用一种新颖的绝对优势加权回合采样策略来补充该算法，并证明了这种策略可以提高训练性能。我们通过在“贪吃蛇”和“冰湖”任务上对一个30亿参数的模型进行后训练来评估我们的方法。实验表明，该方法在提高决策性能方面是有效的：我们后训练的3B参数模型在“冰湖”任务上的表现比72B参数的基线模型高出50%。这项工作表明，有针对性的后训练是创建使用LLM的序贯决策智能体的一种实用且高效的替代方案，而非仅仅依赖于模型规模。"
+    },
+    {
+      "id": "arXiv:2508.10751",
+      "title": "Pass@k Training for Adaptively Balancing Exploration and Exploitation of Large Reasoning Models",
+      "chinese_title": "Pass@k训练：自适应平衡大型推理模型的探索与利用",
+      "authors": "Zhipeng Chen, Xiaobo Qin, Youbin Wu, Yue Ling, Qinghao Ye, Wayne Xin Zhao, Guang Shi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10751&sa=D&source=editors&ust=1755340733643810&usg=AOvVaw0XIjllqYzpdfF7RXoYla3i",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10751&sa=D&source=editors&ust=1755340733643896&usg=AOvVaw36HUOBJ59VKnuAwAZnbY2F",
+      "chinese_abstract": "带有可验证奖励的强化学习（RLVR），通常采用Pass@1作为奖励，在平衡探索与利用方面面临问题，导致策略偏向于保守行动，收敛到局部最优解。因此，确定一个合适的奖励指标至关重要。尽管先前的工作已在评估中使用Pass@k，但其与RLVR中LLM探索力的联系在很大程度上仍被忽视。为了研究这一点，我们首先使用Pass@k作为奖励来训练策略模型（即Pass@k训练），并观察到其探索能力的提升。接着，我们推导出了Pass@k训练优势的解析解，从而实现了一个高效且有效的过程。在此基础上，我们的分析揭示了探索与利用并非固有的冲突目标，而是可以相互促进。此外，带有解析推导的Pass@k训练本质上涉及直接设计优势函数。受此启发，我们初步探索了RLVR的优势设计，展示了有希望的结果，并指出了一个潜在的未来研究方向。"
+    },
+    {
+      "id": "arXiv:2508.10557",
+      "title": "PTQAT: A Hybrid Parameter-Efficient Quantization Algorithm for 3D Perception Tasks",
+      "chinese_title": "PTQAT：一种用于3D感知任务的混合式参数高效量化算法",
+      "authors": "Xinhao Wang, Zhiwei Lin, Zhongyu Xia, Yongtao Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10557&sa=D&source=editors&ust=1755340733652196&usg=AOvVaw2IpPDaLQWrwza5ocUBq9VR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10557&sa=D&source=editors&ust=1755340733652297&usg=AOvVaw20_sygFwiHdJ0-4zrP5nBz",
+      "chinese_abstract": "训练后量化（PTQ）和量化感知训练（QAT）是两种主流的模型量化方法。然而，PTQ常常导致量化模型性能出现不可接受的下降，而QAT由于权重更新，需要大量的GPU内存和较长的训练时间。在本文中，我们提出了一种名为PTQAT的新型通用混合量化算法，用于3D感知网络的高效部署。为了解决PTQ和QAT在速度和精度之间的权衡问题，我们的方法选择关键层进行QAT微调，并对其余层进行PTQ。与直觉相反，微调那些量化前后输出差异较小的层，而不是差异较大的层，实际上能更大地提升模型的量化精度。这意味着我们更好地在量化误差传播过程中进行补偿，而不是在误差发生的地解决它。所提出的PTQAT通过冻结近50%的可量化层，以更高的效率达到了与QAT相似的性能。此外，PTQAT是一种通用的量化方法，支持各种量化位宽（4位）以及不同的模型架构，包括CNN和Transformer。在nuScenes数据集上针对多种3D感知任务（包括目标检测、语义分割和占据预测）的实验结果表明，我们的方法始终优于仅使用QAT的基线。值得注意的是，在目标检测任务中，它在微调更少权重的情况下，NDS提升了0.2%-0.9%，mAP提升了0.3%-1.0%；在语义分割和占据预测任务中，mIoU提升了0.3%-2.0%。"
+    },
+    {
+      "id": "arXiv:2508.10123",
+      "title": "Nested-ReFT: Efficient Reinforcement Learning for Large Language Model Fine-Tuning via Off-Policy Rollouts",
+      "chinese_title": "Nested-ReFT：通过离策略部署实现高效的大语言模型强化学习微调",
+      "authors": "Maxime Heuillet, Yufei Cui, Boxing Chen, Audrey Durand, Prasanna Parthasarathi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.10123&sa=D&source=editors&ust=1755340733671552&usg=AOvVaw0R5OMhSMM4MlKRW5RmSvVP",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.10123&sa=D&source=editors&ust=1755340733671627&usg=AOvVaw2T7nKrvnsi1lmxpbg6lGte",
+      "chinese_abstract": "在数学推理等具有挑战性的领域中，大型语言模型（LLM）的先进推理能力可以通过基于可验证奖励的强化微调（ReFT）来解决。在标准的ReFT框架中，一个行为模型为每个问题生成多个包含答案的补全，然后由奖励函数对答案进行评分。尽管这类强化学习后训练方法在各种具有挑战性的推理领域表现出显著的性能提升，但在训练过程中通过多次推理步骤生成补全的计算成本使得训练开销不容小觑。为了解决这个问题，我们从离策略强化学习和推测解码中汲取灵感，引入了一个新颖的ReFT框架，名为Nested-ReFT。在该框架中目标模型的一个子集层作为行为模型，在训练期间生成离策略的补全。与标准的ReFT框架相比，通过在训练期间为每批次配置动态层跳过，行为模型的推理成本得以降低。我们的理论分析表明，Nested-ReFT能够产生无偏的梯度估计，并且方差可控。我们的实证分析在多个数学推理基准和模型尺寸上，以每秒词元数（tokens/sec）为衡量标准，展示了计算效率的提升。此外，我们探索了三种偏差缓解变体，以最小化梯度更新中的离策略性，从而保持与基线ReFT性能相匹配的性能。"
+    }
+  ],
+  "clusters": {
+    "视频与3D生成": [
+      "arXiv:2508.10881",
+      "arXiv:2508.10774",
+      "arXiv:2508.10771",
+      "arXiv:2508.10507"
+    ],
+    "强化学习与LLM对齐": [
+      "arXiv:2508.10530",
+      "arXiv:2508.10548",
+      "arXiv:2508.10340",
+      "arXiv:2508.10293",
+      "arXiv:2508.10839",
+      "arXiv:2508.10751",
+      "arXiv:2508.10123"
+    ],
+    "多态大语言模型": [
+      "arXiv:2508.10769",
+      "arXiv:2508.10552",
+      "arXiv:2508.10494",
+      "arXiv:2508.10729"
+    ],
+    "音频生成及前沿模型技术": [
+      "arXiv:2508.10875",
+      "arXiv:2508.10559",
+      "arXiv:2508.10436",
+      "arXiv:2508.10009",
+      "arXiv:2508.10557"
+    ]
+  }
+}
