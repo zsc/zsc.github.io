@@ -1,0 +1,212 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.11616",
+      "title": "Controlling Multimodal LLMs via Reward-guided Decoding",
+      "chinese_title": "通过奖励引导解码控制多模态大语言模型",
+      "authors": "Oscar Mañas, Pierluca D'Oro, Koustuv Sinha, Adriana Romero-Soriano, Michal Drozdzal, Aishwarya Agrawal",
+      "abs_link": "https://arxiv.org/abs/2508.11616",
+      "pdf_link": "https://arxiv.org/pdf/2508.11616",
+      "chinese_abstract": "随着多模态大语言模型（MLLM）的应用日益广泛，根据多样化的用户需求对其进行调整变得越来越重要。在本文中，我们研究了通过受控解码来调整MLLM。为此，我们引入了首个用于MLLM奖励引导解码的方法，并展示了其在改善模型视觉定位能力方面的应用。我们的方法包括为视觉定位建立奖励模型，并使用它们来指导MLLM的解码过程。具体来说，我们构建了两个独立的奖励模型，以独立制模型输出中对象精确度和召回率的程度。我们的方法通过两种方式实现了对MLLM推理过程的即时可控性：首先，通过在解码过程中控制每个奖励函数的相对重要性，允许用户在图像字幕任务中动态地权衡对象的精确度和召回率；其次，通过控制解码过程中的搜索广度，允许用户控制测试时计算量与视觉定位程度之间的权衡。我们在标准的对象幻觉基准上评估了我们的方法，结果表明，它在提供对MLLM推理的显著可控性的同时，始终优于现有的幻觉缓解方法。"
+    },
+    {
+      "id": "arXiv:2508.11408",
+      "title": "On-Policy RL Meets Off-Policy Experts: Harmonizing Supervised Fine-Tuning and Reinforcement Learning via Dynamic Weighting",
+      "chinese_title": "在策略强化学习与离策略专家的结合：通过动态加权协调监督微调与强化学习",
+      "authors": "Wenhao Zhang, Yuexiang Xie, Yuchang Sun, Yanxi Chen, Guoyin Wang, Yaliang Li, Bolin Ding, Jingren Zhou",
+      "abs_link": "https://arxiv.org/abs/2508.11408",
+      "pdf_link": "https://arxiv.org/pdf/2508.11408",
+      "chinese_abstract": "监督微调（SFT）和强化学习（RL）是用于优化大语言模型（LLM）能力和对齐其行为的两种主要训练后范式。现有的整合SFT和RL的方法常常面临破坏已有模型模式和导致对专家数据过拟合的风险。为了解决这个问题，我们提出了一项新颖的研究，通过离策略与在策略的视角来统一审视SFT和RL。我们提出了CHORD框架，即通过动态加权实现可控的在策略与离策略强化学习的协调，该框架将SFT重新定义为在策略RL过程中的一个动态加权的辅助目标，而非一个独立的阶段。基于对离策略专家数据在整体和细粒度层面影响的分析，我们在CHORD中引入了双重控制机制。具体来说，该框架首先采用一个全局系数来整体引导从离策略模仿到在策略探索的过渡，然后应一个逐词加权函数，从专家词元中进行细粒度学习，从而保留在策略探索并减轻离策略数据的干扰。我们在广泛使用的基准上进行了大量实验，提供了经验证据表明CHORD实现了稳定高效的学习过程。通过有效地协调离策略专家数据与在策略探索，CHORD在基准测试中表现出显著优于基线模型的性能。我们在此https URL发布了实现代码，以激励进一步的研究。"
+    },
+    {
+      "id": "arXiv:2508.11356",
+      "title": "ETTRL: Balancing Exploration and Exploitation in LLM Test-Time Reinforcement Learning Via Entropy Mechanism",
+      "chinese_title": "ETTRL：通过熵机制平衡大语言模型测试时强化学习中的探索与利用",
+      "authors": "Jia Liu, ChangYi He, YingQiao Lin, MingMin Yang, FeiYang Shen, ShaoGuo Liu, TingTing Gao",
+      "abs_link": "https://arxiv.org/abs/2508.11356",
+      "pdf_link": "https://arxiv.org/pdf/2508.11356",
+      "chinese_abstract": "近年来，大语言模在数学和编程等复杂推理任务上取得了显著进步。然而，这些模型仍然严重依赖于标注数据，并且在无监督场景下的适应能力有限。为了解决这些局限性，测试时强化学习（TTRL）被提出来，它通过利用模型生成的伪标签实现自我优化。尽管前景广阔，TTRL仍面临几个关键挑战，包括并行部署带来的高昂推理成本和早期阶段的估计偏差，这会助长过度自信，降低输出多样性并导致性能停滞。为应对这些挑战，我们引入了一种基于熵的机制，通过两种策略来增强测试时强化学习中的探索-利用平衡：熵分叉树多数投票部署（ETMR）和基于熵的优势重塑（EAR）。与基线相比，我们的方法使Llama3.1-8B在AIME 2024基准测试的Pass@1指标上实现了68%的相对提升，而部署词元预算仅消耗了60%。这突显了我们的方法在有效优化推理效率、多样性和估计鲁棒性之间权衡的能力，从而推动了无监督强化学习在开放领域推理任务中的发展。"
+    },
+    {
+      "id": "arXiv:2508.11143",
+      "title": "Actor-Critic for Continuous Action Chunks: A Reinforcement Learning Framework for Long-Horizon Robotic Manipulation with Sparse Reward",
+      "chinese_title": "面向连续动作块的Actor-Critic方法：一个用于稀疏奖励下长时程机器人操控的强化学习框架",
+      "authors": "Jiarui Yang, Bin Zhu, Jingjing Chen, Yu-Gang Jiang",
+      "abs_link": "https://arxiv.org/abs/2508.11143",
+      "pdf_link": "https://arxiv.org/pdf/2508.11143",
+      "chinese_abstract": "现有的强化学习（RL）方法在处理长时程机器人操控任务时面临困难，尤其是在涉及稀疏奖励的情况下。虽然动作分块是机器人操控中一个有前景的范式，但使用RL直接学习连续动作块并保证其稳定性和数据效率仍然是一个关键挑战。本文介绍了AC3（Actor-Critic for Continuous Chunks），一个新颖的RL框架，用于学习生成高维连续动作序列。为了使学习过程稳定且数据高效，AC3为actor和critic都集成了针对性的稳定机制。首先，为确保可靠的策略改进，actor采用非对称更新规则进行训练，仅从成功的轨迹中学习。其次，为了在稀疏奖励下实现有效的价值学习，critic的更新通过块内n步回报进行稳定，并由一个自监督模块进一步丰富，该模块在与每个动作块对齐的锚点处提供内在奖励。我们在BiGym和RLBench基准测试的25个任务上进行了广泛实验。结果表明，仅使用少量演示和一个简单的模型架构，AC3在大多数任务上取得了优越的成功率，验证了其设计的有效性。"
+    },
+    {
+      "id": "arXiv:2508.11074",
+      "title": "LD-LAudio-V1: Video-to-Long-Form-Audio Generation Extension with Dual Lightweight Adapters",
+      "chinese_title": "LD-LAudio-V1：使用双轻量级适配器扩展视频到长音频生成",
+      "authors": "Haomin Zhang, Kristin Qi, Shuxin Yang, Zihao Chen, Chaofan Ding, Xinhan Di",
+      "abs_link": "https://arxiv.org/abs/2508.11074",
+      "pdf_link": "https://arxiv.org/pdf/2508.11074",
+      "chinese_abstract": "从视频内容生成高质量且时间同步的音频对于视频编辑和后期制作任务至关重要，它能够为无声视频创建语义对齐的音频。然而，大多数现有方法都专注于为10秒以下的视频片段生成短格式音频，或者依赖于有噪声的数据集进行长格式视频到音频的合成。为了解决这些限制，我们引入了LD-LAudio-V1，这是对最先进的视频到音频模型的扩展，它集成了双轻量级适配器以实现长格式音频的生成。此外，我们发布了一个干净且经人工标注的视频到音频数据集，其中包含纯净的音效，没有噪声或伪影。我们的方法在保持计算效率的同时，显著减少了拼接伪影和时间不一致性。与使用短训练视频直接进行微调相比，LD-LAudio-V1在多个指标上取得了著改进：$FD_{\\text{passt}}$ 从450.00提升至327.29（+27.27%），$FD_{\\text{panns}}$ 从34.88提升至22.68（+34.98%），$FD_{\\text{vgg}}$ 从3.75提升至1.28（+65.87%），$KL_{\\text{panns}}$ 从2.49提升至2.07（+16.87%），$KL_{\\text{passt}}$ 从1.78提升至1.53（+14.04%），$IS_{\\text{panns}}$ 从4.17提升至4.30（+3.12%），$IB_{\\text{score}}$ 从0.25提升至0.28（+12.00%），$Energy\\Delta10\\text{ms}$ 从0.3013提升至0.1349（+55.23%），$Energy\\Delta10\\text{ms(this http URL)}$ 从0.0531提升至0.0288（+45.76%），以及$Sem.\\,Rel.$ 从2.73提升至3.28（+20.15%）。我们的数据集旨在促进长格式视频到音频生成领域的进一步研究，并可在此https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.11379",
+      "title": "G-CUT3R: Guided 3D Reconstruction with Camera and Depth Prior Integration",
+      "chinese_title": "G-CUT3R：融合相机和深度先验的引导式三维重建",
+      "authors": "Ramil Khafizov, Artem Komarichev, Ruslan Rakhimov, Peter Wonka, Evgeny Burnaev",
+      "abs_link": "https://arxiv.org/abs/2508.11379",
+      "pdf_link": "https://arxiv.org/pdf/2508.11379",
+      "chinese_abstract": "我们介绍了G-CUT3R，一种新颖的用于引导式3D场景重建的前馈方法，它通过整合先验信息来增强CUT3R模型。与现有的仅依赖输入图像的前馈方法不同，我们的方法利用了在真实世界场景中通常可用的辅助数据，例如深度、相机标定或相机位置。我们对CUT3R提出了一个轻量级的修改，为每种模态引入一个专用的编码器来提取特征，这些特征通过零卷积与RGB图像的词元（tokens）进行融合。这种灵活的设计使得在推理过程中能够无缝集成任何先验信息的组合。在包括3D重建和其他多视图任务在内的多个基准上进行评估，我们的方法展示了显著的性能提升，表明其能够有效利用可用的先验信息，同时保持与不同输入模态的兼容性。"
+    },
+    {
+      "id": "arXiv:2508.11203",
+      "title": "StyleMM: Stylized 3D Morphable Face Model via Text-Driven Aligned Image Translation",
+      "chinese_title": "StyleMM：通过文本驱动的对齐图像翻译实现风格化3D可变形人脸模型",
+      "authors": "Seungmi Lee, Kwan Yun, Junyong Noh",
+      "abs_link": "https://arxiv.org/abs/2508.11203",
+      "pdf_link": "https://arxiv.org/pdf/2508.11203",
+      "chinese_abstract": "我们介绍了StyleMM，一个新颖的框架，可以根据用户定义的文本描述来构建风格化的3D可变形模型（3DMM），这些描述指定了目标风格。我们的方法建立在为原始3DMM写实人脸预训练的网格变形网络和纹理生成器之上，利用通过文本引导的图像到图像（i2i）翻译与扩散模型生成的风格化面部图像对这些模型进行微调，这些图像作为渲染网格的风格化目标。为了防止在i2i翻译过程中出现不希望的身份、面部对齐或表情变化，我们引入了一种风格化方，该方法明确保留源图像的面部属性。通过在图像风格化过程中保持这些关键属性，所提出的方法确保了通过基于图像的训练，在3DMM参数空间中实现一致的3D风格迁移。一旦训练完成，StyleMM能够前馈生成风格化的面部网格，并对形状、表情和纹理参数进行明确控制，从而产生具有一致顶点连接性和可动画性的网格。定量和定性评估表明，我们的方法在身份级面部多样性和风格化能力方面优于最先进的方法。代码和视频可在此http URL获取。"
+    },
+    {
+      "id": "arXiv:2508.11286",
+      "title": "Scene Graph-Guided Proactive Replanning for Failure-Resilient Embodied Agent",
+      "chinese_title": "场景图引导的主动重规划以实现抗故障的具身智能体",
+      "authors": "Che Rin Yu, Daewon Chae, Dabin Seo, Sangwon Lee, Hyeongwoo Im, Jinkyu Kim",
+      "abs_link": "https://arxiv.org/abs/2508.11286",
+      "pdf_link": "https://arxiv.org/pdf/2508.11286",
+      "chinese_abstract": "当人类执行日常任务时，我们会根据环境的当前状态自然地调整我们的行动。例如，如果我们打算把东西放进抽屉但发现它是关着的，我们会先打开它。然而，许多自主机器人缺乏这种自适应意识。它们通常遵循预先计划好的动作，这些动作可能会忽略场景中微小但关键的变化，这可能导致动作在过时的假设下执行并最终失败。虽然重规划对于强大的自主性至关重要，但大多数现有方法仅在失败发生后才做出反应，而此时恢复可能效率低下或不可行。虽然主动重规划有望提前预防失败，但目前的解决方案通常依赖于手动设计的规则和大量的监督。在这项工作中，我们提出了一个主动重规划框架，通过比较从当前RGB-D观测构建的场景图与从成功演示中提取的参考图，在子任务边界处检测和纠正失败。当当前场景未能与参考轨迹对齐时，一个轻量的推理模块被激活，以诊断不匹配并调整计划。在AI2-THOR模拟器中的实验表明，我们的方法在执行失败发生之前检测到语义和空间上的不匹配，显著提高了任务成功率和鲁棒性。"
+    },
+    {
+      "id": "arXiv:2508.11503",
+      "title": "Sim2Dust: Mastering Dynamic Waypoint Tracking on Granular Media",
+      "chinese_title": "Sim2Dust：在颗粒介质上掌握动态航点跟踪",
+      "authors": "Andrej Orsula, Matthieu Geist, Miguel Olivares-Mendez, Carol Martinez",
+      "abs_link": "https://arxiv.org/abs/2508.11503",
+      "pdf_link": "https://arxiv.org/pdf/2508.11503",
+      "chinese_abstract": "在遥远行星表面的非结构化地形上进行可靠的自主导航是未来太空探索的关键推动因素。然而，基于学习的控制器的部署受到固有的模拟到现实（sim-to-real）差距的阻碍，特别是对于车轮与颗粒介质相互作用的复杂动态。这项工作提出了一个完整的模拟到现实框架，用于开发和验证在这种挑战性表面上动态航点跟踪的鲁棒控制策略。我们利用大规模并行仿真，在大量程序化生成且物理参数随机化的环境中训练强化学习智能体。然后，这些策略被零样本迁移到一个在月球模拟设施中运行的实体轮式漫游车上。我们的实验系统地比较了多种强化学习算法和动作平滑滤波器，以确定最适合现实世界部署的组合。至关重要的是，我们提供了强有力的经验证据，表明使用程序化多样性训练的智能体比在静态场景中训练的智能体实现了更优越的零样本性能。我们还分析了使用高保真度粒子物理进行微调的权衡，这种方法以巨大的计算成本换取了低速精度上的微小增益。总之，这些贡献建立了一个经过验证的工作流程，用于创建可靠的基于学习的导航系统，标志着向在终极前沿部署自主机器人迈出了关键一步。"
+    },
+    {
+      "id": "arXiv:2508.11360",
+      "title": "CRAFT-GUI: Curriculum-Reinforced Agent For GUI Tasks",
+      "chinese_title": "CRAFT-GUI：用于图形用户界面任务的课程强化智能体",
+      "authors": "Songqin Nong, Jingxuan Xu, Sheng Zhou, Jianfeng Chen, Xiaoxuan Tang, Tao Jiang, Wenhao Xu",
+      "abs_link": "https://arxiv.org/abs/2508.11360",
+      "pdf_link": "https://arxiv.org/pdf/2508.11360",
+      "chinese_abstract": "随着自主智能体在理解和与图形用户界面（GUI）环境交互方面变得越来越熟练，一个自动化任务执行的新时代正在来临。最近的研究表明，强化学习（RL）可以有效提升智能体在动态交互式GUI环境中的性能。然而，这些方法面临两个关键限制：（1）它们将整个训练数据视为一个统一的集合，忽略了不同GUI任务之间难度的显著差异，这妨碍了智能体调整其学习过程的能力；（2）大多数方法将任务特定的细微差别压缩成一个单一、粗糙的奖励，使得智能体只能得到一个统一的信号，从而导致策略更新效率低下。为了解决这些限制，我们提出了CRAFT-GUI，一个基于组相对策略优化（GRPO）的课程学习框架，该框架明确考虑了不同轨迹之间的难度差异。为了实现更精细的策略优化，我们设计了一个结合简单基于规则的信号和模型判断评估的奖励函数，在训练过程中提供更丰富、更细致的反馈。实验结果表明，我们的方法相比之前最先进的方法取得了显著的改进，在公共基准Android Control上性能提升了5.6%，在我们内部的在线基准上性能提升了10.3%。这些发现从经验上验证了在GUI交互任务中将强化学习与课程学习相结合的有效性。"
+    },
+    {
+      "id": "arXiv:2508.11204",
+      "title": "Multi-Group Equivariant Augmentation for Reinforcement Learning in Robot Manipulation",
+      "chinese_title": "用于机器人操控强化学习的多群组等变增强",
+      "authors": "Hongbin Lin, Juan Rojas, Kwok Wai Samuel Au",
+      "abs_link": "https://arxiv.org/abs/2508.11204",
+      "pdf_link": "https://arxiv.org/pdf/2508.11204",
+      "chinese_abstract": "在现实世界的机器人操控中，部署视觉运动学习的关键在于采样效率。虽然任务对称性已成为提高效率的一个有前景的归纳偏见，但大多数先前的工作仅限于等距对称性——即在所有时间步对所有任务对象应用相同的群变换。在这项工作中，我们探索了非等距对称性，通过在空间和时间维度上应用多个独立的群变换来放宽这些约束。我们引入了一种新的部分可观察马尔可夫决策过程（POMDP）的表述，该表述融合了非等距对称性结构，并提出了一种简单而有效的数据增强方法——多群组等变增强（MEA）。我们将MEA与离线强化学习相结合以提高采样效率，并引入了一种基于体素的视觉表示，该表示保留了平移等变性。在两个操控领域的广泛模拟和实机器人实验证明了我们方法的有效性。"
+    },
+    {
+      "id": "arXiv:2508.11085",
+      "title": "Learn to optimize for automatic proton PBS treatment planning for H&N cancers",
+      "chinese_title": "学习优化头颈癌自动质子笔形束扫描治疗计划",
+      "authors": "Qingqing Wang, Liqiang Xiao, Chang Chang",
+      "abs_link": "https://arxiv.org/abs/2508.11085",
+      "pdf_link": "https://arxiv.org/pdf/2508.11085",
+      "chinese_abstract": "头颈癌的质子笔形束扫描（PBS）治疗计划涉及众多相互冲突的目标，需要人类计划员投入大量精力来平衡和满足多个临床目标。为实现这一目标，需要反复进行依赖经验的目标参数调整和计算成本高昂的逆向优化。尽管已有大量工作致力于自动调整目标参数，但最耗时的部分，即逆向优化，仍然严重依赖理论驱动的方法。我们提出了一种数据驱动的逆向优化器，并将其集成到一个基于PPO的自动治疗计划框架，以在临床可接受的计划时间内自动生成高质量的计划。该逆向优化器是一种“学习优化”（L2O）方法，通过从任务特定数据分布中学习来预测更新步骤。我们首次将最初为大语言模型（LLM）开发的长上下文处理技术集成到一个基于Transformer的L2O框架中，以解决现有L2O方法的可扩展性问题。PPO框架作为一个外循环的虚拟计划员，通过策略网络自主调整目标参数，并使用剂量预测器来初始化目标参数。内循环的L2O逆向优化器根据PPO策略网络精炼的目标，计算机器可交付的MU值。本研究收集了97名患者的数据，与L-BFGSB相比，我们基于L2O的逆向优化器在有效性和效率上分别提高了22.97%和36.41%。结合基于PPO的学习虚拟计划员，我们的框架在平均2.55小时内生成的计划，与人类生成的计划相比，对于不同处方剂量水平、目标体积数量、射束角度等的患者，显示出改善或相当的及器官（OAR）保护效果，同时具有更优的目标覆盖率。"
+    },
+    {
+      "id": "arXiv:2508.11222",
+      "title": "ORFuzz: Fuzzing the \"Other Side\" of LLM Safety -- Testing Over-Refusal",
+      "chinese_title": "ORFuzz：模糊测试大语言模型安全的“另一面”——测试过度拒绝",
+      "authors": "Haonan Zhang, Dongxia Wang, Yi Liu, Kexin Chen, Jiashui Wang, Xinlei Ying, Long Liu, Wenhai Wang",
+      "abs_link": "https://arxiv.org/abs/2508.11222",
+      "pdf_link": "https://arxiv.org/pdf/2508.11222",
+      "chinese_abstract": "大语言模型（LLM）越来越多地表现出过度拒绝——由于过于保守的安全措施而错误地拒绝善意查询——这是一个严重的功能缺陷，损害了它们的可靠性和可用性。目前测试这种行为的方法明显不足，存在有缺陷的基准和有限的测试生成能力，正如我们的实证用户研究所强调的那样。据我们所知，本文首次引入了一个进化测试框架ORFuzz，用于系统性地检测和分析LLM的过度拒绝。ORFuzz独特地集成了三个核心组件：（1）安全类别感知的种子选择，以实现全面的测试覆盖；（2）使用推理LLM的自适应变异器优化，以生成有效的测试用例；以及（3）OR-Judge，一个经过验证的、与人类对齐的判断模型，能够准确反映用户对毒性和拒绝的感知。我们广泛的评估表明，ORFuzz生成的、经过验证的多样化过度拒绝实例的发生率（平均6.98%）是领先基线的两倍以上，有效地揭示了漏洞。此外，ORFuzz的输出构成了ORFuzzSet的基础，这是一个包含1855个高度可迁移测试用例的新基准，在10个不同的LLM上实现了63.56%的平均过度拒绝率，显著优于现有数据集。ORFuzz和ORFuzzSet提供了一个强大的自动化测试框架和宝贵的社区资源，为开发更可靠和可信赖的基于LLM的软件系统铺平了道路。"
+    },
+    {
+      "id": "arXiv:2508.10993",
+      "title": "Match & Choose: Model Selection Framework for Fine-tuning Text-to-Image Diffusion Models",
+      "chinese_title": "匹配与选择：用于微调文本到图像扩散模型的模型选择框架",
+      "authors": "Basile Lewandowski, Robert Birke, Lydia Y. Chen",
+      "abs_link": "https://arxiv.org/abs/2508.10993",
+      "pdf_link": "https://arxiv.org/pdf/2508.10993",
+      "chinese_abstract": "基于扩散和Transformer架构的文本到图像（T2I）模型发展迅速。它们通常在大型语料库上进行预训练，并在HuggingFace等模型平台上公开共享。然后，用户可以通过采用预训练的T2I模型并在目标数据集上进行微调来构建AI应用，例如生成媒体内容。虽然公开的预训练T2I模型促进了模型的普及，但用户面临着一个新的挑战：哪个模型最适合根据目标数据域进行微调？模型选择在分类任务中得到了很好的解决，但在（预训练的）T2I模型及其在目标域上的性能指示方面知之甚少。在本文中，我们提出了第一个模型选择框架M&C，它使用户能够有效地从模型平台中选择一个预训练的T2I模型，而无需在目标数据集上对所有模型进行详尽的微调。M&C的核心是一个匹配图，它包括：（i）可用模型和已分析数据集的节点，以及（ii）分别捕捉微调性能和数据相似性的模型-数据和数据-数据对的边。然后，我们建立一个模型，该模型基于模型/数据特征的输入，以及至关重要的从匹配图中提取的图嵌入特征，来预测在目标域上微调后能达到最佳质量的模型。我们在32个数据集上评估了M&C在十个T2I模型中的选择能力，并与三个基线进行了比较。我们的结果显示，M&C在61.3%的情况下成功预测了最佳微调模型，其余情况下也预测了性能相近的模型。"
+    },
+    {
+      "id": "arXiv:2508.11628",
+      "title": "Is ChatGPT-5 Ready for Mammogram VQA?",
+      "chinese_title": "ChatGPT-5准备好进行乳腺X光像视觉问答了吗？",
+      "authors": "Qiang Li, Shansong Wang, Mingzhe Hu, Mojtaba Safari, Zachary Eidex, Xiaofeng Yang",
+      "abs_link": "https://arxiv.org/abs/2508.11628",
+      "pdf_link": "https://arxiv.org/pdf/2508.11628",
+      "chinese_abstract": "乳腺X光影像视觉问答（VQA）整合了图像解读与临床推理，具有支持乳腺癌筛查的潜力。我们系统地评估了GPT-5系列和GPT-4o模型在四个公开的乳腺X光影像数据集（EMBED, InBreast, CMMD, CBIS-DDSM）上进行BI-RADS评估、异常检测和恶性肿瘤分类任务的表现。GPT-5在所有模型中始终表现最佳，但仍落后于人类专家和领域特定的微调模型。在EMBED数据集上，GPT-5在密度（56.8%）、扭曲（52.5%）、肿块（64.5%）、钙化（63.5%）和恶性肿瘤（52.8%）分类任务中取得了GPT变体中的最高分。在InBreast数据集上，它实现了36.9%的BI-RADS准确率、45.9%的异常检测率和35.0%的恶性肿瘤分类准确率。在CMMD数据集，GPT-5达到了32.3%的异常检测率和55.0%的恶性肿瘤准确率。在CBIS-DDSM数据集上，它实现了69.3%的BI-RADS准确率、66.0%的异常检测率和58.2%的恶性肿瘤准确率。与人类专家的估计相比，GPT-5表现出较低的敏感性（63.5%）和特异性（52.3%）。尽管GPT-5在筛查任务中展现出有希望的能力，但若无针对性的领域适应和优化，其性能仍不足以应用于高风险的临床影像应用。然而，从GPT-4o到GPT-5的巨大性能提升显示出通用大语言模型（LLM）在辅助乳腺X光影像VQA任务方面的潜力呈积极趋势。"
+    },
+    {
+      "id": "arXiv:2508.11609",
+      "title": "Pretrained Conformers for Audio Fingerprinting and Retrieval",
+      "chinese_title": "用于音频指纹和检索的预训练Conformer模型",
+      "authors": "Kemal Altwlkany, Elmedin Selmanovic, Sead Delalic",
+      "abs_link": "https://arxiv.org/abs/2508.11609",
+      "pdf_link": "https://arxiv.org/pdf/2508.11609",
+      "chinese_abstract": "Conformer模型因其能够捕捉局部和全局交互而在语音处理中取得了巨大成功。在这项工作中，我们利用一个自监督对比学习框架来训练基于Conformer的编码器，这些编码器能够为小段音频生成独特的嵌入，并能很好地泛化到前所未见的数据。我们在音频检索任务上取得了最先进的结果，同时仅使用3秒的音频来生成嵌入。我们的模型几乎完全不受时间错位的影响，并且在其他音频失真（如噪声、混响或极端时间拉伸）的情况下也取得了最先进的结果。代码和模型已公开发布，由于我们使用流行且免费的不同大小的数据集进行训练和测试，结果很容易复现。"
+    },
+    {
+      "id": "arXiv:2508.11110",
+      "title": "Diffusion is a code repair operator and generator",
+      "chinese_title": "扩散模型作为代码修复算子和生成器",
+      "authors": "Mukul Singh, Gust Verbruggen, Vu Le, Sumit Gulwani",
+      "abs_link": "https://arxiv.org/abs/2508.11110",
+      "pdf_link": "https://arxiv.org/pdf/2508.11110",
+      "chinese_abstract": "代码扩散模型通过从代码片段的潜在表示中迭代地去除噪声来生成代码。在扩散过程的后期步骤中，当代码片段几乎收敛时，这些片段的离散表示之间的差异看起来像是对损坏或不完整代码应用的最后阶段修复。我们评估了这种相似性在多大程度上可以被利用，通过考虑两个具有巨大潜力的应用，来利用预训练的代码扩散模型解决最后阶段修复的问题。首先，我们可以通过向损坏的代码片段添加噪声并恢复扩散过程，来利用扩散模型进行最后阶段修复。其次，我们可以通过从扩散过程中采样一个中间程序（输入）和最终程序（输出），来利用扩散模型为最后阶段修复任务（这些任务在计算上更高效）生成任意数量的训练数据。我们在3个领域（Python、Excel和PowerShell）进行了实，以评估应用并分析其特性。"
+    },
+    {
+      "id": "arXiv:2508.10925",
+      "title": "gpt-oss-120b & gpt-oss-20b Model Card",
+      "chinese_title": "gpt-oss-120b & gpt-oss-20b 模型卡",
+      "authors": "OpenAI, Sandhini Agarwal, Lama Ahmad, Jason Ai, Sam Altman, Andy Applebaum, Edwin Arbus, Rahul K. Arora, Yu Bai, Bowen Baker, Haiming Bao, Boaz Barak, Ally Bennett, Tyler Bertao, Nivedita Brett, Eugene Brevdo, Greg Brockman, Sebastien Bubeck, Che Chang, Kai Chen, Mark Chen, Enoch Cheung, Aidan Clark, Dan Cook, Marat Dukhan, Casey Dvorak, Kevin Fives, Vlad Fomenko, Timur Garipov, Kristian Georgiev, Mia Glaese, Tarun Gogineni, Adam Goucher, Lukas Gross, Katia Gil Guzman, John Hallman, Jackie Hehir, Johannes Heidecke, Alec Helyar, Haitang Hu, Romain Huet, Jacob Huh, Saachi Jain, Zach Johnson, Chris Koch, Irina Kofman, Dominik Kundel, Jason Kwon, Volodymyr Kyrylov, Elaine Ya Le, Guillaume Leclerc, James Park Lennon, Scott Lessans, Mario Lezcano-Casado, Yuanzhi Li, Zhuohan Li, Ji Lin, Jordan Liss, Lily, Jiancheng Liu, Kevin Lu, Chris Lu, Zoran Martinovic, Lindsay McCallum, Josh McGrath, Scott McKinney, Aidan McLaughlin, Song Mei, Steve Mostovoy, Tong Mu, Gideon Myles, Alexander Neitz, Alex Nichol, Jakub Pachocki, Alex Paino, Dana Palmie, Ashley Pantuliano, Giambattista Parascandolo, Jongsoo Park, Leher Pathak, Carolina Paz, Ludovic Peran, Dmitry Pimenov, Michelle Pokrass, Elizabeth Proehl, Huida Qiu, Gaby Raila, Filippo Raso, Hongyu Ren, Kimmy Richardson, David Robinson, Bob Rotsted, Hadi Salman, Suvansh Sanjeev, Max Schwarzer, D. Sculley, Harshit Sikchi, Kendal Simon, Karan Singhal, Yang Song",
+      "abs_link": "https://arxiv.org/abs/2508.10925",
+      "pdf_link": "https://arxiv.org/pdf/2508.10925",
+      "chinese_abstract": "我们介绍了 gpt-oss-120b 和 gpt-oss-20b，这是两款开源权重的推理模型，它们在准确性和推理成本方面推动了前沿。这些模型采用了高效的专家混合（mixture-of-expert）Transformer架构，并使用大规模蒸馏和强化学习进行训练。我们优化了这些模型，使其具备强大的智能体能力（深度研究浏览、Python工具使用以及支持开发者提供的函数），同时使用一种渲染的聊天格式，以实现清晰的指令遵循和角色划分。这两款模型在数学、编码和安全等多个基准测试中都取得了优异的成绩。我们在Apache 2.0许可下发布了模型权重、推理实现、工具环境和分词器，以促进广泛使用和进一步研究。"
+    },
+    {
+      "id": "arXiv:2508.11551",
+      "title": "ADMIRE-BayesOpt: Accelerated Data MIxture RE-weighting for Language Models with Bayesian Optimization",
+      "chinese_title": "ADMIRE-BayesOpt：使用贝叶斯优化加速语言模型的数据混合重加权",
+      "authors": "Shengzhuang Chen, Xu Ouyang, Michael Arthur Leopold Pearce, Thomas Hartvigsen, Jonathan Richard Schwarz",
+      "abs_link": "https://arxiv.org/abs/2508.11551",
+      "pdf_link": "https://arxiv.org/pdf/2508.11551",
+      "chinese_abstract": "定大型语言模型训练的最佳数据混合仍然是一个具有巨大影响的挑战性问题。在实践中，语言模型开发者继续依赖启发式探索，因为尚无基于学习的方法成为可靠的解决方案。在这项工作中，我们建议将训练数据混合的选择视为一个黑箱超参数优化问题，对此，贝叶斯优化是一类公认的合适算法。首先，我们将数据混合学习视为一个序贯决策问题，旨在在训练探索性（代理）模型的计算成本与最终混合性能之间找到合适的权衡。其次，我们系统地探索了将在小规模上学习到的混合转移到更大规模实验的特性，提供了见解并突出了在适度规模下进行研究的机会。通过提出多保真度贝叶斯优化作为在这种常见场景下的合适方法，我们引入了一个自然框架来平衡实验成本与模型拟合，避免了对小规模过拟合的风险，同时最小化了高成本实验的数量。我们展示了在100万到70亿参数的模型上进行预训练和指令微调的结果，这些模型从简单架构到最先进的模型，基准测试涵盖了数十个数据集。我们展示了相对于广泛基准的持续强劲结果，在我们最大的实验中，确定最佳数据混合的速度比最近的基线快了500%以上。此外，我们通过共享ADMIRE IFT Runs（一个包含460个完整训练和评估运行的数据集，涵盖各种模型大小，价值超过13000个GPU小时）来扩大研究的可及性，大大降低了在该领域进行研究的成本。"
+    },
+    {
+      "id": "arXiv:2508.11112",
+      "title": "Quantization through Piecewise-Affine Regularization: Optimization and Statistical Guarantees",
+      "chinese_title": "通过分段仿射正则化实现量化：优化与统计保证",
+      "authors": "Jianhao Ma, Lin Xiao",
+      "abs_link": "https://arxiv.org/abs/2508.11112",
+      "pdf_link": "https://arxiv.org/pdf/2508.11112",
+      "chinese_abstract": "在离散或量化变量上的优问题通常由于其搜索空间的组合性质而非常具有挑战性。分段仿射正则化（PAR）提供了一个基于连续优化的灵活建模和计算框架用于量化。在这项工作中，我们专注于监督学习的设定，并从优化和统计的角度研究了PAR的理论基础。首先，我们表明在过参数化的情况下，即参数数量超过样本数量时，PAR正则化损失函数的每个临界点都表现出高度的量化性。其次，我们推导了各种（凸、拟凸和非凸）PAR的闭式近端映射，并展示了如何使用近端梯度法、其加速变体以及交替方向乘子法来解决PAR正则化问题。第三，我们研究了PAR正则化线性回归问题的统计保证；具体来说，我们可以使用PAR来近似经典的$\\ell_1$、平方$\\ell_2$和非凸正则化公式，并获得具有量化解的类似统计保证。"
+    }
+  ],
+  "clusters": {
+    "强化学习与智能体": [
+      "arXiv:2508.11408",
+      "arXiv:2508.11356",
+      "arXiv:2508.11222",
+      "arXiv:2508.11360",
+      "arXiv:2508.11143",
+      "arXiv:2508.11204",
+      "arXiv:2508.11503",
+      "arXiv:2508.11286",
+      "arXiv:2508.11085"
+    ],
+    "多模态与内容生成": [
+      "arXiv:2508.11616",
+      "arXiv:2508.11628",
+      "arXiv:2508.11074",
+      "arXiv:2508.11609",
+      "arXiv:2508.11203",
+      "arXiv:2508.11379",
+      "arXiv:2508.10993",
+      "arXiv:2508.11110"
+    ],
+    "大模型训练与效率优化": [
+      "arXiv:2508.10925",
+      "arXiv:2508.11551",
+      "arXiv:2508.11112"
+    ]
+  }
+}
