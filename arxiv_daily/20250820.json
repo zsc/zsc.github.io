@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.14040",
+      "title": "ComputerRL: Scaling End-to-End Online Reinforcement Learning for Computer Use Agents",
+      "chinese_title": "ComputerRL：为计算机使用智能体扩展端到端在线强化学习",
+      "authors": "Hanyu Lai, Xiao Liu, Yanxiao Zhao, Han Xu, Hanchen Zhang, Bohao Jing, Yanyu Ren, Shuntian Yao, Yuxiao Dong, Jie Tang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.14040&sa=D&source=editors&ust=1755699241935251&usg=AOvVaw0qo5zQMV5yP_dybOvzuAu9",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.14040&sa=D&source=editors&ust=1755699241935514&usg=AOvVaw23loADIgKfDxtuyVxrFF7Y",
+      "chinese_abstract": "我们介绍了ComputerRL，一个用于自主桌面智能的框架，它使智能体能够熟练地操作复杂的数字工作空间。ComputerRL采用了API-GUI范式，统一了程序化API调用和直接GUI交互，以解决机器智能体与以人为中心的桌面环境之间的内在不匹配问题。扩展端到端的强化学习（RL）训练对于在各种桌面任务中改进和泛化至关重要，但由于环境效率低下和长期训练中的不稳定性，这仍然是一个挑战。为了支持可扩展和鲁棒的训练，我们开发了一个分布式RL基础设施，能够协调数千个并行的虚拟桌面环境，以加速大规模在线RL。此外，我们提出了Entropulse，一种交替进行强化学习和监督微调的训练策略，有效缓解了长期训练过程中的熵崩溃问题。我们在开源模型GLM-4-9B-0414和Qwen2.5-14B上使用了ComputerRL，并在OSWorld基准上对它们进行了评估。基于GLM-4-9B-0414的AutoGLM-OS-9B达到了48.1%的最新SOTA准确率，展示了通用智能体在桌面自动化方面的显著改进。该算法和框架被用于构建AutoGLM（Liu et al., 2024a）。"
+    },
+    {
+      "id": "arXiv:2508.13587",
+      "title": "Breaking the SFT Plateau: Multimodal Structured Reinforcement Learning for Chart-to-Code Generation",
+      "chinese_title": "突破SFT瓶颈：用于图表到代码生成的多模态结构化强化学习",
+      "authors": "Lei Chen, Xuanle Zhao, Zhixiong Zeng, Jing Huang, Liming Zheng, Yufeng Zhong, Lin Ma",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13587&sa=D&source=editors&ust=1755699241946723&usg=AOvVaw2jPeLbzvowQuPYYVzCMwiI",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13587&sa=D&source=editors&ust=1755699241946834&usg=AOvVaw0RAxl7vY7pOD3XhDegP3OO",
+      "chinese_abstract": "尽管强化学习（RL）在视觉语言模型的一般推理中已被证明非常有效，但其在需要深入理解信息丰富的图像并生成结构化输出的任务中的应用仍未得到充分探索。图表到代码的生成任务就是这一挑战的典型例子，它要求对视觉图表进行复杂推理以生成结构化代码。仅靠监督微调（SFT）通常是不够的，这凸显了需要有效的RL策略来适当地奖励结构化输出。我们通过大规模实验系统地研究了SFT中的性能瓶颈，并提出了用于图表到代码生成的多模态结构化强化学习（MSRL），该方法显著突破了这一瓶颈。我们构建了迄今为止最大的训练语料库，包含来自真实世界arXiv表格的300万个图表-代码对，以缓解以往合成数据的简单模式。尽管达到了最先进的性能，我们的实验表明，扩展SFT数据最终会遇到一个瓶颈，即进一步增加数据带来的改进微乎其微。我们的MSRL方法利用多粒度结构化奖励系统，使用多模态文本和视觉反馈。在文本层面，基于规则的奖励验证了代码的细粒度细节。在视觉层面，基于模型的奖励通过将生成的代码渲染成图像并使用评估模型来评估结构相似性。我们在一个两阶段的课程中实现这一点，以保证训练的稳定性。结果表明，MSRL显著突破了SFT瓶颈，在ChartMimic和ReachQA基准测试中，高层指标分别提高了6.2%和9.9%，达到了与先进的闭源模型相媲美的性能。"
+    },
+    {
+      "id": "arXiv:2508.13579",
+      "title": "Toward Better EHR Reasoning in LLMs: Reinforcement Learning with Expert Attention Guidance",
+      "chinese_title": "提升大语言模型在电子健康记录中的推理能力：基于专家注意力引导的强化学习",
+      "authors": "Yue Fang, Yuxin Guo, Jiaran Gao, Hongxin Ding, Xinke Jiang, Weibin Liao, Yongxin Xu, Yinghao Zhu, Zhibang Yang, Liantao Ma, Junfeng Zhao, Yasha Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13579&sa=D&source=editors&ust=1755699241947540&usg=AOvVaw2suA8iLVt0tyA05j7qPvaO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13579&sa=D&source=editors&ust=1755699241947673&usg=AOvVaw3sTBmhDo2bPkcz37cul7eV",
+      "chinese_abstract": "改进大型语言模型（LLM）用于电子健康记录（EHR）推理对于实现准确且可泛化的临床预测至关重要。虽然LLM在医学文本理解方面表现出色，但由于在建模时间结构化、高维数据方面面临挑战，它们在基于EHR的预测任务中表现不佳。现有方法通常依赖于混合范式，其中LLM仅作为固定的先验检索器，而下游的深度学习（DL）模型处理预测，这未能提高LLM的内在推理能力，并继承了DL模型的泛化限制。为此，我们提出了EAG-RL，这是一个新颖的两阶段训练框架，旨在通过专家注意力引导，从本质上增强LLM的EHR推理能力，其中专家EHR模型指的是在EHR数据上训练的任务特定DL模型。具体而言，EAG-RL首先使用专家引导的蒙特卡洛树搜索构建高质量、逐步的推理轨迹，以有效初始化LLM的策略。然后，EAG-RL通过强化学习进一步优化该策略，将LLM的注意力与专家EHR模型识别出的临床显著特征对齐。在两个真实世界的EHR数据集上的广泛实验表明，EAG-RL将LLM的内在EHR推理能力平均提高了14.62%，同时还增强了对特征扰动的鲁棒性和对未见临床领域的泛化能力。这些结果证明了EAG-RL在临床预测任务中实际部署的潜力。我们的代码已在此https URL上提供。"
+    },
+    {
+      "id": "arXiv:2508.13786",
+      "title": "DegDiT: Controllable Audio Generation with Dynamic Event Graph Guided Diffusion Transformer",
+      "chinese_title": "DegDiT：基于动态事件图引导扩散Transformer的可控音频生成",
+      "authors": "Yisu Liu, Chenxing Li, Wanqian Zhang, Wenfu Wang, Meng Yu, Ruibo Fu, Zheng Lin, Weiping Wang, Dong Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13786&sa=D&source=editors&ust=1755699241981837&usg=AOvVaw1C8TG6PUgOKoIGIi5FPHVV",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13786&sa=D&source=editors&ust=1755699241981961&usg=AOvVaw2HjeA92EAsQZgKfnWRKefU",
+      "chinese_abstract": "可控的文本到音频生成旨在根据文本描述合成音频，同时满足用户指定的约束，包括事件类型、时间序列以及起始和结束时间戳。这使得能够精确控制生成音频的内容和时间结构。尽管最近取得了进展，现有方法在准确的时间定位、开放词汇的可扩展性和实际效率之间仍然面临固有的权衡。为了应对这些挑战，我们提出了DegDiT，一个新颖的动态事件图引导的扩散Transformer框架，用于开放词汇的可控音频生成。DegDiT将描述中的事件编码为结构化的动态图。每个图中的节点被设计为代表三个方面：语义特征、时间属性和事件间的连接。一个图Transformer被用来整合这些节点，并产生作为扩散模型指导的上下文事件嵌入。为确保高质量和多样化的训练数据，我们引入了一个质量平衡的数据选择流程，该流程结合了分层事件标注和多标准质量评分，从而产生了一个具有语义多样性的精选数据集。此外，我们提出了共识偏好优化，通过多个奖励信号的共识来促进音频生成。在AudioCondition、DESED和AudioTime数据集上的广泛实验表明，DegDiT在各种客观和主观评估指标上均达到了最先进的性能。"
+    },
+    {
+      "id": "arXiv:2508.13537",
+      "title": "EAvatar: Expression-Aware Head Avatar Reconstruction with Generative Geometry Priors",
+      "chinese_title": "EAvatar：利用生成式几何先验进行表情感知的头部虚拟形象重建",
+      "authors": "Shikun Zhang, Cunjian Chen, Yiqun Wang, Qiuhong Ke, Yong Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13537&sa=D&source=editors&ust=1755699241999664&usg=AOvVaw0dGsja0a--nAdt7z6BLR8_",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13537&sa=D&source=editors&ust=1755699241999791&usg=AOvVaw1DST9zo23QTauTPYZi4lPo",
+      "chinese_abstract": "高保真头部虚拟形象重建在AR/VR、游戏和多媒体内容创作中扮演着至关重要的角色。3D高斯溅射（3DGS）的最新进展已证明在建模复杂几何形状方面具有实时渲染能力，并被广泛用于高保真头部虚拟形象重建任务。然而，现有的基于3DGS的方法在捕捉精细面部表情和保持局部纹理连续性方面仍面临重大挑战，尤其是在高度可变形区域。为缓解这些限制，我们提出了一个名为EAvatar的新型基于3DGS的头部重建框架，该框架同时具备表情感知和变形感知能力。我们的方法引入了一种稀疏表情控制机制，其中少量关键高斯点用于影响其邻近高斯点的变形，从而能够精确建模局部变形和精细尺度下的纹理过渡。此外，我们利用预训练生成模型的高质量3D先验来提供更可靠的面部几何形状，为训练过程中的收敛稳定性和形状准确性提供结构指导。实验结果表明，我们的方法产生了更准确、视觉上更连贯的头部重建，并具有改进的表情可控性和细节保真度。"
+    },
+    {
+      "id": "arXiv:2508.13167",
+      "title": "Chain-of-Agents: End-to-End Agent Foundation Models via Multi-Agent Distillation and Agentic RL",
+      "chinese_title": "智能体链：通过多智能体蒸馏和智能体强化学习实现端到端智能体基础模型",
+      "authors": "Weizhen Li, Jianbo Lin, Zhuosong Jiang, Jingyi Cao, Xinpeng Liu, Jiayu Zhang, Zhenqiang Huang, Qianben Chen, Weichen Sun, Qiexiang Wang, Hongxuan Lu, Tianrui Qin, Chenghao Zhu, Yi Yao, Shuying Fan, Xiaowan Li, Tiannan Wang, Pai Liu, King Zhu, He Zhu, Dingfeng Shi, Piaohong Wang, Yeyi Guan, Xiangru Tang, Minghao Liu, Yuchen Eleanor Jiang, Jian Yang, Jiaheng Liu, Ge Zhang, Wangchunshu Zhou",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13167&sa=D&source=editors&ust=1755699241962313&usg=AOvVaw0xLiEsvB98kxyLd66SIoRQ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13167&sa=D&source=editors&ust=1755699241962412&usg=AOvVaw1XM2LBajn3BKB3hAf6Ukgu",
+      "chinese_abstract": "近期在大型语言模型（LLM）和多智能体系统方面的进展，在复杂问题解决任务中（如深度研究、氛围编程和数学推理）展现了卓越的能力。然而，大多数现有的多智能体系统是基于手动提示/工作流工程和复杂的智能体框架构建的，这使得它们计算效率低下、能力较弱，并且无法从以数据为中心的学习中受益。在这项工作中，我们引入了智能体链（Chain-of-Agents, CoA），一种新颖的LLM推理范式，它能够在一个模型内以与多智能体系统相同的方式（即通过多轮、多工具、多智能体解决问题）实现原生的端到端复杂问题解决。在智能体链问题解决中，模型动态激活不同的工具智能体和角色扮演智能体，以端到端的方式模拟多智能体协作。为了在LLM中引出端到端的智能体链问题解决能力，我们引入了一个多智能体蒸馏框架，将最先进的多智能体系统蒸馏成智能体链轨迹，用于智能体监督微调。然后，我们在可验证的智能体任务上使用智能体强化学习，进一步提升模型在智能体链问题解决方面的能力。我们将由此产生的模型称为智能体基础模型（AFMs）。我们的实证研究表明，AFM在网页智能体和代码智能体设置的各种基准测试中都创造了新的最先进性能。我们将整个研究，包括模型权重、训练和评估代码以及训练数据，完全开源，为未来关于智能体模型和智能体强化学习的研究提供了一个坚实的起点。"
+    },
+    {
+      "id": "arXiv:2508.14031",
+      "title": "Unintended Misalignment from Agentic Fine-Tuning: Risks and Mitigation",
+      "chinese_title": "智能体微调带来的意外失准：风险与缓解",
+      "authors": "Dongyoon Hahm, Taywon Min, Woogyeol Jin, Kimin Lee",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.14031&sa=D&source=editors&ust=1755699241963550&usg=AOvVaw0AexCVYpumFIFssUQ25_ZJ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.14031&sa=D&source=editors&ust=1755699241963628&usg=AOvVaw06b4JVIgWqarT9QidCpbIO",
+      "chinese_abstract": "除了简单的文本生成，大型语言模型（LLM）已经演变为能够规划并与外部工具交互以解决复杂任务的智能体系统。这一演变涉及在特定智能体任务上对LLM进行微调以增强其熟练度。然而，在微调过程中，安全问题常常被忽视。在这项工作中，我们展示了经过对齐的LLM在被微调以执行智能体任务时，可能会无意中变得失准，导致它们更有可能执行有害任务，并减少拒绝这些任务的倾向。为了应对这些安全挑战，我们提出了前缀注入防护（Prefix INjection Guard, PING），这是一种简单而有效的方法，通过在智能体响应前添加自动生成的自然语言前缀，引导它们拒绝有害请求，同时保持在良性任务上的性能。具体来说，我们引入一种迭代方法，交替进行（1）生成候选前缀和（2）选择那些能够同时优化任务性能和拒绝行为的前缀。实验结果表明，PING在不牺牲微调后LLM智能体效能的情况下，显著增强了其安全性。在网页导航和代码生成任务的各种基准测试中，PING的表现始终优于现有的提示方法。我们通过线性探针分析内部隐藏状态发现，前缀词元对于行为修改至关重要，这解释了性能的提升。警告：本文包含不道德或冒犯性的内容。"
+    },
+    {
+      "id": "arXiv:2508.13437",
+      "title": "Discrete Optimization of Min-Max Violation and its Applications Across Computational Sciences",
+      "chinese_title": "最小-最大违规离散优化及其在计算科学中的应用",
+      "authors": "Cheikh Ahmed, Mahdi Mostajabdaveh, Samin Aref, Zirui Zhou",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13437&sa=D&source=editors&ust=1755699241949887&usg=AOvVaw174nDxLzWr9vItMzsA2Ter",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13437&sa=D&source=editors&ust=1755699241950005&usg=AOvVaw3L0HGEtX9Kcj-HmZ9tIkIX",
+      "chinese_abstract": "我们引入离散最小-最大违规（DMMV）作为一个通用的优化问题，旨在寻找一个将离散值分配给变量的方案，以最小化最大的约束违规。这种无上下文的数学公式适用于广泛具有最坏情况性能要求的用例。在数学上定义DMMV问题后，我们探讨其性质以建立基础理解。为了处理具有实际意义的DMMV实例规模，我们开发了一种GPU加速的启发式算法，利用DMMV的数学特性来加速求解过程。我们通过解决三个优化问题作为用例，展示了我们启发式算法的广泛适用性：（1）语言模型的训练后量化，（2）离散断层扫描，以及（3）有限脉冲响应（FIR）滤波器设计。在没有异常值分离的量化中，我们的启发式算法比现有方法平均提高了14%。在离散断层扫描中，它在均匀噪声下将重建误差降低了16%，并在GPU上将计算速度加快了6倍。对于FIR滤波器设计，与使用商业整数优化求解器Gurobi相比，它几乎实现了50%的波纹减少。我们的比较结果指出了将DMMV作为无上下文优化问题研究的好处，以及我们提出的启发式算法在三个不同问题上提供的优势。我们的GPU加速启发式算法将开源，以进一步激励对DMMV及其其他应用的研究。代码可在https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.13300",
+      "title": "GaitCrafter: Diffusion Model for Biometric Preserving Gait Synthesis",
+      "chinese_title": "GaitCrafter：用于保留生物特征的步态合成的扩散模型",
+      "authors": "Sirshapan Mitra, Yogesh S. Rawat",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13300&sa=D&source=editors&ust=1755699242018927&usg=AOvVaw3xNgnYtoQ_QRCsON_lt9pW",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13300&sa=D&source=editors&ust=1755699242019065&usg=AOvVaw0fwiuFazbqJQuB3n8Q_XwB",
+      "chinese_abstract": "步态识别是一项有价值的生物识别任务，它能够根据个体的行走模式从远处识别人。然而，由于缺乏大规模的标记数据集，以及为每个个体收集多样化步态样本同时保护隐私的困难，这项任务仍然受到限制。为了应对这些挑战，我们提出了GaitCrafter，一个基于扩散的框架，用于在轮廓域中合成真实的步态序列。与依赖模拟环境或其他生成模型的先前工作不同，GaitCrafter从零开始训练一个视频扩散模型，且完全基于步态轮廓数据。我们的方法能够生成时间上一致且保留身份的步态序列。此外，生成过程是可控的——允许根据各种协变量进行条件设置，如服装、携带物品和视角。我们证明，将GaitCrafter生成的合成样本纳入步态识别流程可以提高性能，尤其是在具有挑战性的条件下。此外，我们引入了一种生成新身份的机制——即原始数据集中不存在的合成个体——通过插值身份嵌入来实现。这些新身份表现出独特、一致的步态模式，并且在训练模型的同时能够保护真实主体的隐私。总的来说，我们的工作在利用扩散模型进行高质量、可控且注重隐私的步态数据生成方面迈出了重要一步。"
+    },
+    {
+      "id": "arXiv:2508.13998",
+      "title": "Embodied-R1: Reinforced Embodied Reasoning for General Robotic Manipulation",
+      "chinese_title": "Embodied-R1：用于通用机器人操控的强化具身推理",
+      "authors": "Yifu Yuan, Haiqin Cui, Yaoting Huang, Yibin Chen, Fei Ni, Zibin Dong, Pengyi Li, Yan Zheng, Jianye Hao",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13998&sa=D&source=editors&ust=1755699241965927&usg=AOvVaw2Ogekb21qP0AQ30l8INkb8",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13998&sa=D&source=editors&ust=1755699241966021&usg=AOvVaw0J0qTgZKvup0PYbwcb5R5f",
+      "chinese_abstract": "具身人工智能的泛化能力受到“感知到行动鸿沟”的阻碍，这源于数据稀缺性和实体异构性。为了解决这个问题，我们开创性地将“指向”作为一种统一的、与实体无关的中间表示，定义了四个核心的具身指向能力，这些能力桥接了高层视觉语言理解与低层动作原语。我们介绍了Embodied-R1，一个专为具身推理和指向设计的3B参数视觉语言模型（VLM）。我们使用广泛的具身和通用视觉推理数据集作为来源，构建了一个大规模数据集Embodied-Points-200K，该数据集支持关键的具身指向能力。然后，我们使用一个两阶段的强化微调（RFT）课程，并采用专门的多任务奖励设计来训练Embodied-R1。Embodied-R1在11个具身空间和指向基准测试上取得了最先进的性能。至关重要的是，它展示了强大的零样本泛化能力，在SIMPLEREnv中实现了56.2%的成功率，并在8个真实世界的XArm任务中达到了87.5%的成功率，而无需任何任务特定的微调，这比强大的基线提高了62%。此外，该模型对各种视觉干扰表现出高度的鲁棒性。我们的工作表明，以指向为中心的表示，结合RFT训练范式，为弥合机器人技术中的感知-行动鸿沟提供了一条有效且可泛化的途径。"
+    },
+    {
+      "id": "arXiv:2508.13465",
+      "title": "LM Agents May Fail to Act on Their Own Risk Knowledge",
+      "chinese_title": "语言模型智能体可能无法根据其自身的风险知识采取行动",
+      "authors": "Yuzhi Tang, Tianxiao Li, Elizabeth Li, Chris J. Maddison, Honghua Dong, Yangjun Ruan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13465&sa=D&source=editors&ust=1755699241949156&usg=AOvVaw0X_lf9vBtkJPe2eOb2LJoC",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13465&sa=D&source=editors&ust=1755699241949277&usg=AOvVaw3AwQPx4NidbIrt_ZaD2fLa",
+      "chinese_abstract": "语言模型（LM）智能体在自动化现实世界任务方面展现出巨大潜力，但在安全关键场景中也带来了各种潜在的严重风险。在这项工作中，我们发现LM智能体的风险意识与安全执行能力之间存在显著差距：尽管它们通常会对诸如“执行`sudo rm -rf /*`是否危险？”之类的问题回答“是”，但在实例化轨迹中却很可能无法识别此类风险，甚至在作为智能体行动时直接执行这些危险操作。为了系统地研究这一点，我们开发了一个全面的评估框架，从三个渐进的维度考察智能体的安全性：1）它们对潜在风险的知识，2）它们在执行轨迹中识别相应风险的能力，以及3）它们避免执行这些危险行为的实际行为。我们的评估揭示了两个关键的性能差距，类似于在LM中观察到的生成器-验证器差距：虽然智能体表现出近乎完美的风险知识（通过率>98%），但它们在实际情景中识别风险时未能应用这些知识（性能下降>23%），并且常常仍然执行危险行为（通过率<26%）。值得注意的是，这种趋势在更强大的LM以及像DeepSeek-R1这样的专门推理模型中也持续存在，这表明仅仅扩展模型能力或推理计算并不能从根本上解决安全问题。相反，我们利用这些观察到的差距，开发了一个风险验证器，该验证器独立地评判智能体提出的行动，并配备一个抽象器，将具体的执行轨迹转换为抽象描述，使LM能够更有效地识别风险。我们的整体系统相较于普通提示的智能体，将危险行动的执行减少了55.3%。"
+    },
+    {
+      "id": "arXiv:2508.13755",
+      "title": "Depth-Breadth Synergy in RLVR: Unlocking LLM Reasoning Gains with Adaptive Exploration",
+      "chinese_title": "RLVR中的深度-广度协同：通过自适应探索解锁LLM推理增益",
+      "authors": "Zhicheng Yang, Zhijiang Guo, Yinya Huang, Yongxin Wang, Dongchun Xie, Yiwei Wang, Xiaodan Liang, Jing Tang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13755&sa=D&source=editors&ust=1755699241985863&usg=AOvVaw1lqJatsWJKL6oFDAqGHzDq",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13755&sa=D&source=editors&ust=1755699241985986&usg=AOvVaw2mDwuj72GUID_aZXocPlnu",
+      "chinese_abstract": "带可验证奖励的强化学习（RLVR）已成为解锁大型语言模型推理能力的强大范式，但其全部潜力受限于两个未被充分探索的维度：深度——模型可以采样的最难问题；广度——单次迭代中消耗的实例数量。我们剖析了流行的GRPO算法，并揭示了一个系统性偏差：累积优势不成比例地加权了中等准确率的样本，而低估了对于推动推理边界至关重要的低准确率实例。为了纠正对深度的忽视，我们引入了难度自适应展开采样（DARS），它通过有针对性的多阶段展开重新加权难题，从而增加难题的正向展开次数。经验上，简单地扩大展开规模只会加速收敛，甚至损害Pass@K。相比之下，我们的DARS在收敛时无需额外推理成本即可实现持续的Pass@K增益。正如我们自适应地扩展了探索的深度，我们现在要问，积极扩展训练数据的广度是否能进一步放大推理增益。为此，我们大幅扩展批量大小，并用多个周期的全批量更新取代PPO的小批量迭代。增加广度显著增强了Pass@1性能。大广度训练维持了高词元级熵，表明持续的探索和减少的梯度噪声。我们进一步提出了DARS-B，它用大广度增强了DARS，并展示了在Pass@K和Pass@1上的同步增益。结果证实，广度和跨深度的自适应探索在RLVR中作为正交维度运作，是释放RLVR推理能力的关键。"
+    },
+    {
+      "id": "arXiv:2508.13993",
+      "title": "Chunks as Arms: Multi-Armed Bandit-Guided Sampling for Long-Context LLM Preference Optimization",
+      "chinese_title": "区块为臂：基于多臂老虎机的长上下文LLM偏好优化采样",
+      "authors": "Shaohua Duan, Xinze Li, Zhenghao Liu, Xiaoyuan Yi, Yukun Yan, Shuo Wang, Yu Gu, Ge Yu, Maosong Sun",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13993&sa=D&source=editors&ust=1755699241966459&usg=AOvVaw0z9FV-ZmkvlyIYz5372LxB",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13993&sa=D&source=editors&ust=1755699241966562&usg=AOvVaw06rwPirAebKja1LA4SqAZl",
+      "chinese_abstract": "长上下文建模对于包括长上下文问答、摘要和复杂推理任务在内的广泛现实世界任务至关重要。最近的研究探索了使用合成数据对大型语言模型（LLM）进行微调，以增强其长上下文能力。然而，这类方法的有效性常常受到生成数据多样性低和事实不一致的限制。为了应对这些挑战，我们提出了LongMab-PO，一个新颖的框架，该框架利用多臂老虎机（MAB）的展开策略，从给定的长上下文中识别信息最丰富的区块，用于采样高质量和多样化的响应，并构建用于直接偏好优化（DPO）训练的偏好数据对。具体来说，我们将上下文区块视为MAB的臂，根据其预期奖励分数选择区块输入到LLM中以生成响应，并根据奖励反馈迭代更新这些分数。这种探索和利用过程使模型能够专注于最相关的上下文片段，从而生成并收集高质量和多样化的响应。最后，我们收集展开过程中生成的这些响应，并应用DPO方法进一步优化LLM。实验结果表明，LongMab-PO显著提高了偏好数据对的多样性和质量，在长上下文推理基准上达到了最先进的性能。所有代码和数据将在此https URL上发布。"
+    },
+    {
+      "id": "arXiv:2508.13387",
+      "title": "SPANER: Shared Prompt Aligner for Multimodal Semantic Representation",
+      "chinese_title": "SPANER：用于多模态语义表示的共享提示对齐器",
+      "authors": "Thye Shan Ng, Caren Soyeon Han, Eun-Jung Holden",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13387&sa=D&source=editors&ust=1755699241952824&usg=AOvVaw2xmSwso67Wt9eRaCsJbE2p",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13387&sa=D&source=editors&ust=1755699241952947&usg=AOvVaw2LyU6qTQspI0MzXSEZgtM6",
+      "chinese_abstract": "近期多模态参数高效微调（PEFT）的进展显著提升了在下游任务（如小样本检索）上的性能。然而，大多数现有方法侧重于特定任务的增益，而忽略了多模态嵌入空间的结构。因此，特定模态的表示常常保持孤立，限制了跨模态的泛化能力。在这项工作中，我们介绍了共享提示对齐器（SPANER），一个与模态无关的PEFT框架，旨在将来自不同模态的输入嵌入到一个统一的语义空间中。SPANER的核心是采用一种共享提示机制，该机制充当概念锚点，使语义相关的实例能够在空间上收敛，而无论其模态如何。这种共享提示设计具有内在的可扩展性，支持无缝集成其他模态（如音频），而无需改变核心架构。通过在视觉-语言和音频-视觉基准上的全面实验，SPANER展示了具有竞争力的小样本检索性能，同时在学习到的嵌入空间中保持了高的语义一致性。我们的结果强调了对齐嵌入结构的重要性，而不仅仅是调整适配器权重，对于可扩展的多模态学习至关重要。"
+    },
+    {
+      "id": "arXiv:2508.13485",
+      "title": "CORENet: Cross-Modal 4D Radar Denoising Network with LiDAR Supervision for Autonomous Driving",
+      "chinese_title": "CORENet：基于激光雷达监督的跨模态4D雷达去噪网络用于自动驾驶",
+      "authors": "Fuyang Liu, Jilin Mei, Fangyuan Mao, Chen Min, Yan Xing, Yu Hu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13485&sa=D&source=editors&ust=1755699242005055&usg=AOvVaw0j1c7PQqt2MTTTByNQCVmA",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13485&sa=D&source=editors&ust=1755699242005162&usg=AOvVaw32HkdARPtLlIhoqiZQSMKc",
+      "chinese_abstract": "基于4D雷达的目标检测因其在恶劣天气条件下的鲁棒性以及在多样化驾驶场景中提供丰富空间信息的能力而受到广泛关注。然而，4D雷达点云的稀疏和嘈杂特性给有效感知带来了巨大挑战。为了解决这一局限性，我们提出了CORENet，一个新颖的跨模态去噪框架，它利用激光雷达（LiDAR）的监督来识别噪声模式并从原始4D雷达数据中提取判别性特征。我们的解决方案设计为即插即用的架构，能够无缝集成到基于体素的检测框架中，而无需修改现有流程。值得注意的是，所提出的方法仅在训练期间利用LiDAR数据进行跨模态监督，而在推理过程中保持完全的纯雷达操作。在具有高噪声水平的挑战性Dual-Radar数据集上的广泛评估表明，我们的框架在增强检测鲁棒性方面是有效的。全面的实验验证了CORENet相比于现有的主流方法取得了更优越的性能。"
+    },
+    {
+      "id": "arXiv:2508.13676",
+      "title": "MHSNet:An MoE-based Hierarchical Semantic Representation Network for Accurate Duplicate Resume Detection with Large Language Model",
+      "chinese_title": "MHSNet：一种基于MoE和大型语言模型用于精确重复简历检测的分层语义表示网络",
+      "authors": "Yu Li, Zulong Chen, Wenjian Xu, Hong Wen, Yipeng Yu, Man Lung Yiu, Yuyu Yin",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13676&sa=D&source=editors&ust=1755699241943516&usg=AOvVaw2TTnTLqlbwIIH0YxPrt0L6",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13676&sa=D&source=editors&ust=1755699241943650&usg=AOvVaw03wFafEtfHLTsAOhEMSQg_",
+      "chinese_abstract": "为了维护公司的人才库，招聘人员需要不断地从第三方网站（如LinkedIn、Indeed）搜索简历。然而，获取的简历往往不完整且不准确。为了提高第三方简历的质量并丰富公司的人才库，必须在获取的简历与公司人才库中已有的简历之间进行重复检测。由于简历文本的语义复杂性、结构异构性和信息不完整性，这种重复检测具有挑战性。为此，我们提出了MHSNet，一个多层次身份验证框架，它使用对比学习对BGE-M3进行微调。通过微调后的模型，专家混合（MoE）为简历生成多层次的稀疏和密集表示，从而能够计算相应的多层次语义相似度。此外，MHSNet中采用了状态感知的专家混合（MoE）来处理各种不完整的简历。实验结果验证了MHSNet的有效性。"
+    },
+    {
+      "id": "arXiv:2508.12448",
+      "title": "Uncovering Emergent Physics Representations Learned In-Context by Large Language Models",
+      "chinese_title": "揭示大型语言模型在上下文中学习到的涌现物理表示",
+      "authors": "Yeongwoo Song, Jaeyong Bae, Dong-Kyum Kim, Hawoong Jeong",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.12448&sa=D&source=editors&ust=1755699242039126&usg=AOvVaw1QxPzHXCTpafk9IwaepY8_",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.12448&sa=D&source=editors&ust=1755699242039234&usg=AOvVaw0UDw-DmQObbM_txKqIPd3K",
+      "chinese_abstract": "大型语言模型（LLM）展现出令人印象深刻的在上下文学习（ICL）能力，使其能够仅通过文本提示解决广泛的任务。随着这些能力的提升，其适用领域的范围持续显著扩展。然而，在LLM内部，究竟是何种精确机制或内部结构使其能够在各种不同类别的任务中成功实现ICL，目前仍不清楚。基于物理的任务为探索这一挑战提供了一个有前景的试验平台。与基本算术或符号方程等合成序列不同，物理系统提供了基于基本原理的结构化动力学的实验可控、真实世界数据。这使得它们特别适合在现实而又易于处理的环境中研究LLM的涌现推理行为。在这里，我们从机理上研究了LLM的ICL能力，特别关注它们推理物理的能力。我们以物理系统中的动力学预测任务为代理，评估LLM是否可以在上下文中学习物理。我们首先表明，在上下文中进行动力学预测的性能随着输入上下文的增长而提高。为了揭示这种能力在LLM中是如何涌现的，我们使用稀疏自动编码器（SAE）分析了模型的残差流激活。我们的实验揭示，SAE捕捉到的特征与关键物理变量（如能量）相关。这些发现表明，在上下文学习过程中，有意义的物理概念被编码在LLM内部。总之，我们的工作提供了一个新颖的案例研究，拓宽了我们对LLM如何在上下文中学习的理解。"
+    },
+    {
+      "id": "arXiv:2508.13975",
+      "title": "ChronoLLM: Customizing Language Models for Physics-Based Simulation Code Generation",
+      "chinese_title": "ChronoLLM：为基于物理的仿真代码生成定制语言模型",
+      "authors": "Jingquan Wang, Andrew Negrut, Harry Zhang, Khailanii Slaton, Shu Wang, Radu Serban, Jinlong Wu, Dan Negrut",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13975&sa=D&source=editors&ust=1755699241936948&usg=AOvVaw08qL_f92z_MTLcIGoFjJ_t",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13975&sa=D&source=editors&ust=1755699241937074&usg=AOvVaw0D6gSUZMqKkDbdRIVh03HG",
+      "chinese_abstract": "本贡献关注以下问题：预训练的大型语言模型（LLM）能否被精炼和定制到成为虚拟助手，帮助专家有效使用仿真工具？在本案例研究中，所考虑的“仿真工具”是PyChrono，一个用于多体系统的开源多物理动力学引擎。我们提出了一个框架，用于精炼和定制开源和闭源的LLM，以利用人工智能的力量生成执行PyChrono虚拟实验的脚本。我们通过一个过程对几类LLM进行精炼和定制，该过程导致生成的PyChrono仿真脚本质量得到可量化的提升。这些脚本可以从简单的单摆仿真到涉及完整车辆在可变形地形上行驶的复杂虚拟实验。虽然生成的脚本很少是完美的，但它们通常为用户修改和改进提供了很好的起点。此外，LLM可以回答关于模拟器的具体API问题，或推荐建模方法。所讨论的框架是通用的，可以应用于降低其他应用领域相关仿真工具的入门门槛。"
+    },
+    {
+      "id": "arXiv:2508.13836",
+      "title": "One Shot vs. Iterative: Rethinking Pruning Strategies for Model Compression",
+      "chinese_title": "一次性与迭代式：重新思考模型压缩的剪枝策略",
+      "authors": "Mikołaj Janusz, Tomasz Wojnar, Yawei Li, Luca Benini, Kamil Adamczewski",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13836&sa=D&source=editors&ust=1755699241975973&usg=AOvVaw2cIML6Q8j9xy_rNnneyIBt",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13836&sa=D&source=editors&ust=1755699241976120&usg=AOvVaw2cTwzzCrkOTU-rJiTkZsMT",
+      "chinese_abstract": "剪枝是压缩神经网络以提高计算效率的核心技术。这个过程通常有两种方法：一次性剪枝，涉及单次训练和剪枝过程；以及迭代剪枝，即在多个周期内执行剪枝，以期获得更精细的网络优化。尽管迭代剪枝在历史上被更广泛地采用，但这种偏好通常是基于假设而非严格测试。我们的研究首次对这些方法进行了系统和全面的比较，提供了严格的定义，在结构化和非结构化设置下对两者进行基准测试，并应用了不同的剪枝标准和模式。我们发现每种方法都有其特定的优势：一次性剪枝在较低的剪枝率下更有效，而迭代剪枝在较高的剪枝率下表现更好。基于这些发现，我们提倡基于耐心的剪枝，并引入一种混合方法，在某些情况下可以超越传统方法，为实践者根据其目标和约束选择剪枝策略提供了宝贵的见解。源代码可在https URL获取。"
+    },
+    {
+      "id": "arXiv:2508.13231",
+      "title": "Accelerating LLM Inference via Dynamic KV Cache Placement in Heterogeneous Memory System",
+      "chinese_title": "通过在异构内存系统中动态放置KV缓存来加速LLM推理",
+      "authors": "Yunhua Fang, Rui Xie, Asad Ul Haq, Linsen Ma, Kaoutar El Maghraoui, Naigang Wang, Meng Wang, Liu Liu, Tong Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.13231&sa=D&source=editors&ust=1755699242024104&usg=AOvVaw2_Br5uygJ_w3r4aMyw_-aQ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.13231&sa=D&source=editors&ust=1755699242024208&usg=AOvVaw0zKhP0BZc0KS7a5WqiiXmp",
+      "chinese_abstract": "大型语言模型（LLM）的推理越来越受限于内存带宽，其中对键值（KV）缓存的频繁访问主导了数据移动。虽然注意力稀疏性减少了一些内存流量，但过去词元的相关性随时间变化，要求完整的KV缓存保持可访问状态，从而持续对带宽和容量构成压力。随着NVLink和LPDDR5X等互连技术的进步，现代AI硬件现已将高带宽内存（HBM）与高速的片外DRAM集成，使得异构内存系统成为一种实用的解决方案。本研究探讨了在此类系统中动态放置KV缓存，以在容量限制下最大化聚合带宽利用率。我们没有提出特定的调度策略，而是从数学上对放置问题进行了建模，并推导出了一个理论上限，揭示了运行时优化的巨大空间。据我们所知，这是首次对LLM推理中异构内存系统中的动态KV缓存调度进行形式化处理。"
+    }
+  ],
+  "clusters": {
+    "强化学习与大模型智能体": [
+      "arXiv:2508.14040",
+      "arXiv:2508.13587",
+      "arXiv:2508.13579",
+      "arXiv:2508.13167",
+      "arXiv:2508.13998",
+      "arXiv:2508.13755",
+      "arXiv:2508.13993"
+    ],
+    "多模态与生成模型": [
+      "arXiv:2508.13786",
+      "arXiv:2508.13537",
+      "arXiv:2508.13300",
+      "arXiv:2508.13387",
+      "arXiv:2508.13485"
+    ],
+    "大模型对齐与科学应用": [
+      "arXiv:2508.14031",
+      "arXiv:2508.13465",
+      "arXiv:2508.12448",
+      "arXiv:2508.13975",
+      "arXiv:2508.13676"
+    ],
+    "模型效率与硬件协同": [
+      "arXiv:2508.13437",
+      "arXiv:2508.13836",
+      "arXiv:2508.13231"
+    ]
+  }
+}
