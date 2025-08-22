@@ -1,0 +1,212 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.15769",
+      "title": "SceneGen: Single-Image 3D Scene Generation in One Feedforward Pass",
+      "chinese_title": "SceneGen: 通过单次前向传播实现单图像3D场景生成",
+      "authors": "Yanxu Meng, Haoning Wu, Ya Zhang, Weidi Xie",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15769&sa=D&source=editors&ust=1755864568446417&usg=AOvVaw22gTcPN7vq4DCviv2hZ0FS",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15769&sa=D&source=editors&ust=1755864568446525&usg=AOvVaw0gfVdkF04uboeM_fO707ek",
+      "chinese_abstract": "3D内容生成因其在虚拟现实/增强现实（VR/AR）和具身智能（embodied AI）领域的应用，最近引起了广泛的研究兴趣。在这项工作中，我们解决了在单个场景图像中合成多个3D资产的挑战性任务。具体来说，我们的贡献有四方面：（i）我们提出了SceneGen，一个新颖的框架，它以一个场景图像和相应的对象掩码作为输入，同时生成具有几何形状和纹理的多个3D资产。值得注意的是，SceneGen的运行无需优化或资产检索；（ii）我们引入了一个新颖的特征聚合模块，该模块在特征提取模块内整合了来自视觉和几何编码器的局部及全局场景信息。结合一个位置头（position head），这使得能够在单次前向传播中生成3D资产及其相对空间位置；（iii）我们展示了SceneGen可以直接扩展到多图像输入场景。尽管仅在单图像输入上进行训练，我们的架构设计使得在使用多图像输入时能提高生成性能；以及（iv）广泛的定量和定性评估证实了我们方法的效率和强大的生成能力。我们相信这种范式为高质量3D内容生成提供了一种新颖的解决方案，有可能推动其在下游任务中的实际应用。代码和模型将公开发布。"
+    },
+    {
+      "id": "arXiv:2508.15372",
+      "title": "Image-Conditioned 3D Gaussian Splat Quantization",
+      "chinese_title": "图像条件的3D高斯溅射量化",
+      "authors": "Xinshuang Liu, Runfa Blark Li, Keito Suzuki, Truong Nguyen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15372&sa=D&source=editors&ust=1755864568470740&usg=AOvVaw35RhAhuyefvv6kOjAf820D",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15372&sa=D&source=editors&ust=1755864568470839&usg=AOvVaw3P1gHPRLirBSIbnZUARp4w",
+      "chinese_abstract": "3D高斯溅射（3DGS）因其能够实现高质量的实时渲染而备受关注。尽管已经提出了用于在存储受限设备上部署的3DGS压缩方法，但有两个局限性阻碍了其存档使用：（1）它们仅将中等规模的场景压缩到兆字节（MB）范围，这对于大规模场景或广泛的场景集合仍然不切实际；（2）它们缺乏适应长期存档后场景变化的机制。为了解决这些局限性，我们提出了一种图像条件的高斯溅射量化器（ICGS-Quantizer），该量化器显著提高了压缩效率，并为存档后的场景变化提供了适应性。ICGS-Quantizer通过联合利用高斯之间和属性之间的相关性，以及在所有训练场景中使用共享码本（这些码本随后被固定并应用于前所未见的测试场景，消除了每个场景码本的开销）来提高量化效率。这种方法有效地将3DGS的存储需求降低到千字节（KB）范围，同时保持了视觉保真度。为了实现对存档后场景变化的适应性，ICGS-Quantizer以解码时捕获的图像为条件进行场景解码。编码、量化和解码过程是联合训练的，确保了作为场景量化表示的代码对于条件解码是有效的。我们在3D场景压缩和3D场景更新方面评估了ICGS-Quantizer。实验结果表明，ICGS-Quantizer在压缩效率和对场景变化的适应性方面始终优于最先进的方法。我们的代码、模型和数据将在GitHub上公开发布。"
+    },
+    {
+      "id": "arXiv:2508.15314",
+      "title": "VideoEraser: Concept Erasure in Text-to-Video Diffusion Models",
+      "chinese_title": "VideoEraser：文本到视频扩散模型中的概念擦除",
+      "authors": "Naen Xu, Jinghuai Zhang, Changjiang Li, Zhi Chen, Chunyi Zhou, Qingming Li, Tianyu Du, Shouling Ji",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15314&sa=D&source=editors&ust=1755864568472311&usg=AOvVaw0GnogTxLBIo72_RZRr0WOs",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15314&sa=D&source=editors&ust=1755864568472403&usg=AOvVaw1KtF-ONUhSUNmxV4LjA1e4",
+      "chinese_abstract": "文本到视频（T2V）扩散模型的快速发展引发了关于隐私、版权和安全的担忧，因为它们可能被滥用于生成有害或误导性内容。这些模型通常在大量数据集上训练，包括未经授权的个人身份、艺术创作和有害材料，这可能导致此类内容的失控生产和传播。为了解决这个问题，我们提出了VideoEraser，一个无需训练的框架，它能阻止T2V扩散模型生成包含不良概念的视频，即使在明确用这些概念提示时也是如此。VideoEraser被设计为一个即插即用的模块，可以通过一个两阶段过程无缝集成到代表性的T2V扩散模型中：选择性提示嵌入调整（SPEA）和对抗性弹性噪声引导（ARNG）。我们在四个任务上进行了广泛的评估，包括对象擦除、艺术风格擦除、名人擦除和不雅内容擦除。实验结果表明，VideoEraser在功效、完整性、保真度、鲁棒性和泛化性方面始终优于先前的方法。值得注意的是，VideoEraser在抑制T2V生成过程中的不良内容方面取得了最先进的性能，与基线相比，在四个任务中平均减少了46%。"
+    },
+    {
+      "id": "arXiv:2508.15442",
+      "title": "Mitigating Hallucinations in LM-Based TTS Models via Distribution Alignment Using GFlowNets",
+      "chinese_title": "使用GFlowNets通过分布对齐减轻基于语言模型的文本转语音模型中的幻觉",
+      "authors": "Chenlin Liu, Minghui Fang, Patrick Zhang, Wei Zhou, Jie Gao, Jiqing Han",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15442&sa=D&source=editors&ust=1755864568464853&usg=AOvVaw3Pc3R3FJItHqtjJNpcAmzz",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15442&sa=D&source=editors&ust=1755864568464988&usg=AOvVaw3LmgXFQXzWQ59PYYrXYk1e",
+      "chinese_abstract": "基于语言模型（LM）的文本转语音（TTS）系统经常生成偏离输入文本的幻觉语音。现有的缓解策略要么需要过多的训练资源，要么引入显著的推理延迟。在本文中，我们提出了用于基于LM的TTS的GFlowNet引导的分布对齐（GOAT），这是一个训练后框架，可以在不依赖大量资源或推理成本的情况下减轻幻觉。具体来说，我们首先进行不确定性分析，揭示了幻觉与模型不确定性之间的强正相关关系。基于此，我们将TTS生成重新表述为一个轨迹流优化问题，并引入一个增强的子轨迹平衡目标以及一个锐化的内部奖励作为目标分布。我们进一步集成了奖励温度衰减和学习率优化，以实现稳定性和性能的平衡。广泛的实验表明，GOAT在具有挑战性的测试用例上将字符错误率降低了50%以上，并将不确定性降低了高达58%，展示了其强大的泛化能力和有效性。"
+    },
+    {
+      "id": "arXiv:2508.15418",
+      "title": "LLaSO: A Foundational Framework for Reproducible Research in Large Language and Speech Model",
+      "chinese_title": "LLaSO：一个用于大型语言和语音模型可复现研究的基础框架",
+      "authors": "Yirong Sun, Yizhong Geng, Peidong Wei, Yanjun Chen, Jinghan Yang, Rongfei Chen, Wei Zhang, Xiaoyu Shen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15418&sa=D&source=editors&ust=1755864568466988&usg=AOvVaw1a48Z4WPNPzX6K-PXgGAJu",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15418&sa=D&source=editors&ust=1755864568467089&usg=AOvVaw0PedR_DRP8-Gw8hGFdXR3J",
+      "chinese_abstract": "大型语音语言模型（LSLMs）的发展因碎片化的架构和缺乏透明度而放缓，阻碍了研究的系统性比较和可复现性。与视觉-语言领域不同，LSLM领域普遍存在发布模型权重而不提供相应训练数据和配置的做法。为了解决这些关键差距，我们引入了LLaSO，这是第一个完全开放的、端到端的大规模语音语言建模框架。LLaSO为社区提供了三个基本资源：（1）LLaSO-Align，一个包含1200万实例的语音-文本对齐语料库；（2）LLaSO-Instruct，一个包含1350万实例的多任务指令微调数据集；以及（3）LLaSO-Eval，一个用于标准化评估的可复现基准。为了验证我们的框架，我们构建并发布了LLaSO-Base，一个38亿参数的参考模型，完全使用我们的公开数据进行训练。它取得了0.72的归一化分数，建立了一个强大的、可复现的基线，并超越了同类模型。我们的分析表明，虽然更广泛的训练覆盖能提升性能，但在未见过的任务上仍然存在显著的泛化差距，尤其是在纯音频场景中。通过发布完整的数据、基准和模型堆栈，LLaSO建立了一个基础性的开放标准，以统一研究工作并加速社区驱动的LSLM进展。"
+    },
+    {
+      "id": "arXiv:2508.15407",
+      "title": "When Audio and Text Disagree: Revealing Text Bias in Large Audio-Language Models",
+      "chinese_title": "当音频与文本不一致时：揭示大型音频-语言模型中的文本偏见",
+      "authors": "Cheng Wang, Gelei Deng, Xianglin Yang, Han Qiu, Tianwei Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15407&sa=D&source=editors&ust=1755864568468074&usg=AOvVaw1tfCQN8ZQfUm0UthLNVI-u",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15407&sa=D&source=editors&ust=1755864568468161&usg=AOvVaw24qHyU0JrQY5NGUY-mglha",
+      "chinese_abstract": "大型音频-语言模型（LALMs）被增强了音频感知能力，使其能够有效处理和理解结合了音频和文本的多模态输入。然而，它们在处理音频和文本模态之间信息冲突时的表现，在很大程度上仍未被检验。本文介绍了MCR-BENCH，这是第一个专门设计用于评估LALMs在面对不一致的音频-文本对时如何优先处理信息的综合性基准。通过对不同音频理解任务的广泛评估，我们揭示了一个令人担忧的现象：当模态之间存在不一致时，LALMs表现出对文本输入的显著偏见，经常忽略音频证据。这种倾向导致以音频为中心的任务性能大幅下降，并对现实世界的应用提出了重要的可靠性问题。我们进一步研究了文本偏见的影响因素，通过监督微调探索了缓解策略，并分析了模型置信度模式，发现在存在矛盾输入时，模型仍然持续表现出过度自信。这些发现强调了在训练期间需要改善模态平衡，并需要更复杂的融合机制来增强处理冲突多模态输入时的鲁棒性。"
+    },
+    {
+      "id": "arXiv:2508.15717",
+      "title": "StreamMem: Query-Agnostic KV Cache Memory for Streaming Video Understanding",
+      "chinese_title": "StreamMem：用于流式视频理解的查询无关KV缓存记忆",
+      "authors": "Yanlai Yang, Zhuokai Zhao, Satya Narayan Shukla, Aashu Singh, Shlok Kumar Mishra, Lizhu Zhang, Mengye Ren",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15717&sa=D&source=editors&ust=1755864568453156&usg=AOvVaw3jyBxxmx73ZZNe4mBIPiXa",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15717&sa=D&source=editors&ust=1755864568453317&usg=AOvVaw0_HhH5X8ScJ6tETaS_j8HO",
+      "chinese_abstract": "多模态大型语言模型（MLLMs）在视觉-语言推理方面取得了显著进展，但其高效处理长视频的能力仍然有限。尽管最近长上下文MLLMs有所发展，但为长视觉上下文存储和关注键值（KV）缓存会产生巨大的内存和计算开销。现有的视觉压缩方法要么需要在压缩前编码整个视觉上下文，要么需要预先获取问题，这对于长视频理解和多轮对话设置是不切实际的。在这项工作中，我们提出了StreamMem，一种用于流式视频理解的查询无关（query-agnostic）的KV缓存记忆机制。具体来说，StreamMem以流式方式编码新的视频帧，使用视觉标记和通用查询标记之间的注意力分数来压缩KV缓存，同时维持一个固定大小的KV记忆，以便在内存受限的长视频场景中实现高效的问答（QA）。在三个长视频理解和两个流式视频问答基准上的评估表明，StreamMem在查询无关的KV缓存压缩方面达到了最先进的性能，并且与查询感知（query-aware）的压缩方法具有竞争力。"
+    },
+    {
+      "id": "arXiv:2508.15588",
+      "title": "A Dynamical Systems Framework for Reinforcement Learning Safety and Robustness Verification",
+      "chinese_title": "一个用于强化学习安全性和鲁棒性验证的动力系统框架",
+      "authors": "Ahmed Nasir, Abdelhafid Zenati",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15588&sa=D&source=editors&ust=1755864568429989&usg=AOvVaw1Q3SHOUJFfp2lvYl3rzAco",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15588&sa=D&source=editors&ust=1755864568430141&usg=AOvVaw3cXCwYt-FVQZCHD8hpXN4X",
+      "chinese_abstract": "强化学习在安全关键系统中的应用因缺乏验证学习策略鲁棒性和安全性的形式化方法而受到限制。本文介绍了一个新颖的框架，通过将强化学习智能体及其环境的组合分析为一个离散时间自治动力系统来解决这一差距。通过利用动力系统理论的工具，特别是有限时间李雅普诺夫指数（FTLE），我们识别并可视化了作为控制系统行为的隐藏“骨架”的拉格朗日相干结构（LCS）。我们证明了排斥性LCS在不安全区域周围充当安全屏障，而吸引性LCS揭示了系统的收敛特性和潜在的故障模式，例如意外的“陷阱”状态。为了超越定性可视化，我们引入了一套定量指标：平均边界排斥（MBR）、聚合伪吸引子强度（ASAS）和时间感知伪吸引子强度（TASAS），以形式化地衡量策略的安全裕度和鲁棒性。我们进一步提供了一种推导局部稳定性保证的方法，并将分析扩展到处理模型不确定性。通过在离散和连续控制环境中的实验，我们表明该框架为策略行为提供了全面且可解释的评估，成功地识别了仅根据奖励看起来成功的策略中的关键缺陷。"
+    },
+    {
+      "id": "arXiv:2508.15693",
+      "title": "NiceWebRL: a Python library for human subject experiments with reinforcement learning environments",
+      "chinese_title": "NiceWebRL：一个用于在强化学习环境中进行人类被试实验的Python库",
+      "authors": "Wilka Carvalho, Vikram Goddla, Ishaan Sinha, Hoon Shin, Kunal Jha",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15693&sa=D&source=editors&ust=1755864568424822&usg=AOvVaw3zsOxKz0TLGmOTSaroAHtF",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15693&sa=D&source=editors&ust=1755864568424938&usg=AOvVaw2BJnLLi31hooT2StPxo7DL",
+      "chinese_abstract": "我们介绍了NiceWebRL，这是一个研究工具，使研究人员能够使用机器强化学习（RL）环境进行在线人类被试实验。NiceWebRL是一个Python库，允许将任何基于Jax的环境转换为在线界面，支持单智能体和多智能体环境。因此，NiceWebRL使AI研究人员能够将其算法与人类表现进行比较，认知科学家能够测试机器学习算法作为人类认知的理论，多智能体研究人员能够开发人机协作的算法。我们通过3个案例研究展示了NiceWebRL，证明了其在帮助开发类人AI、人兼容AI和人辅助AI方面的潜力。在第一个案例研究（类人AI）中，NiceWebRL促成了一种新颖的认知RL模型的开发。在这里，NiceWebRL方便了在网格世界和2D Minecraft领域Craftax中对该模型与人类参与者进行测试。在我们的第二个案例研究（人兼容AI）中，NiceWebRL促成了一种新颖的多智能体RL算法的开发，该算法可以在Overcooked领域中泛化到人类伙伴。最后，在我们的第三个案例研究（人辅助AI）中，我们展示了NiceWebRL如何让研究人员研究LLM如何在具有数百万分层任务的环境XLand-Minigrid中辅助人类完成复杂任务。"
+    },
+    {
+      "id": "arXiv:2508.15327",
+      "title": "Search-Based Credit Assignment for Offline Preference-Based Reinforcement Learning",
+      "chinese_title": "用于离线偏好强化学习的基于搜索的信用分配",
+      "authors": "Xiancheng Gao, Yufeng Shi, Wengang Zhou, Houqiang Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15327&sa=D&source=editors&ust=1755864568435086&usg=AOvVaw1NOy7eaemfcl9JR-Sf-yct",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15327&sa=D&source=editors&ust=1755864568435195&usg=AOvVaw16bTnRXvZumPP8smhJkGWm",
+      "chinese_abstract": "离线强化学习指的是从固定数据集中学习策略，而无需与环境进行额外交互。然而，它通常依赖于明确定义的奖励函数，而这些函数的设计既困难又昂贵。人类反馈是一种有吸引力的替代方案，但其两种常见形式——专家演示和偏好——各有局限性。演示提供了逐步的监督，但收集成本高昂，且通常只反映有限的专家行为模式。相比之下，偏好更容易收集，但不清楚行为的哪些部分对轨迹段的贡献最大，导致信用分配问题悬而未决。在本文中，我们引入了一种基于搜索的偏好加权（SPW）方案来统一这两种反馈来源。对于偏好标记轨迹中的每个转换，SPW从专家演示中搜索最相似的状态-动作对，并根据它们的相似性得分直接推导出逐步重要性权重。然后，这些权重被用来指导标准的偏好学习，从而实现传统方法难以达到的更准确的信用分配。我们证明了SPW能够有效地从偏好和演示中进行联合学习，在具有挑战性的机器人操作任务上，其性能优于先前利用这两种反馈类型的方法。"
+    },
+    {
+      "id": "arXiv:2508.15548",
+      "title": "DeepThink3D: Enhancing Large Language Models with Programmatic Reasoning in Complex 3D Situated Reasoning Tasks",
+      "chinese_title": "DeepThink3D：通过程序化推理增强大型语言模型在复杂3D情景推理任务中的能力",
+      "authors": "Jiayi Song, Rui Wan, Lipeng Ma, Weidong Yang, Qingyuan Zhou, Yixuan Li, Ben Fei",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15548&sa=D&source=editors&ust=1755864568430725&usg=AOvVaw1SoUjHQHdXaLK6Rv588HfO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15548&sa=D&source=editors&ust=1755864568430828&usg=AOvVaw15-0TZy95wuYEMan0uAYHv",
+      "chinese_abstract": "这项工作旨在增强大型语言模型（LLM）在3D场景中执行复杂推理的能力。最近的研究通过大型语言模型调用工具来解决3D情景推理任务。大型语言模型通过API调用工具，并通过思维链整合生成的程序，根据程序结果解决问题。然而，由于数据集中问题的简单性，生成的程序推理链相对较短。为了解决这个主要挑战，在本文中，我们引入了DeepThink3D来增强LLM在复杂3D情景推理任务中的工具使用能力。我们的工作在SQA3D基准上提出了一种组合和迭代的进化方法来生成更复杂的问题。在此基础上，我们对大型语言模型进行微调，使其更熟练地使用3D工具。通过采用直接偏好优化（DPO），我们直接优化模型生成的工具链策略，从而提高其在复杂任务中的准确性。"
+    },
+    {
+      "id": "arXiv:2508.15507",
+      "title": "Think in Blocks: Adaptive Reasoning from Direct Response to Deep Reasoning",
+      "chinese_title": "模块化思考：从直接响应到深度推理的自适应推理",
+      "authors": "Yekun Zhu, Guang Chen, Chengjun Mao",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15507&sa=D&source=editors&ust=1755864568431863&usg=AOvVaw1Ik3dNP3a8vprYwZhcNOKg",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15507&sa=D&source=editors&ust=1755864568431953&usg=AOvVaw2eVwwrS1IGKDZQCgJHy3XF",
+      "chinese_abstract": "具有思维链（chains-of-thought）的大型语言模型（LLMs）在越来越多的任务上表现出色，尤其是在涉及复杂逻辑推理的任务中。然而，过长的推理链可能导致过度思考，造成计算浪费和响应变慢。这就引出了一个问题：LLMs能否根据任务的复杂性动态调整其推理过程的长度？为了解决这个问题，我们提出了“模块化思考”（Think in Blocks）框架，通过将推理过程划分为可调数量的模块，实现从零推理到深度推理的自适应推理。我们的主要贡献是：（1）建立了一个明确的块结构范式，其中模型首先预测一个整数推理预算——即模块数量——然后相应地划分其推理过程；（2）通过一个三阶段的流程——监督微调、奖励引导的直接偏好优化和强化学习——训练一个自适应模型，使其推理深度能根据问题难度进行调整；（3）利用明确的模块计数在推理时动态控制推理深度，允许在部署期间灵活调整思维链的长度。"
+    },
+    {
+      "id": "arXiv:2508.15370",
+      "title": "Unveiling Trust in Multimodal Large Language Models: Evaluation, Analysis, and Mitigation",
+      "chinese_title": "揭示多模态大语言模型中的信任问题：评估、分析与缓解",
+      "authors": "Yichi Zhang, Yao Huang, Yifan Wang, Yitong Sun, Chang Liu, Zhe Zhao, Zhengwei Fang, Huanran Chen, Xiao Yang, Xingxing Wei, Hang Su, Yinpeng Dong, Jun Zhu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15370&sa=D&source=editors&ust=1755864568471441&usg=AOvVaw1iAY8X4Arkca1Cvuk74EsM",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15370&sa=D&source=editors&ust=1755864568471567&usg=AOvVaw1_C_bFkMGv-qc7a2rXroNN",
+      "chinese_abstract": "尽管多模态大型语言模型（MLLMs）的能力取得了显著进展，但其可信度仍然是一个备受关注的问题。现有的评估和缓解方法通常只关注狭窄的方面，并忽视了多模态性引入的风险。为了应对这些挑战，我们提出了MultiTrust-X，一个用于评估、分析和缓解MLLMs可信度问题的综合性基准。我们定义了一个三维框架，包括五个可信度方面：真实性、鲁棒性、安全性、公平性和隐私性；两种新颖的风险类型，涵盖多模态风险和跨模态影响；以及从数据、模型架构、训练和推理算法等角度出发的各种缓解策略。基于该分类法，MultiTrust-X包括32个任务和28个精心策划的数据集，能够对30多个开源和专有MLLMs进行全面评估，并使用8种代表性缓解方法进行深入分析。我们的广泛实验揭示了当前模型中的显著漏洞，包括可信度与通用能力之间的差距，以及多模态训练和推理对基础LLM中潜在风险的放大。此外，我们的受控分析揭示了现有缓解策略的关键局限性，虽然某些方法在特定方面有所改进，但很少有方法能有效解决整体可信度问题，并且许多方法引入了意想不到的权衡，损害了模型的实用性。这些发现也为未来的改进提供了实用的见解，例如利用推理来更好地平衡安全性和性能。基于这些见解，我们引入了一种推理增强的安全对齐（RESA）方法，该方法使模型具备思维链推理能力以发现潜在风险，并取得了最先进的结果。"
+    },
+    {
+      "id": "arXiv:2508.15432",
+      "title": "GraSP: A Unified Graph-Based Framework for Scalable Generation, Quality Tagging, and Management of Synthetic Data for SFT and DPO",
+      "chinese_title": "GraSP：一个统一的基于图的框架，用于SFT和DPO合成数据的可扩展生成、质量标注和管理",
+      "authors": "Bidyapati Pradhan, Surajit Dasgupta, Amit Kumar Saha, Omkar Anustoop, Sriram Puttagunta, Vipul Mittal, Gopal Sarda",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15432&sa=D&source=editors&ust=1755864568433016&usg=AOvVaw20UiBrApGVlV6PLvX113LR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15432&sa=D&source=editors&ust=1755864568433105&usg=AOvVaw1VNP0-hlH6feFoipyMKyUb",
+      "chinese_abstract": "大型语言模型（LLMs）的发展严重依赖于高质量数据集的可用性，这些数据集用于监督微调（SFT）、直接偏好优化（DPO）等对齐任务。在这项工作中，我们提出了一个全面的合成数据生成框架，该框架有助于为这些训练范式量身定制可扩展、可配置和高保真度的合成数据生成。我们的方法采用了一个模块化和基于配置的流水线，能够以最少的人工干预模拟复杂的对话流。该框架使用双阶段质量标注机制，结合了启发式规则和基于LLM的评估，自动从OASST格式的对话中筛选和评分数据，确保高质量对话样本的策划。生成的数据集在支持SFT和DPO用例的灵活模式下进行结构化，从而能够无缝集成到各种训练工作流中。总而言之，这些创新为大规模生成和管理合成对话数据提供了一个强大的解决方案，显著减少了LLM训练流程中数据准备的开销。"
+    },
+    {
+      "id": "arXiv:2508.14904",
+      "title": "Efficient Switchable Safety Control in LLMs via Magic-Token-Guided Co-Training",
+      "chinese_title": "通过魔法标记引导的协同训练实现LLM中高效可切换的安全控制",
+      "authors": "Jianfeng Si, Lin Sun, Zhewen Tan, Xiangzheng Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.14904&sa=D&source=editors&ust=1755864568501167&usg=AOvVaw1ri1RxVH2paECLoC4cw0pP",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.14904&sa=D&source=editors&ust=1755864568501401&usg=AOvVaw1YBlM6N-I2mLHAAJJvJNiQ",
+      "chinese_abstract": "当前大型语言模型（LLM）的内容安全方法，如监督微调（SFT）和基于人类反馈的强化学习（RLHF），通常依赖于多阶段训练流程，并且缺乏细粒度的、部署后的可控性。为了解决这些限制，我们提出了一个统一的协同训练框架，该框架在单个SFT阶段高效地集成了多种安全行为：积极的（合法的/亲社会的）、消极的（未过滤的/有风险的）和拒绝的（拒绝导向的/保守的）。值得注意的是，每种行为都通过一个简单的系统级指令或“魔法标记”动态激活，从而在推理时实现隐蔽且高效的行为切换。这种灵活性支持多样化的部署场景，例如，积极模式用于安全的用户交互，消极模式用于内部红队测试，拒绝模式用于由上游审核信号触发的上下文感知拒绝。这种协同训练策略在输出空间中诱导出一个独特的安全对齐边界，其特征是对应于每种安全模式的响应分布被清晰地分离开。这个边界的存在为模型的安全鲁棒性提供了经验证据，并实现了前所未有的细粒度控制。实验表明，我们的方法在安全对齐质量上与SFT+DPO相媲美，我们的8B模型在安全性能上显著超过了DeepSeek-R1（671B），同时显著降低了训练复杂度和部署成本。这项工作为LLM内容安全提供了一个可扩展、高效且高度可控的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.15068",
+      "title": "S3LoRA: Safe Spectral Sharpness-Guided Pruning in Adaptation of Agent Planner",
+      "chinese_title": "S3LoRA：智能体规划器自适应中的安全谱锐度引导剪枝",
+      "authors": "Shuang Ao, Gopal Rumchurn",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15068&sa=D&source=editors&ust=1755864568441971&usg=AOvVaw1rxMKOgWmh6gdwwaBMobFh",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15068&sa=D&source=editors&ust=1755864568442102&usg=AOvVaw3_ZffWXXRaQxd9ILPGO1tg",
+      "chinese_abstract": "使用参数高效微调（PEFT）技术（如LoRA）对大型语言模型（LLM）进行自适应，已经为基于LLM的智能体带来了强大的能力。然而，这些自适应可能会无意中损害安全对齐，导致不安全或不稳定的行为，特别是在智能体规划任务中。现有的安全感知自适应方法通常需要访问基础模型和指令微调模型的检查点，而这些在实践中常常不可用，从而限制了它们的应用性。我们提出了S3LoRA（安全谱锐度引导剪枝LoRA），这是一个轻量级、无数据、模型无关的框架，通过仅检查微调后的权重更新来减轻LoRA自适应模型中的安全风险。我们首先引入了幅度感知球归一化SVD（MAS-SVD），它能稳健地分析LoRA更新的结构特性，同时保留全局幅度信息。然后，我们设计了谱锐度指数（SSI），这是一个锐度感知的度量标准，用于检测具有高度集中且可能不安全的更新层。这些层在事后被剪枝，以在不牺牲任务性能的情况下降低风险。跨智能体规划和语言生成任务的广泛实验和消融研究表明，S3LoRA在保持或提高效用指标的同时，持续改善安全指标，并显著降低推理成本。这些结果确立了S3LoRA作为在真实世界、资源受限和安全关键环境中安全部署基于LLM的智能体的实用且可扩展的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.15008",
+      "title": "Quantized Neural Networks for Microcontrollers: A Comprehensive Review of Methods, Platforms, and Applications",
+      "chinese_title": "用于微控制器的量化神经网络：方法、平台与应用的综合评述",
+      "authors": "Hamza A. Abushahla, Dara Varam, Ariel J. N. Panopio, Mohamed I. AlHajri",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15008&sa=D&source=editors&ust=1755864568490025&usg=AOvVaw3RTcIT4wnI0OgxSC4Mh48U",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15008&sa=D&source=editors&ust=1755864568490115&usg=AOvVaw2484AJSKGoaZwVuxVE-MOd",
+      "chinese_abstract": "在微控制器等资源受限的设备上部署量化神经网络（QNNs）在平衡模型性能、计算复杂度和内存限制方面带来了重大挑战。微型机器学习（TinyML）通过整合机器学习算法、硬件加速和软件优化的进步来解决这些问题，以便在嵌入式系统上高效运行深度神经网络。本综述以硬件为中心介绍了量化技术，系统地回顾了用于加速嵌入式应用深度学习模型的关键量化技术。特别地，我们进一步强调了模型性能和硬件能力之间的关键权衡。该综述还评估了专为支持在微控制器上执行QNN而设计的现有软件框架和硬件平台。此外，我们分析了当前面临的挑战，并概述了在快速发展的QNN部署领域中有前景的未来方向。"
+    },
+    {
+      "id": "arXiv:2508.15212",
+      "title": "SparK: Query-Aware Unstructured Sparsity with Recoverable KV Cache Channel Pruning",
+      "chinese_title": "SparK：具有可恢复KV缓存通道剪枝的查询感知非结构化稀疏性",
+      "authors": "Huanxuan Liao, Yixing Xu, Shizhu He, Guanchen Li, Xuanwu Yin, Dong Li, Emad Barsoum, Jun Zhao, Kang Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15212&sa=D&source=editors&ust=1755864568478670&usg=AOvVaw3m3PNm4OceAAYJWForaQ-F",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15212&sa=D&source=editors&ust=1755864568478765&usg=AOvVaw3okyP2-rKLQKZAUZFI9Zku",
+      "chinese_abstract": "大型语言模型（LLM）中的长上下文推理日益受到KV缓存瓶颈的限制：内存使用随序列长度线性增长，而注意力计算则呈二次方扩展。现有方法通过在时间轴上压缩KV缓存（如令牌驱逐或合并策略）来解决此问题，以减少内存和计算开销。然而，这些方法通常忽略了特征维度（即通道轴）上重要性的细粒度变化，从而限制了它们有效平衡效率和模型准确性的能力。实际上，我们观察到通道显著性在不同查询和位置之间变化剧烈：某些特征通道对于给定查询几乎不携带信息，而其他通道则相关性激增。为了解决这一疏忽，我们提出了SPARK，一种无需训练的即插即用方法，它通过在通道级别上对KV进行剪枝来应用非结构化稀疏性，同时在注意力分数计算期间动态恢复被剪枝的条目。值得注意的是，我们的方法与现有的KV压缩和量化技术是正交的，因此可以与它们集成以实现进一步加速。通过减少通道级别的冗余，SPARK能够在相同的内存预算内处理更长的序列。对于相同长度的序列，SPARK不仅保持或提高了模型准确性，而且与基于驱逐的方法相比，将KV缓存存储减少了30%以上。此外，即使在80%的激进剪枝率下，SPARK的性能下降也比基线驱逐方法少于5%，展示了其鲁棒性和有效性。"
+    },
+    {
+      "id": "arXiv:2508.15099",
+      "title": "Hydra: A 1.6B-Parameter State-Space Language Model with Sparse Attention, Mixture-of-Experts, and Memory",
+      "chinese_title": "Hydra：一个结合稀疏注意力、专家混合和记忆机制的16亿参数状态空间语言模型",
+      "authors": "Siddharth Chaudhary, Bennett Browning",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15099&sa=D&source=editors&ust=1755864568483114&usg=AOvVaw1x5a6Ppqo58RaRNZyu__I6",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15099&sa=D&source=editors&ust=1755864568483213&usg=AOvVaw0uCjZaeJvAGoGOKr3RH1_G",
+      "chinese_abstract": "我们提出Hydra作为一个混合长上下文语言模型的架构方案，该模型在一个约16亿参数的设计范围内结合了条件计算、长上下文记忆机制和稀疏专家混合（Mixture-of-Experts）。Hydra集成了一个Mamba风格的结构化状态空间模型（SSM）骨干，并加入了间歇性的稀疏全局注意力、块级（chunk-level）的MoE前馈路由以及双重记忆（工作区记忆和事实性PKM记忆）。我们对组件接口进行了形式化定义，给出了透明的参数和复杂性核算，并概述了一个旨在稳定激活各部分的分阶段课程。我们为该规范附上了说明性的玩具规模原型测量（在合成数据上为数千万参数），其唯一目的是展示实现的可行性和定性的扩展行为（例如，长上下文吞吐量的交叉点和可控的专家路由），而不是声称具有竞争性的全尺寸性能。我们明确地描述了假设和开放风险（训练复杂性、内存利用率、专业化动态），并将Hydra定位为一个旨在激励实证后续研究的蓝图，而非一个成品系统。通过结合SSM的效率、选择性稀疏注意力、MoE的容量和可学习的记忆，Hydra为模块化、输入自适应的长上下文语言模型描绘了一条路径；在目标规模上验证最终任务的增益仍是未来的工作。"
+    },
+    {
+      "id": "arXiv:2508.15036",
+      "title": "MoEcho: Exploiting Side-Channel Attacks to Compromise User Privacy in Mixture-of-Experts LLMs",
+      "chinese_title": "MoEcho：利用侧信道攻击损害专家混合LLM中的用户隐私",
+      "authors": "Ruyi Ding, Tianhong Xu, Xinyi Shen, Aidong Adam Ding, Yunsi Fei",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.15036&sa=D&source=editors&ust=1755864568487088&usg=AOvVaw0-QyDkhwa4TqueWnWXN_Ga",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.15036&sa=D&source=editors&ust=1755864568487230&usg=AOvVaw2A3DgECFk7OXRqdY8gUg30",
+      "chinese_abstract": "Transformer架构已成为现代人工智能的基石，推动了自然语言处理、计算机视觉和多模态学习应用的显著进步。随着这些模型为追求性能而爆炸性地扩展，实现效率仍然是一个关键挑战。专家混合（MoE）架构通过选择性地激活专门的子网络（专家），在模型准确性和计算成本之间提供了一种独特的平衡。然而，MoE架构中的自适应路由（即输入令牌根据其语义含义被动态地引导到专门的专家）无意中为隐私泄露开辟了一个新的攻击面。这些依赖于输入的激活模式在硬件执行中留下了独特的时间和空间痕迹，对手可以利用这些痕迹来推断敏感的用户数据。在这项工作中，我们提出了MoEcho，发现了一个基于侧信道分析的攻击面，该攻击面会损害基于MoE系统的用户隐私。具体来说，在MoEcho中，我们介绍了四种新颖的架构侧信道，分别位于不同的计算平台：CPU上的缓存占用信道（Cache Occupancy Channels）和Pageout+Reload，以及GPU上的性能计数器（Performance Counter）和TLB Evict+Reload。利用这些漏洞，我们提出了四种攻击，能有效侵犯基于MoE架构的大型语言模型（LLM）和视觉语言模型（VLM）中的用户隐私：提示推断攻击、响应重构攻击、视觉推断攻击和视觉重构攻击。MoEcho是首次对现代Transformer中常见的流行MoE结构进行运行时架构级别的安全分析，突显了严重的安全和隐私威胁，并呼吁在利用基于MoE的模型开发高效的大规模AI服务时，采取有效及时的保障措施。"
+    }
+  ],
+  "clusters": {
+    "多模态生成与3D视觉": [
+      "arXiv:2508.15769",
+      "arXiv:2508.15372",
+      "arXiv:2508.15314",
+      "arXiv:2508.15442",
+      "arXiv:2508.15418",
+      "arXiv:2508.15407",
+      "arXiv:2508.15717"
+    ],
+    "LLM智能体、推理与对齐": [
+      "arXiv:2508.15588",
+      "arXiv:2508.15693",
+      "arXiv:2508.15327",
+      "arXiv:2508.15548",
+      "arXiv:2508.15507",
+      "arXiv:2508.15370",
+      "arXiv:2508.15432",
+      "arXiv:2508.14904"
+    ],
+    "模型架构与高效推理": [
+      "arXiv:2508.15068",
+      "arXiv:2508.15008",
+      "arXiv:2508.15212",
+      "arXiv:2508.15099",
+      "arXiv:2508.15036"
+    ]
+  }
+}
