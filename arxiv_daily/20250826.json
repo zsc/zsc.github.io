@@ -1,0 +1,216 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.17811",
+      "title": "MeshSplat: Generalizable Sparse-View Surface Reconstruction via Gaussian Splatting",
+      "chinese_title": "MeshSplat: 通过高斯溅射实现可泛化的稀疏视图表面重建",
+      "authors": "Hanzhi Chang, Ruijie Zhu, Wenjie Chang, Mulin Yu, Yanzhe Liang, Jiahao Lu, Zhuoyuan Li, Tianzhu Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17811&sa=D&source=editors&ust=1756219275053872&usg=AOvVaw0un9BLtJGyT3o6zDvlSf_g",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17811&sa=D&source=editors&ust=1756219275053987&usg=AOvVaw2S29KeNq1EUYJkMcYZg64C",
+      "chinese_abstract": "表面重建在计算机视觉和图形学中得到了广泛研究。然而，当输入视图极其稀疏时，现有的表面重建工作难以恢复准确的场景几何。为了解决这个问题，我们提出了 MeshSplat，一个通过高斯溅射（Gaussian Splatting）实现的可泛化的稀疏视图表面重建框架。我们的核心思想是利用二维高斯溅射（2DGS）作为桥梁，将新视角合成与学习到的几何先验联系起来，然后传递这些先验以实现表面重建。具体来说，我们集成了一个前馈网络来预测每个视图的像素对齐的2DGS，这使得网络能够合成新视角的图像，从而无需直接的三维真实标签监督。为了提高2DGS位置和方向预测的准确性，我们提出了一种加权倒角距离损失（Weighted Chamfer Distance Loss）来正则化深度图，尤其是在输入视图的重叠区域，并设计了一个法线预测网络，将2DGS的方向与单目法线估计器预测的法线向量对齐。大量的实验验证了我们所提出改进的有效性，表明我们的方法在可泛化的稀疏视图网格重建任务中达到了最先进的性能。项目主页位于此 https URL。"
+    },
+    {
+      "id": "arXiv:2508.17600",
+      "title": "GWM: Towards Scalable Gaussian World Models for Robotic Manipulation",
+      "chinese_title": "GWM: 面向机器人操控的可扩展高斯世界模型",
+      "authors": "Guanxing Lu, Baoxiong Jia, Puhao Li, Yixin Chen, Ziwei Wang, Yansong Tang, Siyuan Huang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17600&sa=D&source=editors&ust=1756219275068888&usg=AOvVaw3lZl_PKBHxLkfkgN4YMlFE",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17600&sa=D&source=editors&ust=1756219275069011&usg=AOvVaw2r8SQrBKc1DtUZd1sFemOL",
+      "chinese_abstract": "在学习到的世界模型中训练机器人策略因真实世界交互的低效率而成为一种趋势。已有的基于图像的世界模型和策略取得了初步成功，但缺乏稳健的几何信息，这需要对三维世界有一致的空间和物理理解，即使是在互联网规模的视频源上进行预训练。为此，我们提出了一种名为高斯世界模型（GWM）的新型世界模型分支，用于机器人操控。它通过推断高斯基元在机器人动作影响下的传播来重建未来状态。其核心是潜在扩散变换器（DiT）与三维变分自编码器的结合，从而能够通过高斯溅射实现细粒度的场景级未来状态重建。GWM不仅可以通过自监督的未来预测训练增强模仿学习智能体的视觉表示，还可以作为支持基于模型的强化学习的神经模拟器。模拟和真实世界的实验都表明，GWM可以精确预测在不同机器人动作条件下的未来场景，并可进一步用于训练性能显著优于现有最先进方法的策略，展示了三维世界模型的初步数据扩展潜力。"
+    },
+    {
+      "id": "arXiv:2508.17062",
+      "title": "SSG-Dit: A Spatial Signal Guided Framework for Controllable Video Generation",
+      "chinese_title": "SSG-Dit: 一种用于可控视频生成的空间信号引导框架",
+      "authors": "Peng Hu, Yu Gu, Liang Luo, Fuji Ren",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17062&sa=D&source=editors&ust=1756219275119618&usg=AOvVaw1rDdkMh1FwF6T06PSK-dLr",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17062&sa=D&source=editors&ust=1756219275119752&usg=AOvVaw0bzMiVENb9pZQ-e4-DCy8K",
+      "chinese_abstract": "可控视频生成旨在合成与用户提供的条件（如文本描述和初始图像）精确对齐的视频内容。然而，该领域存在一个重大挑战：现有模型常常难以维持强语义一致性，生成的视频经常偏离提示中指定的细微细节。为解决此问题，我们提出了SSG-DiT（空间信号引导扩散变换器），一个新颖高效的高保真可控视频生成框架。我们的方法引入了一个解耦的两阶段过程。第一阶段，空间信号提示（Spatial Signal Prompting），通过利用预训练多模态模型的丰富内部表示来生成一个具有空间意识的视觉提示。这个提示与原始文本结合，形成一个联合条件，然后通过我们轻量级且参数高效的SSG-Adapter注入到一个冻结的视频DiT骨干网络中。这种独特的双分支注意力机制设计，使得模型能够同时利用其强大的生成先验，并被外部空间信号精确引导。大量实验表明，SSG-DiT达到了最先进的性能，在VBench基准测试的多个关键指标上超越了现有模型，特别是在空间关系控制和整体一致性方面。"
+    },
+    {
+      "id": "arXiv:2508.17718",
+      "title": "Instant Preference Alignment for Text-to-Image Diffusion Models",
+      "chinese_title": "文本到图像扩散模型的即时偏好对齐",
+      "authors": "Yang Li, Songlin Yang, Xiaoxuan Han, Wei Wang, Jing Dong, Yueming Lyu, Ziyu Xue",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17718&sa=D&source=editors&ust=1756219275059228&usg=AOvVaw2VgQcZgmDV-XZORffn70qL",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17718&sa=D&source=editors&ust=1756219275059313&usg=AOvVaw0kPENKyRlixDz16YHS0Ugp",
+      "chinese_abstract": "文本到图像（T2I）生成极大地增强了创意表达，然而，以实时且无需训练的方式实现偏好对齐的生成仍然具有挑战性。以往的方法通常依赖于静态、预先收集的偏好或微调，这限制了对不断演变和细微的用户意图的适应性。在本文中，我们强调了即时偏好对齐T2I生成的必要性，并提出了一个基于多模态大语言模型（MLLM）先验的免训练框架。我们的框架将任务解耦为两个部分：偏好理解和偏好引导生成。对于偏好理解，我们利用MLLM从参考图像中自动提取全局偏好信号，并使用结构化指令设计来丰富给定的提示。与现有方法相比，我们的方法支持更广泛、更细粒度的用户偏好覆盖。对于偏好引导生成，我们集成了基于全局关键词的控制和局部区域感知的交叉注意力调制，以在无需额外训练的情况下引导扩散模型，从而实现全局属性和局部元素的精确对齐。整个框架支持多轮交互式优化，促进实时和上下文感知的图像生成。在Viper数据集和我们收集的基准上进行的大量实验表明，我们的方法在定量指标和人类评估中均优于先前的方法，并为基于对话的生成和MLLM-扩散集成开辟了新的可能性。"
+    },
+    {
+      "id": "arXiv:2508.18268",
+      "title": "SafeBimanual: Diffusion-based Trajectory Optimization for Safe Bimanual Manipulation",
+      "chinese_title": "SafeBimanual：基于扩散的轨迹优化实现安全的双手操作",
+      "authors": "Haoyuan Deng, Wenkai Guo, Qianzhun Wang, Zhenyu Wu, Ziwei Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.18268&sa=D&source=editors&ust=1756219275017538&usg=AOvVaw3wB6hDxvv1ihA15L5mA0Kf",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.18268&sa=D&source=editors&ust=1756219275017694&usg=AOvVaw0fmYTUYZH_1VEZNHM8xGkK",
+      "chinese_abstract": "双手操作已广泛应用于家庭服务和制造业中，它能够完成需要协调的复杂任务。最近基于扩散的策略学习方法在为双手操作建模动作分布方面取得了有希望的性能。然而，它们忽略了双手操作的物理安全约束，这导致了对机器人和物体造成损害的危险行为。为此，我们针对任何预训练的基于扩散的双手操作策略，提出了一个名为SafeBimanual的测试时轨迹优化框架。该框架对双手动作施加安全约束，以避免危险的机器人行为，并提高成功率。具体来说，我们为不同双臂协作模式下的安全约束设计了多样的成本函数，包括避免撕裂物体以及臂与物体之间的碰撞，通过扩散去噪过程的引导采样来优化机械臂轨迹。此外，我们采用视觉语言模型（VLM）通过指定关键点和相应的成对关系来调度成本函数，从而在整个双手操作过程中动态生成最优安全约束。SafeBimanual在RoboTwin的8个模拟任务上展示了优越性，成功率提高了13.7%，不安全交互减少了18.8%，优于最先进的基于扩散的方法。在4个真实世界任务上的广泛实验进一步验证了其实用价值，成功率提高了32.5%。"
+    },
+    {
+      "id": "arXiv:2508.17784",
+      "title": "Proximal Supervised Fine-Tuning",
+      "chinese_title": "近端监督微调",
+      "authors": "Wenhong Zhu, Ruobing Xie, Rui Wang, Xingwu Sun, Di Wang, Pengfei Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17784&sa=D&source=editors&ust=1756219275055112&usg=AOvVaw0S9rplq45vecl444h7QOWM",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17784&sa=D&source=editors&ust=1756219275055194&usg=AOvVaw20IECmbAirUhqQXLawRSiu",
+      "chinese_abstract": "对基础模型进行监督微调（SFT）常常导致泛化能力差，即在新的任务或领域上进行微调后，原有的能力会下降。受强化学习（RL）中信赖域策略优化（TRPO）和近端策略优化（PPO）的启发，我们提出了近端监督微调（PSFT）。这种微调目标融合了信赖域的优点，在SFT过程中有效约束策略漂移，同时保持有竞争力的微调效果。通过将SFT视为一种具有恒定正优势值的策略梯度方法的特例，我们推导出了PSFT，它能稳定优化过程并带来泛化能力，同时为后续的后训练阶段留下了进一步优化的空间。在数学和人类价值观领域的实验表明，PSFT在领域内的表现与SFT相当，在领域外的泛化能力上优于SFT，在长时间训练下保持稳定而不会导致熵崩溃，并为后续的优化提供了更坚实的基础。"
+    },
+    {
+      "id": "arXiv:2508.16949",
+      "title": "Breaking the Exploration Bottleneck: Rubric-Scaffolded Reinforcement Learning for General LLM Reasoning",
+      "chinese_title": "打破探索瓶颈：基于评分准则支架的强化学习用于通用大语言模型推理",
+      "authors": "Yang Zhou, Sunzhu Li, Shunyu Liu, Wenkai Fang, Jiale Zhao, Jingwen Yang, Jianwei Lv, Kongcheng Zhang, Yihe Zhou, Hengtong Lu, Wei Chen, Yan Xie, Mingli Song",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.16949&sa=D&source=editors&ust=1756219275127652&usg=AOvVaw2JhizDtzc28-O_kMGt2AK8",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.16949&sa=D&source=editors&ust=1756219275127774&usg=AOvVaw226dxLG8c8mbMKXataSWiY",
+      "chinese_abstract": "大型语言模型（LLM）最近的进展凸显了强化学习（RL）在促进推理能力涌现方面的潜力。尽管取得了令人鼓舞的成果，但一个基本的困境依然存在：RL的改进依赖于从高质量样本中学习，而对这类样本的探索仍然受到LLM固有局限性的制约。这实际上形成了一个不良循环，即无法探索到的东西就无法学习到。在本文中，我们提出了基于评分准则支架的强化学习（RuscaRL），这是一种新颖的教学支架框架，旨在打破通用LLM推理的探索瓶颈。具体来说，RuscaRL引入了清单式的评分准则作为（1）在生成展开过程中的明确探索支架，其中不同的评分准则作为任务指令中的外部指导，以引导多样化的高质量响应。这种指导会随着时间的推移逐渐减弱，鼓励模型内化潜在的推理模式；（2）在模型训练过程中的可验证奖励，我们可以使用评分准则作为参考获得稳健的“LLM作为评判者”的分数，从而在通用推理任务上实现有效的RL。广泛的实验证明了所提出的RuscaRL在各种基准测试中的优越性，在best-of-N评估下有效扩展了推理边界。值得注意的是，RuscaRL在HealthBench-500上将Qwen-2.5-7B-Instruct的性能从23.6显著提升至50.3，超过了GPT-4.1。此外，我们在Qwen3-30B-A3B-Instruct上微调的变体在HealthBench-500上达到了61.1，优于包括OpenAI-o3在内的领先LLM。"
+    },
+    {
+      "id": "arXiv:2508.17850",
+      "title": "Group Expectation Policy Optimization for Stable Heterogeneous Reinforcement Learning in LLMs",
+      "chinese_title": "用于大语言模型中稳定异构强化学习的组期望策略优化",
+      "authors": "Han Zhang, Ruibin Zheng, Zexuan Yi, Hanyang Peng, Hui Wang, Yue Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17850&sa=D&source=editors&ust=1756219275050810&usg=AOvVaw3UKHzUgQplNmtyabiAbBKm",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17850&sa=D&source=editors&ust=1756219275050879&usg=AOvVaw2-UOnPF39QKugRLgMwe7K1",
+      "chinese_abstract": "随着单中心计算接近功率限制，去中心化训练变得至关重要。强化学习（RL）后训练可以增强大型语言模型（LLM），但在异构分布式环境中面临挑战，因为其采样-学习交替过程是紧密耦合的。我们提出了HeteroRL，一个异步RL架构，它将 rollout 采样与参数学习解耦，从而能够在网络延迟下，在地理上分散的节点上进行稳健部署。我们发现，延迟引起的KL散度会导致重要性采样因高方差而失败。为解决此问题，我们提出了组期望策略优化（GEPO），该方法通过一种精细的采样机制来减少重要性权重的方差。理论上，GEPO实现了指数级的方差减少。实验表明，它比GRPO等方法保持了更优越的稳定性，在1800秒的延迟下性能下降不到3%，展示了其在异构网络中进行去中心化RL的强大潜力。"
+    },
+    {
+      "id": "arXiv:2508.17225",
+      "title": "SSFO: Self-Supervised Faithfulness Optimization for Retrieval-Augmented Generation",
+      "chinese_title": "SSFO：用于检索增强生成的自监督忠实度优化",
+      "authors": "Xiaqiang Tang, Yi Wang, Keyu Hu, Rui Xu, Chuang Li, Weigao Sun, Jian Li, Sihong Xie",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17225&sa=D&source=editors&ust=1756219275101598&usg=AOvVaw3007OlLNE547334uDdTD4n",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17225&sa=D&source=editors&ust=1756219275101722&usg=AOvVaw0ZjI9MDP9Mctjxr2sJAG5x",
+      "chinese_abstract": "检索增强生成（RAG）系统要求大型语言模型（LLM）生成的响应忠实于检索到的上下文。然而，忠实度幻觉仍然是一个关键挑战，因为现有方法通常需要昂贵的监督和后训练，或带来显著的推理负担。为了克服这些限制，我们引入了自监督忠实度优化（SSFO），这是首个用于增强RAG忠实度的自监督对齐方法。SSFO通过对比模型在有无上下文情况下生成的输出来构建偏好数据对。利用直接偏好优化（DPO），SSFO在不产生标注成本或额外推理负担的情况下对齐模型忠实度。我们从理论上和经验上证明了SSFO利用了一种良性的“可能性位移”，将概率质量从基于参数的词元转移到与上下文对齐的词元。基于这一见解，我们提出了一个修改后的DPO损失函数来鼓励可能性位移。全面的评估表明，SSFO显著优于现有方法，在多个基于上下文的问答数据集上实现了最先进的忠实度。值得注意的是，SSFO表现出强大的泛化能力，改善了跨语言忠实度并保留了一般的指令遵循能力。我们在匿名链接上发布了我们的代码和模型：此 https URL。"
+    },
+    {
+      "id": "arXiv:2508.17380",
+      "title": "Mimicking the Physicist's Eye:A VLM-centric Approach for Physics Formula Discovery",
+      "chinese_title": "模仿物理学家的眼睛：一种以VLM为中心的物理公式发现方法",
+      "authors": "Jiaqi Liu, Songning Lai, Pengze Li, Di Yu, Wenjie Zhou, Yiyang Zhou, Peng Xia, Zijun Wang, Xi Chen, Shixiang Tang, Lei Bai, Wanli Ouyang, Mingyu Ding, Huaxiu Yao, Aoran Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17380&sa=D&source=editors&ust=1756219274998095&usg=AOvVaw1nSjtpNRJfoB8paPsi35jj",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17380&sa=D&source=editors&ust=1756219274998161&usg=AOvVaw2OgB1FmD8jHduVPRrJrKQ-",
+      "chinese_abstract": "从真实世界的观测数据中自动发现物理定律是人工智能领域的一大挑战。当前依赖符号回归或大型语言模型的方法仅限于单模态数据，并忽略了对物理学家而言不可或缺的丰富、可视化的运动现象学表示。这种“感官剥夺”严重削弱了它们解释动态现象中固有 spatio-temporal 模式的能力。为解决这一差距，我们提出了 VIPER-R1，一个多模态模型，它执行基于物理方程推理的视觉归纳（Visual Induction for Physics-based Equation Reasoning）以发现基本的符号公式。它集成了视觉感知、轨迹数据和符号推理，以模拟科学发现过程。该模型通过运动结构归纳（MSI）课程进行训练，使用监督微调来解释运动学相图，并由因果思维链（C-CoT）引导构建假设，随后通过奖励引导的符号校准（RGSC）利用强化学习来优化公式结构。在推理过程中，训练好的 VIPER-R1 充当一个智能体：它首先提出一个高置信度的符号拟设，然后主动调用外部符号回归工具执行符号残差重对齐（SR^2）。这最后一步，类似于物理学家的微扰分析，将理论模型与经验数据进行协调。为了支持这项研究，我们引入了 PhysSymbol，一个新的包含 5000 个实例的多模态语料库。实验表明，VIPER-R1 在准确性和可解释性方面始终优于最先进的 VLM 基线，从而能够更精确地发现物理定律。项目主页：此 https URL。"
+    },
+    {
+      "id": "arXiv:2508.17932",
+      "title": "See What You Need: Query-Aware Visual Intelligence through Reasoning-Perception Loops",
+      "chinese_title": "见你所需：通过推理-感知循环实现查询感知的视觉智能",
+      "authors": "Zixuan Dong, Baoyun Peng, Yufei Wang, Lin Liu, Xinxin Dong, Yunlong Cao, Xiaodong Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17932&sa=D&source=editors&ust=1756219275043295&usg=AOvVaw3a5MkE5n148L73zet5hsKh",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17932&sa=D&source=editors&ust=1756219275043412&usg=AOvVaw0IQmku7CSq2k-gjOMfgIqZ",
+      "chinese_abstract": "人类视频理解表现出推理与视觉注意力之间的动态协调，能自适应地关注与查询相关的细节。然而，当前的长视频问答系统采用僵化的流程，将推理与感知解耦，导致信息因过早的视觉抽象而丢失，或因详尽处理而计算效率低下。其核心局限在于无法根据特定的推理需求调整视觉提取，不同的查询需要从同一视频内容中获取根本不同的视觉证据。在本文中，我们提出了CAVIA，一个通过推理与感知协调来革新视频理解的免训练框架。与传统方法中视觉处理独立于推理不同，CAVIA创建了一个闭环系统，其中推理根据已识别的信息差距持续引导视觉提取。CAVIA引入了三项创新：（1）层次化推理引导的精确帧定位；（2）用于目标提取的跨模态语义桥接；（3）置信度驱动的迭代式综合。CAVIA在具有挑战性的基准测试中取得了最先进的性能：EgoSchema（65.7%，+5.3%），NExT-QA（76.1%，+2.6%），和IntentQA（73.8%，+6.9%），表明动态的推理-感知协调为视频理解提供了一个可扩展的范式。"
+    },
+    {
+      "id": "arXiv:2508.17298",
+      "title": "Explain Before You Answer: A Survey on Compositional Visual Reasoning",
+      "chinese_title": "先解释后回答：组合式视觉推理综述",
+      "authors": "Fucai Ke, Joy Hsu, Zhixi Cai, Zixian Ma, Xin Zheng, Xindi Wu, Sukai Huang, Weiqing Wang, Pari Delir Haghighi, Gholamreza Haffari, Ranjay Krishna, Jiajun Wu, Hamid Rezatofighi",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17298&sa=D&source=editors&ust=1756219275095810&usg=AOvVaw02rOD2eWy02pgG9sA1-CrK",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17298&sa=D&source=editors&ust=1756219275095938&usg=AOvVaw2MQYbzh5L9TEUfqwOiPtlZ",
+      "chinese_abstract": "组合式视觉推理已成为多模态人工智能的一个关键研究前沿，旨在赋予机器类似人类的能力，以分解视觉场景、定位中间概念并执行多步逻辑推理。尽管早期的综述关注于单一的视觉-语言模型或通用多模态推理，但对于迅速扩展的组合式视觉推理文献，仍然缺乏专门的综合性分析。我们通过一篇跨越2023年至2025年的全面综述来填补这一空白，系统地回顾了来自顶级会议（CVPR, ICCV, NeurIPS, ICML, ACL等）的260多篇论文。我们首先规范了核心定义，并描述了为什么组合式方法在认知对齐、语义保真度、鲁棒性、可解释性和数据效率方面具有优势。接着，我们追溯了一个五阶段的范式转变：从提示增强的以语言为中心的流程，到工具增强的LLM和工具增强的VLM，再到最近出现的思维链推理和统一的智能体VLM，突出了它们的架构设计、优点和局限性。然后，我们列举了60多个基准测试和相应的指标，这些指标从定位准确性、思维链忠实度和高分辨率感知等维度探索组合式视觉推理。基于这些分析，我们提炼了关键见解，识别了开放性挑战（例如，基于LLM的推理局限性、幻觉、对演绎推理的偏见、可扩展的监督、工具集成和基准测试的局限性），并勾勒了未来的方向，包括世界模型集成、人机协作推理和更丰富的评估协议。通过提供统一的分类法、历史路线图和批判性展望，本综述旨在为下一代组合式视觉推理研究提供基础参考并激发灵感。"
+    },
+    {
+      "id": "arXiv:2508.18040",
+      "title": "PerPilot: Personalizing VLM-based Mobile Agents via Memory and Exploration",
+      "chinese_title": "PerPilot：通过记忆与探索实现基于VLM的移动智能体个性化",
+      "authors": "Xin Wang, Zhiyao Cui, Hao Li, Ya Zeng, Chenxu Wang, Ruiqi Song, Yihang Chen, Kun Shao, Qiaosheng Zhang, Jinzhuo Liu, Siyue Ren, Shuyue Hu, Zhen Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.18040&sa=D&source=editors&ust=1756219274988134&usg=AOvVaw1N_nnhmOKn0Hiw75Pu6xpD",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.18040&sa=D&source=editors&ust=1756219274988262&usg=AOvVaw1FHqW0N5PPdEJ1HlAdQEqN",
+      "chinese_abstract": "基于视觉语言模型（VLM）的移动智能体在辅助用户执行指令驱动的任务方面显示出巨大潜力。然而，这些智能体通常难以处理个性化指令——即那些包含模糊、用户特定上下文的指令——这一挑战在以往的研究中基本上被忽略了。在本文中，我们定义了个性化指令，并引入了PerInstruct，一个新颖的人工标注数据集，涵盖了各种移动场景下的多样化个性化指令。此外，鉴于现有移动智能体的个性化能力有限，我们提出了PerPilot，一个由大型语言模型（LLM）驱动的即插即用框架，使移动智能体能够自主感知、理解和执行个性化的用户指令。PerPilot通过两种互补的方法来识别个性化元素并自主完成指令：基于记忆的检索和基于推理的探索。实验结果表明，PerPilot能够有效地处理个性化任务，只需最少的用户干预，并且随着持续使用其性能会逐步提高，这凸显了具备个性化感知推理能力对于下一代移动智能体的重要性。数据集和代码可在此 https URL 获取。"
+    },
+    {
+      "id": "arXiv:2508.17229",
+      "title": "Multi-Metric Preference Alignment for Generative Speech Restoration",
+      "chinese_title": "生成式语音修复的多指标偏好对齐",
+      "authors": "Junan Zhang, Xueyao Zhang, Jing Yang, Yuancheng Wang, Fan Fan, Zhizheng Wu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17229&sa=D&source=editors&ust=1756219275100855&usg=AOvVaw2HydQvuEYVh99cJwWmxIHm",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17229&sa=D&source=editors&ust=1756219275100994&usg=AOvVaw0fwmeF86DpgeCVKc7qa4f_",
+      "chinese_abstract": "最近的生成模型在语音修复任务上取得了显著进展，但它们的训练目标常常与人类的感知偏好不一致，导致质量欠佳。虽然基于后训练的对齐在文本和图像生成等其他生成领域已证明有效，但其在生成式语音修复中的应用仍很大程度上未被探索。本研究探讨了将基于偏好的后训练应用于此任务的挑战，重点是如何定义一个稳健的偏好信号并策划高质量数据以避免奖励 hacking。为了应对这些挑战，我们提出了一种多指标偏好对齐策略。我们构建了一个新的数据集 GenSR-Pref，包含8万个偏好对，其中每个被选择的样本都一致地受到一套涵盖感知质量、信号保真度、内容一致性和音色保留的互补指标的青睐。这种有原则的方法确保了全面的偏好信号。利用我们的数据集应用直接偏好优化（DPO），我们在三种不同的生成范式：自回归模型（AR）、掩码生成模型（MGM）和流匹配模型（FM）上，在各种修复基准的客观和主观评估中，都观察到了一致且显著的性能提升。消融研究证实了我们的多指标策略在缓解奖励 hacking 方面优于单指标方法。此外，我们证明了我们对齐后的模型可以作为强大的“数据标注器”，生成高质量的伪标签，为传统判别模型在数据稀缺场景（如歌声修复）中提供监督信号。演示页面：此 https URL。"
+    },
+    {
+      "id": "arXiv:2508.17874",
+      "title": "Vocoder-Projected Feature Discriminator",
+      "chinese_title": "声码器投影特征判别器",
+      "authors": "Takuhiro Kaneko, Hirokazu Kameoka, Kou Tanaka, Yuto Kondo",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17874&sa=D&source=editors&ust=1756219275048538&usg=AOvVaw0yD2JaljnkAHQSeS0kwxT4",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17874&sa=D&source=editors&ust=1756219275048649&usg=AOvVaw1H-F6M8joJqYSeMoZ3sHdZ",
+      "chinese_abstract": "在文本到语音（TTS）和语音转换（VC）中，声学特征（如梅尔频谱图）因其紧凑性和易于学习而通常被用作合成或转换的目标。然而，由于最终目标是生成高质量的波形，使用声码器将这些特征转换为波形并在时域应用对抗性训练是合理的。尽管如此，对波形进行上采样会带来显著的时间和内存开销。为了解决这个问题，我们提出了一种声码器投影特征判别器（VPFD），它使用声码器特征进行对抗性训练。在基于扩散的VC蒸馏实验中，我们证明了一个预训练并冻结的声码器特征提取器，只需一个上采样步骤，就足以达到与波形判别器相当的VC性能，同时分别将训练时间和内存消耗减少了9.6倍和11.4倍。"
+    },
+    {
+      "id": "arXiv:2508.17868",
+      "title": "FasterVoiceGrad: Faster One-step Diffusion-Based Voice Conversion with Adversarial Diffusion Conversion Distillation",
+      "chinese_title": "FasterVoiceGrad：通过对抗性扩散转换蒸馏实现更快的单步基于扩散的语音转换",
+      "authors": "Takuhiro Kaneko, Hirokazu Kameoka, Kou Tanaka, Yuto Kondo",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.17868&sa=D&source=editors&ust=1756219275049090&usg=AOvVaw2XmYbfAArEpMN5wTtGRXpj",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.17868&sa=D&source=editors&ust=1756219275049171&usg=AOvVaw10cJVB2noJqLj9K8O7bqss",
+      "chinese_abstract": "基于扩散的语音转换（VC）模型（例如，VoiceGrad）可以实现高质量的语音和说话人相似度；然而，由于迭代采样，其转换过程较慢。FastVoiceGrad通过将VoiceGrad蒸馏为单步扩散模型来克服这一限制。但是，它仍然需要一个计算密集型的内容编码器来解耦说话人的身份和内容，这会减慢转换速度。因此，我们提出了FasterVoiceGrad，这是一种新颖的单步基于扩散的VC模型，通过使用对抗性扩散转换蒸馏（ADCD）同时蒸馏扩散模型和内容编码器获得，其中蒸馏在转换过程中进行，同时利用对抗性和分数蒸馏训练。对一次性VC的实验评估表明，与FastVoiceGrad相比，FasterVoiceGrad实现了具有竞争力的VC性能，在GPU和CPU上的速度分别快了6.6-6.9倍和1.8倍。"
+    },
+    {
+      "id": "arXiv:2508.16712",
+      "title": "Systematic Characterization of LLM Quantization: A Performance, Energy, and Quality Perspective",
+      "chinese_title": "LLM量化的系统性特征分析：性能、能耗与质量的视角",
+      "authors": "Tianyao Shi, Yi Ding",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.16712&sa=D&source=editors&ust=1756219275150696&usg=AOvVaw0lvlrs9xw7Q0nFqn80dXld",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.16712&sa=D&source=editors&ust=1756219275150780&usg=AOvVaw1g31qXdqzW8WBNGKwuCr_B",
+      "chinese_abstract": "大型语言模型（LLM）在不同领域展现了卓越的能力，但其巨大的资源需求使得量化——将精度降低到更低位数格式——对于高效服务至关重要。尽管存在许多量化方法，但在真实服务条件下对其性能、能耗和质量权衡的系统性理解仍然存在差距。在本文中，我们首先开发了一个全自动的在线特征分析框架qMeter，然后对11种后训练LLM量化方法在4种模型大小（7B-70B）和两种GPU架构（A100, H100）上进行了深入的特征分析。我们在在线服务条件下，从应用、工作负载、并行性和硬件层面评估量化。我们的研究揭示了高度依赖于任务和方法的权衡、对工作负载特征的强烈敏感性，以及与并行性和GPU架构的复杂相互作用。我们进一步展示了三个优化案例研究，说明了在容量规划、节能调度和多目标调优中的部署挑战。据我们所知，这是首批从性能、能耗和质量的联合视角，对LLM量化进行全面的应用、系统和硬件级特征分析之一。"
+    },
+    {
+      "id": "arXiv:2508.16785",
+      "title": "Interpreting the Effects of Quantization on LLMs",
+      "chinese_title": "解释量化对大型语言模型的影响",
+      "authors": "Manpreet Singh, Hassan Sajjad",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.16785&sa=D&source=editors&ust=1756219275143604&usg=AOvVaw1ighJmrwpCd04mgiCuU-RZ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.16785&sa=D&source=editors&ust=1756219275143721&usg=AOvVaw2cn46ypn-jQIKIoF9WGxDQ",
+      "chinese_abstract": "量化为在资源受限环境中部署大型语言模型（LLM）提供了一个实用的解决方案。然而，其对内部表示的影响研究不足，引发了对量化模型可靠性的疑问。在本研究中，我们采用一系列可解释性技术来研究量化如何影响模型和神经元的行为。我们分析了多个LLM在4位和8位量化下的情况。我们的研究结果显示，量化对模型校准的影响通常很小。对神经元激活的分析表明，死神经元（即在整个数据集中激活值接近0的神经元）的数量无论是否量化都保持一致。在神经元对预测的贡献方面，我们观察到较小的全精度模型表现出较少的显著神经元，而较大的模型则倾向于有更多，但Llama-2-7B除外。量化对神经元冗余度的影响因模型而异。总的来说，我们的研究结果表明，量化的影响可能因模型和任务而异，但我们没有观察到任何可能阻止使用量化作为可靠模型压缩技术的剧烈变化。"
+    },
+    {
+      "id": "arXiv:2508.16680",
+      "title": "CALR: Corrective Adaptive Low-Rank Decomposition for Efficient Large Language Model Layer Compression",
+      "chinese_title": "CALR: 用于高效大型语言模型层压缩的校正自适应低秩分解",
+      "authors": "Muchammad Daniyal Kautsar, Afra Majida Hariono, Widyawan, Syukron Abu Ishaq Alfarozi, Kuntpong Wararatpanya",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.16680&sa=D&source=editors&ust=1756219275156597&usg=AOvVaw3xp9ggpNoj_c6H77OnXsPF",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.16680&sa=D&source=editors&ust=1756219275156683&usg=AOvVaw2B4sLfIfxytHWc5_1h6Od2",
+      "chinese_abstract": "大型语言模型（LLM）由于其巨大的规模和计算需求，在部署上面临着重大挑战。模型压缩技术对于使这些模型在资源受限的环境中变得实用至关重要。一种主要的压缩策略是通过奇异值分解（SVD）进行低秩分解，以通过近似权重矩阵来减少模型参数。然而，标准SVD专注于最小化矩阵重构误差，这常常导致模型功能性能的大幅损失。这种性能下降的原因是现有方法未能充分校正压缩过程中丢失的功能信息。为了解决这一差距，我们引入了校正自适应低秩分解（CALR），这是一种双组分压缩方法。CALR将SVD压缩层的主路径与一个并行的、可学习的、低秩的校正模块相结合，该模块被明确训练以恢复功能残差误差。我们在SmolLM2-135M、Qwen3-0.6B和Llama-3.2-1B上的实验评估表明，CALR可以将参数数量减少26.93%至51.77%，同时保留了原始模型性能的59.45%至90.42%，并持续优于LaCo、ShortGPT和LoSparse。CALR的成功表明，将功能信息损失视为一个可学习的信号是一种高效的压缩范式。这种方法使得创建更小、更高效的LLM成为可能，从而提高了它们在实际应用中的可及性和实用部署。"
+    },
+    {
+      "id": "arXiv:2508.16700",
+      "title": "GPT-OSS-20B: A Comprehensive Deployment-Centric Analysis of OpenAI's Open-Weight Mixture of Experts Model",
+      "chinese_title": "GPT-OSS-20B：OpenAI开源权重混合专家模型的全面部署中心分析",
+      "authors": "Deepak Kumar, Divakar Yadav, Yash Patel",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.16700&sa=D&source=editors&ust=1756219275153411&usg=AOvVaw3knrGB26kcO2oN5xSx1Mko",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.16700&sa=D&source=editors&ust=1756219275153482&usg=AOvVaw1A_8Ek-haLlGyljP7uix7U",
+      "chinese_abstract": "我们对GPT-OSS-20B（混合专家模型；总参数209亿，活跃参数约36.1亿）在单GPU（H100, bf16）上与密集基线模型Qwen3-32B和Yi-34B进行了多维度评估。我们测量了真实的首个令牌生成时间（TTFT）、完整解码吞吐量（TPOT）、端到端延迟百分位数、持有过去键值（PKV）时的峰值VRAM以及通过一致的基于nvidia-smi的采样器测量的能耗。在2048个令牌上下文和64个令牌解码的情况下，GPT-OSS-20B的解码吞吐量和每焦耳令牌数均高于密集基线Qwen3-32B和Yi-34B，同时显著降低了峰值VRAM和每生成1000个令牌的能耗；由于MoE路由开销，其TTFT较高。在2048/64配置下，GPT-OSS-20B仅有17.3%的参数处于活跃状态（209亿中的36.1亿），其解码吞吐量比Qwen3-32B高约31.8%，每生成1000个令牌的能耗低25.8%，同时峰值VRAM使用量减少了31.7%。按活跃参数归一化后，GPT-OSS-20B显示出明显更强的每活跃参数效率（APE），凸显了MoE在部署上的优势。我们没有评估准确性；这是一项以部署为中心的研究。我们发布了代码和整理后的结果，以便复现和扩展。"
+    }
+  ],
+  "clusters": {
+    "视觉与场景生成": [
+      "arXiv:2508.17811",
+      "arXiv:2508.17600",
+      "arXiv:2508.17062",
+      "arXiv:2508.17718",
+      "arXiv:2508.18268"
+    ],
+    "强化学习与模型对齐": [
+      "arXiv:2508.17784",
+      "arXiv:2508.16949",
+      "arXiv:2508.17850",
+      "arXiv:2508.17225"
+    ],
+    "多模态大语言模型": [
+      "arXiv:2508.17380",
+      "arXiv:2508.17932",
+      "arXiv:2508.17298",
+      "arXiv:2508.18040"
+    ],
+    "音频与语音生成": [
+      "arXiv:2508.17229",
+      "arXiv:2508.17874",
+      "arXiv:2508.17868"
+    ],
+    "模型压缩与高效推理": [
+      "arXiv:2508.16712",
+      "arXiv:2508.16785",
+      "arXiv:2508.16680",
+      "arXiv:2508.16700"
+    ]
+  }
+}
