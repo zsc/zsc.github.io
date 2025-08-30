@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2508.21058",
+      "title": "Mixture of Contexts for Long Video Generation",
+      "chinese_title": "上下文混合：用于长视频生成的模型",
+      "authors": "Shengqu Cai, Ceyuan Yang, Lvmin Zhang, Yuwei Guo, Junfei Xiao, Ziyan Yang, Yinghao Xu, Zhenheng Yang, Alan Yuille, Leonidas Guibas, Maneesh Agrawala, Lu Jiang, Gordon Wetzstein",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.21058&sa=D&source=editors&ust=1756483668697901&usg=AOvVaw30Suyyp_Aj4RfEP1Q9FTzx",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.21058&sa=D&source=editors&ust=1756483668697969&usg=AOvVaw1-g5sY4v1O37k9exzPzhl-",
+      "chinese_abstract": "长视频生成本质上是一个长上下文记忆问题：模型必须在长范围内保留和检索显著事件，而不会出现崩溃或漂移。然而，扩展扩散变换器以生成长上下文视频从根本上受限于自注意力的二次方成本，这使得内存和计变得难以处理且难以针对长序列进行优化。我们将长上下文视频生成重塑为内部信息检索任务，并提出一个简单、可学习的稀疏注意力路由模块——上下文混合（MoC），作为一种有效的长期记忆检索引擎。在 MoC 中，每个查询动态选择几个信息丰富的块以及强制锚点（标题、局部窗口）进行关注，并采用因果路由来防止循环闭合。随着我们扩展数据并逐渐稀疏化路由，模型将计算资源分配给显著的历史信息，从而在数分钟的内容中保持身份、动作和场景的一致性。效率作为检索的副产品（近线性扩展）随之而来，这使得实际训练和合成成为可能，并促使在分钟级别上出现记忆和一致性。"
+    },
+    {
+      "id": "arXiv:2508.21016",
+      "title": "Inference-Time Alignment Control for Diffusion Models with Reinforcement Learning Guidance",
+      "chinese_title": "基于强化学习引导的扩散模型推理时对齐控",
+      "authors": "Luozhijie Jin, Zijie Qiu, Jie Liu, Zijie Diao, Lifeng Qiao, Ning Ding, Alex Lamb, Xipeng Qiu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.21016&sa=D&source=editors&ust=1756483668700287&usg=AOvVaw0gd6BAsLdiEQRUA_PaBoL-",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.21016&sa=D&source=editors&ust=1756483668700373&usg=AOvVaw0hJAv-Q848i7AYQEkGOyny",
+      "chinese_abstract": "基于去噪的生成模型，特别是扩散和流匹配算法，取得了显著的成功。然而，将其输出分布与复杂的下游目标（如人类偏好、组合准确性或数据可压缩性）对齐仍然具有挑战性。虽然受大型语言模型中人类反馈强化学习（RLHF）进展的启发，强化学习（RL）微调方法已被应用于这些生成框架，但目前的RL方法对于扩散模型并非最优，并且在微调后控制对齐强度的灵活性有限。在这项工作中，我们通过随机微分方程和隐式奖励条件的视角重新诠释了扩散模型的RL微调。我们引入了强化学习引导（RLG），这是一种推理时方法，它通过几何平均结合基础模型和RL微调模型的输出来调整无分类器引导（CFG）。我们的理论分析表明，RLG的引导尺度在数学上等同于调整标准RL目标中的KL正则化系数，从而能够在无需进一步训练的情况下动态控制对齐与质量的权衡。大量实验表明，RLG在各种架构、RL算法和下游任务中持续提升了RL微调模型的性能，包括人类偏好、组合控制、可压缩性和文本渲染。此外，RLG支持插值和外推，从而在控制生成对齐方面提供了前所未有的灵活性。我们的方法为在推理时增强和控制扩散模型对齐提供了一个实用且理论上合理的解决方案。RLG的源代码已在Github上公开。"
+    },
+    {
+      "id": "arXiv:2508.20754",
+      "title": "${C}^{3}$-GS: Learning Context-aware, Cross-dimension, Cross-scale Feature for Generalizable Gaussian Splatting",
+      "chinese_title": "${C}^{3}$-GS：为可泛化高斯溅射学习上下文感知、跨维度、跨尺度的特征",
+      "authors": "Yuxi Hu, Jun Zhang, Kuangyi Chen, Zhe Zhang, Friedrich Fraundorfer",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20754&sa=D&source=editors&ust=1756483668712159&usg=AOvVaw3y0xEHAu9dINx_UVDPo2ul",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20754&sa=D&source=editors&ust=1756483668712231&usg=AOvVaw0H-sT3LSK3nqbBP2W3h0DH",
+      "chinese_abstract": "可泛化高斯溅射旨在为未见过的场景合成新视角，而无需对每个场景进行优化。特别是，近期的进展利用前馈网络来预测每个像素的高斯参数，从而能够从稀疏的输入视图中实现高质量的合成。然而，现有方法在为高斯预测编码具有判别性、多视图一致性的特征方面存在不足，导致在稀疏视图下难以构建准确的几何结构。为了解决这个题，我们提出了$\\mathbf{C}^{3}$-GS，一个通过融合上下文感知、跨维度和跨尺度约束来增强特征学习的框架。我们的架构将三个轻量级模块集成到一个统一的渲染流程中，改善了特征融合，并实现了无需额外监督的光照真实感合成。在基准数据集上的广泛实验验证了$\\mathbf{C}^{3}$-GS实现了最先进的渲染质量和泛化能力。"
+    },
+    {
+      "id": "arXiv:2508.20549",
+      "title": "MedGR$^2$: Breaking the Data Barrier for Medical Reasoning via Generative Reward Learning",
+      "chinese_title": "MedGR$^2$: 通过生成式奖励学习打破医学推理的数据壁垒",
+      "authors": "Weihai Zhi, Jiayan Guo, Shangyang Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20549&sa=D&source=editors&ust=1756483668720264&usg=AOvVaw33Ud_uwRQfyqqjxckFJqmn",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20549&sa=D&source=editors&ust=1756483668720336&usg=AOvVaw0t5uAQyCpodfyo5L_jH4a7",
+      "chinese_abstract": "视觉-语言模型（VLM）在医学领域的应用受到高质量、专家标注数据稀缺的严重制约。在现有数据集上进行监督微调（SFT）通常导致在未见过的模态和任务上泛化能力差，而强化学习（RL）作为一种有前景的替代方案，却因在这一数据稀疏领域缺乏可靠的奖励信号而受阻。为了打破这一僵局，我们引入了用于医学推理的生成式奖励学习框架（MedGR$^2$），该框架创建了一个自我改进的良性循环。MedGR$^2$协同开发了一个数据生成器和一个奖励模型，实现了高质量、多模态医学数据的自动化、持续创建，这些数据既可作为SFT的优质训练源，也可用于RL。我们的实验表明，使用MedGR$^2$生成的数据进行SFT已经超过了在大型、人工策划数据集上训练的基线模型。关键的是，当利用这些数据通过组相对策略优化（GRPO）进行RL时，我们的模型实现了最先进的跨模态和跨任务泛化能力，显著优于专门的基于RL的方法。此外，我们由MedGR$^2$赋能的紧凑模型，其性能可与参数量超过10倍的基础模型相媲美。MedGR$^2$为高风险领域的数据高效学习提供了一种新范式，将问题从数据稀缺转变为数据生成，并释放了RL在构建真正可泛化的医学AI方面的全部潜力。"
+    },
+    {
+      "id": "arXiv:2508.20181",
+      "title": "Mitigating Hallucinations in Multimodal LLMs via Object-aware Preference Optimization",
+      "chinese_title": "通过对象感知的偏好优化减轻多模态大语言模型中的幻觉",
+      "authors": "Alberto Compagnoni, Davide Caffagni, Nicholas Moratelli, Lorenzo Baraldi, Marcella Cornia, Rita Cucchiara",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20181&sa=D&source=editors&ust=1756483668740368&usg=AOvVaw2jteu_YrqI4xPuuLlHzH93",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20181&sa=D&source=editors&ust=1756483668740465&usg=AOvVaw2zHgGH-0vzqjrgSzzObhKv",
+      "chinese_abstract": "多模态大语言模型（MLLM）作为统一接口，可解决从自然语言处理到计算机视觉的多种任务。尽管在许多基准测试中展现了最先进的结果，但一个长期存在的问题是MLLM倾向于产生幻觉，即生成的答案并未在视觉输入中得到反映。在本文中，我们将幻觉问题视为一个对齐问题，旨在引导MLLM，使其更倾向于生成不含幻觉的内容。与近期那些需要复杂流程来构建合成偏好数据以进行对齐训练、且常依赖于专有模型的方法不同，我们利用了著名的CHAIR度量标准，该标准最初用于衡量图像描述中的幻觉程度。给定一对生成的答案，我们利用CHAIR来区分优胜者和失败者选项（即无幻觉和有幻觉的样本），并通过直接偏好优化（DPO）对现成的MLLM进行微调。我们将这种方法称为CHAIR-DPO，它有效地减少了多个幻觉基准测试中的幻觉答案数量，证明了使用基于CHAIR的奖励进行MLLM微调的有效性。源代码和训练好的模型已公开发布。"
+    },
+    {
+      "id": "arXiv:2508.20368",
+      "title": "AI-SearchPlanner: Modular Agentic Search via Pareto-Optimal Multi-Objective Reinforcement Learning",
+      "chinese_title": "AI-SearchPlanner：通过帕累托最优多目标强化学习实现的模块化智能体搜索",
+      "authors": "Lang Mei, Zhihan Yang, Chong Chen",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20368&sa=D&source=editors&ust=1756483668691990&usg=AOvVaw3D35TG9QSTYCXx8F1vOK2d",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20368&sa=D&source=editors&ust=1756483668692158&usg=AOvVaw1rvg-L18uIhLspbQ2eG4vd",
+      "chinese_abstract": "最近的研究探索了将大型语言模型（LLM）与搜索引擎相结合，以利用LLM的内部预训练知识和外部信息。特别是，强化学习（RL）已成为一种通过搜索引擎的多轮交互来增强LLM推理的有前景的范式。然而，现有的基于RL的搜索智能体依赖单一LLM以端到端的方式处理搜索规划和问答（QA）任务，这限制了它们同时优化这两种能力。在实践中，复杂的人工智能搜索系统通常采用一个大型、固定的LLM（例如GPT-4, DeepSeek-R1）来确保高质量的问答。因此，一种更有效和高效的方法是利用一个小型、可训练的LLM专门用于搜索规划。在本文中，我们提出了AI-SearchPlanner，一个新颖的强化学习框架，旨在通过专注于搜索规划来提升固定问答模型的性能。具体而言，我们的方法引入了三个关键创新：1）解耦搜索规划器和生成器的架构，2）用于搜索规划的双重奖励对齐，以及3）规划效用和成本的帕累托优化，以实现目标。在真实世界数据集上的大量实验表明，AI-SearchPlanner在效果和效率上均优于现有的基于RL的搜索智能体，同时不同的固定问答模型和数据领域中表现出强大的泛化能力。"
+    },
+    {
+      "id": "arXiv:2508.20293",
+      "title": "Beacon: Post-Training Quantization with Integrated Grid Selection",
+      "chinese_title": "Beacon：集成网格选择的训练后量化",
+      "authors": "Shihao Zhang, Rayan Saab",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20293&sa=D&source=editors&ust=1756483668733688&usg=AOvVaw0KVtIn1jSyNeuARfuVaGU4",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20293&sa=D&source=editors&ust=1756483668733759&usg=AOvVaw0GjMSZM001hiuPy-P4n2mY",
+      "chinese_abstract": "量化是一种广泛使用的压缩技术，用于降低大型预训练模型的内存和计算成本。逐通道训练后量化（PTQ）的一个关键挑战是选择合适的缩放因子，以将权重值替换为来自缩放量化网格的值。现有方法通常在开始时通过启发式调整或网格搜索来固定缩放因子。在这篇笔中，我们提出了Beacon，一个简单而有效的算法，无需此类手动调整。Beacon直接使用固定的非缩放字母表执行逐通道PTQ，并通过利用对称标量量化的几何特性自动确定最佳缩放因子。它以最小的修改支持对称和非对称量化，并且不依赖于反向传播或大型校准集。尽管其简单且无需调整，Beacon与最先进的方法相比仍取得了具有竞争力的性能，使其成为高效模型部署的实用解决方案。"
+    },
+    {
+      "id": "arXiv:2508.20577",
+      "title": "MERIT: Maximum-normalized Element-wise Ratio for Language Model Large-batch Training",
+      "chinese_title": "MERIT：用于语言模型大批量训练的最大归一化逐元素比率优化器",
+      "authors": "Yang Luo, Zangwei Zheng, Ziheng Qin, Zirui Zhu, Yong Liu, Yang You",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20577&sa=D&source=editors&ust=1756483668717826&usg=AOvVaw3Ix23PFdgSybYZXbWnwP0W",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20577&sa=D&source=editors&ust=1756483668717897&usg=AOvVaw2_ab69XXFIdTAnu1IxHwrd",
+      "chinese_abstract": "大批量训练已成为加速深度神经网络训练的基石，但它在优化和泛化方面带来了挑战。现有的优化器如AdamW在语言模型的大批量训练中表现出性能下降，这是由于注意力层中最大注意力logit的急剧增加导致的信息瓶颈。虽然LAMB优化器部分解决了这个问题，但一些注意力层仍然面临此问题。原因是LAMB中基于l2范数的信任比率在直接影响查询/键权重的最大值方面效果较差。此外，LAMB中逐权重的信任比率容易出错，因为它忽略了行或列内权重值之间的关系。基于这些观察，我们提出了一种新颖的优化器MERIT，它利用最大范数来计算信任比率，以更有效地约束最大注意力logit。此外，我们进一步构建了逐元素的信任比率，通过关注局部权重结构来提供更稳健的更新缩放。在各种规模的GPT-2模型上进行的大批量训练的广泛实验证明了MERIT的优越性能。值得注意的是，在训练GPT-2 Medium期间，MERIT在48B训练令牌下，使用6k的批量大小，与标准批量大小（480）相比没有任何性能下降。这项工作强调了在大批量训练中考虑最大注意力logit和更细粒度信任比率的重要性。它成功地提高了训练稳定性，为使用更大的批量铺平了道路，从而能够更快地开发和迭代大型语言模型。"
+    },
+    {
+      "id": "arXiv:2508.21001",
+      "title": "Train-Once Plan-Anywhere Kinodynamic Motion Planning via Diffusion Trees",
+      "chinese_title": "通过扩散树实现“一次训练，随处规划”的动力学运动规划",
+      "authors": "Yaniv Hassidof, Tom Jurgenson, Kiril Solovey",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.21001&sa=D&source=editors&ust=1756483668701301&usg=AOvVaw2UvDKyBhoIZILFOop_iBGQ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.21001&sa=D&source=editors&ust=1756483668701379&usg=AOvVaw3tnVXdLpS_MSVePOP56U-5",
+      "chinese_abstract": "动力学运动规划关注在遵守机器人动态约束的同时计算无碰撞的轨迹。这个关键问题通常通过基于采样的规划器（SBP）来解决，这些规划器通过动作传播构建搜索树来探索机器人的高维状态空间。尽管SBP可以提供关于完备性和解质量的全局保证，但由于非引导的动作采样，其性能常常受到探索速度慢的限制。基于学习的方法可以产生显著更快的运行时间，但它们无法泛化到分布外（OOD）场景，并且缺乏关键的保证，例如安全性，从而限制了它们在物理机器人上的部署。我们提出了扩散树（DiTree）：一个可证明泛化的框架，利用扩散策略（DP）作为引导采样器，以在SBP内高效地指导状态空间搜索。DiTree结合了DP对专家轨迹复杂分布（以部观测为条件）的建模能力和SBP的完备性，从而在复杂动力系统的几次动作传播迭代内产生可证明安全的解决方案。我们通过一个结合了流行的RRT规划器和在单一环境中训练的DP动作采样器的实现来展示DiTree的强大能力。在对OOD场景的综合评估中，DiTree的运行时间与独立的DP相当（比传统SBP快3倍），同时比DP和SBP的平均成功率更高。DiTree平均比传统SBP快3倍，并通过实现约30%更高的成功率超越了所有其他方法。"
+    },
+    {
+      "id": "arXiv:2508.20279",
+      "title": "How Multimodal LLMs Solve Image Tasks: A Lens on Visual Grounding, Task Reasoning, and Answer Decoding",
+      "chinese_title": "多模态大语言模型如何解决图像任务：视觉定位、任务推理和答案解码的视角",
+      "authors": "Zhuoran Yu, Yong Jae Lee",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20279&sa=D&source=editors&ust=1756483668735175&usg=AOvVaw3SQy01i9fK_JyS1cEFKgfJ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20279&sa=D&source=editors&ust=1756483668735248&usg=AOvVaw1NcvRIGOyWN6eagGINokHo",
+      "chinese_abstract": "多模态大语言模型（MLLM）在广泛的视觉-语言任务上表现出强大的性能，但其内部处理动态仍未得到充分探索。在这项工作中，我们引入了一个探测框架，以系统地分析MLLM如何在不同层级处理视觉和文本输入。我们训练线性分类器，使用标准化的锚点问题，从每层提取的令牌嵌入中预测细粒度的视觉类别（例如，狗的品种）。为了揭示不同层的功能角色，我们在三种受控的提示变体下评估这些探针：（1）测试对表层变化敏感度的词汇变体，（2）通过修改提示中的视觉概念来反转预期答案的语义否定变体，以及（3）保留推理但改变答案格式的输出格式变体。我们将我们的框架应用于LLaVA-1.5、LLaVA-Next-LLaMA-3和Qwen2-VL，发现了一个一致的阶段性结构：早期层执行视觉定位，中间层支持词汇整合和语义推理，而最终层准备特定于任务的输出。我们进一步表明，虽然整体的阶段性结构在视觉令牌化、指令调整数据和预训练语料库的变化中保持稳定，但每个阶段的具体层分配随着基础LLM架构的变化而显著变化。我们的发现为MLLM的层级组织提供了一个统一的视角，并为分析多模态表示动态提供了一种轻量级、模型无关的方法。"
+    },
+    {
+      "id": "arXiv:2508.20840",
+      "title": "Learning Primitive Embodied World Models: Towards Scalable Robotic Learning",
+      "chinese_title": "学习原始具身世界模型：迈向可扩展的机器人学习",
+      "authors": "Qiao Sun, Liujia Yang, Wei Tang, Wei Huang, Kaixin Xu, Yongchao Chen, Mingyu Liu, Jiange Yang, Haoyi Zhu, Yating Wang, Tong He, Yilun Chen, Xili Dai, Nanyang Ye, Qinying Gu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20840&sa=D&source=editors&ust=1756483668704922&usg=AOvVaw0mvXvhN8b0WmZ-Sc8zOrep",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20840&sa=D&source=editors&ust=1756483668704992&usg=AOvVaw2xkMmpW5s1j43QU9GF8VMs",
+      "chinese_abstract": "尽管基于视频生成的具身世界模型越来越受到关注，但它们对大规模具身交互数据的依赖仍然是一个关键瓶颈。具身数据的稀缺性、收集难度和高维度从根本上限制了语言与动作之间的对齐粒度，并加剧了长时程视频生成的挑战——阻碍了生成模型在具身领域实现“GPT时刻”。有一个朴素的观察：具身数据的多样性远超过相对较小的可能原始动作空间。基于这一洞见，我们提出了一种新的世界建模范式——原始具身世界模型（PEWM）。通过将视频生成限制在固定的短时程内，我们的方法 1）实现了语言概念与机器人动作视觉表示之间的细粒度对齐，2）低了学习复杂性，3）提高了具身数据收集的数据效率，以及 4）减少了推理延迟。通过配备模块化的视觉-语言模型（VLM）规划器和起点-终点热图引导机制（SGG），PEWM进一步实现了灵活的闭环控制，并支持原始级别策略在扩展的复杂任务上的组合泛化。我们的框架利用了视频模型中的时空视觉先验和VLM的语义感知能力，以弥合细粒度物理交互与高级推理之间的差距，为实现可扩展、可解释和通用的具身智能铺平了道路。"
+    },
+    {
+      "id": "arXiv:2508.20665",
+      "title": "Amadeus: Autoregressive Model with Bidirectional Attribute Modelling for Symbolic Music",
+      "chinese_title": "Amadeus：用于符号音乐的具有双向属性建模的自回归模型",
+      "authors": "Hongju Su, Ke Li, Lan Yang, Honggang Zhang, Yi-Zhe Song",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20665&sa=D&source=editors&ust=1756483668714864&usg=AOvVaw0rict8V9xS-KX4Xt7xiOdW",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20665&sa=D&source=editors&ust=1756483668714952&usg=AOvVaw2_e219gRxsP0ZA2QXuA_yq",
+      "chinese_abstract": "现有的最先进的符号音乐生成模型主要采用自回归或分层自回归架构，将符号音乐建模为具有单向时间依赖性的属性标记序列，并假设这些属性之间存在固定的、严格的依赖结构。然而，我们观察到在这些模型中使用不同的属性作为初始标记会产生相当的性能。这表明，一个音符的属性本质上是一个并发且无序的集合，而不是一个具有时间依赖性的序列。基于这一见解，我们引入了Amadeus，一个新颖的符号音乐生成框架。Amadeus采用两级架构：一个用于音符序列的自回归模型和一个用于属性的双向离散扩散模型。为了提升性能，我们提出了音乐潜空间可辨别性增强策略（MLSDES），该策略融合了对比学习约束，增了中间音乐表示的可辨别性。条件信息增强模块（CIEM）通过注意力机制同时加强音符潜向量表示，从而实现更精确的音符解码。我们在无条件和文本条件生成任务上进行了广泛的实验。Amadeus在多个指标上显著优于现有SOTA模型，同时实现了至少4倍的速度提升。此外，我们证明了使用我们的模型可以实现无需训练的、细粒度的音符属性控制。为了探索Amadeus架构的性能上限，我们编译了迄今为止最大的开源符号音乐数据集AMD（Amadeus MIDI Dataset），支持预训练和微调。"
+    },
+    {
+      "id": "arXiv:2508.20584",
+      "title": "Flowing Straighter with Conditional Flow Matching for Accurate Speech Enhancement",
+      "chinese_title": "通过条件流匹配实现更直的流以进行精确语音增强",
+      "authors": "Mattias Cross, Anton Ragni",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20584&sa=D&source=editors&ust=1756483668716863&usg=AOvVaw3imKWjpauSJUwfDxylaNWO",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20584&sa=D&source=editors&ust=1756483668716937&usg=AOvVaw1GEr1Lt5Nft7yeNyegz2Xe",
+      "chinese_abstract": "当前基于流的生成式语音增强方法学习弯曲的概率路径，该路径建模了干净语音和带噪语音之间的映射。尽管性能令人印象深刻，但弯曲概率路径的影响尚不清楚。诸如薛定谔桥之类的方法专注于弯曲路径，其中时间相关的梯度和方差不利于直路径。机器学习研究的发现表明，直路径，例如条件流匹配，更容易训练并提供更好的泛化能力。在本文中，我们量化了路径直线度对语音增强质量的影响。我们报告了使用薛定谔桥的实验，其中我们表明某些配置会导致更直的路径。相反，我们提出了用于语音增强的独立条件流匹配，它建模了带噪语音和干净语音之间的直路径。我们凭经验证明，时间无关的差对样本质量的影响比梯度更大。尽管条件流匹配改善了多个语音质量指标，但它需要多个推理步骤。我们通过一个单步解决方案来纠正这一点，即像直接预测模型一样推断训练好的基于流的模型。我们的工作表明，更直的时间无关概率路径比弯曲的时间相关路径更能改善生成式语音增强。"
+    },
+    {
+      "id": "arXiv:2508.20991",
+      "title": "ExpertSim: Fast Particle Detector Simulation Using Mixture-of-Generative-Experts",
+      "chinese_title": "ExpertSim：使用生成式专家混合模型进行快速粒子探测器模拟",
+      "authors": "Patryk Będkowski, Jan Dubiński, Filip Szatkowski, Kamil Deja, Przemysław Rokita, Tomasz Trzciński",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20991&sa=D&source=editors&ust=1756483668701858&usg=AOvVaw2TJuLh1NK7z-fY757EJUW1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20991&sa=D&source=editors&ust=1756483668701933&usg=AOvVaw0eZBz0stYxsVR8uvtm_gD6",
+      "chinese_abstract": "模拟探测器响应是理解欧洲核子研究中心（CERN）大型强子对撞机中粒子碰撞内部工作原理的关键部分。目前，这类模拟是使用统计蒙特卡洛方法进行的，这些方法计算成本高昂，给CERN的计算网格带来了巨大压力。因此，最近的提议主张使用生成式机器学习方法来实现更高效的模拟。然而，数据分布在不同模拟中差异显著，这使得现成的方法难以捕捉。在本研究中，我们提出了ExpertSim——一种专为ALICE实验中的零度量能器量身定制的深度学习模拟方法。我们的方法利用了生成式专家混合（Mixture-of-Generative-Experts）架构，其中每个专家专门模拟数据的不同子集。这使得生成过程更加精确和高效，因为每个专家都专注于量能器响应的特定方面。ExpertSim不仅提高了准确性，还比传统的蒙特卡洛方法提供了显著的速提升，为CERN的粒子物理实验中的高效率探测器模拟提供了有前景的解决方案。"
+    },
+    {
+      "id": "arXiv:2508.20373",
+      "title": "Graph-R1: Unleashing LLM Reasoning with NP-Hard Graph Problems",
+      "chinese_title": "Graph-R1: 利用NP难图问题释放大语言模型的推理能力",
+      "authors": "Yuyao Wang, Bowen Liu, Jianheng Tang, Nuo Chen, Yuhan Li, Qifan Zhang, Jia Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20373&sa=D&source=editors&ust=1756483668729323&usg=AOvVaw0lKWcz4ge65dRp9TnceR0f",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20373&sa=D&source=editors&ust=1756483668729415&usg=AOvVaw1aydWRhV46o7o9J3f-gr7F",
+      "chinese_abstract": "推理大型语言模型（RLLMs）最近在复杂推理任务上取得了显著进展，这在很大程度上得益于其长思维链（Long CoT）能力。然而，开发这些长思维链行为严重依赖于使用高质量数据集进行后训练，这数据集通常成本高昂且由人工策划（例如，数学和代码），使得可扩展的替代方案未被探索。在这项工作中，我们引入NP难（NPH）图问题作为一个新颖的合成训练语料库，因为它们内在地需要深度推理、广泛探索和反思策略，这些是长思维链推理的核心特征。基于这一见解，我们开发了一个两阶段的后训练框架：（i）在拒绝采样的NPH图实例上进行长思维链监督微调（SFT），这显著增强了推理深度；以及（ii）采用细粒度奖励设计的强化学习（RL），这提高了推理效率。我们的旗舰模型Graph-R1-7B在数学、编码、STEM和逻辑等领域展示了强大的泛化能力，并在NPH图问题上在准确性和推理效率方面均超过了QwQ-32B。这些结果表明，NPH图问题是推动LLM中长思维链推理的有效且可扩展的资源，为LLM后训练开辟了新的前沿。"
+    },
+    {
+      "id": "arXiv:2508.20784",
+      "title": "Single Agent Robust Deep Reinforcement Learning for Bus Fleet Control",
+      "chinese_title": "用于公交车队控制的单智能体鲁棒深度强化学习",
+      "authors": "Yifan Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20784&sa=D&source=editors&ust=1756483668680501&usg=AOvVaw3uMI4JZwet8j_Ks_k6fkw5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20784&sa=D&source=editors&ust=1756483668680712&usg=AOvVaw3cHt-7aDdmYmELDwKwZZrC",
+      "chinese_abstract": "由于随机的交通和乘客需求，公交车拥堵仍然是城市交通面临的挑战。传统解决方案依赖于环形线路设置中的多智能体强化学习（MARL），这忽略了以异构路线、时刻表、需求波动和不同车队规模为特征的现实运营。我们提出了一种新颖的单智能体强化学习（RL）框架用于公交车驻站控制，该框架避免了在近现实模拟下MARL的数据不平衡和收敛问题。我们构建了一个具有动态乘客求的双向时刻表网络。关键创新在于通过增加状态空间，将多智能体问题重新表述为单智能体问题，状态空间中除了数值特征（车头时距、载客率、速度）外，还加入了分类标识符（车辆ID、站点ID、时间段）。这种高维编码使单智能体策略能够捕捉智能体间的依赖关系，类似于将不可分的输入投影到更高维空间。我们进一步设计了一个与运营目标一致的结构化奖励函数：用一个山脊形奖励来平衡均匀的车头时距和时刻表遵守，而不是对车头时距偏差进行指数惩罚。实验表明，我们修改后的软演员-评论家（SAC）算法比包括MADDPG在内的基准算法（例如，在随机条件下为-430k vs. -530k）取得了更稳定和优越的性能。这些结果表明，当通过分类结构化和时刻表感知奖励进行增强时，单智能体深度RL可以有效管理非环形、真实世界背景下的公交车驻站控制。这种范式为MARL框提供了一个鲁棒、可扩展的替代方案，尤其是在智能体特定经验不平衡的情况下。"
+    },
+    {
+      "id": "arXiv:2508.20151",
+      "title": "IntentionReasoner: Facilitating Adaptive LLM Safeguards through Intent Reasoning and Selective Query Refinement",
+      "chinese_title": "IntentionReasoner：通过意图推理和选择性查询优化促进自适应大语言模型安全防护",
+      "authors": "Yuanzhe Shen, Zisu Huang, Zhengkang Guo, Yide Liu, Guanxu Chen, Ruicheng Yin, Xiaoqing Zheng, Xuanjing Huang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20151&sa=D&source=editors&ust=1756483668694634&usg=AOvVaw1f0qs8AVvgo37_p5_dTnK7",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20151&sa=D&source=editors&ust=1756483668694705&usg=AOvVaw3l45pH8KDG8okraENFQCvY",
+      "chinese_abstract": "大型语言模型（LLM）的快速发展推动了其在不同领域的应用，但其生成有害内容的能力带来了重大的安全挑战。虽然已有大量研究致力于减少有害输出，但这些努力往往以过度拒绝无害提示为代价。在安全性、过度拒绝和实用性之间取得平衡仍然是一个关键挑战。在这项工作中，我们引入了IntentionReasoner，一种新颖的防护机制，它利用一个专门的守护模型进行意图推理、多级安全分类和查询重写，以消除边缘案例查询中潜在的有害意图。具体来说，我们首先构建了一个包含约163,000个查询的综合数据集，每个查询都标注了意图推理、安全标签和重写版本。然后应用监督微调，使守护模型具备格式遵守、意图分析和安全重写的基础能力。最后，我们应用一种定制的多奖励优化策略，该策略在强化学习框架内整合了基于规则的启发式方法和奖励模型信号，以进一步提升性能。大量实验表明，IntentionReasoner在多个防护基准、生成质量评估和越狱攻击场景中表现出色，显著增强了安全性的同时，有效降低了过度拒绝率并提高了响应质量。"
+    },
+    {
+      "id": "arXiv:2508.20766",
+      "title": "Turning the Spell Around: Lightweight Alignment Amplification via Rank-One Safety Injection",
+      "chinese_title": "扭转咒语：通过一阶安全注入实现轻量级对齐放大",
+      "authors": "Harethah Abu Shairah, Hasan Abed Al Kader Hammoud, George Turkiyyah, Bernard Ghanem",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20766&sa=D&source=editors&ust=1756483668709242&usg=AOvVaw2D-wR8DdM9regSvTO7p0mi",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20766&sa=D&source=editors&ust=1756483668709318&usg=AOvVaw2w-jff6ywZ5DFSs-tJxxMg",
+      "chinese_abstract": "大型语言模型（LLMs）中的安全对齐通常涉及调节内部表示以拒绝有害请求。最近的研究表明，这些安全机制可以通过消融或移除模型内特定的表示方向来绕过。在本文中，我们提出了反的方法：一阶安全注入（ROSI），这是一种白盒方法，通过将其激活永久地导向拒绝调节子空间来放大模型的安全对齐。ROSI作为一种简单的、无需微调的一阶权重修改，应用于所有残差流写入矩阵。所需的安全方向可以从一小组有害和无害的指令对中计算出来。我们表明，ROSI持续提高了安全拒绝率——经Llama Guard 3评估——同时在MMLU、HellaSwag和Arc等标准基准上保持了模型的实用性。此外，我们还表明，ROSI还可以通过放大“未经审查”模型自身的潜在安全方向来重新对齐它们，证明了其作为一种有效的最后一里路安全程序的实用性。我们的结果表明，有针对性的、可解释的权重引导是提高LLM安全性的一种廉价而有效的机制，补充了资源更密集的微调范式。"
+    },
+    {
+      "id": "arXiv:2508.20374",
+      "title": "TCIA: A Task-Centric Instruction Augmentation Method for Instruction Finetuning",
+      "chinese_title": "TCIA：一种用于指令微调的以任务为中心的指令增强方法",
+      "authors": "Simin Ma, Shujian Liu, Jun Tan, Yebowen Hu, Song Wang, Sathish Reddy Indurthi, Sanqiang Zhao, Liwei Wu, Jianbing Han, Kaiqiang Song",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.20374&sa=D&source=editors&ust=1756483668689133&usg=AOvVaw0fViCL1iUPQQlcZFiLX8ZM",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.20374&sa=D&source=editors&ust=1756483668689299&usg=AOvVaw0QDaFcXAxoiAPDwTqML6m9",
+      "chinese_abstract": "多样化的指令数据对于大型语言模型的有效指令调整至关重要，因为它能使模型泛化到不同类型的输入。构建这样一个多样化的指令数据集是此过程中的一个基本步骤。现有方法通常利用大型语言模型来自动探索和生成多样化的指令，以确保数据的多样性和质量。然而，它们往往忽略了现实世界应用中的一个重要因素：任务相关性。实际上，只有少数现实世界的应用需要一个真正的通用模型；大多数应用受益于针对其特定用例量身定制的任务特定知识。因此，开发不仅能保持多样性，而且还能针对特定现实场景进行优化的指令增强方法至关重要。因此，我们引入了以任务为中心的指令增强（TCIA），这是一个在保持多样性和任务对齐的同时系统地扩展指令的框架。通过在离散的查询-约束空间中表示指令，TCIA创建了一组丰富的与任务相关的指令，并使模型能够在不牺牲整体性能的情况下泛化到这些任务特定的指令。实验表明，TCIA在四个现实世界的任务特定应用中，将开源LLM的性能平均提高了8.7%，在某些情况下甚至超过了领先的闭源模型。这些改进不影响通用的指令遵循能力，使TCIA成为一个可扩展且高效的解决方案，用于将LLM应用于以任务为中心的现实世界应用。"
+    },
+    {
+      "id": "arXiv:2508.21048",
+      "title": "Veritas: Generalizable Deepfake Detection via Pattern-Aware Reasoning",
+      "chinese_title": "Veritas：通过模式感知推理实现可泛化的Deepfake检测",
+      "authors": "Hao Tan, Jun Lan, Zichang Tan, Ajian Liu, Chuanbiao Song, Senyuan Shi, Huijia Zhu, Weiqiang Wang, Jun Wan, Zhen Lei",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2508.21048&sa=D&source=editors&ust=1756483668699348&usg=AOvVaw3T5kFeYPvEgY3N5xH9sHic",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2508.21048&sa=D&source=editors&ust=1756483668699419&usg=AOvVaw15zaHP3PSqMgJuPB-Livyf",
+      "chinese_abstract": "由于现实世界场景中伪造内容的复杂性和不断演变的性质，Deepfake检测仍然是一个巨大的挑战。然而，现有的学术基准与工业实践存在严重差异，通常具有同质化的训练来源和低质量的测试图像，这阻碍了当前检测器的实际部署。为了弥合这一差距，我们引入HydraFake，一个通过分层泛化测试模拟现实世界挑战的数据集。具体来说，HydraFake涉及多样化的deepfake技术和野外伪造品，以及严格的训练和评估协议，涵盖了未见过的模型架构、新兴的伪造技术和新颖的数据领域。基于这一资源，我们提出Veritas，一个基于多模态大语言模型（MLLM）的deepfake检测器。与普通的思维链（CoT）不同，我们引入了模式感知推理，该推理涉及“规划”和“自我反思”等关键推理模式，以模拟人类的法证过程。我们进一步提出了一个两阶段训练流程，将这种deepfake推理能力无缝地内化到当前的MLLM中。在HydraFake数据集上的实验表明，尽管以前的检测器在跨模型场景中表现出很好的泛化能力，但它们在未见过的伪造品和数据领域上表现不佳。我们的Veritas在不同的分布外（OOD）场景中取得了显著的增益，并能够提供透明和可信的检测输出。"
+    }
+  ],
+  "clusters": {
+    "大模型对齐与强化学习": [
+      "arXiv:2508.21016",
+      "arXiv:2508.20549",
+      "arXiv:2508.20181",
+      "arXiv:2508.20368",
+      "arXiv:2508.20373",
+      "arXiv:2508.20784",
+      "arXiv:2508.20151",
+      "arXiv:2508.20766"
+    ],
+    "多模态与视觉生成": [
+      "arXiv:2508.21058",
+      "arXiv:2508.20754",
+      "arXiv:2508.21001",
+      "arXiv:2508.20279",
+      "arXiv:2508.20840",
+      "arXiv:2508.21048"
+    ],
+    "音频与其他生成应用": [
+      "arXiv:2508.20665",
+      "arXiv:2508.20584",
+      "arXiv:2508.20991"
+    ],
+    "大模型训练与效率优化": [
+      "arXiv:2508.20293",
+      "arXiv:2508.20577",
+      "arXiv:2508.20374"
+    ]
+  }
+}
