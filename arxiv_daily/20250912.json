@@ -1,0 +1,214 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2509.09679",
+      "title": "ButterflyQuant: Ultra-low-bit LLM Quantization through Learnable Orthogonal Butterfly Transforms",
+      "chinese_title": "ButterflyQuant：通过可学习的正交蝶形变换实现超低比特大语言模型量化",
+      "authors": "Bingxin Xu, Zhen Dong, Oussama Elachqar, Yuzhang Shang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09679&sa=D&source=editors&ust=1757670990852893&usg=AOvVaw3U_MA6OxLRtZixg6IoQOOM",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09679&sa=D&source=editors&ust=1757670990852927&usg=AOvVaw0Hc_AsmTu1J0x3kZ_kgJYz",
+      "chinese_abstract": "大型语言模型需要巨大的内存占用，严重限制了其在消费级硬件上的部署。量化通过降低数值精度来减少内存，但极端的2比特量化由于激活值中的异常值而遭受灾难性的性能损失。基于旋转的方法，如QuIP和QuaRot，在量化前应用正交变以消除异常值，利用了计算不变性：$\\mathbf{y} = \\mathbf{Wx} = (\\mathbf{WQ}^T)(\\mathbf{Qx})$，其中$\\mathbf{Q}$是正交矩阵。然而，这些方法使用固定的变换——哈达玛矩阵，虽然实现了最优的最坏情况相干性$\\mu = 1/\\sqrt{n}$，但无法适应特定的权重分布。我们发现不同的Transformer层表现出独特的异常值模式，这促使我们采用层自适应的旋转而非一刀切的方法。我们提出了ButterflyQuant，它用由连续吉文斯旋转角参数化的可学习蝶形变换取代哈达玛旋转。与哈达玛矩阵中不可微分且禁止梯度学习的离散$\\{+1, -1\\}$元素不同，蝶形变换的连续参数化能够实现平滑优化，同时通过构造保证正交性。这种正交约束确保了在抑制异常值方面的理论保证，同时以仅$\\frac{n \\log n}{2}$个可学习参数实现了$O(n \\log n)$的计算复杂度。我们进一步引入了对变换后激活值的均匀性正则化，以促进更平滑、更适合量化的分布。学习过程仅需128个校准样本，在单个GPU上几分钟内即可收敛——这是一次性的可忽略成本。在LLaMA-2-7B模型的2比特量化上，ButterflyQuant的困惑度达到了15.4，而QuaRot为22.1。"
+    },
+    {
+      "id": "arXiv:2509.09547",
+      "title": "Improving Video Diffusion Transformer Training by Multi-Feature Fusion and Alignment from Self-Supervised Vision Encoders",
+      "chinese_title": "通过自监督视觉编码器的多特征融合与对齐改进视频扩散Transformer训练",
+      "authors": "Dohun Lee, Hyeonho Jeong, Jiwook Kim, Duygu Ceylan, Jong Chul Ye",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09547&sa=D&source=editors&ust=1757670990856688&usg=AOvVaw0jgB07n1-Kd0E7seSGBrC5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09547&sa=D&source=editors&ust=1757670990856724&usg=AOvVaw3B925qhayt7SDGZD1iygI5",
+      "chinese_abstract": "近年来，视频扩散模型由于系列架构创新（如扩散Transformer）和新颖训练目标（如流匹配）的应用而取得了飞速发展。相比之下，提高此类模型的特征表示能力方面受到的关注较少。在这项工作中，我们展示了通过将视频生成器的中间特征与预训练视觉编码器的特征表示进行对齐，可以使视频扩散模型的训练受益。我们提出了一个新的度量标准，并对各种视觉编码器进行了深入分析，以评估其判别性和时间一致性，从而评估它们是否适合用于视频特征对齐。基于此分析，我们提出了Align4Gen，这是一种新颖的多特征融合与对齐方法，并将其集成到视频扩散模型的训练中。我们在无条件和类别条件视频生成任务上评估了Align4Gen，结果表明，通过各种度量标准的量化，该方法改善了视频生成效果。完整的视频结果可在我们的项目页面上找到：this https URL。"
+    },
+    {
+      "id": "arXiv:2509.09675",
+      "title": "CDE: Curiosity-Driven Exploration for Efficient Reinforcement Learning in Large Language Models",
+      "chinese_title": "CDE: 面向大语言模型高效强化学习的好奇心驱动探索",
+      "authors": "Runpeng Dai, Linfeng Song, Haolin Liu, Zhenwen Liang, Dian Yu, Haitao Mi, Zhaopeng Tu, Rui Liu, Tong Zheng, Hongtu Zhu, Dong Yu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09675&sa=D&source=editors&ust=1757670990853184&usg=AOvVaw0DQOhvBb2aA3FolcqtqEKD",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09675&sa=D&source=editors&ust=1757670990853221&usg=AOvVaw09vPtctVz5uyNwXnNnqqz9",
+      "chinese_abstract": "带有可验证奖励的强化学习（RLVR）是增强大型语言模型（LLM）推理能力的强大范式。然而，当前的RLVR方法通常探索不佳，导致过早收敛和熵崩溃。为了应对这一挑战，我们引入了好奇心驱动探索（CDE），这是一个利用模型自身内在好奇心来引导探索的架。我们通过来自行动者（actor）和评论家（critic）的信号来形式化好奇心：对于行动者，我们使用其生成响应的困惑度；对于评论家，我们使用来自多头架构的值估计的方差。这两种信号都在RLVR框架内作为探索奖励来引导模型。我们的理论分析表明，行动者视角的奖励天生会惩罚过度自信的错误并促进正确响应的多样性；此外，我们将评论家视角的奖励与强化学习中成熟的基于计数的探索奖励联系起来。在实验上，我们的方法在AIME基准测试中使用GRPO/PPO，相较于标准RLVR实现了约+3个点的改进。进一步的分析揭示了RLVR内部的校准崩溃机制，为常见的LLM失败模式提供了新的见解。"
+    },
+    {
+      "id": "arXiv:2509.09674",
+      "title": "SimpleVLA-RL: Scaling VLA Training via Reinforcement Learning",
+      "chinese_title": "SimpleVLA-RL: 通过强化学习扩展视觉-语言-动作模型的训练",
+      "authors": "Haozhan Li, Yuxin Zuo, Jiale Yu, Yuhao Zhang, Zhaohui Yang, Kaiyan Zhang, Xuekai Zhu, Yuchen Zhang, Tianxing Chen, Ganqu Cui, Dehui Wang, Dingxiang Luo, Yuchen Fan, Youbang Sun, Jia Zeng, Jiangmiao Pang, Shanghang Zhang, Yu Wang, Yao Mu, Bowen Zhou, Ning Ding",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09674&sa=D&source=editors&ust=1757670990853440&usg=AOvVaw25IdKyiQkkyJL8N6U8l6E-",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09674&sa=D&source=editors&ust=1757670990853474&usg=AOvVaw2bdtuAF_-ESucBW1G8ltaD",
+      "chinese_abstract": "视觉-语言-动作（VLA）模型最近已成为机器人操控的强大范式。尽管大规模预训练和监督微调（SFT）取得了实质性进展，但这些模型面临两个基本挑战：（i）SFT扩展所需的大规模人类操作机器人轨迹数据稀缺且成本高昂，以及（ii）在涉及分布变化的ת务上泛化能力有限。大型推理模型（LRM）的最新突破表明，强化学习RL）可以显著增强逐步推理能力，这自然引出一个问题：RL能否同样改善VLA的长期逐步动作规划？在这项工作中，我们介绍了SimpleVLA-RL，一个专为VLA模型量身定制的高效RL框架。在veRL的基础上，我们引入了VLA特定的轨迹采样、可扩展的并行化、多环境渲染和优化的损失计算。当应用于OpenVLA-OFT时，SimpleVLA-RL在LIBERO上实现了最先进的性能，甚至在我们引入的探索增强策略下，在RoboTwin 1.0和2.0上超越了$\\pi_0$。SimpleVLA-RL不仅减少了对大规模数据的依赖，实现了稳健的泛化，而且在真实世界任务中显著超越了SFT。此外，我们在RL训练过程中发现了一种新现象“pushcut”，即策略发现了超出先前训练过程中所见的模式。Github: this https URL"
+    },
+    {
+      "id": "arXiv:2509.09090",
+      "title": "SQAP-VLA: A Synergistic Quantization-Aware Pruning Framework for High-Performance Vision-Language-Action Models",
+      "chinese_title": "SQAP-VLA：一个用于高性能视觉-语言-动作模型的协同量化感知剪枝框架",
+      "authors": "Hengyu Fang, Yijiang Liu, Yuan Du, Li Du, Huanrui Yang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09090&sa=D&source=editors&ust=1757670990867127&usg=AOvVaw1z1EfzIgfdvm2gGrQ_V8tr",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09090&sa=D&source=editors&ust=1757670990867160&usg=AOvVaw1IDkCnjMyKQKyfxZRE84kz",
+      "chinese_abstract": "视觉-语言-动作（VLA）模型在具身智能方面展现了前所未有的能力。然而，其巨大的计算和内存成本阻碍了它们的实际部署。现有的VLA压缩和加速方法以临时方式进行量化或令牌剪枝，但由于观察到的不兼容性，未能将两者结合以实现整体效率提升。本研究介绍了SQAP-VLA，这是第一个结构化的、无需训练的VLA推理加速框架，它同时实现了最先进的量化和令牌剪枝。我们通过协同计量化和令牌剪枝流程来克服不兼容性，其中我们提出了新的量化感知令牌剪枝标准，该标准适用于激进量化后的模型，同时改进了量化器设计以增强剪枝效果。当应用于标准VLA模型时，SQAP-VLA在计算效率和推理速度方面取得了显著提升，同时成功保持了核心模型性能，与原始模型相比，实现了1.93倍的加速和高达4.5%的平均成功率提升。"
+    },
+    {
+      "id": "arXiv:2509.09174",
+      "title": "EchoX: Towards Mitigating Acoustic-Semantic Gap via Echo Training for Speech-to-Speech LLMs",
+      "chinese_title": "EchoX: 通过回声训练缓解语音到语音大语言模型的声学-语义鸿沟",
+      "authors": "Yuhao Zhang, Yuhao Du, Zhanchen Dai, Xiangnan Ma, Kaiqi Kou, Benyou Wang, Haizhou Li",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09174&sa=D&source=editors&ust=1757670990864008&usg=AOvVaw17lxmHG64pV8DcVfaVMtij",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09174&sa=D&source=editors&ust=1757670990864041&usg=AOvVaw2M1ZxxOKd_82uMn6ESH9zF",
+      "chinese_abstract": "语音到语音大型语言模型（SLLM）正吸引越来越多的关注。源自基于文本的大型语言模型（LLM），SLLM在知识和推理能力上常常表现出退化。我们假设这种限制源于当前SLLM的训练范式未能弥合特征表示空间中的声学-语义鸿沟。为了解决这个问题，我们提出了EchoX，它利用语义表示并动态生成语音训练目标。这种方法整合了声学和语义学习，使EchoX能够作为语音LLM保留强大的推理能力。实验结果表明，EchoX使用约六千小时的训练数据，在多个基于知识的问答基准测试中取得了先进的性能。该项目可在 this https URL 获取。"
+    },
+    {
+      "id": "arXiv:2509.09284",
+      "title": "Tree-OPO: Off-policy Monte Carlo Tree-Guided Advantage Optimization for Multistep Reasoning",
+      "chinese_title": "Tree-OPO: 用于多推理的离策略蒙特卡洛树引导优势优化",
+      "authors": "Bingning Huang, Tu Nguyen, Matthieu Zimmer",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09284&sa=D&source=editors&ust=1757670990849579&usg=AOvVaw0BtNA-fmh5M-sT3wDroPhR",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09284&sa=D&source=editors&ust=1757670990849614&usg=AOvVaw1p30zlBwLA-s8yg0tWJGDc",
+      "chinese_abstract": "最近在大型语言模型（LLM）推理方面的进展表明，蒙特卡洛树搜索（MCTS）在生成高质量中间轨迹方面非常有效，尤其是在数学和符号领域。受此启发，我们探索如何将传统上用于训练价值或奖励模型的MCTS派生轨迹，重新用于改进基于偏好的强化学习（RL）中的策略优化。具体来说，我们关注组相对策略优化（GRPO），这是一种最近提出的无需价值网络即可实现偏好一致性策略学习的算法。我们提出了一种分阶段的GRPO训练范，其中补全序列来源于部分展开的MCTS rollout，为优势估计引入了一种新颖的树状结构设置。这产生了一类丰富的前缀条件奖励信号，我们对其进行了理论和实证分析。我们的初步结果表明，虽然结构化的优势估计可以稳定更新并更好地反映组合推理的质量，但优势饱和和奖励信号崩溃等挑战依然存在。我们提出了启发式和统计解决方案来缓解这些问题，并讨论了在分阶段或树状奖励结构下学习的开放性挑战。"
+    },
+    {
+      "id": "arXiv:2509.09677",
+      "title": "The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs",
+      "chinese_title": "收益递减的幻觉：衡量大语言模型的长时程执行能力",
+      "authors": "Akshit Sinha, Arvindh Arun, Shashwat Goel, Steffen Staab, Jonas Geiping",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09677&sa=D&source=editors&ust=1757670990846556&usg=AOvVaw3H24LYTMVcqHCnld2iFCbt",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09677&sa=D&source=editors&ust=1757670990846718&usg=AOvVaw3K0gjqjiFz6rkWBW1kfzXz",
+      "chinese_abstract": "持续扩展大型语言模型（LLMs）是否会带来递减的回报？现实世界的价值往往源于智能体能够完成的任务的长度。我们在这项工作中首先观察到一个简单但违反直觉的事实：单步准确率的边际提升可以复合为模型成功完成任务长度的指数级改进。然后，我们认为，当简单任务变长时，LLMs的失败源于执行上的错误，而非推理能力的不足。我们提议通过明确提供解决长时程任务所需的知识和计划来分离执行能力。我们发现，即使小型模型具有100%的单轮准确率，大型模型也能正确执行显著更多的轮次。我们观察到，随着步骤数的增加，模型的每步准确率会下降。这不仅仅是由于长上下文的限制——奇怪的是，我们观察到一种自条件效应——当上下文中包含模型先前轮次的错误时，模型更容易犯错。自条件效应并不会仅通过扩大模型规模而减少。相比之下，最近的“思考”模型不会自条件化，并且可以在单轮内执行更长的任务。我们最后通过基准测试前沿“思考”模型在单轮内可执行的任务长度来总结。总的来说，通过关注执行能力，我们希望调和关于LLMs如何解决复杂推理问题却在简单任务变长时失败的争论，并强调扩大模型规模和顺序测试时计算对于长时程任务的巨大益处。"
+    },
+    {
+      "id": "arXiv:2509.09055",
+      "title": "Improving LLM Safety and Helpfulness using SFT and DPO: A Study on OPT-350M",
+      "chinese_title": "使用SFT和DPO提升LLM的安全性与有用性：一项基于OPT-350M的研究",
+      "authors": "Piyush Pant",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09055&sa=D&source=editors&ust=1757670990867834&usg=AOvVaw0IptTS_E8XX_7t9aK8KIXk",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09055&sa=D&source=editors&ust=1757670990867867&usg=AOvVaw2xvqsD2MxzxiCL7I_YBaHp",
+      "chinese_abstract": "本研究调查了对齐技术——监督微调（SFT）、直接偏好优化（DPO）以及SFT+DPO组合方法——在提升OPT-350M语言模型的安全性和有用性方面的有效性。我们利用Anthropic的有用-无害RLHF数据集，训练并评估了四个模型：基础的OPT-350M、一个SFT模型、一个DPO模型以及一个同时使用SFT和DPO训练的模型。我们引入了三个关键评估指标：无害率（HmR）、有用率（HpR）和一个综合对齐分数（CAS），这些指标均源自奖励模型的输出。结果显示，虽然SFT优于DPO，但SFT+DPO组合模型在所有指标上均表现最佳，证明了这些技术的互补性。我们的发现也凸显了由噪声数据、有限的GPU资源和训练限制带来的挑战。本研究全面审视了微调策略如何响模型对齐，并为未来更稳健的对齐流程提供了基础。"
+    },
+    {
+      "id": "arXiv:2509.09332",
+      "title": "OmniEVA: Embodied Versatile Planner via Task-Adaptive 3D-Grounded and Embodiment-aware Reasoning",
+      "chinese_title": "OmniEVA: 通过任务自适应3D接地和具身感知推理实现的具身通用规划器",
+      "authors": "Yuecheng Liu, Dafeng Chi, Shiguang Wu, Zhanguang Zhang, Yuzheng Zhuang, Bowen Yang, He Zhu, Lingfeng Zhang, Pengwei Xie, David Gamaliel Arcos Bravo, Yingxue Zhang, Jianye Hao, Xingyue Quan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09332&sa=D&source=editors&ust=1757670990860519&usg=AOvVaw2YSE_VSLBYcZGh-mng5AgB",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09332&sa=D&source=editors&ust=1757670990860560&usg=AOvVaw1FHoJXhe3LE9qcPC1SdRUC",
+      "chinese_abstract": "多模态大型语言模型（MLLM）的最新进展为具身智能开辟了新机遇，使其能够进行多模态理、推理、交互以及连续的空间决策。然而，当前基于MLLM的具身系统面临两个关键限制。首先是几何适应性差距：仅在2D输入上训练或通过硬编码注入3D几何信息的模型，要么缺乏足够的空间信息，要么2D泛化能力受限，导致在具有不同空间需求的任务中适应性差。其次是具身约束差距：先前的工作常常忽略真实机器人的物理约束和能力，导致制定的任务计划虽然理论上可行但实际上无法执行。为了解决这些差距，我们引入了OmniEVA——一个具身通用规划器，通过两项关键创新实现了先进的具身推理和任务规划：（1）任务自适应3D接地机制，引入了一个门控路由器，根据上下文需求对3D融合进行显式选择性调节，为多样的具身任务实现上下文感知的3D接地。（2）具身感知推理框架，将任务目标和具身约束共同纳入推理循环，从而制定出既有目标导向又可执行的规划决策。广泛的实验结果表明，OmniEVA不仅在通用具身推理性能上达到了最先进水平，而且在广泛的下游场景中表现出强大的能力。在一系列我们提出的具身基准测试（包括基本任务和复合任务）上的评估，证实了其稳健和通用的规划能力。项目页面：this https URL"
+    },
+    {
+      "id": "arXiv:2509.09210",
+      "title": "ProgD: Progressive Multi-scale Decoding with Dynamic Graphs for Joint Multi-agent Motion Forecasting",
+      "chinese_title": "ProgD: 基于动态图的渐进式多尺度解码用于联合多智能体运动预测",
+      "authors": "Xing Gao, Zherui Huang, Weiyao Lin, Xiao Sun",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09210&sa=D&source=editors&ust=1757670990850537&usg=AOvVaw0N8Bfszje3V6gM4u2BUrK3",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09210&sa=D&source=editors&ust=1757670990850571&usg=AOvVaw1gFVtGpSvM685sUYLloBc7",
+      "chinese_abstract": "确预测周围智能体的运动对于自动驾驶车辆的安全规划至关重要。近期的进展已将预测技术从单个智能体扩展到多个交互智能体的联合预测，并采用多种策略来处理智能体未来运动中的复杂交互。然而，这些方法忽略了这些交互的演变特性。为解决此限制，我们借助基于动态异构图的场景建模，提出了一种新颖的渐进式多尺度解码策略，称为ProgD。具体而言，为了明确且全面地捕捉未来场景中不断演变的社会交互（考虑到其固有的不确定性），我们设计了一种使用动态异构图的场景渐进式建模方法。随着这种动态异构图的展开，我们设计了一种分解式架构来处理未来场景中的时空依赖关系，并逐步消除多个智能体未来运动的不确定性。此外，我们还引入了多尺度解码过程，以改进未来场景建模和智能体未来运动的一致性预测。所提出的ProgD在INTERACTION多智能体预测准测试中取得了最先进的性能，排名第一，并在Argoverse 2多世界预测基准测试中表现出色。"
+    },
+    {
+      "id": "arXiv:2509.09143",
+      "title": "Objectness Similarity: Capturing Object-Level Fidelity in 3D Scene Evaluation",
+      "chinese_title": "物体性相似度：在3D场景评估中捕捉物体级别的保真度",
+      "authors": "Yuiko Uchida, Ren Togo, Keisuke Maeda, Takahiro Ogawa, Miki Haseyama",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09143&sa=D&source=editors&ust=1757670990865759&usg=AOvVaw3EudTVe3SB-4_0zBorFhp3",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09143&sa=D&source=editors&ust=1757670990865805&usg=AOvVaw3R9YTnFNIQHkKx_Y7Di6zP",
+      "chinese_abstract": "本文提出了物体性相似度（OSIM），一种新颖的3D场景评估指标，它明确关注“物体”——人类视觉感知的基本单位。现有的指标评估整体图像质量，导致与人类感知存在差异受神经心理学见解的启发，我们假设人类对3D场景的识别从根本上涉及到对单个物体的关注。OSIM通过利用物体检测模型及其特征表示来量化场景中每个物体的“物体性”，从而实现以物体为中心的评估。我们的用户研究表明，与现有指标相比，OSIM与人类感知的对齐度更高。我们还使用多种方法分析了OSIM的特性。此外，我们在标准化的实验设置下重新评估了近期的3D重建和生成模型，以阐明该领域的进展。代码可在 this https URL 获取。"
+    },
+    {
+      "id": "arXiv:2509.09610",
+      "title": "Mechanistic Learning with Guided Diffusion Models to Predict Spatio-Temporal Brain Tumor Growth",
+      "chinese_title": "利用引导扩散模型进行机理学习以预测时空脑肿瘤生长",
+      "authors": "Daria Laslo, Efthymios Georgiou, Marius George Linguraru, Andreas Rauschecker, Sabine Muller, Catherine R. Jutzeler, Sarah Bruningk",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09610&sa=D&source=editors&ust=1757670990854963&usg=AOvVaw3kDmZw4vwBmMEHUQQ_IvdJ",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09610&sa=D&source=editors&ust=1757670990855029&usg=AOvVaw15gFq3hioUWeUKN2Q95MUk",
+      "chinese_abstract": "预测脑肿瘤的时空进展对于指导神经肿瘤学的临床决策至关重要。我们提出了一个混合机理学习框架，该框架结合了数学肿瘤生长模型和引导去噪扩散隐式模型（DDIM），以从先前的扫描图像中合生成在解剖学上可行的未来MRI图像。该机理模型被表述为一个常微分方程组，捕捉了包括放疗效应在内的时间性肿瘤动态，并估计未来的肿瘤负荷。这些估计值作为梯度引导的DDIM的条件，使得图像合成能够与预测的生长和患者的解剖结构保持一致。我们在BraTS成人和儿科胶质瘤数据集上训练我们的模型，并在60个内部儿科弥漫性中线胶质瘤（DMG）例的纵向轴向切片上进行评估。我们的框架根据空间相似性指标生成了逼真的随访扫描图像。它还引入了肿瘤生长概率图，这些图谱通过95百分位的豪斯多夫距离显示，捕捉了临床相关的肿瘤生长范围和方向性。该方法能够在数据有限的情况下实现基于生物学信息的图像生成，提供了考虑机理先验的生成-时空预测。"
+    },
+    {
+      "id": "arXiv:2509.09204",
+      "title": "Bona fide Cross Testing Reveals Weak Spot in Audio Deepfake Detection Systems",
+      "chinese_title": "真实交叉测试揭示音频深度伪造检测系统的薄弱环节",
+      "authors": "Chin Yuen Kwok, Jia Qi Yip, Zhen Qiu, Chi Hung Chi, Kwok Yan Lam",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09204&sa=D&source=editors&ust=1757670990862419&usg=AOvVaw0wEQc4TmqWl-RBD7GS-zQI",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09204&sa=D&source=editors&ust=1757670990862451&usg=AOvVaw2kVN1DUB3ebaFd9-5oGUPc",
+      "chinese_abstract": "音频深度伪造检测（ADD）模型通常使用结合多个合成器的数据集进行评估，性能以单一的等错误率（EER）报告。然而，这种方法不成比例地加权了样本较多的合成器，低估了其他合成器，从而降低了EER的整体可靠性。此外，大多数ADD数据集在真实语音方面缺乏多样性，通常只包含单一环境和语音风格（例如，干净的朗读语音），这限制了它们模拟真实世界条件的能力。为了解决这些挑战，我们提出了“真实交叉测试”（bona fide cross-testing），这是一种新颖的评估框架，它结合了多样化的真实数据集并汇总EER以进行更平衡的评估。与传统评估方法相比，我们的方法提高了鲁棒性和可解释性。我们对超过150个合成器在九种真实语音类型上进行了基准测试，并发布了一个新的数据集以促进进一步的研究，网址为this https URL。"
+    },
+    {
+      "id": "arXiv:2509.09155",
+      "title": "HISPASpoof: A New Dataset For Spanish Speech Forensics",
+      "chinese_title": "HISPASpoof：一个新的西班牙语语音取证数据集",
+      "authors": "Maria Risques, Kratika Bhagtani, Amit Kumar Singh Yadav, Edward J. Delp",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09155&sa=D&source=editors&ust=1757670990864951&usg=AOvVaw2lP4v0aAd1WV0k5o13M-4H",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09155&sa=D&source=editors&ust=1757670990864983&usg=AOvVaw2F3iiGzs799wsgJJjfI6Jj",
+      "chinese_abstract": "零样本语音克隆（VC）和文本到语音（TTS）方法发展迅速，能够生成高度逼真的合成语音，并引发了对其滥用的严重关切。尽管已经为英语和中文开发了众多检测器，但全球超过6亿人使用的西班牙语在语音取证领域仍然代表性不足。为了填补这一空白，我们引入了HISPASpoof，这是首个专为合成音检测和归属设计的大规模西班牙语数据集。它包含了来自六种不同口音的公共语料库的真实语音，以及使用六种零样本TTS系统生成的合成语音。我们评估了五种代表性方法，结果表明在英语上训练的检测器无法泛化到西班牙语，而在HISPASpoof上训练则显著提高了检测性能。我们还在HISPASpoof上评估了合成语音归属性能，即识别合成语音的生成方法。因此，HISPASpoof为推进西班牙语中可靠和包容的语音取证提供了一个关键的基准。"
+    },
+    {
+      "id": "arXiv:2509.08897",
+      "title": "Recurrence Meets Transformers for Universal Multimodal Retrieval",
+      "chinese_title": "循环与Transformer结合实现通用多模态检索",
+      "authors": "Davide Caffagni, Sara Sarto, Marcella Cornia, Lorenzo Baraldi, Rita Cucchiara",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.08897&sa=D&source=editors&ust=1757670990871542&usg=AOvVaw1euKjiH6r4LDcKlAkG0gDq",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.08897&sa=D&source=editors&ust=1757670990871596&usg=AOvVaw0qqzj6CSvJGhILSDyYVn1O",
+      "chinese_abstract": "随着多模态检索的快速发展及其在大型语言模型（LLM）和多模态LLM中的应用，日益复杂的检索任务应运而生。现有方法主要依赖于对视觉-语言模型进行特定任务的微调，并且仅限于单模态查询或文档。在本文中，我们提出了ReT-2，一个统一的检索模型，它支持由图像和文本组成的多模态查询，并在文本和图像共存的多模态文档集合中进行搜索。ReT-2利用多层表示和一个带有类似LSTM门控机制的循环Transformer架构，动态地整合跨层和跨模态的信息，以捕捉细粒度的视觉和文本细节。我们在具有挑战性的M2KR和M-BEIR基准上，跨不同检索配置对ReT-2进行了评估。结果表明，ReT-2在各种设置下均持续取得最先进的性能，同时与先前的方法相比，提供了更快的推理速度和更低的内存使用。当集成到检索增强生成流程中时，ReT-2还在Encyclopedic-VQA和InfoSeek数据集上改善了下游任务的性能。我们的源代码和训练好的模型已在以下网址公开：this https URL。"
+    },
+    {
+      "id": "arXiv:2509.09013",
+      "title": "Can Vision-Language Models Solve Visual Math Equations?",
+      "chinese_title": "视觉-语言模型能解视觉数学方程吗？",
+      "authors": "Monjoy Narayan Choudhury, Junling Wang, Yifan Hou, Mrinmaya Sachan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09013&sa=D&source=editors&ust=1757670990869308&usg=AOvVaw1151zVz32zklPw8FEBu3nK",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09013&sa=D&source=editors&ust=1757670990869369&usg=AOvVaw2M8RV4n_YocKFM7aMR6vFw",
+      "chinese_abstract": "尽管视觉-语言模型（VLM）在视觉理解和基于语言的推理方面表现出色，但它们在需要合感知和符号计算的任务上仍然存在困难。我们通过视觉方程求解来研究这一局限性，其中数学方程嵌入在图像中，变量由物体图标表示，系数必须通过计数来推断。虽然VLM在文本方程上表现良好，但它们在视觉接地的对应任务上失败了。为了理解这一差距，我们将任务分解为系数计数和变量识别，并发现即使识别准确，计数也是主要的瓶颈。我们还观察到，识别和推理的组合会引入额外的错误，凸显了多步视觉推理中的挑战。最后，随着方程复杂度的增加，符号推理本身也成为一个限制因素。这些发现揭示了当前VLM的关键弱点，并为未来改进视觉接地的数学推理指明了方向。"
+    },
+    {
+      "id": "arXiv:2509.09356",
+      "title": "Curriculum-Based Multi-Tier Semantic Exploration via Deep Reinforcement Learning",
+      "chinese_title": "通过深度强化学习实现基于课程的多层语义探索",
+      "authors": "Abdel Hakim Drid, Vincenzo Suriani, Daniele Nardi, Abderrezzak Debilou",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09356&sa=D&source=editors&ust=1757670990848361&usg=AOvVaw1FOdPo0vYCPaXewQ64ximY",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09356&sa=D&source=editors&ust=1757670990848396&usg=AOvVaw21m59HF8NZzWjvRrIUrHiG",
+      "chinese_abstract": "自主导航和理解复杂未知环境要求具身智能体具备超越基本感知和移动的能力。真正有效的探索需要智能体拥有更高级的认知能力、对其周围环境进行推理的能力，以及就探索策略做出更明智决策的能力。然而，传统的强化学习方法由于智能体的小策略中嵌入的认知能力有限，难以平衡高效探索和语义理解，在处理语义探索时常常需要人类驾驶员介入。在本文中，我们通过提出一种专为资源高效的语义探索而设计的新型深度强化学习（DRL）架构来解决这挑战。一个关键的方法论贡献是通过分层奖励函数集成了视觉-语言模型（VLM）的常识。VLM查询被建模为一个专门的动作，允许智能体仅在认为有必要获取外部指导时才策略性地查询VLM，从而节省资源。该机制与课程学习策略相结合，旨在指导不同复杂程度的学习，以确保稳健和稳定的学习过程。我们的实验评估结果有力地证明，我们的智能体实现了显著提高的物体发现率，并发展出一种学习到的能力，能有效导航至语义丰富的区域。此外，它还展示了在何时请求外部环境信息方面的策略性掌握。通过展示一种实用且可扩展的方法，将常识性语义推理嵌入自主智能体中，本研究为在机器人领域追求完全智能和自导向的探索提供了一种新颖的途径。"
+    },
+    {
+      "id": "arXiv:2509.09208",
+      "title": "Incentivizing Safer Actions in Policy Optimization for Constrained Reinforcement Learning",
+      "chinese_title": "在约束强化学习的策略优化中激励更安全的行为",
+      "authors": "Somnath Hazra, Pallab Dasgupta, Soumyajit Dey",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09208&sa=D&source=editors&ust=1757670990862215&usg=AOvVaw3dt2OKkFbq3DY38ul5NiLH",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09208&sa=D&source=editors&ust=1757670990862248&usg=AOvVaw0OHRLSig6YSldgAnTUB_IO",
+      "chinese_abstract": "约束强化学习（RL）旨在最大化回报的同时遵守预定义的约束限制，这些限制代表了领域特定的安全要求。在连续控制设置中，学习智能体控制系统行为，平衡奖励最大化和约束满足之间的权衡仍然是一个重大挑战。策略优化方法在约束边界附近常常表现出不稳定性，导致训练性能欠佳。为了解决这个问题，我们引入了一种新颖的方法，在奖励结构之外集成了一个自适应激励机制，以便在接近约束界之前保持在约束范围内。基于这一见解，我们提出了增量惩罚近端策略优化（IP3O），这是一种实用的算法，通过施加逐渐增加的惩罚来稳定训练动态。通过在基准环境上的实证评估，我们证明了IP3O相比于最先进的安全RL算法的有效性。此外，我们通过推导算法所达到的最优性的最坏情况误差界限，提供了理论保证。"
+    },
+    {
+      "id": "arXiv:2509.09052",
+      "title": "MoWE : A Mixture of Weather Experts",
+      "chinese_title": "MoWE：天气专家混合模型",
+      "authors": "Dibyajyoti Chakraborty, Romit Maulik, Peter Harrington, Dallas Foster, Mohammad Amin Nabian, Sanjay Choudhry",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09052&sa=D&source=editors&ust=1757670990868328&usg=AOvVaw29MWm2zjePuYmqN9auu3Ji",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09052&sa=D&source=editors&ust=1757670990868361&usg=AOvVaw0L6syK6pAgXPdEOk4DlJqa",
+      "chinese_abstract": "数据驱动的天气模型近来已达到最先进的性能水平，但近年来进展已趋于平稳。本文引入了一种专家混合（MoWE）方法作为一种新的范式来克服这些限制，其方法不是创建一个新的预报器，而是优化地组合现有模型的输出。MoWE模型的训练所用的计算资源远低于单个专家模型。我们的模型采用了一个基于Vision Transformer的门控网络，该网络动态地学习在每个网格点上对多个“专家”模型的贡献进行加权，并以预报提前期为条件。这种方法创建了一个合成的确定性预报，在均方根误差（RMSE）方面比任何单个组件都更准确。我们的结果证明了该方法的有效性，在2天的预报范围内，其RMSE比表现最佳的人工智能天气模型低10%，显著优于单个专家以及所有专家的简单平均值。这项工作提出了一种计算高效且可扩展的策略，通过最大限度地利用领先的高质量预报模型，推动数据驱动天气预报技术的最新发展。"
+    }
+  ],
+  "clusters": {
+    "大语言模型的强化学习与对齐": [
+      "arXiv:2509.09675",
+      "arXiv:2509.09284",
+      "arXiv:2509.09055",
+      "arXiv:2509.09677",
+      "arXiv:2509.09208"
+    ],
+    "多模态模型与具身智能": [
+      "arXiv:2509.09674",
+      "arXiv:2509.09332",
+      "arXiv:2509.08897",
+      "arXiv:2509.09013",
+      "arXiv:2509.09356"
+    ],
+    "高效模型压缩与推理": [
+      "arXiv:2509.09679",
+      "arXiv:2509.09090",
+      "arXiv:2509.09052"
+    ],
+    "生成模型及其在多媒体与三维场景中的应用": [
+      "arXiv:2509.09547",
+      "arXiv:2509.09174",
+      "arXiv:2509.09204",
+      "arXiv:2509.09155",
+      "arXiv:2509.09610",
+      "arXiv:2509.09143",
+      "arXiv:2509.09210"
+    ]
+  }
+}
