@@ -1,0 +1,212 @@
+{
+  "papers": [
+    {
+      "id": "arXiv:2509.10423",
+      "title": "Mutual Information Tracks Policy Coherence in Reinforcement Learning",
+      "chinese_title": "互信息追踪强化学习中的策略一致性",
+      "authors": "Cameron Reid, Wael Hafez, Amirhossein Nazeri",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10423&sa=D&source=editors&ust=1757942147177926&usg=AOvVaw1XERifyW_wU69dsuRkZVa1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10423&sa=D&source=editors&ust=1757942147178126&usg=AOvVaw2Bctuc8FoB7HNwbybTd9I_",
+      "chinese_abstract": "摘要：部署在真实世界环境中的强化学习（RL）智能体面临着传感器故障、执行器磨损和环境变化导致的性能下降问题，但它们缺乏内在的机制来检测和诊断这些故障。我们提出了一个信息论框架，该框架既揭示了强化学习的基本动态，又为诊断部署时的异常提供了实用方法。通过分析机器人控制任务中状态-动作互信息的模式，我们首先证明了成功的学习表现出特有的信息特征：尽管状态熵在增加，状态和动作之间的互信息仍从0.84比特稳步增加到2.83比特（增长238%），这表明智能体对任务相关模式的注意力越来越有选择性。有趣的是，状态、动作和下一状态的联合互信息 MI(S,A;S') 呈现倒U形曲线，在学习早期达到峰值，然后随着智能体专精化而下降，这表明从广泛探索到高效利用的转变。更具即时应用价值的是，我们展示了信息度量可以差异化地诊断系统故障：观测空间（即状态）的噪声（传感器故障）会在所有信息通道上产生广泛的崩溃，状态-动作耦合显著下降；而动作空间的噪声（执行器故障）则选择性地破坏动作-结果的可预测性，同时保留状态-动作关系。这种通过受控扰动实验证明的差异化诊断能力，能够在不修改架构或降低性能的情况下实现精确的故障定位。通过将信息模式确立为学习的标志和系统健康的诊断工具，我们为能够基于信息论原理进行自主故障检测和策略调整的自适应强化学习系统奠定了基础。"
+    },
+    {
+      "id": "arXiv:2509.09838",
+      "title": "Revisiting Actor-Critic Methods in Discrete Action Off-Policy Reinforcement Learning",
+      "chinese_title": "重温离散动作异策略强化学习中的Actor-Critic方法",
+      "authors": "Reza Asad, Reza Babanezhad, Sharan Vaswani",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09838&sa=D&source=editors&ust=1757942147221449&usg=AOvVaw047o19K4Iapsc2tBlW7M3V",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09838&sa=D&source=editors&ust=1757942147221544&usg=AOvVaw3SqkRvFurFVVi8uHr_0xi5",
+      "chinese_abstract": "摘要：基于值函数的方法（如DQN）是处理具有离散动作环境（如Atari游戏）的异策略强化学习的默认方法。常见的基于略的方法要么是在策略（on-policy）且不能有效地从异策略数据中学习（如PPO），要么在离散动作设置下经验性能较差（如SAC）。因此，我们从离散SAC（DSAC）出发，重新审视了在这种设置下Actor-Critic方法的设计。首先，我们确定Actor和Critic熵之间的耦合是DSAC性能不佳的主要原因。我们证明，仅仅通过解耦这些组件，DSAC的性能就可以与DQN相媲美。受此启发，我们引入了一个灵活的异策略Actor-Critic框架，该框架将DSAC作为一个特例包含在内。我们的框架允许使用m步贝尔曼算子进行Critic更新，并能将标准策略优化方法与熵正则化相结合来实例化最终的Actor目标。理论上，我们证明了所提出的方法在表格设置下可以保证收敛到最优正则化值函数。在经验上，我们证明了这些方法在标准Atari游戏上的性能可以接近DQN，并且即使没有熵正则化或显式探索也能做到这一点。"
+    },
+    {
+      "id": "arXiv:2509.09177",
+      "title": "Clip Your Sequences Fairly: Enforcing Length Fairness for Sequence-Level RL",
+      "chinese_title": "公平地裁剪您的序列：为序列级强化学习强制执行长度公平性",
+      "authors": "Hanyi Mao, Quanjia Xiao, Lei Pang, Haixiao Liu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09177&sa=D&source=editors&ust=1757942147250117&usg=AOvVaw0N4izWFSQmwNDwJKFvP6n1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09177&sa=D&source=editors&ust=1757942147250206&usg=AOvVaw2cyXP-2Bl8aPhj3ZtPfF3O",
+      "chinese_abstract": "摘要：我们提出了FSPO（公平序列策略优化），这是一种针对大语言模型（LLM）的序列级强化学习方法，它直接在重要性采样（IS）权重空间中强制执行长度公平的裁剪。我们重新审视了序列级强化学习方法，并发现将PPO/GRPO风格的裁剪移植到序列时存在不匹配问题：固定的裁剪范围系性地重新加权了短响应与长响应，从而扭曲了有效目标。理论上，我们通过长度重加权误差（LRE）来形式化长度公平性，并证明小的LRE可以保证裁剪后更新与真实更新之间的方向余弦值。FSPO引入了一种简单的、受高斯启发的补救措施：我们使用一个应用了KL校正漂移项并按√L比例缩放的带来裁剪序列的对数重要性采样比率。在经验上，FSPO使不同长度区间的裁剪率趋于平坦，稳定了训练过程，并在多个评估数据集上优于所有基线方法。"
+    },
+    {
+      "id": "arXiv:2509.10128",
+      "title": "Efficient Learning-Based Control of a Legged Robot in Lunar Gravity",
+      "chinese_title": "月球重力下腿式机器人的高效学习控制",
+      "authors": "Philip Arm, Oliver Fischer, Joseph Church, Adrian Fuhrer, Hendrik Kolvenbach, Marco Hutter",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10128&sa=D&source=editors&ust=1757942147201653&usg=AOvVaw1Eq7cl19tm_MHQTeM1F-d_",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10128&sa=D&source=editors&ust=1757942147201736&usg=AOvVaw2gp07Pu6WEgcte9WxielWJ",
+      "chinese_abstract": "摘要：腿式机器人因其在非结构化地形上的卓越机动性，成为探索月球、火星或小行星等低重力天体上挑战性区域的有希望的候选者。然而，由于行星机器人的功率和热预算受到严格限制，这些机器人需要能够轻松迁移到多种重力环境的节能控制方法。在这项工作中，我们引入了一种基于强化学习的腿式机器人控制方法，该方法采用重力缩放的功率优化奖励函数。我们使用该方法在从月球重力（1.62 m/s²）到假设的超级地球（19.62 m/s²）的重力环境中开发并验证了一款运动控制器和一款基座姿态控制器。我们的方法利用重力缩放的奖励函数，成功地在这些重力级别上实现了运动和基座姿态控制的扩展。在地球重力下，功率优化的运动控制器在一个15.65公斤的机器人上以0.4 m/s的速度实现了23.4 W的运动功耗，相比基线策略提高了23%。此外，我们设计了一个恒力弹簧卸载系统，使我们能够在月球重力下进行腿式运动的真实世界实验。在月球重力下，功率优化的控制策略功耗达到12.2 W，比未经功率效率优化的基线控制器低36%。我们的方法为开发跨多个重力级别的腿式机器人节能运动控制器提供了一种可扩展的途径。"
+    },
+    {
+      "id": "arXiv:2509.09712",
+      "title": "The Thinking Therapist: Training Large Language Models to Deliver Acceptance and Commitment Therapy using Supervised Fine-Tuning and Odds Ratio Policy Optimization",
+      "chinese_title": "思考的治疗师：使用监督微调和优势比策略优化训练大型语言模型以提供接纳与承诺疗法",
+      "authors": "Talha Tahir",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09712&sa=D&source=editors&ust=1757942147235906&usg=AOvVaw2rdFPRp525fmo7QtchtFov",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09712&sa=D&source=editors&ust=1757942147236015&usg=AOvVaw1FcypCltuE5aX_rgRBDrzn",
+      "chinese_abstract": "摘要：接纳与承诺疗法（ACT）是第三波认知行为疗法，其在多种精神疾病中的疗效证据日益增多。本研究探讨了后训练方法和显式推理对一个小型开源权重大型语言模型（LLM）提供ACT能力的影响。我们使用由Mistral-Large生成的50组合成ACT对话记录，采用两种不同方法——监督微调（SFT）和优势比策略优化（ORPO）——对Llama-3.2-3b-Instruct进行训练，每种方法都包含有和没有显式思维链（COT）推理步骤的变体。通过将这四种后训练变体与基础Instruct模型进行比较来评估性能。这些模型在模拟治疗会话中进行基准测试，其性能通过ACT保真度测量（ACT-FM）和治疗师共情量表（TES）进行量化评估，评估由一个在人类评估数据上微调过的LLM裁判进行。我们的研究结果表明，经过ORPO训练的模型在ACT保真度（χ²(5) = 185.15, p < .001）和治疗共情（χ²(5) = 140.37, p < .001）方面均显著优于SFT和Instruct对应模型。COT的效果是有条件的，它为SFT模型带来了显著的好处，使ACT-FM分数平均提高了2.68分（p < .001），但对性能更优的ORPO或指令微调变体则没有明显优势。我们认为，ORPO的优越性源于其学习治疗“过程”而非模仿“内容”的能力，这是ACT的一个关键方面，而COT则为仅通过模仿训练的模型提供了一个必要的支架。本研究证实，偏好对齐的策略优化可以有效地向小型LLM灌输ACT能力，并且显式推理的效用高度依赖于底层的训练范式。"
+    },
+    {
+      "id": "arXiv:2509.10297",
+      "title": "The Morality of Probability: How Implicit Moral Biases in LLMs May Shape the Future of Human-AI Symbiosis",
+      "chinese_title": "概率的道德性：大型语言模型中隐含的道德偏见如何塑造人机共生的未来",
+      "authors": "Eoin O'Doherty, Nicole Weinrauch, Andrew Talone, Uri Klempner, Xiaoyuan Yi, Xing Xie, Yi Zeng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10297&sa=D&source=editors&ust=1757942147180065&usg=AOvVaw0qJM8RIyGI1-JvjnAbDx3E",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10297&sa=D&source=editors&ust=1757942147180235&usg=AOvVaw3Cjr1eRX5lMiNSPUlUeIcf",
+      "chinese_abstract": "摘要：人工智能（AI）的飞速发展引发了如何将机器决策与人类道德价值观对齐的紧迫问题。这篇工作论文研究了领先的AI系统如何优先考虑道德结果，以及这揭示了人机共生前景的哪些方面。我们探讨了两个核心问题：（1）当面临困境时，最先进的大型语言模型（LLM）隐含地偏好哪些道德价值观？（2）模型架构、文化起源和可解释的差异如何影响这些道德偏好？为了探索这些问题，我们对六个LLM进行了定量实验，在代表五种道德框架的18个困境中对结果进行排名和评分。我们的发现揭示了惊人一致的价值偏见。在所有模型中，关怀和美德价值观的结果被评为最道德，而自由主义的选择则持续受到惩罚。具备推理能力的模型对情境表现出更高的敏感性，并提供了更丰富的解释，而不具备推理能力模型则产生更统一但更不透明的判断。这项研究做出了三点贡献：（i）在经验上，它对不同文化背景的LLM进行了大规模的道德推理比较；（ii）在理论上，它将概率模型的行为与潜在的价值编码联系起来；（iii）在实践上，它强调了可解释性和文化意识作为关键设计原则，以引导AI走向一个透明、对齐和共生的未来。"
+    },
+    {
+      "id": "arXiv:2509.10408",
+      "title": "Multimodal SAM-adapter for Semantic Segmentation",
+      "chinese_title": "用于语义分割的多模态SAM适配器",
+      "authors": "Iacopo Curti, Pierluigi Zama Ramirez, Alioscia Petrelli, Luigi Di Stefano",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10408&sa=D&source=editors&ust=1757942147193219&usg=AOvVaw21XHZ5cL-Cx-3GNJQ7ALf5",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10408&sa=D&source=editors&ust=1757942147193325&usg=AOvVaw3cAaYSUxVLlPTwyA2dmaoT",
+      "chinese_abstract": "摘要：语义分割是计算机视觉中的一项关键任务，在自动驾驶、医学成像和机器人技术等领域有着广泛应用，并通过深度学习取得了显著进展。然而，当前的方法在面对光照不佳、遮挡和恶劣天气等挑战性条件时仍然很脆弱。为了解决这些限制，最近出现了集成辅助传感器数据（如激光雷达、红外线）的多模态方法，它们提供了补充信息以增强鲁棒性。在这项工作中，我们提出了MM SAM-adapter，一个新颖的框架，它扩展了Segment Anything Model（SAM）的能力，用于多模态语义分割。所提出的方法采用一个适配器网络，将融合后的多模态特征注入到SAM丰富的RGB特征中。这种设计使得模型能够保留RGB特征强大的泛化能力，同时只有在辅助模态提供额外线索时才选择性地融入它们。因此，MM SAM-adapter实现了对多模态信息的均衡高效利用。我们在三个具有挑战性的基准数据集DeLiVER、FMB和MUSES上评估了我们的方法，MM SAM-adapter在这些数据集上均达到了最先进的性能。为了进一步分析各模态的贡献，我们将DeLiVER和FMB划分为RGB-easy和RGB-hard子集。结果一致表明，我们的框架在有利和不利条件下都优于竞争方法，突显了多模态自适应对于鲁棒场景理解的有效性。代码已在链接中提供。"
+    },
+    {
+      "id": "arXiv:2509.10345",
+      "title": "Towards Understanding Visual Grounding in Visual Language Models",
+      "chinese_title": "迈向理解视觉语言模型中的视觉定位",
+      "authors": "Georgios Pantazopoulos, Eda B. Özyiğit",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10345&sa=D&source=editors&ust=1757942147195595&usg=AOvVaw2PZfojDiDkidCpIhjQmq31",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10345&sa=D&source=editors&ust=1757942147195711&usg=AOvVaw011wlP_wic6XpwpT-tsE2_",
+      "chinese_abstract": "摘要：视觉定位（Visual grounding）指的是模型在视觉输入中识别出与文本描述相匹配区域的能力。因此，具备视觉定位能力的模型可以应用于各种领域的广泛应用，包括指代表达理解、回答与图像或视频中细粒度细节相关的问题、通过明确指代实体来为视觉上下文添加字幕，以及在模拟和真实环境中进行低级和高级控制。在这篇综述论文中，我们回顾了现代通用视觉语言模型（VLM）研究关键领域的代表性工作。我们首先概述了定位在VLM中的重要性，然后描绘了开发具备定位能力模型的当代范式的核心组成部分，并考察了它们的实际应用，包括具备定位能力的多模态生成的基准和评估指标。我们还讨论了VLM中视觉定位、多模态思维链和推理之间多方面的相互关系。最后，我们分析了视觉定位固有的挑战，并为未来的研究提出了有希望的方向。"
+    },
+    {
+      "id": "arXiv:2509.10122",
+      "title": "Realism Control One-step Diffusion for Real-World Image Super-Resolution",
+      "chinese_title": "用于真实世界图像超分辨率的真实感可控单步扩散模型",
+      "authors": "Zongliang Wu, Siming Zheng, Peng-Tao Jiang, Xin Yuan",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10122&sa=D&source=editors&ust=1757942147203054&usg=AOvVaw0GNghD5y0EkRRF2L8h0UqA",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10122&sa=D&source=editors&ust=1757942147203142&usg=AOvVaw0F_N0NKE5ZveDQH2wf-XL4",
+      "chinese_abstract": "摘要：预训练的扩散模型通过生成高分辨率重建图像，在真实世界图像超分辨率（Real-ISR）任务中展现出巨大潜力。虽然单步扩散（OSD）方法相比传统的多步方法显著提高了效率，但它们在不同场景下平衡保真度和真实感方面仍存在局限性。由于用于超分辨率的单步扩散模型通常通过单个时间步进行训练或蒸馏，它们缺乏灵活的控制机制来自适应地优先处理这些相互竞争的目标，而这在多步方法中可以通过调整采样步数来内在管理。为了应对这一挑战，我们提出了一种用于真实世界图像超分辨率的真实感可控单步扩散（RCOD）框架。RCOD提供了一种潜在域分组策略，能够在噪声预测阶段对保真度-真实感的权衡进行显式控制，而只需对训练范式和原始训练数据进行最小的修改。我们还引入了一种退化感知的采策略，以使蒸馏正则化与分组策略对齐，并增强对权衡的控制。此外，我们使用了一个视觉提示注入模块，用退化感知的视觉标记替换传统的文本提示，从而增强了恢复准确性和语义一致性。我们的方法在保持计算效率的同时，实现了卓越的保真度和感知质量。大量实验表明，RCOD在定量指标和视觉质量方面均优于最先进的单步扩散方法，并在推理阶段具备灵活的真实感控制能力。代码将予以发布。"
+    },
+    {
+      "id": "arXiv:2509.09880",
+      "title": "Automated Tuning for Diffusion Inverse Problem Solvers without Generative Prior Retraining",
+      "chinese_title": "无需生成先验再训练的扩散逆问题求解器自动调优",
+      "authors": "Yaşar Utku Alçalar, Junno Yun, Mehmet Akçakaya",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09880&sa=D&source=editors&ust=1757942147216455&usg=AOvVaw01qyr4Wq_LPEAWm2rJ672Y",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09880&sa=D&source=editors&ust=1757942147216545&usg=AOvVaw1HOJKHs-JgqKlL6EDri7sl",
+      "chinese_abstract": "摘要：基于扩散/分数的模型最近已成为解决逆问题（包括加速MRI重建）的强大生成先验。尽管它们的灵活性允许将测量模型与学习到的先验解耦，但其性能严重依赖于精心调整的数据保真度权重，尤其是在具有少量去噪步骤的快速采样方案下。现有方法通常依赖于启发式或固定权重，这些方法无法在变化的测量条件和不规则的时间步调度下进行泛化。在这项工作中，我们提出了零样本自适应扩散采样（ZADS），这是一种测试时优化方法，它可以在任意噪声调度下自适应地调整保真度权重，而无需重新训练扩散先验。ZADS将去噪过程视为一个固定的展开采样器，并仅使用欠采样测量以自监督的方式优化保真度权重。在fastMRI膝关节数据集上的实表明，ZADS的性能始终优于传统的压缩感知和最近的基于扩散的方法，展示了其在不同噪声调度和采集设置下提供高保真度重建的能力。"
+    },
+    {
+      "id": "arXiv:2509.09737",
+      "title": "World Modeling with Probabilistic Structure Integration",
+      "chinese_title": "基于概率结构集成的世界建模",
+      "authors": "Klemen Kotar, Wanhee Lee, Rahul Venkatesh, Honglin Chen, Daniel Bear, Jared Watrous, Simon Kim, Khai Loong Aw, Lilian Naing Chen, Stefan Stojanov, Kevin Feigelis, Imran Thobani, Alex Durango, Khaled Jedoui, Atlas Kazemian, Dan Yamins",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09737&sa=D&source=editors&ust=1757942147228149&usg=AOvVaw1jpkd9UeruAlYWOv7hKx-U",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09737&sa=D&source=editors&ust=1757942147228234&usg=AOvVaw3DPWy2Si3Xt4gU_aX_r7DT",
+      "chinese_abstract": "摘要：我们提出了概率结构集成（PSI），一个用于从数据中学习可丰富控制且可灵活提示的世界模型的系统。PSI由一个三步循环组成。第一步，概率预测，涉及构建数据的概率图模型Psi，形式为随机访问的自回归序列模型。Psi支持一套完整的学习到的条件分布，描述了数据中任意变量对任何其他变量集的依赖关系。在第二步，结构提取中，我们展示了如何通过对Psi进行因果推断，以零样本的方式提取数据中潜在的低维属性，这些属性对应于一组多样且有意义的“中间结构”。第三步，集成，通过将这些结构转换为新的标记类型来完成循环，这些标记类型随后被持续地混合回训练数据中，作为条件信号和预测目标。每个这样的循环都增强了Psi的能力，既使其能更好地建模基础数据，又创建了新的控制手柄——类似于一个类似LLM的通用提示语言。我们利用1.4万亿个互联网视频数据标记训练了一个Psi实例；我们用来执行各种有用的视频预测和理解推断；我们提取了最先进的光流、自监督深度和对象分割；并且我们使用这些结构来支持一个完整的预测改进循环。"
+    },
+    {
+      "id": "arXiv:2509.09836",
+      "title": "CoDiCodec: Unifying Continuous and Discrete Compressed Representations of Audio",
+      "chinese_title": "CoDiCodec：统一音频的连续和离散压缩表示",
+      "authors": "Marco Pasini, Stefan Lattner, George Fazekas",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09836&sa=D&source=editors&ust=1757942147222030&usg=AOvVaw2T4hBVbs6RVjREhHhV811E",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09836&sa=D&source=editors&ust=1757942147222113&usg=AOvVaw1y-cJcMoX5MdZB-fIfSnmA",
+      "chinese_abstract": "摘要：在压缩的潜在空间中高效地表示音频信号对于潜在生成建模至关重要。然而，现有的自编码器通常强制在连续嵌入和离散标记之间做出选。此外，在保持音频保真度的同时实现高压缩比仍然是一个挑战。我们引入了CoDiCodec，这是一种新颖的音频自编码器，它通过摘要嵌入高效编码全局特征，并从同一个训练好的模型中产生约11Hz的压缩连续嵌入和速率为2.38kbps的离散标记，从而克服了这些限制，为不同的下游生成任务提供了前所未有的灵活性。这是通过有限标量量化（FSQ）和一种新颖的FSQ-dropout技术实现的，并且除了用于端到端训练的单个一致性损失外，不需要额外的损失项。CoDiCodec支持自回归解码和一种新颖的并行解码策略，后者实现了更优的音频质量和更快的解码速度。在相似比特率下，CoDiCodec在重建音频质量方面优于现有的连续和离散自编码器。我们的工作为音频压缩提供了一种统一的方法，弥合了连续和离散生成建模范式之间的差距。"
+    },
+    {
+      "id": "arXiv:2509.09716",
+      "title": "VStyle: A Benchmark for Voice Style Adaptation with Spoken Instructions",
+      "chinese_title": "VStyle：一个用于通过口语指令进行声音风格自适应的基准",
+      "authors": "Jun Zhan, Mingyang Han, Yuxuan Xie, Chen Wang, Dong Zhang, Kexin Huang, Haoxiang Shi, DongXiao Wang, Tengtao Song, Qinyuan Cheng, Shimin Li, Jun Song, Xipeng Qiu, Bo Zheng",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09716&sa=D&source=editors&ust=1757942147232830&usg=AOvVaw1voapmxTK4Df882ojFEnO1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09716&sa=D&source=editors&ust=1757942147232954&usg=AOvVaw3sWbXqBkXtP2WtioVDtdq8",
+      "chinese_abstract": "摘要：口语语言模型（SLMs）已成为语音理解和生成的统一范式，实现了自然的人机交互。然而，尽管大部分进展集中在语义准确性和指令遵循上，但SLMs根据口语指令调整其说话风格的能力受到的关注有限。我们引入了声音风格自适应（VSA），一新任务，旨在检验SLMs是否能根据自然语言口语指令修改其说话风格，如音色、韵律或角色。为了研究这项任务，我们提出了VStyle，一个双语（中文和英文）基准，涵盖了四类语音生成：声学属性、自然语言指令、角色扮演和隐含共情。我们还引入了“大型音频语言模型作为裁判”（LALM as a Judge）框架，该框架从文本忠实度、风格一致性和自然度三个方面逐步评估输出，确保了可复现和客观的评估。对商业系统和开源SLMs的实验表明，当前模型在可控风格自适应方面存在明显局限，突显了这项任务的新颖性和挑战性。通过发布VStyle及其评估工具包，我们旨在为社区提供一个推动以人为中心的口语交互发展的基础。数据集和代码已在项目主页公开发布。"
+    },
+    {
+      "id": "arXiv:2509.10334",
+      "title": "I-Segmenter: Integer-Only Vision Transformer for Efficient Semantic Segmentation",
+      "chinese_title": "I-Segmenter：用于高效语义分割的纯整数视觉Transformer",
+      "authors": "Jordan Sassoon, Michal Szczepanski, Martyna Poreba",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10334&sa=D&source=editors&ust=1757942147196817&usg=AOvVaw3zsdly-2Cbk2eR5x9-uFWd",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10334&sa=D&source=editors&ust=1757942147196896&usg=AOvVaw16p3MhnSpYwSsJHzXxsp_3",
+      "chinese_abstract": "摘要：视觉Transformer（ViTs）最近在语义分割方面取得了优异的成果，但由于其高内存占用和计算成本，它们在资源受限设备上的部署仍然有限。量化是提高效率的有效策略，但基于ViT的分割模型在低精度下 notoriously fragile，因为量化误差会在深层编码器-解码器管道中累积。我们介绍了I-Segmenter，这是第一个完全纯整数的ViT分割框架。基于Segmenter架构，I-Segmenter系统地将浮点运算替换为纯整数运算为了进一步稳定训练和推理，我们提出了λ-ShiftGELU，这是一种新颖的激活函数，可以缓解均匀量化在处理长尾激活分布时的局限性。此外，我们移除了L2归一化层，并将解码器中的双线性插值替换为最近邻上采样，确保整个计算图的纯整数执行。广泛的实验表明，I-Segmenter的准确率在其FP32基线的合理范围内（平均为5.1%），同时模型大小减少了高达3.8倍，并通过优化的运行时使推理速度提高了1.2倍。值得注意的是，即使在仅使用单个校准图像的单次训练后量化（PTQ）中，I-Segmenter也能提供具有竞争力的准确率，凸显了其在现实世界部署中的实用性。"
+    },
+    {
+      "id": "arXiv:2509.09754",
+      "title": "LAVa: Layer-wise KV Cache Eviction with Dynamic Budget Allocation",
+      "chinese_title": "LAVa：具有动态预算分配的逐层KV缓存驱逐策略",
+      "authors": "Yiqun Shen, Song Yuan, Zhengze Zhang, Xiaoliang Wang, Daxin Jiang, Nguyen Cam-Tu",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09754&sa=D&source=editors&ust=1757942147224515&usg=AOvVaw2btla-2SwGtoGDx3LRp9fw",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09754&sa=D&source=editors&ust=1757942147224595&usg=AOvVaw0YG-U0qx5-kDrEeUsRgDdu",
+      "chinese_abstract": "摘要：KV缓存通常用于加速具有长上下文的LLM推理，但其高内存需求推动了对缓存压缩的需求。然而，现有的压缩方法在很大程度上是启发式的，并且缺乏动态预算分配。为了解决这个限制，我们通过最小化Transformer残差流中的信息损失，引入了一个统一的缓存压缩框架。在此基础上，我们分析了层注意力输出损失，并推导出一个新指标来比较跨头的缓存条目，从而实现了具有动态头预算的逐层压缩。此外，通过对比跨层信息，我们还实现了动态层预算。LAVa是第一个用于缓存驱逐和动态预算配的统一策略，与以往的方法不同，它不依赖于训练或多种策略的组合。在基准测试（LongBench, Needle-In-A-Haystack, Ruler, 和 InfiniteBench）上的实验证明了其优越性。此外，我们的实验揭示了一个新的见解：动态层预算对于生成任务（如代码补全）至关重要，而动态头预算在提取任务（如抽取式问答）中起着关键作用。作为一种完全动态的压缩方法，LAVa在各种任务类型中始终保持顶级性能。我们的代码已在链接中提供。"
+    },
+    {
+      "id": "arXiv:2509.10025",
+      "title": "Exploring Expert Specialization through Unsupervised Training in Sparse Mixture of Experts",
+      "chinese_title": "通过在稀疏专家混合模型中进行无监督训练探索专家专业化",
+      "authors": "Strahinja Nikolic, Ilker Oguz, Demetri Psaltis",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10025&sa=D&source=editors&ust=1757942147207488&usg=AOvVaw0KBto7kkyviTyxomtY-VH1",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10025&sa=D&source=editors&ust=1757942147207573&usg=AOvVaw2jWjgc84L6kYEJOPFIVhbo",
+      "chinese_abstract": "摘要：理解神经网络的内部组织结构仍然是深度学习可解释性中的一个根本挑战。我们通过探索一种新颖的稀疏专家混合变分自编码器（SMoE-VAE）架构来应对这一挑战。我们在QuickDraw数据集上测试了我们的模型，比较了无监督专家路由与由真实标签指导的监督基线。令人惊讶的是，我们发现无监督路由始终能实现更优的重建性能。专家们学会了识别有意义的子类别结构，这些结构常常超越了人类定义的类别界限。通过t-SNE可视化和重建分析，我们研究了MoE模型如何揭示比预定义标签更符合模型目标的根本数据结构。此外，我们对数据集大小影响的研究为数据量与专家专业化之间的权衡提供了见解，为设计高效的MoE架构提供了指导。"
+    },
+    {
+      "id": "arXiv:2509.10303",
+      "title": "Generalizing Beyond Suboptimality: Offline Reinforcement Learning Learns Effective Scheduling through Random Data",
+      "chinese_title": "超越次优性的泛化：离线强化学习通过随机数据学习有效调度",
+      "authors": "Jesse van Remmerden, Zaharah Bukhsh, Yingqian Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10303&sa=D&source=editors&ust=1757942147197475&usg=AOvVaw3HJ2iQ3YgOyuB33QpwtCE0",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10303&sa=D&source=editors&ust=1757942147197573&usg=AOvVaw1z50x_w2qNfUhw6EeDvvut",
+      "chinese_abstract": "摘要：作业车间调度问题（JSP）和柔性作业车间调度问题（FJSP）是典型的组合优化问题，在工业运营中有广泛的应用。近年来，许多在线强化学习（RL）方法被提出来学习JSP和FJSP的构造性启发式算法。尽管有效，但这些在线RL方法要与可能无法捕捉现实世界复杂性的模拟环境进行数百万次交互，并且它们的随机策略初始化导致样本效率低下。为了解决这些局限性，我们引入了保守离散分位数Actor-Critic（CDQAC），这是一种新颖的离线RL算法，可以直接从历史数据中学习有效的调度策略，无需昂贵的在线交互，同时保持了改进次优训练数据的能力。CDQAC将基于分位数的Critic与延迟的策略更新相结合，估计每个机器-操作对的回报分布，而不是直接选择配对。我们广泛的实验证明了CDQAC从多样化数据源中学习的卓越能力。CDQAC始终优于原始数据生成启发式算法，并超越了最先进的离线和在线RL基线。此外，CDQAC具有很高的样本效率，仅需10-20个训练实例即可学习到高质量的策略。令人惊讶的是，我们发现当CDQAC在随机启发式生成的数据上训练时，其性能优于在遗传算法和优先调度规则等更高质量数据训练时的性能。"
+    },
+    {
+      "id": "arXiv:2509.10162",
+      "title": "Online Robust Planning under Model Uncertainty: A Sample-Based Approach",
+      "chinese_title": "模型不确定性下的在线鲁棒规划：一种基于采样的方法",
+      "authors": "Tamir Shazman, Idan Lev-Yehudi, Ron Benchetit, Vadim Indelman",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10162&sa=D&source=editors&ust=1757942147182987&usg=AOvVaw1Gdy19ul--MN90RvsKXNoa",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10162&sa=D&source=editors&ust=1757942147183079&usg=AOvVaw3-VG_v6OItmSvnlIaaXvHG",
+      "chinese_abstract": "摘要：马尔可夫决策过程（MDPs）中的在线规划通过从当前状态模拟未来轨迹，使智能体能够做出序贯决策，因此非常适合大规模或动态环境。基于采样的方法，如稀疏采样和蒙特卡洛树搜索（MCTS），因其能使用生成模型来近似最优动作而被广泛采用。然而，在实际应用中，生成模型通常是从有限数据中学习的，这会引入近似误差，可能导致性能下降或不安全的行为。为了应对这些挑战，鲁棒MDPs（RMDPs）为在模型不确定性下进行规划提供了一个有原则的框架，但现有方法通常计算密集，不适合实时使用。在这项工作中，我们引入了鲁棒稀疏采样（RSS），这是第一个具有有限样本理论性能保证的RMDPs在线规划算法。与估计名义值函数的稀疏采样不同，RSS通过利用样本平均近似（SAA）的效率和理论特性来计算鲁棒值函数，从而实现在线设置中可行的鲁棒策略计算。RSS适用于无限或连续状态空间，其样本和计算复杂度与状态空间的大小无关。我们提供了理论性能保证，并通过经验证明，在具有不确定动态的环境中，RSS优于标准的稀疏采样。"
+    },
+    {
+      "id": "arXiv:2509.10059",
+      "title": "Multimodal Mathematical Reasoning Embedded in Aerial Vehicle Imagery: Benchmarking, Analysis, and Exploration",
+      "chinese_title": "嵌入于飞行器影像中的多模态数学推理：基准测试、分析与探索",
+      "authors": "Yue Zhou, Litong Feng, Mengcheng Lan, Xue Yang, Qingyun Li, Yiping Ke, Xue Jiang, Wayne Zhang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.10059&sa=D&source=editors&ust=1757942147206243&usg=AOvVaw0sRemos0alaikMQ8m1YK0h",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.10059&sa=D&source=editors&ust=1757942147206340&usg=AOvVaw374aPXgc8ymaSAvSiTTimw",
+      "chinese_abstract": "摘要：数学推理对于无人机（UAV）遥感中的精确距离和面积计算、轨迹估计以及空间分析等任务至关重要，然而，当前的视觉语言模型（VLMs）在这一领域尚未得到充分测试。为了解决这一差距，我们引入了AVI-Math，这是第一个严格评估飞行器影像中多模态数学推理的基准，它超越了简单的计数任务包含了如几何、逻辑和代数等领域的特定知识。该数据集包含从无人机视角捕获的3773个高质量的车辆相关问题，涵盖6个数学学科和20个主题。数据在不同高度和多个无人机角度收集，反映了真实的无人机场景，确保了所构建数学问题的多样性和复杂性。在本文中，我们通过全面评估对14个著名的VLM进行了基准测试，并证明尽管这些模型在以前的多模态基准上取得了成功，但它们在AVI-Math的推理任务中表现不佳。我们的详细分析突显了当前VLM在数学推理能力方面的显著局限性，并为未来的研究指明了方向。此外，我们探索了使用思维链提示和微调技术，这些技术在解决AVI-Math中的推理挑战方面显示出潜力。我们的发现不仅揭示了VLM在数学推理方面的局限性，也为在实际应用中推进基于无人机的可信赖VLM提供了宝贵的见解。代码和数据集将在此https URL发布。"
+    },
+    {
+      "id": "arXiv:2509.09721",
+      "title": "A Multimodal RAG Framework for Housing Damage Assessment: Collaborative Optimization of Image Encoding and Policy Vector Retrieval",
+      "chinese_title": "一个用于房屋损坏评估的多模态RAG框架：图像编码与策略向量检索的协同优化",
+      "authors": "Jiayi Miao, Dingxin Lu, Zhuqi Wang",
+      "abs_link": "https://www.google.com/url?q=https://arxiv.org/abs/2509.09721&sa=D&source=editors&ust=1757942147231888&usg=AOvVaw3Ry53xhcxL45-SOsnujHyP",
+      "pdf_link": "https://www.google.com/url?q=https://arxiv.org/pdf/2509.09721&sa=D&source=editors&ust=1757942147231983&usg=AOvVaw2wznZoTxkvCtDtnA8QFJLN",
+      "chinese_abstract": "摘要：自然灾害后，对房屋损坏的准确评估对于保险理赔响应和资源规划至关重要。在这项工作中，我们引入了一种新颖的多模态检索增强生成（MM-RAG）框架。在经典RAG架构之上，我们进一步发展该框架，设计了一个双分支多模态编码器结：图像分支采用由ResNet和Transformer组成的视觉编码器来提取灾后建筑损坏的特征；文本分支利用BERT检索器对帖子和保险策略进行文本向量化，并构建可检索的恢复索引。为了实现跨模态语义对齐，该模型集成了一个跨模态交互模块，通过多头注意力机制来桥接图像和文本之间的语义表示。同时，在生成模块中，引入的模态注意力门控机制动态控制视觉证据和文本先验信息在生成过程中的作用。整个框架采用端到端训练，并结合比较损失、检索损失和生成损失形成多任务优化目标，在协同学习中实现图像理解和策略匹配。结果表明，该框架在检索准确率和损坏严重程度分类指标上表现优异，其中Top-1检索准确率提高了9.6%。"
+    }
+  ],
+  "clusters": {
+    "强化学习理论与应用": [
+      "arXiv:2509.10423",
+      "arXiv:2509.09838",
+      "arXiv:2509.09177",
+      "arXiv:2509.10128",
+      "arXiv:2509.10303",
+      "arXiv:2509.10162"
+    ],
+    "多模态与生成模型": [
+      "arXiv:2509.10408",
+      "arXiv:2509.10345",
+      "arXiv:2509.10122",
+      "arXiv:2509.09880",
+      "arXiv:2509.09737",
+      "arXiv:2509.09836",
+      "arXiv:2509.09716",
+      "arXiv:2509.10059",
+      "arXiv:2509.09721"
+    ],
+    "大语言模型对齐与效率": [
+      "arXiv:2509.09712",
+      "arXiv:2509.10297",
+      "arXiv:2509.10334",
+      "arXiv:2509.09754",
+      "arXiv:2509.10025"
+    ]
+  }
+}
