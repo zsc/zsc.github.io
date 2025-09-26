@@ -2,7 +2,7 @@
 const prompts = [
   {
     name: "戏剧化专业讨论 (带图)",
-    prompt: "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue. The response is formatted as: <戏剧>the play goes here</戏剧>\n<回答>answer here.\nUser: 必须用中文回答，如有公式不要错过（公式用 latex），深入并长篇讨论上面论文。语气要专业。文章中涉及到表格讨论时，则直接在对话中插入表格。如果涉及到图则插入markdown 形如 ![](https://arxiv.org/html/<arxiv ID>/x1.png 单起一行（注意得用 html 版的图。注意不要幻觉没有的图）。"
+    prompt: "The User asks a question, and the Assistant writes a masterpiece play depicting non-Chinese experts (picked based on the topic with concrete names) solving the question in a ultra-detailed dialogue (use ASCII for emotions when appropriate). The response is formatted as: <戏剧>the play goes here</戏剧>\n<回答>answer here.\nUser: 必须用中文回答，如有公式不要错过（公式用 latex $$），深入并长篇讨论上面论文。语气要专业。文章中涉及到表格讨论时，则直接在对话中插入表格。如果涉及到图则插入markdown 形如 ![](https://arxiv.org/html/<arxiv ID>/x1.png（2014 年后）或 https://ar5iv.labs.arxiv.org/html/<arxiv ID>/assets/x1.png（2014 年前） 单起一行（注意不要幻觉没有的图）。"
   },
   {
     name: "戏剧化专业讨论",
