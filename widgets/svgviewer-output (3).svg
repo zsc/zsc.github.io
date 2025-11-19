@@ -1,0 +1,229 @@
+<svg width="800" height="2200" viewBox="0 0 800 2200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 角色定义 -->
+    <!-- 勇者: 达拉崩吧 -->
+    <g id="hero">
+      <circle cx="0" cy="0" r="20" fill="#ffe0bd" /> <!-- 头 -->
+      <path d="M-20,20 L20,20 L25,70 L-25,70 Z" fill="#3498db" /> <!-- 身体 -->
+      <path d="M-25,20 L-40,50 M25,20 L40,50" stroke="#3498db" stroke-width="8" stroke-linecap="round"/> <!-- 手臂 -->
+      <path d="M-15,-5 L-15,5" stroke="#333" stroke-width="2" stroke-linecap="round"/> <!-- 眼 -->
+      <path d="M15,-5 L15,5" stroke="#333" stroke-width="2" stroke-linecap="round"/> <!-- 眼 -->
+    </g>
+
+    <!-- 公主: 米娅 -->
+    <g id="princess">
+      <circle cx="0" cy="0" r="18" fill="#ffe0bd" />
+      <path d="M-20,-10 Q0,-30 20,-10 L22,10 Q0,-5 -22,10 Z" fill="#f1c40f" /> <!-- 头发 -->
+      <path d="M0,20 L-30,80 L30,80 Z" fill="#e91e63" /> <!-- 裙子 -->
+    </g>
+
+    <!-- 恶龙: 昆图 -->
+    <g id="dragon-head">
+      <path d="M0,0 Q50,-50 100,0 Q120,20 100,50 Q80,80 0,60 Z" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+      <circle cx="60" cy="20" r="8" fill="#f1c40f" />
+      <path d="M60,20 L60,28" stroke="#000" stroke-width="2"/> <!-- 瞳孔 -->
+      <path d="M80,40 L90,35 M85,45 L95,40" stroke="#fff" stroke-width="2"/> <!-- 牙齿 -->
+    </g>
+  </defs>
+
+  <style>
+    text { font-family: sans-serif; fill: #555; font-weight: bold; }
+    .panel { fill: #fff; stroke: #333; stroke-width: 4; }
+    .bg-sky { fill: #e0f7fa; }
+    .bg-cave { fill: #2c3e50; }
+    .bg-battle { fill: #ffebee; }
+    .ground { fill: #795548; }
+  </style>
+
+  <!-- 第一幕：噩梦降临 (0 - 400) -->
+  <g transform="translate(0, 0)">
+    <rect x="10" y="10" width="780" height="380" class="panel bg-sky" />
+    
+    <!-- 城堡背景 -->
+    <path d="M50,300 L50,150 L80,150 L80,120 L120,120 L120,150 L150,150 L150,300 Z" fill="#95a5a6" />
+    <path d="M150,300 L150,100 L180,100 L180,70 L220,70 L220,100 L250,100 L250,300 Z" fill="#7f8c8d" />
+    <rect x="0" y="300" width="800" height="90" class="ground" />
+
+    <!-- 恶龙喷火 -->
+    <g transform="translate(500, 150) scale(1.5)">
+      <use href="#dragon-head" />
+      <!-- 火焰 -->
+      <path d="M-10,40 Q-50,20 -100,40 Q-150,60 -80,80 Q-40,90 -10,70 Z" fill="#e74c3c" opacity="0.8">
+        <animate attributeName="d" dur="0.5s" repeatCount="indefinite"
+          values="M-10,40 Q-50,20 -100,40 Q-150,60 -80,80 Q-40,90 -10,70 Z;
+                  M-10,42 Q-60,10 -110,45 Q-140,70 -90,85 Q-30,85 -10,72 Z;
+                  M-10,40 Q-50,20 -100,40 Q-150,60 -80,80 Q-40,90 -10,70 Z" />
+      </path>
+    </g>
+    <!-- 标题替代物 -->
+    <path d="M20,20 L60,60 M60,20 L20,60" stroke="#e74c3c" stroke-width="5" transform="translate(700, 20)"/>
+  </g>
+
+  <!-- 第二幕：公主被抓 (400 - 700) -->
+  <g transform="translate(0, 400)">
+    <rect x="10" y="10" width="780" height="280" class="panel bg-cave" />
+    
+    <!-- 笼子/山洞 -->
+    <path d="M350,50 L450,50 L450,250 L350,250 Z" fill="none" stroke="#7f8c8d" stroke-width="10"/>
+    <line x1="370" y1="50" x2="370" y2="250" stroke="#7f8c8d" stroke-width="4"/>
+    <line x1="400" y1="50" x2="400" y2="250" stroke="#7f8c8d" stroke-width="4"/>
+    <line x1="430" y1="50" x2="430" y2="250" stroke="#7f8c8d" stroke-width="4"/>
+
+    <!-- 哭泣的公主 -->
+    <g transform="translate(400, 180)">
+      <use href="#princess" />
+      <!-- 眼泪 -->
+      <circle cx="-10" cy="5" r="2" fill="#3498db">
+        <animate attributeName="cy" values="5;15" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="10" cy="5" r="2" fill="#3498db">
+        <animate attributeName="cy" values="5;15" dur="1s" begin="0.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- 恶龙阴影 -->
+    <path d="M600,50 Q550,150 700,200" stroke="#1e272e" stroke-width="10" fill="none"/>
+  </g>
+
+  <!-- 第三幕：勇者集结 (700 - 1000) -->
+  <g transform="translate(0, 700)">
+    <rect x="10" y="10" width="780" height="280" class="panel bg-sky" />
+    <rect x="0" y="250" width="800" height="40" class="ground" />
+
+    <!-- 国王 -->
+    <g transform="translate(200, 180)">
+      <circle cx="0" cy="0" r="25" fill="#ffe0bd" />
+      <path d="M-25,-10 L-25,-40 L-10,-25 L0,-50 L10,-25 L25,-40 L25,-10 Z" fill="#f1c40f" stroke="#f39c12" stroke-width="2"/> <!-- 皇冠 -->
+      <path d="M-25,25 L25,25 L35,100 L-35,100 Z" fill="#9b59b6" /> <!-- 长袍 -->
+    </g>
+
+    <!-- 授剑仪式 -->
+    <path d="M240,190 L360,190" stroke="#95a5a6" stroke-width="4" stroke-dasharray="5,5"/> <!-- 视线/动作线 -->
+    
+    <!-- 宝剑 -->
+    <g transform="translate(300, 170) rotate(45)">
+      <rect x="-2" y="-30" width="4" height="60" fill="#bdc3c7" />
+      <rect x="-10" y="10" width="20" height="4" fill="#f1c40f" />
+      <circle cx="0" cy="25" r="4" fill="#c0392b" />
+    </g>
+
+    <!-- 勇者接受任务 -->
+    <g transform="translate(400, 180)">
+      <use href="#hero" />
+      <path d="M25,20 L50,10" stroke="#3498db" stroke-width="6" stroke-linecap="round"/> <!-- 举手 -->
+    </g>
+  </g>
+
+  <!-- 第四幕：互相报菜名 (1000 - 1300) -->
+  <g transform="translate(0, 1000)">
+    <rect x="10" y="10" width="780" height="280" class="panel bg-cave" />
+
+    <!-- 勇者 -->
+    <g transform="translate(150, 200)">
+      <use href="#hero" />
+    </g>
+
+    <!-- 恶龙 -->
+    <g transform="translate(650, 150) scale(-2, 2)">
+      <use href="#dragon-head" />
+    </g>
+
+    <!-- 超长名字的气泡 -->
+    <g transform="translate(200, 100)">
+      <path d="M0,0 L200,0 Q220,0 220,20 L220,60 Q220,80 200,80 L20,80 L0,100 L10,80 L0,80 Q-20,80 -20,60 L-20,20 Q-20,0 0,0 Z" fill="#fff" stroke="#000" stroke-width="2"/>
+      <!-- 代表长名字的波浪线 -->
+      <path d="M0,20 L200,20 M0,40 L200,40 M0,60 L150,60" stroke="#333" stroke-width="2" stroke-dasharray="2,2"/>
+      <!-- 时间流逝图标 -->
+      <circle cx="240" cy="40" r="15" fill="none" stroke="#bdc3c7" stroke-width="3"/>
+      <path d="M240,40 L240,30 M240,40 L250,40" stroke="#bdc3c7" stroke-width="3"/>
+    </g>
+
+    <g transform="translate(580, 100) scale(-1, 1)">
+      <path d="M0,0 L200,0 Q220,0 220,20 L220,60 Q220,80 200,80 L20,80 L0,100 L10,80 L0,80 Q-20,80 -20,60 L-20,20 Q-20,0 0,0 Z" fill="#fff" stroke="#000" stroke-width="2"/>
+      <path d="M0,20 L200,20 M0,40 L200,40 M0,60 L150,60" stroke="#333" stroke-width="2" stroke-dasharray="2,2"/>
+    </g>
+  </g>
+
+  <!-- 第五幕：史诗对决 (1300 - 1600) -->
+  <g transform="translate(0, 1300)">
+    <rect x="10" y="10" width="780" height="280" class="panel bg-battle" />
+
+    <!-- 攻击特效 -->
+    <path d="M100,280 L700,20 L720,40 L120,300 Z" fill="#ecf0f1" opacity="0.5"/>
+    <path d="M150,250 L650,50" stroke="#e74c3c" stroke-width="8"/>
+    
+    <!-- 暴击星星 -->
+    <g transform="translate(400, 150)">
+      <polygon points="0,-50 15,-15 50,-15 20,10 35,45 0,25 -35,45 -20,10 -50,-15 -15,-15" fill="#f1c40f" stroke="#e67e22" stroke-width="2">
+         <animateTransform attributeName="transform" type="scale" values="1;1.5;1" dur="0.2s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+
+    <!-- 勇者冲锋 -->
+    <g transform="translate(200, 220) rotate(-20)">
+      <use href="#hero" />
+      <rect x="20" y="10" width="60" height="6" fill="#bdc3c7" /> <!-- 剑伸出 -->
+    </g>
+
+    <!-- 恶龙阵亡 -->
+    <g transform="translate(600, 150) rotate(20)">
+      <use href="#dragon-head" />
+      <!-- X 眼睛 -->
+      <line x1="52" y1="12" x2="68" y2="28" stroke="#000" stroke-width="4"/>
+      <line x1="68" y1="12" x2="52" y2="28" stroke="#000" stroke-width="4"/>
+    </g>
+  </g>
+
+  <!-- 第六幕：婚礼 (1600 - 1900) -->
+  <g transform="translate(0, 1600)">
+    <rect x="10" y="10" width="780" height="280" class="panel bg-sky" />
+    
+    <!-- 婚礼拱门 -->
+    <path d="M200,300 L200,100 Q400,-50 600,100 L600,300" fill="none" stroke="#2ecc71" stroke-width="15"/>
+    <circle cx="250" cy="120" r="10" fill="#e91e63"/>
+    <circle cx="550" cy="120" r="10" fill="#e91e63"/>
+    <circle cx="400" cy="50" r="10" fill="#e91e63"/>
+
+    <!-- 勇者和公主 -->
+    <g transform="translate(350, 200)">
+      <use href="#hero" />
+    </g>
+    <g transform="translate(450, 200)">
+      <use href="#princess" />
+    </g>
+
+    <!-- 爱心 -->
+    <path d="M400,120 C400,100 350,100 350,130 C350,150 400,180 400,180 C400,180 450,150 450,130 C450,100 400,100 400,120 Z" fill="#e74c3c">
+       <animateTransform attributeName="transform" type="scale" values="1;1.2;1" dur="1s" repeatCount="indefinite" transform-origin="400 140"/>
+    </path>
+  </g>
+
+  <!-- 尾声：孩子 (1900 - 2200) -->
+  <g transform="translate(0, 1900)">
+    <rect x="10" y="10" width="780" height="280" class="panel" fill="#fff" />
+    
+    <!-- 孩子 -->
+    <g transform="translate(400, 180) scale(0.8)">
+      <!-- 尾巴 (暗示恶龙血统) -->
+      <path d="M0,60 Q30,80 50,60" stroke="#2ecc71" stroke-width="6" fill="none"/>
+      <path d="M45,55 L55,65 L45,75" fill="#2ecc71"/> <!-- 尾巴尖 -->
+      
+      <!-- 身体 -->
+      <circle cx="0" cy="0" r="25" fill="#ffe0bd" />
+      <path d="M-25,25 L25,25 L30,80 L-30,80 Z" fill="#3498db" />
+      
+      <!-- 小角 -->
+      <path d="M-15,-20 L-25,-40 L-5,-25 Z" fill="#2ecc71"/>
+      <path d="M15,-20 L25,-40 L5,-25 Z" fill="#2ecc71"/>
+
+      <!-- 脸 -->
+      <circle cx="-8" cy="-5" r="3" fill="#333"/>
+      <circle cx="8" cy="-5" r="3" fill="#333"/>
+      <path d="M-10,10 Q0,20 10,10" stroke="#333" stroke-width="2" fill="none"/> <!-- 微笑 -->
+    </g>
+    
+    <!-- 问号/暗示 -->
+    <text x="500" y="150" font-size="60" fill="#bdc3c7">?</text>
+  </g>
+
+</svg>
