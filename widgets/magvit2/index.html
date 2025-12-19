@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-bit Number to GB2312 Grid Converter</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --panel-bg: #ffffff;
+            --border: #ddd;
+            --primary: #007bff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 { margin-top: 0; font-size: 1.2rem; color: #333; }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        label { font-size: 0.9rem; font-weight: bold; }
+        input[type="number"], select {
+            padding: 5px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0; /* Important for flex child scrolling */
+        }
+        .box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            resize: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-sizing: border-box;
+            outline: none;
+        }
+        textarea:focus {
+            border-color: var(--primary);
+        }
+        /* Make the number input monospace */
+        #inputNumbers {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        /* Make the char output aligned */
+        #outputGrid {
+            font-family: 'SimSun', 'Songti SC', serif; /* Use serif for better Chinese alignment */
+            white-space: pre;
+            overflow-x: auto;
+            font-size: 16px;
+            line-height: 1.5; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>高度 (Height):</label>
+            <input type="number" id="heightVal" value="64" style="width: 60px;">
+        </div>
+        <div class="control-group">
+            <label>宽度 (Width):</label>
+            <input type="number" id="widthVal" value="96" style="width: 60px;">
+        </div>
+        <div class="control-group">
+            <label>采样 (Sampling):</label>
+            <select id="sampleSelect">
+                <option value="8">8x8</option>
+                <option value="16">16x16</option>
+            </select>
+        </div>
+        <div class="control-group" style="margin-left: auto; color: #666; font-size: 0.85rem;">
+            * 0 映射为 "啊" (GB2312)
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="box">
+            <h2>数字数组 (Numbers Array)</h2>
+            <textarea id="inputNumbers" placeholder="输入 JSON 数组..."></textarea>
+        </div>
+        <div class="box">
+            <h2>汉字矩阵 (Character Grid)</h2>
+            <textarea id="outputGrid" placeholder="生成的汉字..."></textarea>
+        </div>
+    </div>
+
+<script>
+    // --- 1. GB2312 Table Generation (First 512 chars) ---
+    // GB2312 Level 1 starts at Row 16 (0xB0), Col 1 (0xA1).
+    // We need exactly 512 characters.
+    
+    const charMap = [];     // Index -> Char
+    const valMap = {};      // Char -> Index
+
+    function initGB2312() {
+        const decoder = new TextDecoder('gb2312');
+        let count = 0;
+        
+        // Iterate GB2312 zones
+        // Level 1: Row 16-55 (0xB0 - 0xE7). 
+        // We iterate bytes directly.
+        for (let row = 0xB0; row <= 0xF7; row++) {
+            for (let col = 0xA1; col <= 0xFE; col++) {
+                if (count >= 512) return;
+                
+                const bytes = new Uint8Array([row, col]);
+                const char = decoder.decode(bytes);
+                
+                charMap.push(char);
+                valMap[char] = count;
+                count++;
+            }
+        }
+    }
+
+    initGB2312();
+
+    // --- 2. Configuration & State ---
+    const els = {
+        numInput: document.getElementById('inputNumbers'),
+        charInput: document.getElementById('outputGrid'),
+        hVal: document.getElementById('heightVal'),
+        wVal: document.getElementById('widthVal'),
+        sample: document.getElementById('sampleSelect')
+    };
+
+    let isUpdating = false; // Prevent recursive loops
+
+    // Default Data provided in prompt
+    const defaultData = [
+        235523, 252795, 256595, 258579, 252518, 121870, 245623, 257059, 255042, 119589, 121419, 254475, 
+        244299, 130566, 101218, 117248, 120602, 240060, 131071, 96218, 126662, 243713, 117319, 258651, 
+        121611, 123998, 128655, 246750, 252522, 18167, 74170, 121341, 102524, 236986, 244290, 253527, 
+        112079, 116529, 97529, 102543, 259242, 78771, 225835, 220778, 222970, 110799, 98371, 260670, 
+        255784, 17805, 35247, 34045, 152298, 116173, 43307, 177339, 230741, 250298, 108619, 260871, 
+        127355, 5372, 152187, 61215, 112296, 18940, 216123, 226046, 1253, 242746, 239683, 130586, 
+        236330, 253435, 90844, 196603, 259193, 86773, 127422, 85244, 126397, 119715, 250457, 232270, 
+        252527, 255923, 70911, 79034, 159641, 22203, 153133, 181183, 50348, 130906, 260623, 252419
+    ];
+
+    // --- 3. Core Logic ---
+
+    function getGridConfig() {
+        const H = parseInt(els.hVal.value) || 64;
+        const W = parseInt(els.wVal.value) || 96;
+        const S = parseInt(els.sample.value) || 8;
+        
+        // Logical grid dimensions (number of blocks)
+        const rows = Math.floor(H / S);
+        const cols = Math.floor(W / S); // Numbers per row
+        
+        return { rows, cols }; // Note: chars per row = cols * 2
+    }
+
+    function numbersToText() {
+        if (isUpdating) return;
+        isUpdating = true;
+
+        try {
+            const raw = els.numInput.value;
+            if (!raw.trim()) {
+                els.charInput.value = "";
+                isUpdating = false;
+                return;
+            }
+
+            const nums = JSON.parse(raw);
+            if (!Array.isArray(nums)) throw new Error("Input is not an array");
+
+            const { cols } = getGridConfig();
+            let result = "";
+            let lineBuffer = "";
+            let countInLine = 0;
+
+            nums.forEach((num, index) => {
+                // Split 18-bit to two 9-bit
+                // Range check: 0 ~ 262143
+                const n = parseInt(num);
+                const high = (n >> 9) & 0x1FF; // Top 9 bits
+                const low = n & 0x1FF;         // Bottom 9 bits
+
+                const c1 = charMap[high] || '？';
+                const c2 = charMap[low] || '？';
+
+                lineBuffer += c1 + c2;
+                countInLine++;
+
+                // Line wrapping logic based on grid
+                if (countInLine >= cols) {
+                    result += lineBuffer + "\n";
+                    lineBuffer = "";
+                    countInLine = 0;
+                }
+            });
+
+            // Append remaining buffer if any
+            if (lineBuffer) result += lineBuffer;
+
+            els.charInput.value = result;
+
+        } catch (e) {
+            console.error(e);
+            // Don't clear output on partial error to avoid bad UX while typing
+        } finally {
+            isUpdating = false;
+        }
+    }
+
+    function textToNumbers() {
+        if (isUpdating) return;
+        isUpdating = true;
+
+        try {
+            const rawText = els.charInput.value;
+            // Clean up newlines to process stream, but respecting sequence
+            // We just need the raw characters.
+            // Filter out characters not in our map (like newlines or spaces) 
+            // BUT we must be careful. If user types spaces for formatting, we usually ignore them 
+            // unless they are mapped. Our map is strict GB2312 chars.
+            
+            const validChars = [];
+            for (let char of rawText) {
+                if (valMap.hasOwnProperty(char)) {
+                    validChars.push(char);
+                }
+            }
+
+            const nums = [];
+            // Process pairs
+            for (let i = 0; i < validChars.length; i += 2) {
+                if (i + 1 >= validChars.length) break; // Ignore incomplete pair
+
+                const c1 = validChars[i];
+                const c2 = validChars[i+1];
+
+                const high = valMap[c1];
+                const low = valMap[c2];
+
+                // Reconstruct 18-bit integer
+                const val = (high << 9) | low;
+                nums.push(val);
+            }
+
+            // Format JSON nicely with line breaks for readability
+            // Let's try to match the width logic roughly for display in JSON
+            const { cols } = getGridConfig();
+            let jsonStr = "[\n";
+            let rowTemp = [];
+            
+            nums.forEach((n, idx) => {
+                rowTemp.push(n);
+                if (rowTemp.length >= cols) {
+                    jsonStr += "  " + rowTemp.join(", ") + (idx === nums.length - 1 ? "" : ",") + "\n";
+                    rowTemp = [];
+                }
+            });
+            if (rowTemp.length > 0) {
+                jsonStr += "  " + rowTemp.join(", ") + "\n";
+            }
+            jsonStr += "]";
+
+            els.numInput.value = jsonStr;
+
+        } catch (e) {
+            console.error(e);
+        } finally {
+            isUpdating = false;
+        }
+    }
+
+    // --- 4. Event Listeners ---
+
+    // Sync on input
+    els.numInput.addEventListener('input', numbersToText);
+    els.charInput.addEventListener('input', textToNumbers);
+
+    // Sync on Layout Change (re-formats the text side based on numbers)
+    function onLayoutChange() {
+        // Trigger a refresh from numbers to text to apply new wrapping
+        // We force it even if numbers haven't changed to update visual line breaks
+        const temp = isUpdating;
+        isUpdating = false;
+        numbersToText();
+        isUpdating = temp;
+    }
+
+    els.hVal.addEventListener('change', onLayoutChange);
+    els.wVal.addEventListener('change', onLayoutChange);
+    els.sample.addEventListener('change', onLayoutChange);
+
+    // Initialize
+    els.numInput.value = JSON.stringify(defaultData); // Load raw first
+    // Trigger initial calculation/formatting
+    numbersToText(); 
+
+</script>
+</body>
+</html>
