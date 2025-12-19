@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAV to Mel Spectrogram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h2 { margin-bottom: 10px; }
+
+        .controls {
+            margin-bottom: 20px;
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        input[type="file"] {
+            color: #ccc;
+        }
+
+        button {
+            padding: 8px 20px;
+            background-color: #e65100;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #ff9800; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+
+        /* 绘图容器 */
+        .vis-container {
+            position: relative;
+            background-color: #000;
+            border: 1px solid #444;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            margin-top: 10px;
+        }
+
+        /* 两个Canvas重叠：bottom画图，top画光标和坐标轴 */
+        canvas {
+            display: block;
+        }
+        
+        #cursor-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto; /* 允许点击跳转 */
+            cursor: crosshair;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #aaa;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>WAV Mel 频谱生成器</h2>
+
+    <div class="controls">
+        <input type="file" id="fileInput" accept="audio/wav, audio/mp3">
+        <button id="playBtn" disabled>播放</button>
+        <button id="stopBtn" disabled>停止</button>
+    </div>
+
+    <div class="status" id="statusText">请上传 WAV 文件</div>
+
+    <div class="vis-container" id="visContainer" style="display:none;">
+        <canvas id="specCanvas"></canvas>
+        <canvas id="cursorCanvas"></canvas>
+    </div>
+
+<script>
+/**
+ * 核心逻辑：
+ * 1. 读取 AudioBuffer
+ * 2. 纯 JS 实现 STFT (短时傅里叶变换)
+ * 3. 应用 Mel Filterbank
+ * 4. 渲染热力图
+ * 5. 处理播放同步
+ */
+
+// --- 配置参数 ---
+const FFT_SIZE = 2048;
+const HOP_SIZE = 512; // 步长
+const MEL_BANDS = 128; // Mel 频段数量
+const MAX_FREQ = 8000; // 绘图最高频率 (Hz)
+const MIN_FREQ = 0;
+const CANVAS_HEIGHT = 400;
+const CANVAS_WIDTH = 800;
+const MARGIN = { top: 20, bottom: 40, left: 60, right: 20 };
+
+// --- 颜色映射 (模拟 Magma/Inferno) ---
+// 从黑 -> 紫 -> 红 -> 橙 -> 黄
+function getMagmaColor(value) {
+    // value 0.0 ~ 1.0
+    // 定义关键帧颜色
+    const stops = [
+        { t: 0.0, r: 0,   g: 0,   b: 4 },    // 黑
+        { t: 0.2, r: 40,  g: 10,  b: 80 },   // 深紫
+        { t: 0.4, r: 100, g: 30,  b: 100 },  // 紫红
+        { t: 0.6, r: 200, g: 60,  b: 60 },   // 红
+        { t: 0.8, r: 250, g: 140, b: 20 },   // 橙
+        { t: 1.0, r: 252, g: 252, b: 180 }   // 亮黄
+    ];
+
+    // 找到区间
+    let lower = stops[0];
+    let upper = stops[stops.length - 1];
+    
+    for (let i = 0; i < stops.length - 1; i++) {
+        if (value >= stops[i].t && value <= stops[i+1].t) {
+            lower = stops[i];
+            upper = stops[i+1];
+            break;
+        }
+    }
+
+    // 线性插值
+    const range = upper.t - lower.t;
+    const ratio = (value - lower.t) / range;
+    
+    const r = Math.floor(lower.r + (upper.r - lower.r) * ratio);
+    const g = Math.floor(lower.g + (upper.g - lower.g) * ratio);
+    const b = Math.floor(lower.b + (upper.b - lower.b) * ratio);
+
+    return `rgb(${r},${g},${b})`;
+}
+
+// --- DOM 元素 ---
+const fileInput = document.getElementById('fileInput');
+const playBtn = document.getElementById('playBtn');
+const stopBtn = document.getElementById('stopBtn');
+const statusText = document.getElementById('statusText');
+const visContainer = document.getElementById('visContainer');
+const specCanvas = document.getElementById('specCanvas');
+const cursorCanvas = document.getElementById('cursorCanvas');
+const ctxSpec = specCanvas.getContext('2d');
+const ctxCursor = cursorCanvas.getContext('2d');
+
+// --- 音频状态 ---
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioBuffer = null;
+let sourceNode = null;
+let startTime = 0;
+let isPlaying = false;
+let pauseTime = 0; // 用于记录暂停位置（简单起见，本例实现播放/停止）
+
+// 初始化 Canvas
+function initCanvas() {
+    visContainer.style.display = 'block';
+    visContainer.style.width = CANVAS_WIDTH + 'px';
+    visContainer.style.height = CANVAS_HEIGHT + 'px';
+    
+    specCanvas.width = CANVAS_WIDTH;
+    specCanvas.height = CANVAS_HEIGHT;
+    cursorCanvas.width = CANVAS_WIDTH;
+    cursorCanvas.height = CANVAS_HEIGHT;
+    
+    // 样式调整
+    cursorCanvas.style.position = 'absolute';
+    cursorCanvas.style.top = '0';
+    cursorCanvas.style.left = '0';
+}
+
+fileInput.addEventListener('change', async (e) => {
+    if (e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    stopAudio();
+    playBtn.disabled = true;
+    stopBtn.disabled = true;
+    statusText.textContent = "正在解码音频...";
+    initCanvas();
+
+    const arrayBuffer = await file.arrayBuffer();
+    try {
+        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        statusText.textContent = "正在计算 Mel 频谱 (这可能需要几秒钟)...";
+        
+        // 给 UI 渲染一点时间，避免卡死看起来像崩溃
+        setTimeout(() => {
+            generateMelSpectrogram(audioBuffer);
+            statusText.textContent = "就绪。";
+            playBtn.disabled = false;
+            stopBtn.disabled = false;
+        }, 50);
+        
+    } catch (err) {
+        statusText.textContent = "音频解析失败: " + err.message;
+        console.error(err);
+    }
+});
+
+// --- 播放控制 ---
+playBtn.addEventListener('click', () => {
+    if (isPlaying) {
+        stopAudio();
+        playBtn.textContent = "播放";
+    } else {
+        playAudio(pauseTime); // 从头或上次位置
+        playBtn.textContent = "暂停";
+    }
+});
+
+stopBtn.addEventListener('click', () => {
+    stopAudio();
+    pauseTime = 0;
+    drawCursor(0);
+    playBtn.textContent = "播放";
+});
+
+cursorCanvas.addEventListener('click', (e) => {
+    if (!audioBuffer) return;
+    const rect = cursorCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    
+    // 计算点击的时间
+    const plotWidth = CANVAS_WIDTH - MARGIN.left - MARGIN.right;
+    if (x < MARGIN.left || x > CANVAS_WIDTH - MARGIN.right) return;
+    
+    const ratio = (x - MARGIN.left) / plotWidth;
+    const clickTime = ratio * audioBuffer.duration;
+    
+    stopAudio();
+    pauseTime = clickTime;
+    playAudio(clickTime);
+    playBtn.textContent = "暂停";
+});
+
+function playAudio(offset) {
+    if (isPlaying) stopAudio();
+    sourceNode = audioCtx.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+    sourceNode.connect(audioCtx.destination);
+    sourceNode.start(0, offset);
+    startTime = audioCtx.currentTime - offset;
+    isPlaying = true;
+    requestAnimationFrame(animationLoop);
+}
+
+function stopAudio() {
+    if (sourceNode) {
+        try { sourceNode.stop(); } catch(e){}
+        sourceNode = null;
+    }
+    if (isPlaying) {
+        pauseTime = audioCtx.currentTime - startTime; // 记录当前播放位置
+    }
+    isPlaying = false;
+}
+
+function animationLoop() {
+    if (!isPlaying) return;
+    
+    const current = audioCtx.currentTime - startTime;
+    if (current >= audioBuffer.duration) {
+        stopAudio();
+        playBtn.textContent = "播放";
+        drawCursor(0);
+        pauseTime = 0;
+        return;
+    }
+    
+    drawCursor(current);
+    requestAnimationFrame(animationLoop);
+}
+
+// --- 绘图：光标与坐标轴 ---
+// 将坐标轴和光标画在顶层，底层只画一次频谱
+function drawCursor(time) {
+    ctxCursor.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    const plotWidth = CANVAS_WIDTH - MARGIN.left - MARGIN.right;
+    const plotHeight = CANVAS_HEIGHT - MARGIN.top - MARGIN.bottom;
+    
+    // 1. 绘制坐标轴 (Axis)
+    ctxCursor.strokeStyle = "#fff";
+    ctxCursor.fillStyle = "#fff";
+    ctxCursor.lineWidth = 1;
+    ctxCursor.font = "12px sans-serif";
+    ctxCursor.textAlign = "right";
+    ctxCursor.textBaseline = "middle";
+
+    // Y轴 (Hz)
+    ctxCursor.beginPath();
+    ctxCursor.moveTo(MARGIN.left, MARGIN.top);
+    ctxCursor.lineTo(MARGIN.left, MARGIN.top + plotHeight);
+    ctxCursor.stroke();
+
+    // Y轴刻度: 0, 512, 1024, 2048, 4096...
+    const yTicks = [0, 512, 1024, 2048, 4096, 8000];
+    
+    // Mel 转换辅助函数用于定位 Y 轴
+    const hzToMel = (hz) => 2595 * Math.log10(1 + hz / 700);
+    const maxMel = hzToMel(MAX_FREQ);
+    const minMel = hzToMel(MIN_FREQ);
+
+    yTicks.forEach(hz => {
+        if (hz > MAX_FREQ) return;
+        const mel = hzToMel(hz);
+        // 归一化 0~1 (0在下，1在上)
+        const norm = (mel - minMel) / (maxMel - minMel); 
+        // 转换为 Canvas Y (0在上)
+        const y = MARGIN.top + plotHeight * (1 - norm);
+        
+        ctxCursor.fillText(hz, MARGIN.left - 5, y);
+        // 短横线
+        ctxCursor.beginPath();
+        ctxCursor.moveTo(MARGIN.left, y);
+        ctxCursor.lineTo(MARGIN.left - 3, y);
+        ctxCursor.stroke();
+    });
+    
+    // Y轴标签
+    ctxCursor.save();
+    ctxCursor.translate(15, MARGIN.top + plotHeight/2);
+    ctxCursor.rotate(-Math.PI/2);
+    ctxCursor.textAlign = "center";
+    ctxCursor.fillText("Hz", 0, 0);
+    ctxCursor.restore();
+
+    // X轴 (Time)
+    ctxCursor.beginPath();
+    ctxCursor.moveTo(MARGIN.left, MARGIN.top + plotHeight);
+    ctxCursor.lineTo(MARGIN.left + plotWidth, MARGIN.top + plotHeight);
+    ctxCursor.stroke();
+
+    // X轴刻度 (每隔 1.5s 或 自适应)
+    const duration = audioBuffer ? audioBuffer.duration : 10;
+    const step = duration > 10 ? 2 : 1.5;
+    
+    ctxCursor.textAlign = "center";
+    ctxCursor.textBaseline = "top";
+    
+    for (let t = 0; t <= duration; t += step) {
+        const xRatio = t / duration;
+        const x = MARGIN.left + xRatio * plotWidth;
+        if (x > MARGIN.left + plotWidth) break;
+        
+        ctxCursor.fillText(t.toFixed(1), x, MARGIN.top + plotHeight + 5);
+        // 短横线
+        ctxCursor.beginPath();
+        ctxCursor.moveTo(x, MARGIN.top + plotHeight);
+        ctxCursor.lineTo(x, MARGIN.top + plotHeight + 3);
+        ctxCursor.stroke();
+    }
+    
+    // X轴标签
+    ctxCursor.fillText("Time (s)", MARGIN.left + plotWidth/2, CANVAS_HEIGHT - 10);
+
+    // 2. 绘制光标 (Cursor)
+    if (audioBuffer) {
+        const xRatio = time / audioBuffer.duration;
+        const xPos = MARGIN.left + xRatio * plotWidth;
+        
+        if (xPos <= MARGIN.left + plotWidth) {
+            ctxCursor.strokeStyle = "rgba(255, 255, 255, 0.9)";
+            ctxCursor.lineWidth = 1.5;
+            ctxCursor.beginPath();
+            ctxCursor.moveTo(xPos, MARGIN.top);
+            ctxCursor.lineTo(xPos, MARGIN.top + plotHeight);
+            ctxCursor.stroke();
+        }
+    }
+}
+
+// --- 算法部分：Spectrogram生成 ---
+
+function generateMelSpectrogram(buffer) {
+    const channelData = buffer.getChannelData(0); // 只取单声道
+    const sampleRate = buffer.sampleRate;
+    
+    // 1. 初始化 Mel Filterbank
+    const melMatrix = createMelFilterbank(MEL_BANDS, FFT_SIZE/2, sampleRate);
+    
+    // 2. 准备绘图数据
+    const plotWidth = CANVAS_WIDTH - MARGIN.left - MARGIN.right;
+    const plotHeight = CANVAS_HEIGHT - MARGIN.top - MARGIN.bottom;
+    
+    // 预计算 Hann Window
+    const windowFunc = new Float32Array(FFT_SIZE);
+    for(let i=0; i<FFT_SIZE; i++) {
+        windowFunc[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (FFT_SIZE - 1)));
+    }
+
+    // 3. 执行 STFT 并绘图
+    // 为了性能，我们不一定要计算每一个步长，而是根据 Canvas 宽度进行下采样
+    // 但是为了画质，我们计算足够的列数填满宽度
+    
+    const totalSamples = channelData.length;
+    const totalFrames = Math.floor((totalSamples - FFT_SIZE) / HOP_SIZE);
+    
+    // 如果文件太长，我们只能抽取一部分帧来画，否则计算量太大
+    // 这里我们简单处理：计算所有帧，但在 X 轴上压缩
+    // 为了防止浏览器卡死，这里使用简单的 ImageBitmap 绘制策略
+    
+    const imgData = ctxSpec.createImageData(plotWidth, plotHeight);
+    const data = imgData.data; // RGBA array
+    
+    // 计算每一列像素对应的音频帧索引
+    // Pixel X -> Time -> Frame Index
+    
+    for (let px = 0; px < plotWidth; px++) {
+        // 当前像素对应的时间比例
+        const ratio = px / plotWidth;
+        // 对应的采样点索引
+        const centerSample = Math.floor(ratio * (totalSamples - FFT_SIZE));
+        
+        // 提取一段音频
+        const real = new Float32Array(FFT_SIZE);
+        const imag = new Float32Array(FFT_SIZE);
+        
+        for(let i=0; i<FFT_SIZE; i++) {
+            if (centerSample + i < channelData.length) {
+                real[i] = channelData[centerSample + i] * windowFunc[i];
+            } else {
+                real[i] = 0;
+            }
+            imag[i] = 0;
+        }
+        
+        // 执行 FFT
+        performFFT(real, imag);
+        
+        // 计算 Magnitude Spectrum (只取前半部分)
+        const magnitude = new Float32Array(FFT_SIZE/2 + 1);
+        for(let i=0; i <= FFT_SIZE/2; i++) {
+            magnitude[i] = Math.sqrt(real[i]*real[i] + imag[i]*imag[i]);
+        }
+        
+        // 应用 Mel Filterbank -> 得到 MEL_BANDS 个数值
+        const melEnergies = new Float32Array(MEL_BANDS);
+        for (let m = 0; m < MEL_BANDS; m++) {
+            let sum = 0;
+            // 稀疏矩阵乘法加速
+            // melMatrix[m] 是一个包含 {bin: index, weight: w} 的数组
+            const filter = melMatrix[m];
+            for (let k = 0; k < filter.length; k++) {
+                sum += magnitude[filter[k].bin] * filter[k].weight;
+            }
+            melEnergies[m] = sum;
+        }
+        
+        // Log Scale (dB)
+        for(let m=0; m<MEL_BANDS; m++) {
+            // 避免 log(0)
+            let val = melEnergies[m];
+            if (val < 0.0000001) val = 0.0000001;
+            melEnergies[m] = 10 * Math.log10(val);
+        }
+        
+        // 归一化这一列 (或者基于全局最大值)
+        // 通常基于全局最大值更好，但为了流式处理简单，我们这里预设一个分贝范围
+        // 假设范围 -80dB 到 0dB (相对值)
+        // 这里做一个局部动态归一化以便看清细节
+        
+        let maxDB = -Infinity;
+        let minDB = Infinity;
+        for(let m=0; m<MEL_BANDS; m++) {
+            if(melEnergies[m] > maxDB) maxDB = melEnergies[m];
+            if(melEnergies[m] < minDB) minDB = melEnergies[m];
+        }
+        
+        // 硬编码一个合理的动态范围，效果通常比较稳定
+        const range = 60; // dB dynamic range
+        const refMax = maxDB; 
+        
+        // 填充像素 Y
+        for (let py = 0; py < plotHeight; py++) {
+            // py=0 是顶部(高频)，py=height 是底部(低频)
+            // Mel 数组 0 是低频，MEL_BANDS-1 是高频
+            
+            const yRatio = 1 - (py / plotHeight); // 1 at top, 0 at bottom -> reverse for array
+            // 映射到 Mel Band 索引
+            const bandIdx = Math.floor(yRatio * (MEL_BANDS - 1));
+            
+            let db = melEnergies[bandIdx];
+            
+            // Normalize 0..1
+            let norm = (db - (refMax - range)) / range;
+            if (norm < 0) norm = 0;
+            if (norm > 1) norm = 1;
+            
+            // 获取颜色
+            const color = getMagmaColorRGB(norm);
+            
+            // 设置像素
+            const pIndex = (py * plotWidth + px) * 4;
+            data[pIndex] = color.r;     // R
+            data[pIndex + 1] = color.g; // G
+            data[pIndex + 2] = color.b; // B
+            data[pIndex + 3] = 255;     // Alpha
+        }
+    }
+    
+    // 将图像数据放回 Canvas
+    ctxSpec.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctxSpec.fillStyle = "black";
+    ctxSpec.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctxSpec.putImageData(imgData, MARGIN.left, MARGIN.top);
+    
+    // 初始画一次坐标轴
+    drawCursor(0);
+}
+
+// 辅助：获取 RGB 对象而不是字符串，用于直接操作 ImageData
+function getMagmaColorRGB(value) {
+    const stops = [
+        { t: 0.0, r: 0,   g: 0,   b: 4 },    
+        { t: 0.2, r: 40,  g: 10,  b: 80 },   
+        { t: 0.4, r: 100, g: 30,  b: 100 },  
+        { t: 0.6, r: 200, g: 60,  b: 60 },   
+        { t: 0.8, r: 250, g: 140, b: 20 },   
+        { t: 1.0, r: 252, g: 252, b: 180 }   
+    ];
+    
+    let lower = stops[0];
+    let upper = stops[stops.length - 1];
+    
+    for (let i = 0; i < stops.length - 1; i++) {
+        if (value >= stops[i].t && value <= stops[i+1].t) {
+            lower = stops[i];
+            upper = stops[i+1];
+            break;
+        }
+    }
+    const range = upper.t - lower.t;
+    const ratio = (range === 0) ? 0 : (value - lower.t) / range;
+    return {
+        r: Math.floor(lower.r + (upper.r - lower.r) * ratio),
+        g: Math.floor(lower.g + (upper.g - lower.g) * ratio),
+        b: Math.floor(lower.b + (upper.b - lower.b) * ratio)
+    };
+}
+
+// --- 数学工具 ---
+
+// 简单的 Cooley-Tukey FFT (原地, 递归或迭代). 
+// 为了简洁，这里使用预计算反转位的迭代版本。
+function performFFT(re, im) {
+    const n = re.length;
+    // Bit Reversal
+    let j = 0;
+    for (let i = 0; i < n - 1; i++) {
+        if (i < j) {
+            let temp = re[i]; re[i] = re[j]; re[j] = temp;
+            temp = im[i]; im[i] = im[j]; im[j] = temp;
+        }
+        let k = n / 2;
+        while (k <= j) {
+            j -= k;
+            k /= 2;
+        }
+        j += k;
+    }
+    
+    // Butterfly
+    for (let l = 1; l <= Math.log2(n); l++) {
+        const m = Math.pow(2, l);
+        const halfM = m / 2;
+        const uR = 1.0;
+        const uI = 0.0;
+        // W_m = exp(-2pi * i / m)
+        const wmR = Math.cos(-2 * Math.PI / m);
+        const wmI = Math.sin(-2 * Math.PI / m);
+        
+        for (let k = 0; k < n; k += m) {
+            let wR = 1.0;
+            let wI = 0.0;
+            for (let j = 0; j < halfM; j++) {
+                // t = w * data[k + j + halfM]
+                const tR = wR * re[k + j + halfM] - wI * im[k + j + halfM];
+                const tI = wR * im[k + j + halfM] + wI * re[k + j + halfM];
+                
+                const uR_val = re[k + j];
+                const uI_val = im[k + j];
+                
+                re[k + j] = uR_val + tR;
+                im[k + j] = uI_val + tI;
+                
+                re[k + j + halfM] = uR_val - tR;
+                im[k + j + halfM] = uI_val - tI;
+                
+                // w = w * wm
+                const tempWR = wR * wmR - wI * wmI;
+                wI = wR * wmI + wI * wmR;
+                wR = tempWR;
+            }
+        }
+    }
+}
+
+// 创建 Mel Filterbank 矩阵
+// 返回一个数组，每个元素是一个对象数组 [{bin: fftBinIndex, weight: value}, ...]
+function createMelFilterbank(numMels, numFftBins, sampleRate) {
+    const fMin = 0;
+    const fMax = sampleRate / 2;
+    // Hz to Mel function
+    const hzToMel = (hz) => 2595 * Math.log10(1 + hz / 700);
+    // Mel to Hz function
+    const melToHz = (mel) => 700 * (Math.pow(10, mel / 2595) - 1);
+    
+    const melMin = hzToMel(fMin);
+    const melMax = hzToMel(fMax); // 或者是 8000Hz 对应的 Mel
+    
+    // 我们希望 Mel 点覆盖到 maxFreq (例如8000或Nyquist)
+    // 根据示例图，通常是 Nyquist，但绘图只画一部分。这里计算到 Nyquist。
+    
+    const melPoints = [];
+    for (let i = 0; i < numMels + 2; i++) {
+        melPoints.push(melToHz(melMin + (melMax - melMin) * i / (numMels + 1)));
+    }
+    
+    // 转换为 FFT bin 索引
+    const binPoints = melPoints.map(hz => Math.floor((FFT_SIZE + 1) * hz / sampleRate));
+    
+    const filters = [];
+    
+    for (let m = 1; m <= numMels; m++) {
+        const start = binPoints[m - 1];
+        const center = binPoints[m];
+        const end = binPoints[m + 1];
+        
+        const filterWeights = [];
+        
+        for (let k = start; k < end; k++) {
+            let weight = 0;
+            if (k < center) {
+                weight = (k - start) / (center - start);
+            } else {
+                weight = (end - k) / (end - center);
+            }
+            if (k >= 0 && k < numFftBins) {
+                 filterWeights.push({ bin: k, weight: weight });
+            }
+        }
+        filters.push(filterWeights);
+    }
+    return filters;
+}
+
+</script>
+</body>
+</html>

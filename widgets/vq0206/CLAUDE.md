@@ -5,3 +5,10 @@ html 两个 text edit 框互相监听，其中一个变了，另一个按上面�
 
 输入字符串。
 <audio_958><audio_101><audio_2216><audio_1028><audio_2892><audio_101><audio_465><audio_2430><audio_2036><audio_2036><audio_253><audio_204><audio_2866><audio_1042><audio_2357><audio_204><audio_35><audio_4302><audio_3270><audio_2592><audio_196><audio_196><audio_3160><audio_2160><audio_3820><audio_196><audio_403><audio_1392><audio_2760><audio_1210><audio_502><audio_502><audio_2998><audio_3113><audio_3113><audio_836><audio_836><audio_1382><audio_2124><audio_5088><audio_966><audio_748><audio_3820><audio_1738><audio_2664><audio_748><audio_762><audio_2809><audio_1564><audio_2427><audio_410><audio_410><audio_3561><audio_4569><audio_1093><audio_866><audio_681><audio_1445><audio_1475><audio_2366><audio_239><audio_206><audio_3728><audio_1784><audio_3759><audio_866><audio_772><audio_1513><audio_1093><audio_1986><audio_772><audio_772><audio_1065><audio_1399><audio_4264><audio_631><audio_133><audio_3347><audio_1172><audio_1270><audio_792><audio_866><audio_3196><audio_3227><audio_1083><audio_224><audio_681><audio_2341><audio_2146><audio_1782><audio_63><audio_842><audio_3330><audio_1233><audio_3634><audio_866><audio_681><audio_3392><audio_1556><audio_1040><audio_758><audio_922><audio_1040><audio_4953><audio_1062><audio_922><audio_936><audio_2608><audio_2062><audio_2062><audio_918><audio_918><audio_1915><audio_1042><audio_1042><audio_313><audio_631><audio_2866><audio_4171><audio_1888><audio_631><audio_497><audio_2981><audio_2528><audio_2528>
+
+
+
+----
+
+生成 single-file html，对上传的 wav 用 javascript 直接算出 mel 谱并显示。
+注意 html 上 mel 图要显示坐标系，并有 wav 播放按钮（播放时在 mel 上同步显示一个 cursor），并且使用所给图的上色方案。
