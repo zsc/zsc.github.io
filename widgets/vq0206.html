@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Tag <-> GB2312 Matrix Converter</title>
+    <style>
+        body {
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+        }
+
+        .box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            white-space: pre; 
+            overflow: auto;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #66afe9;
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+        }
+
+        .note {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+            background: #e9e9e9;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 1200px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Audio 标签 / GB2312 竖排矩阵转换器</h2>
+
+    <div class="container">
+        <div class="box">
+            <label for="inputAudio">Audio 标签输入 (线性流)</label>
+            <textarea id="inputAudio" spellcheck="false"></textarea>
+        </div>
+        <div class="box">
+            <label for="inputText">汉字矩阵 (5行，竖向排列)</label>
+            <textarea id="inputText" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>规则：</strong> 
+        1. ID 0 映射为 GB2312 第一个汉字 "啊"。
+        2. Audio 序列每 5 个一组，在右侧变为一列（即：第1个字在第1行，第2个字在第2行...）。
+        3. 左右输入框实时互转。
+    </div>
+
+<script>
+    // ==========================================
+    // 1. 初始化 GB2312 字符集
+    // ==========================================
+    const gbChars = [];
+    const charToIdMap = new Map();
+
+    function initGB2312() {
+        const decoder = new TextDecoder('gbk'); // GBK 兼容 GB2312
+        
+        // GB2312 范围：
+        // 一级汉字：16-55区 (0xB0 - 0xD7)
+        // 二级汉字：56-87区 (0xD8 - 0xF7)
+        // 每个区有 94 个位 (0xA1 - 0xFE)
+        
+        // 为了确保 0 = "啊" (0xB0A1)，我们需要严格按照顺序生成
+        
+        const ranges = [
+            { start: 0xB0, end: 0xD7 }, // Level 1
+            { start: 0xD8, end: 0xF7 }  // Level 2
+        ];
+
+        let index = 0;
+
+        ranges.forEach(range => {
+            for (let b1 = range.start; b1 <= range.end; b1++) {
+                for (let b2 = 0xA1; b2 <= 0xFE; b2++) {
+                    const buffer = new Uint8Array([b1, b2]);
+                    const char = decoder.decode(buffer);
+                    
+                    // 存入数组
+                    gbChars.push(char);
+                    // 建立反向索引 (如果字符重复，保留第一个索引)
+                    if (!charToIdMap.has(char)) {
+                        charToIdMap.set(char, index);
+                    }
+                    index++;
+                }
+            }
+        });
+        
+        console.log(`GB2312 table loaded. Total chars (including potential blanks): ${gbChars.length}`);
+        console.log(`Index 0: ${gbChars[0]} (Should be 啊)`);
+    }
+
+    initGB2312();
+
+    // ==========================================
+    // 2. 转换逻辑
+    // ==========================================
+
+    const audioInput = document.getElementById('inputAudio');
+    const textInput = document.getElementById('inputText');
+
+    // 默认输入字符串
+    const defaultInput = `<audio_958><audio_101><audio_2216><audio_1028><audio_2892><audio_101><audio_465><audio_2430><audio_2036><audio_2036><audio_253><audio_204><audio_2866><audio_1042><audio_2357><audio_204><audio_35><audio_4302><audio_3270><audio_2592><audio_196><audio_196><audio_3160><audio_2160><audio_3820><audio_196><audio_403><audio_1392><audio_2760><audio_1210><audio_502><audio_502><audio_2998><audio_3113><audio_3113><audio_836><audio_836><audio_1382><audio_2124><audio_5088><audio_966><audio_748><audio_3820><audio_1738><audio_2664><audio_748><audio_762><audio_2809><audio_1564><audio_2427><audio_410><audio_410><audio_3561><audio_4569><audio_1093><audio_866><audio_681><audio_1445><audio_1475><audio_2366><audio_239><audio_206><audio_3728><audio_1784><audio_3759><audio_866><audio_772><audio_1513><audio_1093><audio_1986><audio_772><audio_772><audio_1065><audio_1399><audio_4264><audio_631><audio_133><audio_3347><audio_1172><audio_1270><audio_792><audio_866><audio_3196><audio_3227><audio_1083><audio_224><audio_681><audio_2341><audio_2146><audio_1782><audio_63><audio_842><audio_3330><audio_1233><audio_3634><audio_866><audio_681><audio_3392><audio_1556><audio_1040><audio_758><audio_922><audio_1040><audio_4953><audio_1062><audio_922><audio_936><audio_2608><audio_2062><audio_2062><audio_918><audio_918><audio_1915><audio_1042><audio_1042><audio_313><audio_631><audio_2866><audio_4171><audio_1888><audio_631><audio_497><audio_2981><audio_2528><audio_2528>`;
+
+    // Audio String -> Matrix Text
+    function convertAudioToText() {
+        const rawStr = audioInput.value;
+        const regex = /<audio_(\d+)>/g;
+        let match;
+        const ids = [];
+        
+        // 提取所有数字
+        while ((match = regex.exec(rawStr)) !== null) {
+            ids.push(parseInt(match[1], 10));
+        }
+
+        if (ids.length === 0) {
+            textInput.value = "";
+            return;
+        }
+
+        // 准备 5 行的数组
+        const rows = [[], [], [], [], []];
+
+        // 填充矩阵 (竖排逻辑：元素依次填入 row 0, row 1, ... row 4, 然后回到 row 0)
+        ids.forEach((id, index) => {
+            const rowIndex = index % 5;
+            let char = "？"; // 默认错误符
+            if (id >= 0 && id < gbChars.length) {
+                char = gbChars[id];
+            }
+            rows[rowIndex].push(char);
+        });
+
+        // 拼接成字符串，用换行符分隔
+        textInput.value = rows.map(row => row.join("")).join("\n");
+    }
+
+    // Matrix Text -> Audio String
+    function convertTextToAudio() {
+        const rawText = textInput.value;
+        const lines = rawText.split("\n");
+        
+        // 确保有 5 行，不足补空
+        while (lines.length < 5) lines.push("");
+        // 截断多余的行 (只取前5行)
+        const processLines = lines.slice(0, 5);
+
+        // 找出最长的一行，决定列数
+        let maxLen = 0;
+        processLines.forEach(line => {
+            if (line.length > maxLen) maxLen = line.length;
+        });
+
+        const resultAudio = [];
+
+        // 按列扫描
+        for (let col = 0; col < maxLen; col++) {
+            for (let row = 0; row < 5; row++) {
+                const line = processLines[row];
+                // 检查该行是否有这一列
+                if (col < line.length) {
+                    const char = line[col];
+                    // 查找 ID
+                    let id = charToIdMap.get(char);
+                    
+                    if (id === undefined) {
+                        // 如果找不到或者是空格等，处理逻辑
+                        // 这里我们简单跳过或标记 -1，或者保留原样？
+                        // 为了保持结构，如果不认识的字，我们假设它是 ID 0 ('啊') 或者报错
+                        // 这里选择输出一个特殊的 audio_0 表示 fallback
+                        // 或者如果它是不可见字符且不在库中，忽略
+                        if(char.trim() === '') continue; // 忽略空格
+                        id = 0; 
+                    }
+                    resultAudio.push(`<audio_${id}>`);
+                }
+            }
+        }
+
+        audioInput.value = resultAudio.join("");
+    }
+
+    // ==========================================
+    // 3. 事件监听
+    // ==========================================
+
+    let isSyncing = false;
+
+    audioInput.addEventListener('input', () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        convertAudioToText();
+        isSyncing = false;
+    });
+
+    textInput.addEventListener('input', () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        convertTextToAudio();
+        isSyncing = false;
+    });
+
+    // 初始化
+    window.addEventListener('DOMContentLoaded', () => {
+        audioInput.value = defaultInput;
+        convertAudioToText();
+    });
+
+</script>
+
+</body>
+</html>
