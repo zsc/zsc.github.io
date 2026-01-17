@@ -23,6 +23,8 @@ def create_html_index(scan_dir, output_filename="index.html"):
 
     html_files_map = {} # { 'relative_dir_path': ['file1.html', 'file2.html'], ... }
 
+    output_file_path = os.path.abspath(os.path.join(abs_scan_dir, output_filename))
+
     # Walk through the directory
     for root, dirs, files in os.walk(abs_scan_dir, topdown=True):
         # Optional: Exclude hidden directories (like .git, .vscode)
@@ -31,7 +33,7 @@ def create_html_index(scan_dir, output_filename="index.html"):
         # Filter for HTML files, excluding the output_filename itself
         current_dir_html_files = sorted([
             f for f in files 
-            if f.lower().endswith(".html") and f.lower() != output_filename.lower()
+            if f.lower().endswith(".html") and os.path.abspath(os.path.join(root, f)) != output_file_path
         ])
 
         if current_dir_html_files:
